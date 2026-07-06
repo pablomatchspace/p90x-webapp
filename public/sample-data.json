@@ -1,0 +1,1741 @@
+{
+  "schemaVersion": 1,
+  "settings": {
+    "program": "classic",
+    "startDate": "2026-01-05",
+    "units": "metric",
+    "gender": "male",
+    "age": 40,
+    "height": 1.8,
+    "startWeight": 82,
+    "startBodyFat": 0.22,
+    "limits": {
+      "weight": 90,
+      "bodyFat": 0.25,
+      "bmi": 28
+    },
+    "targets": {
+      "leanMassIncrease": 4,
+      "bodyFat": 0.15
+    },
+    "scoring": {
+      "penaltyDivisor": 2,
+      "penaltyOn": true,
+      "chairFactor": 2,
+      "rwDivisor": 10
+    }
+  },
+  "scheduleOps": [
+    {
+      "id": "sample-skip-1",
+      "kind": "skip",
+      "date": "2026-01-14",
+      "createdAt": "2026-01-20T09:00:00"
+    }
+  ],
+  "workoutLogs": {
+    "chest-back": {
+      "sessions": [
+        {
+          "programDayId": "d001",
+          "entries": {
+            "standard-push-ups": {
+              "rounds": [
+                {
+                  "main": 8,
+                  "secondary": 0
+                },
+                {
+                  "main": 6,
+                  "secondary": 2
+                }
+              ]
+            },
+            "wide-front-pull-ups": {
+              "rounds": [
+                {
+                  "main": 11,
+                  "secondary": 0
+                },
+                {
+                  "main": 9,
+                  "secondary": 2
+                }
+              ]
+            },
+            "military-push-ups": {
+              "rounds": [
+                {
+                  "main": 14,
+                  "secondary": 0
+                },
+                {
+                  "main": 12,
+                  "secondary": 2
+                }
+              ]
+            },
+            "reverse-grip-chin-ups": {
+              "rounds": [
+                {
+                  "main": 17,
+                  "secondary": 0
+                },
+                {
+                  "main": 15,
+                  "secondary": 2
+                }
+              ]
+            },
+            "wide-fly-push-ups": {
+              "rounds": [
+                {
+                  "main": 10,
+                  "secondary": 0
+                },
+                {
+                  "main": 8,
+                  "secondary": 2
+                }
+              ]
+            },
+            "closed-grip-overhand-pull-ups": {
+              "rounds": [
+                {
+                  "main": 13,
+                  "secondary": 0
+                },
+                {
+                  "main": 11,
+                  "secondary": 2
+                }
+              ]
+            },
+            "decline-push-ups": {
+              "rounds": [
+                {
+                  "main": 16,
+                  "secondary": 0
+                },
+                {
+                  "main": 14,
+                  "secondary": 2
+                }
+              ]
+            },
+            "heavy-pants": {
+              "rounds": [
+                {
+                  "main": 11,
+                  "secondary": 12
+                },
+                {
+                  "main": 10,
+                  "secondary": 12
+                }
+              ]
+            },
+            "diamond-push-ups": {
+              "rounds": [
+                {
+                  "main": 12,
+                  "secondary": 0
+                },
+                {
+                  "main": 10,
+                  "secondary": 2
+                }
+              ]
+            },
+            "lawnmowers": {
+              "rounds": [
+                {
+                  "main": 17,
+                  "secondary": 10
+                },
+                {
+                  "main": 16,
+                  "secondary": 10
+                }
+              ]
+            },
+            "dive-bomber-push-ups": {
+              "rounds": [
+                {
+                  "main": 8,
+                  "secondary": 0
+                },
+                {
+                  "main": 6,
+                  "secondary": 2
+                }
+              ]
+            },
+            "back-flys": {
+              "rounds": [
+                {
+                  "main": 13,
+                  "secondary": 14
+                },
+                {
+                  "main": 12,
+                  "secondary": 14
+                }
+              ]
+            }
+          },
+          "completed": true,
+          "loggedAt": "2026-01-20T09:00:00"
+        },
+        {
+          "programDayId": "d008",
+          "annotation": "2 sample note",
+          "entries": {
+            "standard-push-ups": {
+              "rounds": [
+                {
+                  "main": 9,
+                  "secondary": 0
+                },
+                {
+                  "main": 7,
+                  "secondary": 2
+                }
+              ]
+            },
+            "wide-front-pull-ups": {
+              "rounds": [
+                {
+                  "main": 12,
+                  "secondary": 0
+                },
+                {
+                  "main": 10,
+                  "secondary": 2
+                }
+              ]
+            },
+            "military-push-ups": {
+              "rounds": [
+                {
+                  "main": 15,
+                  "secondary": 0
+                },
+                {
+                  "main": 13,
+                  "secondary": 2
+                }
+              ]
+            },
+            "reverse-grip-chin-ups": {
+              "rounds": [
+                {
+                  "main": 18,
+                  "secondary": 0
+                },
+                {
+                  "main": 16,
+                  "secondary": 2
+                }
+              ]
+            },
+            "wide-fly-push-ups": {
+              "rounds": [
+                {
+                  "main": 11,
+                  "secondary": 0
+                },
+                {
+                  "main": 9,
+                  "secondary": 2
+                }
+              ]
+            },
+            "closed-grip-overhand-pull-ups": {
+              "rounds": [
+                {
+                  "main": 14,
+                  "secondary": 0
+                },
+                {
+                  "main": 12,
+                  "secondary": 2
+                }
+              ]
+            },
+            "decline-push-ups": {
+              "rounds": [
+                {
+                  "main": 17,
+                  "secondary": 0
+                },
+                {
+                  "main": 15,
+                  "secondary": 2
+                }
+              ]
+            },
+            "heavy-pants": {
+              "rounds": [
+                {
+                  "main": 12,
+                  "secondary": 12
+                },
+                {
+                  "main": 11,
+                  "secondary": 12
+                }
+              ]
+            },
+            "diamond-push-ups": {
+              "rounds": [
+                {
+                  "main": 13,
+                  "secondary": 0
+                },
+                {
+                  "main": 11,
+                  "secondary": 2
+                }
+              ]
+            },
+            "lawnmowers": {
+              "rounds": [
+                {
+                  "main": 18,
+                  "secondary": 10
+                },
+                {
+                  "main": 17,
+                  "secondary": 10
+                }
+              ]
+            },
+            "dive-bomber-push-ups": {
+              "rounds": [
+                {
+                  "main": 9,
+                  "secondary": 0
+                },
+                {
+                  "main": 7,
+                  "secondary": 2
+                }
+              ]
+            },
+            "back-flys": {
+              "rounds": [
+                {
+                  "main": 14,
+                  "secondary": 14
+                },
+                {
+                  "main": 13,
+                  "secondary": 14
+                }
+              ]
+            }
+          },
+          "completed": true,
+          "loggedAt": "2026-01-20T09:00:00"
+        }
+      ]
+    },
+    "shoulders-arms": {
+      "sessions": [
+        {
+          "programDayId": "d003",
+          "entries": {
+            "alternating-shoulder-presses": {
+              "rounds": [
+                {
+                  "main": 10,
+                  "secondary": 10
+                },
+                {
+                  "main": 9,
+                  "secondary": 10
+                }
+              ]
+            },
+            "in-and-out-bicep-curls": {
+              "rounds": [
+                {
+                  "main": 13,
+                  "secondary": 12
+                },
+                {
+                  "main": 12,
+                  "secondary": 12
+                }
+              ]
+            },
+            "two-arm-tricep-kickbacks": {
+              "rounds": [
+                {
+                  "main": 16,
+                  "secondary": 14
+                },
+                {
+                  "main": 15,
+                  "secondary": 14
+                }
+              ]
+            },
+            "deep-swimmers-presses": {
+              "rounds": [
+                {
+                  "main": 19,
+                  "secondary": 10
+                },
+                {
+                  "main": 18,
+                  "secondary": 10
+                }
+              ]
+            },
+            "full-supination-concentration-curls": {
+              "rounds": [
+                {
+                  "main": 12,
+                  "secondary": 12
+                },
+                {
+                  "main": 11,
+                  "secondary": 12
+                }
+              ]
+            },
+            "chair-dips": {
+              "rounds": [
+                {
+                  "main": 17,
+                  "secondary": null
+                },
+                {
+                  "main": 16,
+                  "secondary": null
+                }
+              ]
+            },
+            "upright-rows": {
+              "rounds": [
+                {
+                  "main": 18,
+                  "secondary": 10
+                },
+                {
+                  "main": 17,
+                  "secondary": 10
+                }
+              ]
+            },
+            "static-arm-curls": {
+              "rounds": [
+                {
+                  "main": 11,
+                  "secondary": 12
+                },
+                {
+                  "main": 10,
+                  "secondary": 12
+                }
+              ]
+            },
+            "flip-grip-twist-tricep-kickbacks": {
+              "rounds": [
+                {
+                  "main": 14,
+                  "secondary": 14
+                },
+                {
+                  "main": 13,
+                  "secondary": 14
+                }
+              ]
+            },
+            "seated-two-angle-shoulder-flys": {
+              "rounds": [
+                {
+                  "main": 17,
+                  "secondary": 10
+                },
+                {
+                  "main": 16,
+                  "secondary": 10
+                }
+              ]
+            },
+            "crouching-cohen-curls": {
+              "rounds": [
+                {
+                  "main": 10,
+                  "secondary": 12
+                },
+                {
+                  "main": 9,
+                  "secondary": 12
+                }
+              ]
+            },
+            "lying-down-tricep-extensions": {
+              "rounds": [
+                {
+                  "main": 13,
+                  "secondary": 14
+                },
+                {
+                  "main": 12,
+                  "secondary": 14
+                }
+              ]
+            },
+            "in-and-out-strait-arm-shoulder-flys": {
+              "rounds": [
+                {
+                  "main": 16,
+                  "secondary": 10
+                },
+                {
+                  "main": 15,
+                  "secondary": 10
+                }
+              ]
+            },
+            "congdon-curls": {
+              "rounds": [
+                {
+                  "main": 19,
+                  "secondary": 12
+                },
+                {
+                  "main": 18,
+                  "secondary": 12
+                }
+              ]
+            },
+            "side-tri-rises": {
+              "rounds": [
+                {
+                  "main": 10,
+                  "secondary": 8
+                },
+                {
+                  "main": 10,
+                  "secondary": 8
+                }
+              ]
+            }
+          },
+          "completed": true,
+          "loggedAt": "2026-01-20T09:00:00"
+        },
+        {
+          "programDayId": "d010",
+          "entries": {
+            "alternating-shoulder-presses": {
+              "rounds": [
+                {
+                  "main": 11,
+                  "secondary": 10
+                },
+                {
+                  "main": 10,
+                  "secondary": 10
+                }
+              ]
+            },
+            "in-and-out-bicep-curls": {
+              "rounds": [
+                {
+                  "main": 14,
+                  "secondary": 12
+                },
+                {
+                  "main": 13,
+                  "secondary": 12
+                }
+              ]
+            },
+            "two-arm-tricep-kickbacks": {
+              "rounds": [
+                {
+                  "main": 17,
+                  "secondary": 14
+                },
+                {
+                  "main": 16,
+                  "secondary": 14
+                }
+              ]
+            },
+            "deep-swimmers-presses": {
+              "rounds": [
+                {
+                  "main": 20,
+                  "secondary": 10
+                },
+                {
+                  "main": 19,
+                  "secondary": 10
+                }
+              ]
+            },
+            "full-supination-concentration-curls": {
+              "rounds": [
+                {
+                  "main": 13,
+                  "secondary": 12
+                },
+                {
+                  "main": 12,
+                  "secondary": 12
+                }
+              ]
+            },
+            "chair-dips": {
+              "rounds": [
+                {
+                  "main": 18,
+                  "secondary": null
+                },
+                {
+                  "main": 17,
+                  "secondary": null
+                }
+              ]
+            },
+            "upright-rows": {
+              "rounds": [
+                {
+                  "main": 19,
+                  "secondary": 10
+                },
+                {
+                  "main": 18,
+                  "secondary": 10
+                }
+              ]
+            },
+            "static-arm-curls": {
+              "rounds": [
+                {
+                  "main": 12,
+                  "secondary": 12
+                },
+                {
+                  "main": 11,
+                  "secondary": 12
+                }
+              ]
+            },
+            "flip-grip-twist-tricep-kickbacks": {
+              "rounds": [
+                {
+                  "main": 15,
+                  "secondary": 14
+                },
+                {
+                  "main": 14,
+                  "secondary": 14
+                }
+              ]
+            },
+            "seated-two-angle-shoulder-flys": {
+              "rounds": [
+                {
+                  "main": 18,
+                  "secondary": 10
+                },
+                {
+                  "main": 17,
+                  "secondary": 10
+                }
+              ]
+            },
+            "crouching-cohen-curls": {
+              "rounds": [
+                {
+                  "main": 11,
+                  "secondary": 12
+                },
+                {
+                  "main": 10,
+                  "secondary": 12
+                }
+              ]
+            },
+            "lying-down-tricep-extensions": {
+              "rounds": [
+                {
+                  "main": 14,
+                  "secondary": 14
+                },
+                {
+                  "main": 13,
+                  "secondary": 14
+                }
+              ]
+            },
+            "in-and-out-strait-arm-shoulder-flys": {
+              "rounds": [
+                {
+                  "main": 17,
+                  "secondary": 10
+                },
+                {
+                  "main": 16,
+                  "secondary": 10
+                }
+              ]
+            },
+            "congdon-curls": {
+              "rounds": [
+                {
+                  "main": 20,
+                  "secondary": 12
+                },
+                {
+                  "main": 19,
+                  "secondary": 12
+                }
+              ]
+            },
+            "side-tri-rises": {
+              "rounds": [
+                {
+                  "main": 11,
+                  "secondary": 9
+                },
+                {
+                  "main": 11,
+                  "secondary": 9
+                }
+              ]
+            }
+          },
+          "completed": true,
+          "loggedAt": "2026-01-20T09:00:00"
+        }
+      ]
+    },
+    "legs-back": {
+      "sessions": [
+        {
+          "programDayId": "d005",
+          "entries": {
+            "balance-lunge": {
+              "rounds": [
+                {
+                  "main": 8,
+                  "secondary": 6
+                }
+              ]
+            },
+            "calf-raise-squat": {
+              "rounds": [
+                {
+                  "main": 13,
+                  "secondary": 12
+                }
+              ]
+            },
+            "reverse-grip-chin-ups": {
+              "rounds": [
+                {
+                  "main": 14,
+                  "secondary": 0
+                },
+                {
+                  "main": 12,
+                  "secondary": 2
+                }
+              ]
+            },
+            "super-skater": {
+              "rounds": [
+                {
+                  "main": 17,
+                  "secondary": 15
+                }
+              ]
+            },
+            "wall-squat-sec": {
+              "rounds": [
+                {
+                  "main": 14,
+                  "secondary": null
+                }
+              ]
+            },
+            "wide-front-pull-ups": {
+              "rounds": [
+                {
+                  "main": 13,
+                  "secondary": 0
+                },
+                {
+                  "main": 11,
+                  "secondary": 2
+                }
+              ]
+            },
+            "step-back-lunge": {
+              "rounds": [
+                {
+                  "main": 18,
+                  "secondary": 10
+                },
+                {
+                  "main": 17,
+                  "secondary": 10
+                }
+              ]
+            },
+            "alternating-side-lunge": {
+              "rounds": [
+                {
+                  "main": 11,
+                  "secondary": 12
+                }
+              ]
+            },
+            "closed-grip-overhand-pull-ups": {
+              "rounds": [
+                {
+                  "main": 12,
+                  "secondary": 0
+                },
+                {
+                  "main": 10,
+                  "secondary": 2
+                }
+              ]
+            },
+            "single-leg-wall-squat-sec": {
+              "rounds": [
+                {
+                  "main": 19,
+                  "secondary": null
+                }
+              ]
+            },
+            "deadlift-squat": {
+              "rounds": [
+                {
+                  "main": 8,
+                  "secondary": 6
+                }
+              ]
+            },
+            "switch-grip-pull-ups": {
+              "rounds": [
+                {
+                  "main": 11,
+                  "secondary": 0
+                },
+                {
+                  "main": 9,
+                  "secondary": 2
+                }
+              ]
+            },
+            "three-way-lunge": {
+              "rounds": [
+                {
+                  "main": 14,
+                  "secondary": 12
+                }
+              ]
+            },
+            "sneaky-lunge": {
+              "rounds": [
+                {
+                  "main": 21,
+                  "secondary": null
+                }
+              ]
+            },
+            "chair-salutations-sec": {
+              "rounds": [
+                {
+                  "main": 14,
+                  "secondary": null
+                },
+                {
+                  "main": 13,
+                  "secondary": null
+                }
+              ]
+            },
+            "toe-roll-iso-lunge": {
+              "rounds": [
+                {
+                  "main": 13,
+                  "secondary": 11
+                }
+              ]
+            },
+            "groucho-walk": {
+              "rounds": [
+                {
+                  "main": 20,
+                  "secondary": null
+                }
+              ]
+            },
+            "calf-raises": {
+              "rounds": [
+                {
+                  "main": 11,
+                  "secondary": 14
+                }
+              ]
+            },
+            "80-20-cyber-speed-squat": {
+              "rounds": [
+                {
+                  "main": 12,
+                  "secondary": 10
+                }
+              ]
+            }
+          },
+          "completed": true,
+          "loggedAt": "2026-01-20T09:00:00"
+        },
+        {
+          "programDayId": "d012",
+          "entries": {
+            "balance-lunge": {
+              "rounds": [
+                {
+                  "main": 9,
+                  "secondary": 7
+                }
+              ]
+            },
+            "calf-raise-squat": {
+              "rounds": [
+                {
+                  "main": 14,
+                  "secondary": 12
+                }
+              ]
+            },
+            "reverse-grip-chin-ups": {
+              "rounds": [
+                {
+                  "main": 15,
+                  "secondary": 0
+                },
+                {
+                  "main": 13,
+                  "secondary": 2
+                }
+              ]
+            },
+            "super-skater": {
+              "rounds": [
+                {
+                  "main": 18,
+                  "secondary": 16
+                }
+              ]
+            },
+            "wall-squat-sec": {
+              "rounds": [
+                {
+                  "main": 15,
+                  "secondary": null
+                }
+              ]
+            },
+            "wide-front-pull-ups": {
+              "rounds": [
+                {
+                  "main": 14,
+                  "secondary": 0
+                },
+                {
+                  "main": 12,
+                  "secondary": 2
+                }
+              ]
+            },
+            "step-back-lunge": {
+              "rounds": [
+                {
+                  "main": 19,
+                  "secondary": 10
+                },
+                {
+                  "main": 18,
+                  "secondary": 10
+                }
+              ]
+            },
+            "alternating-side-lunge": {
+              "rounds": [
+                {
+                  "main": 12,
+                  "secondary": 12
+                }
+              ]
+            },
+            "closed-grip-overhand-pull-ups": {
+              "rounds": [
+                {
+                  "main": 13,
+                  "secondary": 0
+                },
+                {
+                  "main": 11,
+                  "secondary": 2
+                }
+              ]
+            },
+            "single-leg-wall-squat-sec": {
+              "rounds": [
+                {
+                  "main": 20,
+                  "secondary": null
+                }
+              ]
+            },
+            "deadlift-squat": {
+              "rounds": [
+                {
+                  "main": 9,
+                  "secondary": 7
+                }
+              ]
+            },
+            "switch-grip-pull-ups": {
+              "rounds": [
+                {
+                  "main": 12,
+                  "secondary": 0
+                },
+                {
+                  "main": 10,
+                  "secondary": 2
+                }
+              ]
+            },
+            "three-way-lunge": {
+              "rounds": [
+                {
+                  "main": 15,
+                  "secondary": 13
+                }
+              ]
+            },
+            "sneaky-lunge": {
+              "rounds": [
+                {
+                  "main": 22,
+                  "secondary": null
+                }
+              ]
+            },
+            "chair-salutations-sec": {
+              "rounds": [
+                {
+                  "main": 15,
+                  "secondary": null
+                },
+                {
+                  "main": 14,
+                  "secondary": null
+                }
+              ]
+            },
+            "toe-roll-iso-lunge": {
+              "rounds": [
+                {
+                  "main": 14,
+                  "secondary": 12
+                }
+              ]
+            },
+            "groucho-walk": {
+              "rounds": [
+                {
+                  "main": 21,
+                  "secondary": null
+                }
+              ]
+            },
+            "calf-raises": {
+              "rounds": [
+                {
+                  "main": 12,
+                  "secondary": 14
+                }
+              ]
+            },
+            "80-20-cyber-speed-squat": {
+              "rounds": [
+                {
+                  "main": 13,
+                  "secondary": 11
+                }
+              ]
+            }
+          },
+          "completed": true,
+          "loggedAt": "2026-01-20T09:00:00"
+        }
+      ]
+    },
+    "plyometrics": {
+      "sessions": [
+        {
+          "programDayId": "d002",
+          "status": "yes",
+          "notes": "Sample: kept up with the video",
+          "loggedAt": "2026-01-20T09:00:00"
+        },
+        {
+          "programDayId": "d009",
+          "status": "yes",
+          "notes": "Sample: 80% intensity",
+          "loggedAt": "2026-01-20T09:00:00"
+        }
+      ]
+    },
+    "yoga-x": {
+      "sessions": [
+        {
+          "programDayId": "d004",
+          "status": "yes",
+          "loggedAt": "2026-01-20T09:00:00"
+        },
+        {
+          "programDayId": "d011",
+          "status": "no",
+          "notes": "Sample: skipped, sore",
+          "loggedAt": "2026-01-20T09:00:00"
+        }
+      ]
+    },
+    "kenpo-x": {
+      "sessions": [
+        {
+          "programDayId": "d006",
+          "status": "yes",
+          "loggedAt": "2026-01-20T09:00:00"
+        },
+        {
+          "programDayId": "d013",
+          "status": "yes",
+          "loggedAt": "2026-01-20T09:00:00"
+        }
+      ]
+    },
+    "ab-ripper-x": {
+      "sessions": [
+        {
+          "programDayId": "d001",
+          "entries": {
+            "in-and-out": {
+              "rounds": [
+                {
+                  "main": 15,
+                  "secondary": null
+                }
+              ]
+            },
+            "seated-bicycle": {
+              "rounds": [
+                {
+                  "main": 16,
+                  "secondary": null
+                }
+              ]
+            },
+            "seated-crunchy-frog": {
+              "rounds": [
+                {
+                  "main": 17,
+                  "secondary": null
+                }
+              ]
+            },
+            "crossed-leg-wide-leg-sit-up": {
+              "rounds": [
+                {
+                  "main": 18,
+                  "secondary": null
+                }
+              ]
+            },
+            "fifer-scissors": {
+              "rounds": [
+                {
+                  "main": 19,
+                  "secondary": null
+                }
+              ]
+            },
+            "hip-rock-n-raise": {
+              "rounds": [
+                {
+                  "main": 20,
+                  "secondary": null
+                }
+              ]
+            },
+            "pulse-up": {
+              "rounds": [
+                {
+                  "main": 21,
+                  "secondary": null
+                }
+              ]
+            },
+            "roll-up-v-up-combo": {
+              "rounds": [
+                {
+                  "main": 22,
+                  "secondary": null
+                }
+              ]
+            },
+            "oblique-v-up": {
+              "rounds": [
+                {
+                  "main": 23,
+                  "secondary": null
+                }
+              ]
+            },
+            "leg-climb": {
+              "rounds": [
+                {
+                  "main": 24,
+                  "secondary": null
+                }
+              ]
+            },
+            "mason-twist": {
+              "rounds": [
+                {
+                  "main": 15,
+                  "secondary": null
+                }
+              ]
+            }
+          },
+          "completed": true,
+          "loggedAt": "2026-01-20T09:00:00"
+        },
+        {
+          "programDayId": "d003",
+          "entries": {
+            "in-and-out": {
+              "rounds": [
+                {
+                  "main": 16,
+                  "secondary": null
+                }
+              ]
+            },
+            "seated-bicycle": {
+              "rounds": [
+                {
+                  "main": 17,
+                  "secondary": null
+                }
+              ]
+            },
+            "seated-crunchy-frog": {
+              "rounds": [
+                {
+                  "main": 18,
+                  "secondary": null
+                }
+              ]
+            },
+            "crossed-leg-wide-leg-sit-up": {
+              "rounds": [
+                {
+                  "main": 19,
+                  "secondary": null
+                }
+              ]
+            },
+            "fifer-scissors": {
+              "rounds": [
+                {
+                  "main": 20,
+                  "secondary": null
+                }
+              ]
+            },
+            "hip-rock-n-raise": {
+              "rounds": [
+                {
+                  "main": 21,
+                  "secondary": null
+                }
+              ]
+            },
+            "pulse-up": {
+              "rounds": [
+                {
+                  "main": 22,
+                  "secondary": null
+                }
+              ]
+            },
+            "roll-up-v-up-combo": {
+              "rounds": [
+                {
+                  "main": 23,
+                  "secondary": null
+                }
+              ]
+            },
+            "oblique-v-up": {
+              "rounds": [
+                {
+                  "main": 24,
+                  "secondary": null
+                }
+              ]
+            },
+            "leg-climb": {
+              "rounds": [
+                {
+                  "main": 15,
+                  "secondary": null
+                }
+              ]
+            },
+            "mason-twist": {
+              "rounds": [
+                {
+                  "main": 16,
+                  "secondary": null
+                }
+              ]
+            }
+          },
+          "completed": true,
+          "loggedAt": "2026-01-20T09:00:00"
+        },
+        {
+          "programDayId": "d005",
+          "entries": {
+            "in-and-out": {
+              "rounds": [
+                {
+                  "main": 17,
+                  "secondary": null
+                }
+              ]
+            },
+            "seated-bicycle": {
+              "rounds": [
+                {
+                  "main": 18,
+                  "secondary": null
+                }
+              ]
+            },
+            "seated-crunchy-frog": {
+              "rounds": [
+                {
+                  "main": 19,
+                  "secondary": null
+                }
+              ]
+            },
+            "crossed-leg-wide-leg-sit-up": {
+              "rounds": [
+                {
+                  "main": 20,
+                  "secondary": null
+                }
+              ]
+            },
+            "fifer-scissors": {
+              "rounds": [
+                {
+                  "main": 21,
+                  "secondary": null
+                }
+              ]
+            },
+            "hip-rock-n-raise": {
+              "rounds": [
+                {
+                  "main": 22,
+                  "secondary": null
+                }
+              ]
+            },
+            "pulse-up": {
+              "rounds": [
+                {
+                  "main": 23,
+                  "secondary": null
+                }
+              ]
+            },
+            "roll-up-v-up-combo": {
+              "rounds": [
+                {
+                  "main": 24,
+                  "secondary": null
+                }
+              ]
+            },
+            "oblique-v-up": {
+              "rounds": [
+                {
+                  "main": 15,
+                  "secondary": null
+                }
+              ]
+            },
+            "leg-climb": {
+              "rounds": [
+                {
+                  "main": 16,
+                  "secondary": null
+                }
+              ]
+            },
+            "mason-twist": {
+              "rounds": [
+                {
+                  "main": 17,
+                  "secondary": null
+                }
+              ]
+            }
+          },
+          "completed": true,
+          "loggedAt": "2026-01-20T09:00:00"
+        },
+        {
+          "programDayId": "d008",
+          "entries": {
+            "in-and-out": {
+              "rounds": [
+                {
+                  "main": 18,
+                  "secondary": null
+                }
+              ]
+            },
+            "seated-bicycle": {
+              "rounds": [
+                {
+                  "main": 19,
+                  "secondary": null
+                }
+              ]
+            },
+            "seated-crunchy-frog": {
+              "rounds": [
+                {
+                  "main": 20,
+                  "secondary": null
+                }
+              ]
+            },
+            "crossed-leg-wide-leg-sit-up": {
+              "rounds": [
+                {
+                  "main": 21,
+                  "secondary": null
+                }
+              ]
+            },
+            "fifer-scissors": {
+              "rounds": [
+                {
+                  "main": 22,
+                  "secondary": null
+                }
+              ]
+            },
+            "hip-rock-n-raise": {
+              "rounds": [
+                {
+                  "main": 23,
+                  "secondary": null
+                }
+              ]
+            },
+            "pulse-up": {
+              "rounds": [
+                {
+                  "main": 24,
+                  "secondary": null
+                }
+              ]
+            },
+            "roll-up-v-up-combo": {
+              "rounds": [
+                {
+                  "main": 15,
+                  "secondary": null
+                }
+              ]
+            },
+            "oblique-v-up": {
+              "rounds": [
+                {
+                  "main": 16,
+                  "secondary": null
+                }
+              ]
+            },
+            "leg-climb": {
+              "rounds": [
+                {
+                  "main": 17,
+                  "secondary": null
+                }
+              ]
+            },
+            "mason-twist": {
+              "rounds": [
+                {
+                  "main": 18,
+                  "secondary": null
+                }
+              ]
+            }
+          },
+          "completed": true,
+          "loggedAt": "2026-01-20T09:00:00"
+        },
+        {
+          "programDayId": "d010",
+          "entries": {
+            "in-and-out": {
+              "rounds": [
+                {
+                  "main": 19,
+                  "secondary": null
+                }
+              ]
+            },
+            "seated-bicycle": {
+              "rounds": [
+                {
+                  "main": 20,
+                  "secondary": null
+                }
+              ]
+            },
+            "seated-crunchy-frog": {
+              "rounds": [
+                {
+                  "main": 21,
+                  "secondary": null
+                }
+              ]
+            },
+            "crossed-leg-wide-leg-sit-up": {
+              "rounds": [
+                {
+                  "main": 22,
+                  "secondary": null
+                }
+              ]
+            },
+            "fifer-scissors": {
+              "rounds": [
+                {
+                  "main": 23,
+                  "secondary": null
+                }
+              ]
+            },
+            "hip-rock-n-raise": {
+              "rounds": [
+                {
+                  "main": 24,
+                  "secondary": null
+                }
+              ]
+            },
+            "pulse-up": {
+              "rounds": [
+                {
+                  "main": 15,
+                  "secondary": null
+                }
+              ]
+            },
+            "roll-up-v-up-combo": {
+              "rounds": [
+                {
+                  "main": 16,
+                  "secondary": null
+                }
+              ]
+            },
+            "oblique-v-up": {
+              "rounds": [
+                {
+                  "main": 17,
+                  "secondary": null
+                }
+              ]
+            },
+            "leg-climb": {
+              "rounds": [
+                {
+                  "main": 18,
+                  "secondary": null
+                }
+              ]
+            },
+            "mason-twist": {
+              "rounds": [
+                {
+                  "main": 19,
+                  "secondary": null
+                }
+              ]
+            }
+          },
+          "completed": true,
+          "loggedAt": "2026-01-20T09:00:00"
+        }
+      ]
+    }
+  },
+  "bodyLog": [
+    {
+      "date": "2026-01-06",
+      "weight": 82,
+      "bodyFat": 0.22,
+      "water": 0.55,
+      "bone": 0.04,
+      "zoneMinutes": null
+    },
+    {
+      "date": "2026-01-07",
+      "weight": 81.9,
+      "bodyFat": 0.219,
+      "water": 0.55,
+      "bone": 0.04,
+      "zoneMinutes": null
+    },
+    {
+      "date": "2026-01-08",
+      "weight": 81.8,
+      "bodyFat": 0.219,
+      "water": 0.55,
+      "bone": 0.04,
+      "zoneMinutes": null
+    },
+    {
+      "date": "2026-01-09",
+      "weight": 81.7,
+      "bodyFat": 0.218,
+      "water": 0.55,
+      "bone": 0.04,
+      "zoneMinutes": null
+    },
+    {
+      "date": "2026-01-10",
+      "weight": 81.6,
+      "bodyFat": 0.218,
+      "water": 0.55,
+      "bone": 0.04,
+      "zoneMinutes": null
+    },
+    {
+      "date": "2026-01-11",
+      "weight": 81.6,
+      "bodyFat": 0.217,
+      "water": 0.55,
+      "bone": 0.04,
+      "zoneMinutes": null
+    },
+    {
+      "date": "2026-01-12",
+      "weight": 81.5,
+      "bodyFat": 0.216,
+      "water": 0.55,
+      "bone": 0.04,
+      "zoneMinutes": null
+    },
+    {
+      "date": "2026-01-13",
+      "weight": 81.4,
+      "bodyFat": 0.216,
+      "water": 0.55,
+      "bone": 0.04,
+      "zoneMinutes": null
+    },
+    {
+      "date": "2026-01-14",
+      "weight": 81.3,
+      "bodyFat": 0.215,
+      "water": 0.55,
+      "bone": 0.04,
+      "zoneMinutes": null
+    },
+    {
+      "date": "2026-01-15",
+      "weight": 81.2,
+      "bodyFat": 0.215,
+      "water": 0.55,
+      "bone": 0.04,
+      "zoneMinutes": null
+    },
+    {
+      "date": "2026-01-16",
+      "weight": 81.1,
+      "bodyFat": 0.214,
+      "water": 0.55,
+      "bone": 0.04,
+      "zoneMinutes": null
+    },
+    {
+      "date": "2026-01-17",
+      "weight": 81,
+      "bodyFat": 0.213,
+      "water": 0.55,
+      "bone": 0.04,
+      "zoneMinutes": null
+    },
+    {
+      "date": "2026-01-18",
+      "weight": 80.9,
+      "bodyFat": 0.213,
+      "water": 0.55,
+      "bone": 0.04,
+      "zoneMinutes": null
+    },
+    {
+      "date": "2026-01-19",
+      "weight": 80.8,
+      "bodyFat": 0.212,
+      "water": 0.55,
+      "bone": 0.04,
+      "zoneMinutes": null
+    }
+  ],
+  "quotes": {
+    "disabledIds": [],
+    "custom": [
+      {
+        "id": "sample-custom-1",
+        "text": "Sample data: bring your own fire."
+      }
+    ]
+  },
+  "notes": "This is the fabricated sample dataset. Import your own file to replace it."
+}

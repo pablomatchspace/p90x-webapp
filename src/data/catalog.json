@@ -1,0 +1,1840 @@
+{
+  "workouts": [
+    {
+      "key": "chest-back",
+      "name": "Chest & Back",
+      "style": "strength",
+      "exercises": [
+        {
+          "id": "standard-push-ups",
+          "name": "Standard Push-Ups",
+          "rounds": 2,
+          "secondary": "knee",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "N1",
+              "secondary": "K1"
+            },
+            {
+              "main": "N2",
+              "secondary": "K2"
+            }
+          ]
+        },
+        {
+          "id": "wide-front-pull-ups",
+          "name": "Wide Front Pull-Ups",
+          "rounds": 2,
+          "secondary": "chair",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "NC1",
+              "secondary": "C1"
+            },
+            {
+              "main": "NC2",
+              "secondary": "C2"
+            }
+          ]
+        },
+        {
+          "id": "military-push-ups",
+          "name": "Military Push-Ups",
+          "rounds": 2,
+          "secondary": "knee",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "N1",
+              "secondary": "K1"
+            },
+            {
+              "main": "N2",
+              "secondary": "K2"
+            }
+          ]
+        },
+        {
+          "id": "reverse-grip-chin-ups",
+          "name": "Reverse Grip Chin-Ups",
+          "rounds": 2,
+          "secondary": "chair",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "NC1",
+              "secondary": "C1"
+            },
+            {
+              "main": "NC2",
+              "secondary": "C2"
+            }
+          ]
+        },
+        {
+          "id": "wide-fly-push-ups",
+          "name": "Wide Fly Push-Ups",
+          "rounds": 2,
+          "secondary": "knee",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "N1",
+              "secondary": "K1"
+            },
+            {
+              "main": "N2",
+              "secondary": "K2"
+            }
+          ]
+        },
+        {
+          "id": "closed-grip-overhand-pull-ups",
+          "name": "Closed Grip Overhand Pull-Ups",
+          "rounds": 2,
+          "secondary": "chair",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "NC1",
+              "secondary": "C1"
+            },
+            {
+              "main": "NC2",
+              "secondary": "C2"
+            }
+          ]
+        },
+        {
+          "id": "decline-push-ups",
+          "name": "Decline Push-Ups",
+          "rounds": 2,
+          "secondary": "knee",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "N1",
+              "secondary": "K1"
+            },
+            {
+              "main": "N2",
+              "secondary": "K2"
+            }
+          ]
+        },
+        {
+          "id": "heavy-pants",
+          "name": "Heavy Pants",
+          "rounds": 2,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "diamond-push-ups",
+          "name": "Diamond Push-Ups",
+          "rounds": 2,
+          "secondary": "knee",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "N1",
+              "secondary": "K1"
+            },
+            {
+              "main": "N2",
+              "secondary": "K2"
+            }
+          ]
+        },
+        {
+          "id": "lawnmowers",
+          "name": "Lawnmowers",
+          "rounds": 2,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "dive-bomber-push-ups",
+          "name": "Dive-Bomber Push-Ups",
+          "rounds": 2,
+          "secondary": "knee",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "N1",
+              "secondary": "K1"
+            },
+            {
+              "main": "N2",
+              "secondary": "K2"
+            }
+          ]
+        },
+        {
+          "id": "back-flys",
+          "name": "Back Flys",
+          "rounds": 2,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "plyometrics",
+      "name": "Plyometrics",
+      "style": "completion"
+    },
+    {
+      "key": "shoulders-arms",
+      "name": "Shoulders & Arms",
+      "style": "strength",
+      "exercises": [
+        {
+          "id": "alternating-shoulder-presses",
+          "name": "Alternating Shoulder Presses",
+          "rounds": 2,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "in-and-out-bicep-curls",
+          "name": "In & Out Bicep Curls",
+          "rounds": 2,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "two-arm-tricep-kickbacks",
+          "name": "Two-Arm Tricep Kickbacks",
+          "rounds": 2,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "deep-swimmers-presses",
+          "name": "Deep Swimmer's Presses",
+          "rounds": 2,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "full-supination-concentration-curls",
+          "name": "Full Supination Concentration Curls",
+          "rounds": 2,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "chair-dips",
+          "name": "Chair Dips",
+          "rounds": 2,
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1"
+            },
+            {
+              "main": "R2"
+            }
+          ]
+        },
+        {
+          "id": "upright-rows",
+          "name": "Upright Rows",
+          "rounds": 2,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "static-arm-curls",
+          "name": "Static Arm Curls",
+          "rounds": 2,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "flip-grip-twist-tricep-kickbacks",
+          "name": "Flip-Grip Twist Tricep Kickbacks",
+          "rounds": 2,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "seated-two-angle-shoulder-flys",
+          "name": "Seated Two-Angle Shoulder Flys",
+          "rounds": 2,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "crouching-cohen-curls",
+          "name": "Crouching Cohen Curls",
+          "rounds": 2,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "lying-down-tricep-extensions",
+          "name": "Lying-Down Tricep Extensions",
+          "rounds": 2,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "in-and-out-strait-arm-shoulder-flys",
+          "name": "In & Out Strait Arm Shoulder Flys",
+          "rounds": 2,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "congdon-curls",
+          "name": "Congdon Curls",
+          "rounds": 2,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "side-tri-rises",
+          "name": "Side Tri-Rises",
+          "rounds": 2,
+          "secondary": "extra",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "LA",
+              "secondary": "RA"
+            },
+            {
+              "main": "LA",
+              "secondary": "RA"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "yoga-x",
+      "name": "Yoga X",
+      "style": "completion"
+    },
+    {
+      "key": "legs-back",
+      "name": "Legs & Back",
+      "style": "strength",
+      "exercises": [
+        {
+          "id": "balance-lunge",
+          "name": "Balance Lunge",
+          "rounds": 1,
+          "secondary": "extra",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "RL",
+              "secondary": "LL"
+            }
+          ]
+        },
+        {
+          "id": "calf-raise-squat",
+          "name": "Calf Raise Squat",
+          "rounds": 1,
+          "secondary": "weight",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "reverse-grip-chin-ups",
+          "name": "Reverse Grip Chin-Ups",
+          "rounds": 2,
+          "secondary": "chair",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "NC1",
+              "secondary": "C1"
+            },
+            {
+              "main": "NC2",
+              "secondary": "C2"
+            }
+          ]
+        },
+        {
+          "id": "super-skater",
+          "name": "Super Skater",
+          "rounds": 1,
+          "secondary": "extra",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "RL",
+              "secondary": "LL"
+            }
+          ]
+        },
+        {
+          "id": "wall-squat-sec",
+          "name": "Wall Squat (sec)",
+          "rounds": 1,
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R"
+            }
+          ]
+        },
+        {
+          "id": "wide-front-pull-ups",
+          "name": "Wide Front Pull-Ups",
+          "rounds": 2,
+          "secondary": "chair",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "NC1",
+              "secondary": "C1"
+            },
+            {
+              "main": "NC2",
+              "secondary": "C2"
+            }
+          ]
+        },
+        {
+          "id": "step-back-lunge",
+          "name": "Step Back Lunge",
+          "rounds": 2,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "RL",
+              "secondary": "W"
+            },
+            {
+              "main": "LL",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "alternating-side-lunge",
+          "name": "Alternating Side Lunge",
+          "rounds": 1,
+          "secondary": "weight",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "closed-grip-overhand-pull-ups",
+          "name": "Closed Grip Overhand Pull-Ups",
+          "rounds": 2,
+          "secondary": "chair",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "NC1",
+              "secondary": "C1"
+            },
+            {
+              "main": "NC2",
+              "secondary": "C2"
+            }
+          ]
+        },
+        {
+          "id": "single-leg-wall-squat-sec",
+          "name": "Single Leg Wall Squat (sec)",
+          "rounds": 1,
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R"
+            }
+          ]
+        },
+        {
+          "id": "deadlift-squat",
+          "name": "Deadlift Squat",
+          "rounds": 1,
+          "secondary": "extra",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "LL",
+              "secondary": "RL"
+            }
+          ]
+        },
+        {
+          "id": "switch-grip-pull-ups",
+          "name": "Switch Grip Pull-Ups",
+          "rounds": 2,
+          "secondary": "chair",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "NC1",
+              "secondary": "C1"
+            },
+            {
+              "main": "NC2",
+              "secondary": "C2"
+            }
+          ]
+        },
+        {
+          "id": "three-way-lunge",
+          "name": "Three-Way Lunge",
+          "rounds": 1,
+          "secondary": "extra",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "RL",
+              "secondary": "LL"
+            }
+          ]
+        },
+        {
+          "id": "sneaky-lunge",
+          "name": "Sneaky Lunge",
+          "rounds": 1,
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R"
+            }
+          ]
+        },
+        {
+          "id": "chair-salutations-sec",
+          "name": "Chair Salutations (sec)",
+          "rounds": 2,
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1"
+            },
+            {
+              "main": "R2"
+            }
+          ]
+        },
+        {
+          "id": "toe-roll-iso-lunge",
+          "name": "Toe-Roll Iso Lunge",
+          "rounds": 1,
+          "secondary": "extra",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "RL",
+              "secondary": "LL"
+            }
+          ]
+        },
+        {
+          "id": "groucho-walk",
+          "name": "Groucho Walk",
+          "rounds": 1,
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R"
+            }
+          ]
+        },
+        {
+          "id": "calf-raises",
+          "name": "Calf Raises",
+          "rounds": 1,
+          "secondary": "weight",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "80-20-cyber-speed-squat",
+          "name": "80/20 Cyber-Speed Squat",
+          "rounds": 1,
+          "secondary": "extra",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "RL",
+              "secondary": "LL"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "kenpo-x",
+      "name": "Kenpo X",
+      "style": "completion"
+    },
+    {
+      "key": "core-synergistics",
+      "name": "Core Synergistics",
+      "style": "strength",
+      "exercises": [
+        {
+          "id": "stack-foot-stagger-hands-push-ups",
+          "name": "Stack Foot/Stagger Hands Push-Ups",
+          "rounds": 1,
+          "secondary": "knee",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "N1",
+              "secondary": "K1"
+            }
+          ]
+        },
+        {
+          "id": "banana-rolls",
+          "name": "Banana Rolls",
+          "rounds": 1,
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R"
+            }
+          ]
+        },
+        {
+          "id": "leaning-crescent-lunges",
+          "name": "Leaning Crescent Lunges",
+          "rounds": 1,
+          "secondary": "weight",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "squat-run",
+          "name": "Squat Run",
+          "rounds": 1,
+          "secondary": "weight",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "sphinx-push-ups",
+          "name": "Sphinx Push-Ups",
+          "rounds": 1,
+          "secondary": "knee",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "N1",
+              "secondary": "K1"
+            }
+          ]
+        },
+        {
+          "id": "bow-to-boat",
+          "name": "Bow To Boat",
+          "rounds": 1,
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R"
+            }
+          ]
+        },
+        {
+          "id": "low-lateral-skaters",
+          "name": "Low Lateral Skaters",
+          "rounds": 1,
+          "secondary": "weight",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "lunge-and-reach",
+          "name": "Lunge & Reach",
+          "rounds": 1,
+          "secondary": "weight",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "prison-cell-push-ups",
+          "name": "Prison Cell Push-Ups",
+          "rounds": 1,
+          "secondary": "knee",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "N1",
+              "secondary": "K1"
+            }
+          ]
+        },
+        {
+          "id": "side-hip-raise",
+          "name": "Side Hip Raise",
+          "rounds": 1,
+          "secondary": "extra",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "RL",
+              "secondary": "LL"
+            }
+          ]
+        },
+        {
+          "id": "squat-x-press",
+          "name": "Squat X-Press",
+          "rounds": 1,
+          "secondary": "weight",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "plank-to-chaturanga-run",
+          "name": "Plank To Chaturanga Run",
+          "rounds": 1,
+          "secondary": "extra",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "P",
+              "secondary": "C"
+            }
+          ]
+        },
+        {
+          "id": "walking-push-ups",
+          "name": "Walking Push-Ups",
+          "rounds": 1,
+          "secondary": "knee",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "N1",
+              "secondary": "K1"
+            }
+          ]
+        },
+        {
+          "id": "superman-banana",
+          "name": "Superman Banana",
+          "rounds": 1,
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R"
+            }
+          ]
+        },
+        {
+          "id": "lunge-kickback-curl-press",
+          "name": "Lunge-Kickback-Curl-Press",
+          "rounds": 1,
+          "secondary": "weight",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "towel-hopping",
+          "name": "Towel Hopping",
+          "rounds": 1,
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R"
+            }
+          ]
+        },
+        {
+          "id": "reach-high-and-under-push-ups",
+          "name": "Reach High & Under Push-Ups",
+          "rounds": 1,
+          "secondary": "knee",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "N1",
+              "secondary": "K1"
+            }
+          ]
+        },
+        {
+          "id": "steam-engine",
+          "name": "Steam Engine",
+          "rounds": 1,
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R"
+            }
+          ]
+        },
+        {
+          "id": "dreya-roll",
+          "name": "Dreya Roll",
+          "rounds": 1,
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R"
+            }
+          ]
+        },
+        {
+          "id": "plank-to-chaturanga-iso",
+          "name": "Plank To Chaturanga Iso",
+          "rounds": 1,
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R"
+            }
+          ]
+        },
+        {
+          "id": "the-halfback",
+          "name": "The Halfback",
+          "rounds": 1,
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R"
+            }
+          ]
+        },
+        {
+          "id": "table-dip-leg-raise",
+          "name": "Table Dip Leg Raise",
+          "rounds": 1,
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "chest-shoulders-triceps",
+      "name": "Chest, Shoulders & Triceps",
+      "style": "strength",
+      "exercises": [
+        {
+          "id": "slow-motion-3-in-1-push-ups",
+          "name": "Slow-Motion 3-in-1 Push-Ups",
+          "rounds": 1,
+          "secondary": "extra",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "Reg",
+              "secondary": "Bon"
+            }
+          ]
+        },
+        {
+          "id": "in-and-out-shoulder-flys",
+          "name": "In & Out Shoulder Flys",
+          "rounds": 1,
+          "secondary": "weight",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "chairs-dips",
+          "name": "Chairs Dips",
+          "rounds": 1,
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R"
+            }
+          ]
+        },
+        {
+          "id": "plange-push-ups",
+          "name": "Plange Push-Ups",
+          "rounds": 1,
+          "secondary": "knee",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "N1",
+              "secondary": "K1"
+            }
+          ]
+        },
+        {
+          "id": "pike-presses",
+          "name": "Pike Presses",
+          "rounds": 1,
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R"
+            }
+          ]
+        },
+        {
+          "id": "side-tri-rises",
+          "name": "Side Tri-Rises",
+          "rounds": 1,
+          "secondary": "extra",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "RA",
+              "secondary": "LA"
+            }
+          ]
+        },
+        {
+          "id": "floor-flys",
+          "name": "Floor Flys",
+          "rounds": 1,
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R"
+            }
+          ]
+        },
+        {
+          "id": "scarecrows",
+          "name": "Scarecrows",
+          "rounds": 1,
+          "secondary": "weight",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "overhead-tricep-extensions",
+          "name": "Overhead Tricep Extensions",
+          "rounds": 1,
+          "secondary": "weight",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "two-twitch-speed-push-ups",
+          "name": "Two-Twitch Speed Push-Ups",
+          "rounds": 1,
+          "secondary": "knee",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "N1",
+              "secondary": "K1"
+            }
+          ]
+        },
+        {
+          "id": "y-presses",
+          "name": "Y-Presses",
+          "rounds": 1,
+          "secondary": "weight",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "lying-tricep-extensions",
+          "name": "Lying Tricep Extensions",
+          "rounds": 1,
+          "secondary": "weight",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "side-to-side-push-ups",
+          "name": "Side-To-Side Push-Ups",
+          "rounds": 1,
+          "secondary": "knee",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "N1",
+              "secondary": "K1"
+            }
+          ]
+        },
+        {
+          "id": "pour-flys",
+          "name": "Pour Flys",
+          "rounds": 1,
+          "secondary": "weight",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "side-leaning-tricep-extensions",
+          "name": "Side-Leaning Tricep Extensions",
+          "rounds": 2,
+          "secondary": "weight",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "RA",
+              "secondary": "W"
+            },
+            {
+              "main": "LA",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "one-arm-push-ups",
+          "name": "One-Arm Push-Ups",
+          "rounds": 1,
+          "secondary": "knee",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "N1",
+              "secondary": "K1"
+            }
+          ]
+        },
+        {
+          "id": "weighted-circles",
+          "name": "Weighted Circles",
+          "rounds": 1,
+          "secondary": "weight",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "throw-the-bomb",
+          "name": "Throw the Bomb",
+          "rounds": 2,
+          "secondary": "weight",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "RA",
+              "secondary": "W"
+            },
+            {
+              "main": "LA",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "clap-or-plyo-push-ups",
+          "name": "Clap or Plyo Push-Ups",
+          "rounds": 1,
+          "secondary": "knee",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "N1",
+              "secondary": "K1"
+            }
+          ]
+        },
+        {
+          "id": "slo-mo-throws",
+          "name": "Slo-Mo Throws",
+          "rounds": 1,
+          "secondary": "weight",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "front-to-back-tricep-extensions",
+          "name": "Front-To Back Tricep Extensions",
+          "rounds": 2,
+          "secondary": "weight",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "RA",
+              "secondary": "W"
+            },
+            {
+              "main": "LA",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "one-arm-balance-push-ups",
+          "name": "One-Arm Balance Push-Ups",
+          "rounds": 1,
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R"
+            }
+          ]
+        },
+        {
+          "id": "fly-row-presses",
+          "name": "Fly-Row Presses",
+          "rounds": 1,
+          "secondary": "weight",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "dumbbell-cross-body-blows",
+          "name": "Dumbbell Cross-Body Blows",
+          "rounds": 1,
+          "secondary": "weight",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R",
+              "secondary": "W"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "back-biceps",
+      "name": "Back & Biceps",
+      "style": "strength",
+      "exercises": [
+        {
+          "id": "wide-front-pull-ups",
+          "name": "Wide Front Pull-Ups",
+          "rounds": 1,
+          "secondary": "chair",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "NC",
+              "secondary": "C"
+            }
+          ]
+        },
+        {
+          "id": "lawnmowers",
+          "name": "Lawnmowers",
+          "rounds": 2,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "RA",
+              "secondary": "W"
+            },
+            {
+              "main": "LA",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "twenty-ones",
+          "name": "Twenty-Ones",
+          "rounds": 1,
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R"
+            }
+          ]
+        },
+        {
+          "id": "one-arm-cross-body-curls",
+          "name": "One-Arm Cross-Body Curls",
+          "rounds": 2,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "RA",
+              "secondary": "W"
+            },
+            {
+              "main": "LA",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "switch-grip-pull-ups",
+          "name": "Switch Grip Pull-Ups",
+          "rounds": 1,
+          "secondary": "chair",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "NC",
+              "secondary": "C"
+            }
+          ]
+        },
+        {
+          "id": "elbows-out-lawnmowers",
+          "name": "Elbows-Out Lawnmowers",
+          "rounds": 2,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "RA",
+              "secondary": "W"
+            },
+            {
+              "main": "LA",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "standing-bicep-curls",
+          "name": "Standing Bicep Curls",
+          "rounds": 1,
+          "secondary": "weight",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "one-arm-concentration-curls",
+          "name": "One-Arm Concentration Curls",
+          "rounds": 2,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "RA",
+              "secondary": "W"
+            },
+            {
+              "main": "LA",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "corn-cob-pull-ups",
+          "name": "Corn Cob Pull-Ups",
+          "rounds": 1,
+          "secondary": "chair",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "NC",
+              "secondary": "C"
+            }
+          ]
+        },
+        {
+          "id": "reverse-grip-bent-over-rows",
+          "name": "Reverse Grip Bent-Over Rows",
+          "rounds": 1,
+          "secondary": "weight",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "open-arm-curls",
+          "name": "Open Arm Curls",
+          "rounds": 1,
+          "secondary": "weight",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "static-arm-curls",
+          "name": "Static Arm Curls",
+          "rounds": 1,
+          "secondary": "weight",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "towel-pull-ups",
+          "name": "Towel Pull-Ups",
+          "rounds": 1,
+          "secondary": "chair",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "NC",
+              "secondary": "C"
+            }
+          ]
+        },
+        {
+          "id": "congdon-locomotives",
+          "name": "Congdon Locomotives",
+          "rounds": 1,
+          "secondary": "weight",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "crouching-cohen-curls",
+          "name": "Crouching Cohen Curls",
+          "rounds": 1,
+          "secondary": "weight",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "one-arm-corkscrew-curls",
+          "name": "One-Arm Corkscrew Curls",
+          "rounds": 1,
+          "secondary": "weight",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "chin-ups",
+          "name": "Chin-Ups",
+          "rounds": 1,
+          "secondary": "chair",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "NC",
+              "secondary": "C"
+            }
+          ]
+        },
+        {
+          "id": "seated-bent-over-back-flys",
+          "name": "Seated Bent-Over Back Flys",
+          "rounds": 1,
+          "secondary": "weight",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "curl-up-hammer-downs",
+          "name": "Curl-Up/Hammer Downs",
+          "rounds": 1,
+          "secondary": "weight",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "hammer-curls",
+          "name": "Hammer Curls",
+          "rounds": 1,
+          "secondary": "weight",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "max-rep-pull-ups",
+          "name": "Max Rep Pull-Ups",
+          "rounds": 1,
+          "secondary": "chair",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "NC",
+              "secondary": "C"
+            }
+          ]
+        },
+        {
+          "id": "superman",
+          "name": "Superman",
+          "rounds": 1,
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R"
+            }
+          ]
+        },
+        {
+          "id": "in-out-hammer-curls",
+          "name": "In-Out Hammer Curls",
+          "rounds": 1,
+          "secondary": "weight",
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "R",
+              "secondary": "W"
+            }
+          ]
+        },
+        {
+          "id": "strip-set-curls",
+          "name": "Strip-Set Curls",
+          "rounds": 4,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W1"
+            },
+            {
+              "main": "R2",
+              "secondary": "W2"
+            },
+            {
+              "main": "R3",
+              "secondary": "W3"
+            },
+            {
+              "main": "R4",
+              "secondary": "W4"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "ab-ripper-x",
+      "name": "Ab Ripper X",
+      "style": "arx",
+      "exercises": [
+        {
+          "id": "in-and-out",
+          "name": "In & Out",
+          "rounds": 1,
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "Reps"
+            }
+          ]
+        },
+        {
+          "id": "seated-bicycle",
+          "name": "Seated Bicycle",
+          "rounds": 1,
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "Reps"
+            }
+          ]
+        },
+        {
+          "id": "seated-crunchy-frog",
+          "name": "Seated Crunchy Frog",
+          "rounds": 1,
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "Reps"
+            }
+          ]
+        },
+        {
+          "id": "crossed-leg-wide-leg-sit-up",
+          "name": "Crossed leg/Wide Leg Sit-Up",
+          "rounds": 1,
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "Reps"
+            }
+          ]
+        },
+        {
+          "id": "fifer-scissors",
+          "name": "Fifer Scissors",
+          "rounds": 1,
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "Reps"
+            }
+          ]
+        },
+        {
+          "id": "hip-rock-n-raise",
+          "name": "Hip Rock 'N Raise",
+          "rounds": 1,
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "Reps"
+            }
+          ]
+        },
+        {
+          "id": "pulse-up",
+          "name": "Pulse-Up",
+          "rounds": 1,
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "Reps"
+            }
+          ]
+        },
+        {
+          "id": "roll-up-v-up-combo",
+          "name": "Roll-Up/V-Up Combo",
+          "rounds": 1,
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "Reps"
+            }
+          ]
+        },
+        {
+          "id": "oblique-v-up",
+          "name": "Oblique V-Up",
+          "rounds": 1,
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "Reps"
+            }
+          ]
+        },
+        {
+          "id": "leg-climb",
+          "name": "Leg Climb",
+          "rounds": 1,
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "Reps"
+            }
+          ]
+        },
+        {
+          "id": "mason-twist",
+          "name": "Mason Twist",
+          "rounds": 1,
+          "agg": "sum",
+          "labels": [
+            {
+              "main": "Reps"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "cardio-x",
+      "name": "Cardio X",
+      "style": "completion"
+    },
+    {
+      "key": "x-stretch",
+      "name": "X Stretch",
+      "style": "completion"
+    },
+    {
+      "key": "rest",
+      "name": "Rest or X Stretch",
+      "style": "rest"
+    }
+  ]
+}

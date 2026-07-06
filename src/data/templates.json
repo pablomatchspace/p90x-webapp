@@ -1,0 +1,1266 @@
+{
+  "classic": [
+    {
+      "day": 1,
+      "week": 1,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["chest-back", "ab-ripper-x"]
+    },
+    {
+      "day": 2,
+      "week": 1,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["plyometrics"]
+    },
+    {
+      "day": 3,
+      "week": 1,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["shoulders-arms", "ab-ripper-x"]
+    },
+    {
+      "day": 4,
+      "week": 1,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["yoga-x"]
+    },
+    {
+      "day": 5,
+      "week": 1,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["legs-back", "ab-ripper-x"]
+    },
+    {
+      "day": 6,
+      "week": 1,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["kenpo-x"]
+    },
+    {
+      "day": 7,
+      "week": 1,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["rest"]
+    },
+    {
+      "day": 8,
+      "week": 2,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["chest-back", "ab-ripper-x"]
+    },
+    {
+      "day": 9,
+      "week": 2,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["plyometrics"]
+    },
+    {
+      "day": 10,
+      "week": 2,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["shoulders-arms", "ab-ripper-x"]
+    },
+    {
+      "day": 11,
+      "week": 2,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["yoga-x"]
+    },
+    {
+      "day": 12,
+      "week": 2,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["legs-back", "ab-ripper-x"]
+    },
+    {
+      "day": 13,
+      "week": 2,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["kenpo-x"]
+    },
+    {
+      "day": 14,
+      "week": 2,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["rest"]
+    },
+    {
+      "day": 15,
+      "week": 3,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["chest-back", "ab-ripper-x"]
+    },
+    {
+      "day": 16,
+      "week": 3,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["plyometrics"]
+    },
+    {
+      "day": 17,
+      "week": 3,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["shoulders-arms", "ab-ripper-x"]
+    },
+    {
+      "day": 18,
+      "week": 3,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["yoga-x"]
+    },
+    {
+      "day": 19,
+      "week": 3,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["legs-back", "ab-ripper-x"]
+    },
+    {
+      "day": 20,
+      "week": 3,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["kenpo-x"]
+    },
+    {
+      "day": 21,
+      "week": 3,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["rest"]
+    },
+    {
+      "day": 22,
+      "week": 4,
+      "phase": 1,
+      "recovery": true,
+      "workouts": ["yoga-x"]
+    },
+    {
+      "day": 23,
+      "week": 4,
+      "phase": 1,
+      "recovery": true,
+      "workouts": ["core-synergistics"]
+    },
+    {
+      "day": 24,
+      "week": 4,
+      "phase": 1,
+      "recovery": true,
+      "workouts": ["kenpo-x"]
+    },
+    {
+      "day": 25,
+      "week": 4,
+      "phase": 1,
+      "recovery": true,
+      "workouts": ["x-stretch"]
+    },
+    {
+      "day": 26,
+      "week": 4,
+      "phase": 1,
+      "recovery": true,
+      "workouts": ["core-synergistics"]
+    },
+    {
+      "day": 27,
+      "week": 4,
+      "phase": 1,
+      "recovery": true,
+      "workouts": ["yoga-x"]
+    },
+    {
+      "day": 28,
+      "week": 4,
+      "phase": 1,
+      "recovery": true,
+      "workouts": ["rest"]
+    },
+    {
+      "day": 29,
+      "week": 5,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["chest-shoulders-triceps", "ab-ripper-x"]
+    },
+    {
+      "day": 30,
+      "week": 5,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["plyometrics"]
+    },
+    {
+      "day": 31,
+      "week": 5,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["back-biceps", "ab-ripper-x"]
+    },
+    {
+      "day": 32,
+      "week": 5,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["yoga-x"]
+    },
+    {
+      "day": 33,
+      "week": 5,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["legs-back", "ab-ripper-x"]
+    },
+    {
+      "day": 34,
+      "week": 5,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["kenpo-x"]
+    },
+    {
+      "day": 35,
+      "week": 5,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["rest"]
+    },
+    {
+      "day": 36,
+      "week": 6,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["chest-shoulders-triceps", "ab-ripper-x"]
+    },
+    {
+      "day": 37,
+      "week": 6,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["plyometrics"]
+    },
+    {
+      "day": 38,
+      "week": 6,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["back-biceps", "ab-ripper-x"]
+    },
+    {
+      "day": 39,
+      "week": 6,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["yoga-x"]
+    },
+    {
+      "day": 40,
+      "week": 6,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["legs-back", "ab-ripper-x"]
+    },
+    {
+      "day": 41,
+      "week": 6,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["kenpo-x"]
+    },
+    {
+      "day": 42,
+      "week": 6,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["rest"]
+    },
+    {
+      "day": 43,
+      "week": 7,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["chest-shoulders-triceps", "ab-ripper-x"]
+    },
+    {
+      "day": 44,
+      "week": 7,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["plyometrics"]
+    },
+    {
+      "day": 45,
+      "week": 7,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["back-biceps", "ab-ripper-x"]
+    },
+    {
+      "day": 46,
+      "week": 7,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["yoga-x"]
+    },
+    {
+      "day": 47,
+      "week": 7,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["legs-back", "ab-ripper-x"]
+    },
+    {
+      "day": 48,
+      "week": 7,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["kenpo-x"]
+    },
+    {
+      "day": 49,
+      "week": 7,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["rest"]
+    },
+    {
+      "day": 50,
+      "week": 8,
+      "phase": 2,
+      "recovery": true,
+      "workouts": ["yoga-x"]
+    },
+    {
+      "day": 51,
+      "week": 8,
+      "phase": 2,
+      "recovery": true,
+      "workouts": ["core-synergistics"]
+    },
+    {
+      "day": 52,
+      "week": 8,
+      "phase": 2,
+      "recovery": true,
+      "workouts": ["kenpo-x"]
+    },
+    {
+      "day": 53,
+      "week": 8,
+      "phase": 2,
+      "recovery": true,
+      "workouts": ["x-stretch"]
+    },
+    {
+      "day": 54,
+      "week": 8,
+      "phase": 2,
+      "recovery": true,
+      "workouts": ["core-synergistics"]
+    },
+    {
+      "day": 55,
+      "week": 8,
+      "phase": 2,
+      "recovery": true,
+      "workouts": ["yoga-x"]
+    },
+    {
+      "day": 56,
+      "week": 8,
+      "phase": 2,
+      "recovery": true,
+      "workouts": ["rest"]
+    },
+    {
+      "day": 57,
+      "week": 9,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["chest-back", "ab-ripper-x"]
+    },
+    {
+      "day": 58,
+      "week": 9,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["plyometrics"]
+    },
+    {
+      "day": 59,
+      "week": 9,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["shoulders-arms", "ab-ripper-x"]
+    },
+    {
+      "day": 60,
+      "week": 9,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["yoga-x"]
+    },
+    {
+      "day": 61,
+      "week": 9,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["legs-back", "ab-ripper-x"]
+    },
+    {
+      "day": 62,
+      "week": 9,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["kenpo-x"]
+    },
+    {
+      "day": 63,
+      "week": 9,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["rest"]
+    },
+    {
+      "day": 64,
+      "week": 10,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["chest-shoulders-triceps", "ab-ripper-x"]
+    },
+    {
+      "day": 65,
+      "week": 10,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["plyometrics"]
+    },
+    {
+      "day": 66,
+      "week": 10,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["back-biceps", "ab-ripper-x"]
+    },
+    {
+      "day": 67,
+      "week": 10,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["yoga-x"]
+    },
+    {
+      "day": 68,
+      "week": 10,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["legs-back", "ab-ripper-x"]
+    },
+    {
+      "day": 69,
+      "week": 10,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["kenpo-x"]
+    },
+    {
+      "day": 70,
+      "week": 10,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["rest"]
+    },
+    {
+      "day": 71,
+      "week": 11,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["chest-back", "ab-ripper-x"]
+    },
+    {
+      "day": 72,
+      "week": 11,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["plyometrics"]
+    },
+    {
+      "day": 73,
+      "week": 11,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["shoulders-arms", "ab-ripper-x"]
+    },
+    {
+      "day": 74,
+      "week": 11,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["yoga-x"]
+    },
+    {
+      "day": 75,
+      "week": 11,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["legs-back", "ab-ripper-x"]
+    },
+    {
+      "day": 76,
+      "week": 11,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["kenpo-x"]
+    },
+    {
+      "day": 77,
+      "week": 11,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["rest"]
+    },
+    {
+      "day": 78,
+      "week": 12,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["chest-shoulders-triceps", "ab-ripper-x"]
+    },
+    {
+      "day": 79,
+      "week": 12,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["plyometrics"]
+    },
+    {
+      "day": 80,
+      "week": 12,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["back-biceps", "ab-ripper-x"]
+    },
+    {
+      "day": 81,
+      "week": 12,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["yoga-x"]
+    },
+    {
+      "day": 82,
+      "week": 12,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["legs-back", "ab-ripper-x"]
+    },
+    {
+      "day": 83,
+      "week": 12,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["kenpo-x"]
+    },
+    {
+      "day": 84,
+      "week": 12,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["rest"]
+    },
+    {
+      "day": 85,
+      "week": 13,
+      "phase": 3,
+      "recovery": true,
+      "workouts": ["yoga-x"]
+    },
+    {
+      "day": 86,
+      "week": 13,
+      "phase": 3,
+      "recovery": true,
+      "workouts": ["core-synergistics"]
+    },
+    {
+      "day": 87,
+      "week": 13,
+      "phase": 3,
+      "recovery": true,
+      "workouts": ["kenpo-x"]
+    },
+    {
+      "day": 88,
+      "week": 13,
+      "phase": 3,
+      "recovery": true,
+      "workouts": ["x-stretch"]
+    },
+    {
+      "day": 89,
+      "week": 13,
+      "phase": 3,
+      "recovery": true,
+      "workouts": ["core-synergistics"]
+    },
+    {
+      "day": 90,
+      "week": 13,
+      "phase": 3,
+      "recovery": true,
+      "workouts": ["yoga-x"]
+    }
+  ],
+  "lean": [
+    {
+      "day": 1,
+      "week": 1,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["core-synergistics"]
+    },
+    {
+      "day": 2,
+      "week": 1,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["cardio-x"]
+    },
+    {
+      "day": 3,
+      "week": 1,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["shoulders-arms", "ab-ripper-x"]
+    },
+    {
+      "day": 4,
+      "week": 1,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["yoga-x"]
+    },
+    {
+      "day": 5,
+      "week": 1,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["legs-back", "ab-ripper-x"]
+    },
+    {
+      "day": 6,
+      "week": 1,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["kenpo-x"]
+    },
+    {
+      "day": 7,
+      "week": 1,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["rest"]
+    },
+    {
+      "day": 8,
+      "week": 2,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["core-synergistics"]
+    },
+    {
+      "day": 9,
+      "week": 2,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["cardio-x"]
+    },
+    {
+      "day": 10,
+      "week": 2,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["shoulders-arms", "ab-ripper-x"]
+    },
+    {
+      "day": 11,
+      "week": 2,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["yoga-x"]
+    },
+    {
+      "day": 12,
+      "week": 2,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["legs-back", "ab-ripper-x"]
+    },
+    {
+      "day": 13,
+      "week": 2,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["kenpo-x"]
+    },
+    {
+      "day": 14,
+      "week": 2,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["rest"]
+    },
+    {
+      "day": 15,
+      "week": 3,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["core-synergistics"]
+    },
+    {
+      "day": 16,
+      "week": 3,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["cardio-x"]
+    },
+    {
+      "day": 17,
+      "week": 3,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["shoulders-arms", "ab-ripper-x"]
+    },
+    {
+      "day": 18,
+      "week": 3,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["yoga-x"]
+    },
+    {
+      "day": 19,
+      "week": 3,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["legs-back", "ab-ripper-x"]
+    },
+    {
+      "day": 20,
+      "week": 3,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["kenpo-x"]
+    },
+    {
+      "day": 21,
+      "week": 3,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["rest"]
+    },
+    {
+      "day": 22,
+      "week": 4,
+      "phase": 1,
+      "recovery": true,
+      "workouts": ["yoga-x"]
+    },
+    {
+      "day": 23,
+      "week": 4,
+      "phase": 1,
+      "recovery": true,
+      "workouts": ["core-synergistics"]
+    },
+    {
+      "day": 24,
+      "week": 4,
+      "phase": 1,
+      "recovery": true,
+      "workouts": ["kenpo-x"]
+    },
+    {
+      "day": 25,
+      "week": 4,
+      "phase": 1,
+      "recovery": true,
+      "workouts": ["x-stretch"]
+    },
+    {
+      "day": 26,
+      "week": 4,
+      "phase": 1,
+      "recovery": true,
+      "workouts": ["cardio-x"]
+    },
+    {
+      "day": 27,
+      "week": 4,
+      "phase": 1,
+      "recovery": true,
+      "workouts": ["yoga-x"]
+    },
+    {
+      "day": 28,
+      "week": 4,
+      "phase": 1,
+      "recovery": true,
+      "workouts": ["rest"]
+    },
+    {
+      "day": 29,
+      "week": 5,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["core-synergistics"]
+    },
+    {
+      "day": 30,
+      "week": 5,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["cardio-x"]
+    },
+    {
+      "day": 31,
+      "week": 5,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["chest-shoulders-triceps", "ab-ripper-x"]
+    },
+    {
+      "day": 32,
+      "week": 5,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["yoga-x"]
+    },
+    {
+      "day": 33,
+      "week": 5,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["legs-back", "ab-ripper-x"]
+    },
+    {
+      "day": 34,
+      "week": 5,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["kenpo-x"]
+    },
+    {
+      "day": 35,
+      "week": 5,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["rest"]
+    },
+    {
+      "day": 36,
+      "week": 6,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["core-synergistics"]
+    },
+    {
+      "day": 37,
+      "week": 6,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["cardio-x"]
+    },
+    {
+      "day": 38,
+      "week": 6,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["chest-shoulders-triceps", "ab-ripper-x"]
+    },
+    {
+      "day": 39,
+      "week": 6,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["yoga-x"]
+    },
+    {
+      "day": 40,
+      "week": 6,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["legs-back", "ab-ripper-x"]
+    },
+    {
+      "day": 41,
+      "week": 6,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["kenpo-x"]
+    },
+    {
+      "day": 42,
+      "week": 6,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["rest"]
+    },
+    {
+      "day": 43,
+      "week": 7,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["core-synergistics"]
+    },
+    {
+      "day": 44,
+      "week": 7,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["cardio-x"]
+    },
+    {
+      "day": 45,
+      "week": 7,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["chest-shoulders-triceps", "ab-ripper-x"]
+    },
+    {
+      "day": 46,
+      "week": 7,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["yoga-x"]
+    },
+    {
+      "day": 47,
+      "week": 7,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["legs-back", "ab-ripper-x"]
+    },
+    {
+      "day": 48,
+      "week": 7,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["kenpo-x"]
+    },
+    {
+      "day": 49,
+      "week": 7,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["rest"]
+    },
+    {
+      "day": 50,
+      "week": 8,
+      "phase": 2,
+      "recovery": true,
+      "workouts": ["yoga-x"]
+    },
+    {
+      "day": 51,
+      "week": 8,
+      "phase": 2,
+      "recovery": true,
+      "workouts": ["core-synergistics"]
+    },
+    {
+      "day": 52,
+      "week": 8,
+      "phase": 2,
+      "recovery": true,
+      "workouts": ["kenpo-x"]
+    },
+    {
+      "day": 53,
+      "week": 8,
+      "phase": 2,
+      "recovery": true,
+      "workouts": ["x-stretch"]
+    },
+    {
+      "day": 54,
+      "week": 8,
+      "phase": 2,
+      "recovery": true,
+      "workouts": ["cardio-x"]
+    },
+    {
+      "day": 55,
+      "week": 8,
+      "phase": 2,
+      "recovery": true,
+      "workouts": ["yoga-x"]
+    },
+    {
+      "day": 56,
+      "week": 8,
+      "phase": 2,
+      "recovery": true,
+      "workouts": ["rest"]
+    },
+    {
+      "day": 57,
+      "week": 9,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["chest-back", "ab-ripper-x"]
+    },
+    {
+      "day": 58,
+      "week": 9,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["cardio-x"]
+    },
+    {
+      "day": 59,
+      "week": 9,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["shoulders-arms", "ab-ripper-x"]
+    },
+    {
+      "day": 60,
+      "week": 9,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["yoga-x"]
+    },
+    {
+      "day": 61,
+      "week": 9,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["core-synergistics"]
+    },
+    {
+      "day": 62,
+      "week": 9,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["kenpo-x"]
+    },
+    {
+      "day": 63,
+      "week": 9,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["rest"]
+    },
+    {
+      "day": 64,
+      "week": 10,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["chest-shoulders-triceps", "ab-ripper-x"]
+    },
+    {
+      "day": 65,
+      "week": 10,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["cardio-x"]
+    },
+    {
+      "day": 66,
+      "week": 10,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["back-biceps", "ab-ripper-x"]
+    },
+    {
+      "day": 67,
+      "week": 10,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["yoga-x"]
+    },
+    {
+      "day": 68,
+      "week": 10,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["core-synergistics"]
+    },
+    {
+      "day": 69,
+      "week": 10,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["kenpo-x"]
+    },
+    {
+      "day": 70,
+      "week": 10,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["rest"]
+    },
+    {
+      "day": 71,
+      "week": 11,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["chest-back", "ab-ripper-x"]
+    },
+    {
+      "day": 72,
+      "week": 11,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["cardio-x"]
+    },
+    {
+      "day": 73,
+      "week": 11,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["shoulders-arms", "ab-ripper-x"]
+    },
+    {
+      "day": 74,
+      "week": 11,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["yoga-x"]
+    },
+    {
+      "day": 75,
+      "week": 11,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["core-synergistics"]
+    },
+    {
+      "day": 76,
+      "week": 11,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["kenpo-x"]
+    },
+    {
+      "day": 77,
+      "week": 11,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["rest"]
+    },
+    {
+      "day": 78,
+      "week": 12,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["chest-shoulders-triceps", "ab-ripper-x"]
+    },
+    {
+      "day": 79,
+      "week": 12,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["cardio-x"]
+    },
+    {
+      "day": 80,
+      "week": 12,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["back-biceps", "ab-ripper-x"]
+    },
+    {
+      "day": 81,
+      "week": 12,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["yoga-x"]
+    },
+    {
+      "day": 82,
+      "week": 12,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["core-synergistics"]
+    },
+    {
+      "day": 83,
+      "week": 12,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["kenpo-x"]
+    },
+    {
+      "day": 84,
+      "week": 12,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["rest"]
+    },
+    {
+      "day": 85,
+      "week": 13,
+      "phase": 3,
+      "recovery": true,
+      "workouts": ["yoga-x"]
+    },
+    {
+      "day": 86,
+      "week": 13,
+      "phase": 3,
+      "recovery": true,
+      "workouts": ["core-synergistics"]
+    },
+    {
+      "day": 87,
+      "week": 13,
+      "phase": 3,
+      "recovery": true,
+      "workouts": ["kenpo-x"]
+    },
+    {
+      "day": 88,
+      "week": 13,
+      "phase": 3,
+      "recovery": true,
+      "workouts": ["x-stretch"]
+    },
+    {
+      "day": 89,
+      "week": 13,
+      "phase": 3,
+      "recovery": true,
+      "workouts": ["cardio-x"]
+    },
+    {
+      "day": 90,
+      "week": 13,
+      "phase": 3,
+      "recovery": true,
+      "workouts": ["yoga-x"]
+    }
+  ]
+}
