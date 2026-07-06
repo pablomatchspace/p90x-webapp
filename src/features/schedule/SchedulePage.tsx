@@ -119,9 +119,24 @@ export function SchedulePage() {
     )
   }
 
+  const actionLink =
+    'flex h-9 items-center rounded-lg border border-zinc-300 px-3 text-sm font-medium text-zinc-600 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800'
   const weeks = groupByWeek(schedule.days)
   return (
-    <Page title="Schedule" subtitle={`Started ${formatLong(schedule.startDate)}`}>
+    <Page
+      title="Schedule"
+      subtitle={`Started ${formatLong(schedule.startDate)}`}
+      actions={
+        <>
+          <Link to="/schedule/weekly" className={actionLink}>
+            Weekly order
+          </Link>
+          <Link to="/schedule/history" className={actionLink}>
+            History
+          </Link>
+        </>
+      }
+    >
       <ProgramStatusBar />
       <ul className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-zinc-500 dark:text-zinc-400">
         {LEGEND.map((status) => (
