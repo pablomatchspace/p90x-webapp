@@ -1,6 +1,7 @@
 import { CalendarCheck2, CalendarDays, Dumbbell, LayoutDashboard, Menu, Scale } from 'lucide-react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { SystemBanners } from '@/components/SystemBanners'
+import { UpdateToast } from '@/components/UpdateToast'
 
 const tabs = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
@@ -46,6 +47,7 @@ export function Layout() {
           <SystemBanners />
           <Outlet />
         </div>
+        <UpdateToast />
       </main>
 
       <nav
