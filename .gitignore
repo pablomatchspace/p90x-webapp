@@ -12,6 +12,18 @@ dist
 dist-ssr
 *.local
 
+# Personal data — never commit (PRD decision D3)
+p90x-data*.json
+*.local.json
+local/
+
+# Test & tooling artifacts
+coverage
+playwright-report
+test-results
+dev-dist
+*.tsbuildinfo
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
