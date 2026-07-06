@@ -1,0 +1,37 @@
+// @vitest-environment jsdom
+import { beforeEach, describe, expect, it } from 'vitest'
+import { emptyState } from '@/lib/schema'
+import { setCompletionStatus, setWorkoutCompleted } from '@/state/actions'
+import { useStore } from '@/state/store'
+
+beforeEach(() => {
+  useStore.setState((s) => ({ ...s, data: emptyState() }))
+})
+
+describe('quick-log actions', () => {
+  it('creates a session on first log and updates it on repeat', () => {
+    setCompletionStatus('plyometrics', 'd002', 'yes')
+    let sessions = useStore.getState().data.workoutLogs['plyometrics'].sessions
+    expect(sessions).toHaveLength(1)
+    expect(sessions[0]).toMatchObject({ programDayId: 'd002', status: 'yes' })
+    expect(sessions[0].loggedAt).toBeTruthy()
+
+    setCompletionStatus('plyometrics', 'd002', 'no')
+    sessions = useStore.getState().data.workoutLogs['plyometrics'].sessions
+    expect(sessions).toHaveLength(1)
+    expect(sessions[0].status).toBe('no')
+  })
+
+  it('keeps sessions on different program days separate', () => {
+    setCompletionStatus('plyometrics', 'd002', 'yes')
+    setCompletionStatus('plyometrics', 'd009', 'yes')
+    expect(useStore.getState().data.workoutLogs['plyometrics'].sessions).toHaveLength(2)
+  })
+
+  it('sets and clears the strength completed override', () => {
+    setWorkoutCompleted('chest-back', 'd001', true)
+    expect(useStore.getState().data.workoutLogs['chest-back'].sessions[0].completed).toBe(true)
+    setWorkoutCompleted('chest-back', 'd001', undefined)
+    expect(useStore.getState().data.workoutLogs['chest-back'].sessions[0].completed).toBeUndefined()
+  })
+})

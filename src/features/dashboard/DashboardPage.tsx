@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Card, Page } from '@/components/Page'
+import { ProgramStatusBar } from '@/features/schedule/ProgramStatusBar'
 import { useStore } from '@/state/store'
 
 export function DashboardPage() {
@@ -21,11 +22,14 @@ export function DashboardPage() {
           </Link>
         </Card>
       ) : (
-        <Card>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            KPI cards, trends and progression charts arrive with Epic E6.
-          </p>
-        </Card>
+        <>
+          <ProgramStatusBar />
+          <Card>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+              KPI cards, trends and progression charts arrive with Epic E6.
+            </p>
+          </Card>
+        </>
       )}
     </Page>
   )

@@ -15,6 +15,7 @@ export default function App() {
         <Route element={<Layout />}>
           <Route index element={<DashboardPage />} />
           <Route path="today" element={<TodayPage />} />
+          <Route path="day/:date" element={<TodayPage />} />
           <Route path="schedule" element={<SchedulePage />} />
           <Route path="workouts" element={<WorkoutsPage />} />
           <Route path="body" element={<BodyPage />} />
