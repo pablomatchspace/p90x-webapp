@@ -58,15 +58,15 @@ export const scheduleOpSchema = z.discriminatedUnion('kind', [
 ])
 
 const roundSchema = z.object({
-  /** reps (or seconds for timed moves); for R×W rows this is reps */
+  /** reps; for R×W rows this is reps */
   main: nullableNumber,
-  /** assisted reps (knee/chair) or the weight for R×W rows */
+  /** assisted reps (knee/chair), the weight for R×W rows, or the extra/other-side count */
   secondary: nullableNumber,
 })
 
 export const exerciseEntrySchema = z.object({
-  r1: roundSchema.optional(),
-  r2: roundSchema.optional(),
+  /** one entry per catalog round: 1, 2, or 4 (Strip-Set Curls) */
+  rounds: z.array(roundSchema).min(1).max(4),
 })
 
 export const sessionSchema = z.object({

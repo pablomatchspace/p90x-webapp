@@ -37,7 +37,12 @@ function populated(): AppState {
         annotation: '1',
         completed: true,
         entries: {
-          'standard-push-ups': { r1: { main: 20, secondary: 0 }, r2: { main: 15, secondary: 4 } },
+          'standard-push-ups': {
+            rounds: [
+              { main: 20, secondary: 0 },
+              { main: 15, secondary: 4 },
+            ],
+          },
         },
         notes: 'solid',
       },
