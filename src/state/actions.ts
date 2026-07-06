@@ -1,4 +1,4 @@
-import type { AppState, Session } from '@/lib/schema'
+import type { AppState, ScheduleOp, Session } from '@/lib/schema'
 import { useStore } from '@/state/store'
 
 /**
@@ -27,6 +27,21 @@ export function setCompletionStatus(
     const session = upsertSession(draft, workoutKey, programDayId)
     session.status = status
     session.loggedAt = new Date().toISOString()
+  })
+}
+
+/** Append a reschedule op (validate upstream with `previewOp` first). */
+export function addScheduleOp(op: ScheduleOp): void {
+  useStore.getState().mutate((draft) => {
+    draft.scheduleOps.push(op)
+  })
+}
+
+/** Soft-delete: the op stays in the audit trail but stops applying. */
+export function revertScheduleOp(opId: string): void {
+  useStore.getState().mutate((draft) => {
+    const op = draft.scheduleOps.find((o) => o.id === opId)
+    if (op !== undefined && op.revertedAt === undefined) op.revertedAt = new Date().toISOString()
   })
 }
 

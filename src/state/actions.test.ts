@@ -1,7 +1,12 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it } from 'vitest'
 import { emptyState } from '@/lib/schema'
-import { setCompletionStatus, setWorkoutCompleted } from '@/state/actions'
+import {
+  addScheduleOp,
+  revertScheduleOp,
+  setCompletionStatus,
+  setWorkoutCompleted,
+} from '@/state/actions'
 import { useStore } from '@/state/store'
 
 beforeEach(() => {
@@ -33,5 +38,22 @@ describe('quick-log actions', () => {
     expect(useStore.getState().data.workoutLogs['chest-back'].sessions[0].completed).toBe(true)
     setWorkoutCompleted('chest-back', 'd001', undefined)
     expect(useStore.getState().data.workoutLogs['chest-back'].sessions[0].completed).toBeUndefined()
+  })
+})
+
+describe('reschedule op actions', () => {
+  it('appends ops and reverts them exactly once', () => {
+    addScheduleOp({ id: 'op1', createdAt: 't', kind: 'skip', date: '2026-01-14' })
+    expect(useStore.getState().data.scheduleOps).toHaveLength(1)
+
+    revertScheduleOp('op1')
+    const stamped = useStore.getState().data.scheduleOps[0].revertedAt
+    expect(stamped).toBeTruthy()
+
+    revertScheduleOp('op1') // idempotent — the audit timestamp is not rewritten
+    expect(useStore.getState().data.scheduleOps[0].revertedAt).toBe(stamped)
+
+    revertScheduleOp('unknown') // unknown id is a no-op
+    expect(useStore.getState().data.scheduleOps).toHaveLength(1)
   })
 })

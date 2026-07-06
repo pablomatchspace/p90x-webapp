@@ -4,7 +4,9 @@ import { BodyPage } from '@/features/body/BodyPage'
 import { DashboardPage } from '@/features/dashboard/DashboardPage'
 import { DataPage } from '@/features/more/DataPage'
 import { MorePage } from '@/features/more/MorePage'
+import { HistoryPage } from '@/features/schedule/HistoryPage'
 import { SchedulePage } from '@/features/schedule/SchedulePage'
+import { WeeklyEditorPage } from '@/features/schedule/WeeklyEditorPage'
 import { TodayPage } from '@/features/today/TodayPage'
 import { WorkoutsPage } from '@/features/workouts/WorkoutsPage'
 
@@ -17,6 +19,8 @@ export default function App() {
           <Route path="today" element={<TodayPage />} />
           <Route path="day/:date" element={<TodayPage />} />
           <Route path="schedule" element={<SchedulePage />} />
+          <Route path="schedule/weekly" element={<WeeklyEditorPage />} />
+          <Route path="schedule/history" element={<HistoryPage />} />
           <Route path="workouts" element={<WorkoutsPage />} />
           <Route path="body" element={<BodyPage />} />
           <Route path="more" element={<MorePage />} />

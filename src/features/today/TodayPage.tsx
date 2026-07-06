@@ -7,6 +7,7 @@ import type { ProgramDay } from '@/lib/schedule/materialize'
 import { dayStatus, workoutState } from '@/lib/schedule/status'
 import { Chip } from '@/features/schedule/Chip'
 import { ProgramStatusBar } from '@/features/schedule/ProgramStatusBar'
+import { RescheduleSection } from '@/features/schedule/RescheduleSection'
 import {
   DAY_STATUS_LABELS,
   DAY_STATUS_TONES,
@@ -236,6 +237,8 @@ export function TodayPage() {
           ))}
         </>
       )}
+
+      {day !== undefined ? <RescheduleSection day={day} /> : null}
     </Page>
   )
 }
