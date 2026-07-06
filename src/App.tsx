@@ -2,6 +2,7 @@ import { HashRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { Layout } from '@/components/Layout'
 import { BodyPage } from '@/features/body/BodyPage'
 import { DashboardPage } from '@/features/dashboard/DashboardPage'
+import { DataPage } from '@/features/more/DataPage'
 import { MorePage } from '@/features/more/MorePage'
 import { SchedulePage } from '@/features/schedule/SchedulePage'
 import { TodayPage } from '@/features/today/TodayPage'
@@ -18,6 +19,7 @@ export default function App() {
           <Route path="workouts" element={<WorkoutsPage />} />
           <Route path="body" element={<BodyPage />} />
           <Route path="more" element={<MorePage />} />
+          <Route path="more/data" element={<DataPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
