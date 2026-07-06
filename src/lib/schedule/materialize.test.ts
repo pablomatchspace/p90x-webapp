@@ -19,7 +19,7 @@ function op<K extends ScheduleOp['kind']>(
     kind,
     ...(reverted ? { revertedAt: '2026-01-02T00:00:00' } : {}),
     ...fields,
-  } as ScheduleOp
+  } as unknown as ScheduleOp
 }
 
 function programDays(schedule: ReturnType<typeof materialize>): ProgramDay[] {
