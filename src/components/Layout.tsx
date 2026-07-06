@@ -1,5 +1,6 @@
 import { CalendarCheck2, CalendarDays, Dumbbell, LayoutDashboard, Menu, Scale } from 'lucide-react'
 import { NavLink, Outlet } from 'react-router-dom'
+import { SystemBanners } from '@/components/SystemBanners'
 
 const tabs = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
@@ -42,6 +43,7 @@ export function Layout() {
 
       <main className="min-w-0 flex-1 pb-24 md:pb-10 md:pl-56">
         <div className="mx-auto w-full max-w-5xl px-4 pt-4 md:px-8 md:pt-8">
+          <SystemBanners />
           <Outlet />
         </div>
       </main>
