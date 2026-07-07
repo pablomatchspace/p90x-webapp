@@ -5,6 +5,7 @@ import { addDays, compareISO, formatLong, isISODate, todayISO, type ISODate } fr
 import { getWorkout } from '@/lib/programData'
 import type { ProgramDay } from '@/lib/schedule/materialize'
 import { dayStatus, workoutState } from '@/lib/schedule/status'
+import { BodyQuickAdd } from '@/features/body/BodyQuickAdd'
 import { Chip } from '@/features/schedule/Chip'
 import { ProgramStatusBar } from '@/features/schedule/ProgramStatusBar'
 import { RescheduleSection } from '@/features/schedule/RescheduleSection'
@@ -208,6 +209,8 @@ export function TodayPage() {
           ))}
         </>
       )}
+
+      {isToday ? <BodyQuickAdd /> : null}
 
       {day !== undefined ? <RescheduleSection day={day} /> : null}
     </Page>
