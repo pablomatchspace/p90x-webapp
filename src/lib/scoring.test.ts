@@ -20,9 +20,7 @@ describe('US-040 golden master — Chest & Back week 1 (workbook)', () => {
   // PRD §US-040 fixture computed under the canonical B3 rule. One documented
   // deviation: decline-push-ups penalty is 0.5 here (adjusted comparison
   // 10 vs 6+6/2=9) where the sheet's week-1 formula (raw 10 vs 12) shows 0.
-  const week1: Array<
-    [string, [number, number | null], [number, number | null], number, number]
-  > = [
+  const week1: Array<[string, [number, number | null], [number, number | null], number, number]> = [
     ['standard-push-ups', [22, null], [15, null], 18.5, 3.5],
     ['wide-front-pull-ups', [12, null], [10, null], 11, 1],
     ['military-push-ups', [15, null], [10, null], 12.5, 2.5],
@@ -50,7 +48,11 @@ describe('US-040 golden master — Chest & Back week 1 (workbook)', () => {
 describe('scoreExercise', () => {
   it('keeps the weighted penalty in the same ÷rwDivisor scale as the score', () => {
     // 12×11=132 → 13.2 vs 10×11=110 → 11: penalty (13.2−11)/2
-    const result = scoreExercise(entry([12, 11], [10, 11]), ex('chest-back', 'heavy-pants'), SCORING)
+    const result = scoreExercise(
+      entry([12, 11], [10, 11]),
+      ex('chest-back', 'heavy-pants'),
+      SCORING,
+    )
     expect(result.score).toBeCloseTo(12.1, 10)
     expect(result.penalty).toBeCloseTo(1.1, 10)
     expect(result.drop).toBe(true)
@@ -71,11 +73,7 @@ describe('scoreExercise', () => {
   })
 
   it('counts a secondary-only round (all-assisted set) with the chair factor', () => {
-    const result = scoreExercise(
-      entry([null, 8]),
-      ex('chest-back', 'wide-front-pull-ups'),
-      SCORING,
-    )
+    const result = scoreExercise(entry([null, 8]), ex('chest-back', 'wide-front-pull-ups'), SCORING)
     expect(result.score).toBe(4)
   })
 
@@ -105,7 +103,11 @@ describe('scoreExercise', () => {
       drop: null,
     })
     expect(
-      scoreExercise(entry([null, null], [null, null]), ex('chest-back', 'standard-push-ups'), SCORING),
+      scoreExercise(
+        entry([null, null], [null, null]),
+        ex('chest-back', 'standard-push-ups'),
+        SCORING,
+      ),
     ).toEqual({ score: null, penalty: null, net: null, drop: null })
   })
 
@@ -126,9 +128,7 @@ describe('sessionTotals', () => {
     const def = getWorkout('ab-ripper-x')
     const session: Session = {
       programDayId: 'd001',
-      entries: Object.fromEntries(
-        (def.exercises ?? []).map((e) => [e.id, entry([25, null])]),
-      ),
+      entries: Object.fromEntries((def.exercises ?? []).map((e) => [e.id, entry([25, null])])),
     }
     const totals = sessionTotals(session, def, SCORING)
     expect(totals.entered).toBe(11)

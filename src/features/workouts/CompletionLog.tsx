@@ -11,7 +11,13 @@ import { CompletionButtons } from './CompletionButtons'
  * Cardio-style session list (US-044): one row per scheduled occurrence with
  * the YES / NO / NOT YET cycle and the free-text notes cell from the sheet.
  */
-export function CompletionLog({ def, occurrences }: { def: WorkoutDef; occurrences: ProgramDay[] }) {
+export function CompletionLog({
+  def,
+  occurrences,
+}: {
+  def: WorkoutDef
+  occurrences: ProgramDay[]
+}) {
   const sessions = useWorkoutSessions(def.key)
   const today = todayISO()
 

@@ -22,11 +22,20 @@ function initialIndex(occurrences: ProgramDay[], dayParam: string | null, today:
   return current
 }
 
-function ScoreLine({ name, result, showPenalty }: { name: string; result: ExerciseScore; showPenalty: boolean }) {
+function ScoreLine({
+  name,
+  result,
+  showPenalty,
+}: {
+  name: string
+  result: ExerciseScore
+  showPenalty: boolean
+}) {
   if (result.score === null) {
     return <span className="text-xs text-zinc-300 dark:text-zinc-600">—</span>
   }
-  const penalty = showPenalty && result.penalty !== null && result.penalty > 0 ? result.penalty : null
+  const penalty =
+    showPenalty && result.penalty !== null && result.penalty > 0 ? result.penalty : null
   const label = `${name} score: ${formatScore(result.score)}${penalty !== null ? `, penalty ${formatScore(penalty)}` : ''}`
   return (
     <span aria-label={label} className="text-xs tabular-nums">

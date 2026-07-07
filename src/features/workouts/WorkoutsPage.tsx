@@ -7,7 +7,10 @@ const GROUPS: Array<{ title: string; match: (w: WorkoutDef) => boolean }> = [
   { title: 'Resistance', match: (w) => w.style === 'strength' },
   { title: 'Ab Ripper', match: (w) => w.style === 'arx' },
   // X Stretch lives on rest days (logged from Today), so it has no log sheet here
-  { title: 'Cardio & flexibility', match: (w) => w.style === 'completion' && w.key !== 'x-stretch' },
+  {
+    title: 'Cardio & flexibility',
+    match: (w) => w.style === 'completion' && w.key !== 'x-stretch',
+  },
 ]
 
 export function WorkoutsPage() {

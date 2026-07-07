@@ -33,7 +33,12 @@ function Sparkline({ points }: { points: number[] }) {
     .map((p, i) => `${(i / (points.length - 1)) * 100},${26 - ((p - min) / range) * 22}`)
     .join(' ')
   return (
-    <svg viewBox="0 0 100 28" className="h-7 w-28 text-red-500" preserveAspectRatio="none" aria-hidden>
+    <svg
+      viewBox="0 0 100 28"
+      className="h-7 w-28 text-red-500"
+      preserveAspectRatio="none"
+      aria-hidden
+    >
       <polyline
         points={coords}
         fill="none"

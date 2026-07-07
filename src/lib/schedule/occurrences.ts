@@ -28,8 +28,9 @@ export function previousValue(
   field: 'main' | 'secondary',
 ): number | null {
   for (let i = beforeIndex - 1; i >= 0; i--) {
-    const value =
-      sessions.get(occurrences[i].programDayId)?.entries?.[exerciseId]?.rounds[round]?.[field]
+    const value = sessions.get(occurrences[i].programDayId)?.entries?.[exerciseId]?.rounds[round]?.[
+      field
+    ]
     if (value !== null && value !== undefined) return value
   }
   return null
