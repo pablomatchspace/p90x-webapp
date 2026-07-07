@@ -3,12 +3,14 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { emptyState } from '@/lib/schema'
 import {
   addScheduleOp,
+  deleteBodyEntry,
   revertScheduleOp,
   setCompletionStatus,
   setRoundValue,
   setSessionAnnotation,
   setSessionNotes,
   setWorkoutCompleted,
+  upsertBodyEntry,
 } from '@/state/actions'
 import { useStore } from '@/state/store'
 
@@ -79,6 +81,34 @@ describe('round entry actions', () => {
     const session = useStore.getState().data.workoutLogs['chest-back'].sessions[0]
     expect(session.annotation).toBe('2 with chestweight')
     expect(session.notes).toBe('felt strong')
+  })
+})
+
+describe('body log actions', () => {
+  it('creates entries lazily, updates them in place, and keeps dates sorted', () => {
+    upsertBodyEntry('2026-01-07', { weight: 81.9 })
+    upsertBodyEntry('2026-01-06', { weight: 82 })
+    upsertBodyEntry('2026-01-07', { bodyFat: 0.219 })
+    const log = useStore.getState().data.bodyLog
+    expect(log.map((e) => e.date)).toEqual(['2026-01-06', '2026-01-07'])
+    expect(log[1]).toMatchObject({ weight: 81.9, bodyFat: 0.219 })
+  })
+
+  it('removes the entry once every field is cleared', () => {
+    upsertBodyEntry('2026-01-06', { weight: 82, water: 0.55 })
+    upsertBodyEntry('2026-01-06', { weight: null })
+    expect(useStore.getState().data.bodyLog).toHaveLength(1)
+    upsertBodyEntry('2026-01-06', { water: null })
+    expect(useStore.getState().data.bodyLog).toHaveLength(0)
+  })
+
+  it('deletes by date and ignores unknown dates or malformed input', () => {
+    upsertBodyEntry('2026-01-06', { weight: 82 })
+    upsertBodyEntry('not-a-date', { weight: 1 })
+    deleteBodyEntry('2026-02-01')
+    expect(useStore.getState().data.bodyLog).toHaveLength(1)
+    deleteBodyEntry('2026-01-06')
+    expect(useStore.getState().data.bodyLog).toHaveLength(0)
   })
 })
 

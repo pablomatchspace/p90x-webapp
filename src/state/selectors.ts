@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { materialize, type Schedule } from '@/lib/schedule/materialize'
 import { previewOp, type OpPreview } from '@/lib/schedule/ops'
 import { indexSessions, type SessionIndex } from '@/lib/schedule/status'
-import type { AppState, ScheduleOp, ScoringSettings, Session } from '@/lib/schema'
+import type { AppState, ScheduleOp, ScoringSettings, Session, Settings } from '@/lib/schema'
 import { useStore } from '@/state/store'
 
 /** Materialized schedule, or null until a start date exists. Recomputes only
@@ -29,6 +29,15 @@ export function useWorkoutSessions(workoutKey: string): Map<string, Session> {
 
 export function useScoringSettings(): ScoringSettings {
   return useStore((s) => s.data.settings.scoring)
+}
+
+export function useSettings(): Settings {
+  return useStore((s) => s.data.settings)
+}
+
+/** Scale entries, sorted ascending by date (the upsert action keeps the order). */
+export function useBodyLog(): AppState['bodyLog'] {
+  return useStore((s) => s.data.bodyLog)
 }
 
 export function useSessionIndex(): SessionIndex {

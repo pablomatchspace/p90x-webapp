@@ -1,5 +1,6 @@
+import { compareISO, isISODate, type ISODate } from '@/lib/dates'
 import { getWorkout } from '@/lib/programData'
-import type { AppState, ScheduleOp, Session } from '@/lib/schema'
+import type { AppState, BodyEntry, ScheduleOp, Session } from '@/lib/schema'
 import { useStore } from '@/state/store'
 
 /**
@@ -94,6 +95,37 @@ export function setSessionNotes(workoutKey: string, programDayId: string, notes:
   useStore.getState().mutate((draft) => {
     const session = upsertSession(draft, workoutKey, programDayId)
     session.notes = notes
+  })
+}
+
+/**
+ * One scale entry per date (US-050). Created lazily, kept sorted, and removed
+ * again when every field is cleared so missing-day gaps stay honest.
+ */
+export function upsertBodyEntry(date: ISODate, patch: Partial<Omit<BodyEntry, 'date'>>): void {
+  if (!isISODate(date)) return
+  useStore.getState().mutate((draft) => {
+    let entry = draft.bodyLog.find((e) => e.date === date)
+    if (entry === undefined) {
+      entry = { date, weight: null, bodyFat: null, water: null, bone: null, zoneMinutes: null }
+      draft.bodyLog.push(entry)
+      draft.bodyLog.sort((a, b) => compareISO(a.date, b.date))
+    }
+    Object.assign(entry, patch)
+    const cleared = [entry.weight, entry.bodyFat, entry.water, entry.bone, entry.zoneMinutes]
+    if (cleared.every((v) => (v ?? null) === null)) {
+      draft.bodyLog.splice(
+        draft.bodyLog.findIndex((e) => e.date === date),
+        1,
+      )
+    }
+  })
+}
+
+export function deleteBodyEntry(date: ISODate): void {
+  useStore.getState().mutate((draft) => {
+    const i = draft.bodyLog.findIndex((e) => e.date === date)
+    if (i !== -1) draft.bodyLog.splice(i, 1)
   })
 }
 
