@@ -8,6 +8,7 @@ import { HistoryPage } from '@/features/schedule/HistoryPage'
 import { SchedulePage } from '@/features/schedule/SchedulePage'
 import { WeeklyEditorPage } from '@/features/schedule/WeeklyEditorPage'
 import { TodayPage } from '@/features/today/TodayPage'
+import { WorkoutDetailPage } from '@/features/workouts/WorkoutDetailPage'
 import { WorkoutsPage } from '@/features/workouts/WorkoutsPage'
 
 export default function App() {
@@ -22,6 +23,7 @@ export default function App() {
           <Route path="schedule/weekly" element={<WeeklyEditorPage />} />
           <Route path="schedule/history" element={<HistoryPage />} />
           <Route path="workouts" element={<WorkoutsPage />} />
+          <Route path="workouts/:key" element={<WorkoutDetailPage />} />
           <Route path="body" element={<BodyPage />} />
           <Route path="more" element={<MorePage />} />
           <Route path="more/data" element={<DataPage />} />
