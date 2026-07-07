@@ -84,6 +84,12 @@ function WorkoutCard({
             </button>
           )}
           <Link
+            to={`/workouts/${workoutKey}/focus/${day.programDayId}`}
+            className="rounded-lg bg-red-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-red-700"
+          >
+            Log in focus mode
+          </Link>
+          <Link
             to={`/workouts/${workoutKey}?day=${day.programDayId}`}
             className="rounded-lg border border-zinc-300 px-4 py-1.5 text-sm font-medium text-zinc-600 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
           >

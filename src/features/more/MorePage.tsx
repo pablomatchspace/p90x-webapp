@@ -1,4 +1,4 @@
-import { Calculator, Database, HelpCircle, NotebookPen, Settings } from 'lucide-react'
+import { Calculator, Database, HelpCircle, NotebookPen, Settings, Timer } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Card, Page } from '@/components/Page'
 
@@ -8,6 +8,13 @@ const items = [
     icon: Database,
     title: 'Data',
     desc: 'Import your Excel conversion, export backups, reset',
+    ready: true,
+  },
+  {
+    to: '/more/timer',
+    icon: Timer,
+    title: 'Rest timer',
+    desc: 'Interval beeper for strength rests',
     ready: true,
   },
   {
