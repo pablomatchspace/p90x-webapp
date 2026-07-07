@@ -42,7 +42,8 @@ export function NumberField({
       onChange(prev ?? (direction === 1 ? step : 0))
       return
     }
-    onChange(Math.max(0, value + direction * step))
+    // fractional steps (0.1 kg) accumulate float noise without the rounding
+    onChange(Math.max(0, Math.round((value + direction * step) * 1e6) / 1e6))
   }
 
   return (

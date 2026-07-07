@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Card, Page } from '@/components/Page'
+import { BodyQuickAdd } from '@/features/body/BodyQuickAdd'
 import { ProgramStatusBar } from '@/features/schedule/ProgramStatusBar'
 import { useStore } from '@/state/store'
 
@@ -24,6 +25,7 @@ export function DashboardPage() {
       ) : (
         <>
           <ProgramStatusBar />
+          <BodyQuickAdd />
           <Card>
             <p className="text-sm text-zinc-500 dark:text-zinc-400">
               KPI cards, trends and progression charts arrive with Epic E6.
