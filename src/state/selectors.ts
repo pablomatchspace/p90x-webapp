@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { materialize, type Schedule } from '@/lib/schedule/materialize'
 import { previewOp, type OpPreview } from '@/lib/schedule/ops'
 import { indexSessions, type SessionIndex } from '@/lib/schedule/status'
-import type { ScheduleOp } from '@/lib/schema'
+import type { AppState, ScheduleOp, ScoringSettings, Session } from '@/lib/schema'
 import { useStore } from '@/state/store'
 
 /** Materialized schedule, or null until a start date exists. Recomputes only
@@ -15,6 +15,20 @@ export function useSchedule(): Schedule | null {
     () => (startDate === null ? null : materialize(program, startDate, ops)),
     [program, startDate, ops],
   )
+}
+
+export function useWorkoutLogs(): AppState['workoutLogs'] {
+  return useStore((s) => s.data.workoutLogs)
+}
+
+/** One workout's sessions keyed by programDayId (the log-screen shape). */
+export function useWorkoutSessions(workoutKey: string): Map<string, Session> {
+  const log = useStore((s) => s.data.workoutLogs[workoutKey])
+  return useMemo(() => new Map((log?.sessions ?? []).map((s) => [s.programDayId, s])), [log])
+}
+
+export function useScoringSettings(): ScoringSettings {
+  return useStore((s) => s.data.settings.scoring)
 }
 
 export function useSessionIndex(): SessionIndex {

@@ -5,6 +5,9 @@ import {
   addScheduleOp,
   revertScheduleOp,
   setCompletionStatus,
+  setRoundValue,
+  setSessionAnnotation,
+  setSessionNotes,
   setWorkoutCompleted,
 } from '@/state/actions'
 import { useStore } from '@/state/store'
@@ -38,6 +41,44 @@ describe('quick-log actions', () => {
     expect(useStore.getState().data.workoutLogs['chest-back'].sessions[0].completed).toBe(true)
     setWorkoutCompleted('chest-back', 'd001', undefined)
     expect(useStore.getState().data.workoutLogs['chest-back'].sessions[0].completed).toBeUndefined()
+  })
+})
+
+describe('round entry actions', () => {
+  const entry = () =>
+    useStore.getState().data.workoutLogs['chest-back'].sessions[0].entries?.['standard-push-ups']
+
+  it('creates the entry with the catalog round count and sets the value', () => {
+    setRoundValue('chest-back', 'd001', 'standard-push-ups', 1, 'main', 15)
+    expect(entry()).toEqual({
+      rounds: [
+        { main: null, secondary: null },
+        { main: 15, secondary: null },
+      ],
+    })
+  })
+
+  it('removes the entry again once every value is cleared', () => {
+    setRoundValue('chest-back', 'd001', 'standard-push-ups', 0, 'main', 22)
+    setRoundValue('chest-back', 'd001', 'standard-push-ups', 0, 'secondary', 4)
+    setRoundValue('chest-back', 'd001', 'standard-push-ups', 0, 'main', null)
+    expect(entry()?.rounds[0]).toEqual({ main: null, secondary: 4 })
+    setRoundValue('chest-back', 'd001', 'standard-push-ups', 0, 'secondary', null)
+    expect(entry()).toBeUndefined()
+  })
+
+  it('ignores out-of-range rounds and unknown exercises without leaving residue', () => {
+    setRoundValue('chest-back', 'd001', 'standard-push-ups', 5, 'main', 10)
+    setRoundValue('chest-back', 'd001', 'no-such-exercise', 0, 'main', 10)
+    expect(useStore.getState().data.workoutLogs['chest-back']).toBeUndefined()
+  })
+
+  it('stores annotation and notes on the session', () => {
+    setSessionAnnotation('chest-back', 'd008', '2 with chestweight')
+    setSessionNotes('chest-back', 'd008', 'felt strong')
+    const session = useStore.getState().data.workoutLogs['chest-back'].sessions[0]
+    expect(session.annotation).toBe('2 with chestweight')
+    expect(session.notes).toBe('felt strong')
   })
 })
 

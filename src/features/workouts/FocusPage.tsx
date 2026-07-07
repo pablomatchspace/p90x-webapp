@@ -1,0 +1,249 @@
+import { useState } from 'react'
+import { Link, Navigate, useParams } from 'react-router-dom'
+import { Card, Page } from '@/components/Page'
+import { formatLong } from '@/lib/dates'
+import { getWorkout, hasWorkout, type WorkoutDef } from '@/lib/programData'
+import { workoutOccurrences } from '@/lib/schedule/occurrences'
+import { formatScore, scoreExercise, sessionTotals } from '@/lib/scoring'
+import type { Session } from '@/lib/schema'
+import { setWorkoutCompleted } from '@/state/actions'
+import { useSchedule, useScoringSettings, useWorkoutSessions } from '@/state/selectors'
+import { RoundInputs } from './entryUi'
+import { TimerCard } from './TimerCard'
+
+/** Resume where the athlete left off: the first exercise with no data yet. */
+function resumeIndex(def: WorkoutDef | null, session: Session | undefined): number {
+  const exercises = def?.exercises ?? []
+  const first = exercises.findIndex((e) => {
+    const entry = session?.entries?.[e.id]
+    return (
+      entry === undefined ||
+      entry.rounds.every((r) => (r.main ?? null) === null && (r.secondary ?? null) === null)
+    )
+  })
+  return first === -1 ? Math.max(0, exercises.length - 1) : first
+}
+
+function Sparkline({ points }: { points: number[] }) {
+  if (points.length < 2) return null
+  const min = Math.min(...points)
+  const max = Math.max(...points)
+  const range = max - min || 1
+  const coords = points
+    .map((p, i) => `${(i / (points.length - 1)) * 100},${26 - ((p - min) / range) * 22}`)
+    .join(' ')
+  return (
+    <svg
+      viewBox="0 0 100 28"
+      className="h-7 w-28 text-red-500"
+      preserveAspectRatio="none"
+      aria-hidden
+    >
+      <polyline
+        points={coords}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        vectorEffect="non-scaling-stroke"
+      />
+    </svg>
+  )
+}
+
+/**
+ * One-exercise-at-a-time entry that follows the video's rhythm (US-043):
+ * ordered cards with prev/next, progress, history sparkline and an embedded
+ * rest timer; finishing marks the session complete and shows totals + PRs.
+ */
+export function FocusPage() {
+  const params = useParams<{ key: string; programDayId: string }>()
+  const key = params.key ?? ''
+  const programDayId = params.programDayId ?? ''
+  const valid = hasWorkout(key)
+  const def = valid ? getWorkout(key) : null
+
+  const schedule = useSchedule()
+  const sessions = useWorkoutSessions(key)
+  const scoring = useScoringSettings()
+  const session = sessions.get(programDayId)
+  const [idx, setIdx] = useState(() => resumeIndex(def, session))
+  const [finished, setFinished] = useState(false)
+
+  if (!valid) return <Navigate to="/workouts" replace />
+  if (schedule === null) return <Navigate to={`/workouts/${key}`} replace />
+  const occurrences = workoutOccurrences(schedule, key)
+  const occIndex = occurrences.findIndex((d) => d.programDayId === programDayId)
+  if (occIndex < 0) return <Navigate to={`/workouts/${key}`} replace />
+
+  const exercises = def?.exercises ?? []
+  if (exercises.length === 0) return <Navigate to={`/workouts/${key}`} replace />
+  const day = occurrences[occIndex]
+  const exercise = exercises[Math.min(idx, exercises.length - 1)]
+  const result = scoreExercise(session?.entries?.[exercise.id], exercise, scoring)
+  const isArx = def?.style === 'arx'
+
+  const historyNets = (exerciseId: string, through: number): number[] => {
+    const points: number[] = []
+    for (let i = 0; i <= through; i++) {
+      const net = scoreExercise(
+        sessions.get(occurrences[i].programDayId)?.entries?.[exerciseId],
+        exercises.find((e) => e.id === exerciseId) ?? exercise,
+        scoring,
+      ).net
+      if (net !== null) points.push(net)
+    }
+    return points
+  }
+
+  const finish = () => {
+    setWorkoutCompleted(key, programDayId, true)
+    setFinished(true)
+  }
+
+  const ghostBtn =
+    'rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-50 disabled:opacity-30 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800'
+
+  if (finished) {
+    const totals = sessionTotals(sessions.get(programDayId), def as WorkoutDef, scoring)
+    const anyHistory = exercises.some((e) => historyNets(e.id, occIndex - 1).length > 0)
+    const prs = exercises.filter((e) => {
+      const current = scoreExercise(sessions.get(programDayId)?.entries?.[e.id], e, scoring).net
+      if (current === null) return false
+      const previous = historyNets(e.id, occIndex - 1)
+      return previous.length > 0 && current > Math.max(...previous)
+    })
+    return (
+      <Page title={def?.name ?? ''} subtitle={`Week ${day.week} · ${formatLong(day.date)}`}>
+        <Card>
+          <h2 className="text-lg font-semibold">Workout complete 🎉</h2>
+          <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
+            {isArx ? (
+              <>
+                Total reps: <strong className="tabular-nums">{formatScore(totals.score)}</strong>
+              </>
+            ) : (
+              <>
+                Session score <strong className="tabular-nums">{formatScore(totals.score)}</strong>
+                {totals.penalty > 0 ? <> · penalties −{formatScore(totals.penalty)}</> : null} · net{' '}
+                <strong className="tabular-nums">{formatScore(totals.net)}</strong>
+              </>
+            )}{' '}
+            · {totals.entered} of {exercises.length} exercises logged
+          </p>
+          <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
+            {!anyHistory
+              ? 'First logged session — every rep sets the baseline.'
+              : prs.length === 0
+                ? 'No PRs this time — the baseline holds.'
+                : `${prs.length} PR${prs.length === 1 ? '' : 's'} vs last time: ${prs
+                    .slice(0, 4)
+                    .map((e) => e.name)
+                    .join(', ')}${prs.length > 4 ? '…' : ''}`}
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Link
+              to="/today"
+              className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+            >
+              Back to Today
+            </Link>
+            <Link to={`/workouts/${key}?day=${programDayId}`} className={ghostBtn}>
+              Open grid
+            </Link>
+          </div>
+        </Card>
+      </Page>
+    )
+  }
+
+  const sparkPoints = historyNets(exercise.id, occIndex)
+
+  return (
+    <Page
+      title={def?.name ?? ''}
+      subtitle={`Focus mode · Week ${day.week} · ${formatLong(day.date)}`}
+      actions={
+        <Link
+          to={`/workouts/${key}?day=${programDayId}`}
+          className="flex h-9 items-center rounded-lg border border-zinc-300 px-3 text-sm font-medium text-zinc-600 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+        >
+          Exit
+        </Link>
+      }
+    >
+      <Card>
+        <div className="flex items-center justify-between gap-2 text-xs text-zinc-500 dark:text-zinc-400">
+          <span>
+            Exercise {idx + 1} of {exercises.length}
+          </span>
+          {sparkPoints.length >= 2 ? (
+            <span className="flex items-center gap-2">
+              History <Sparkline points={sparkPoints} />
+            </span>
+          ) : null}
+        </div>
+        <div
+          className="mt-2 h-1.5 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800"
+          aria-hidden
+        >
+          <div
+            className="h-full rounded-full bg-red-600 transition-all"
+            style={{ width: `${((idx + 1) / exercises.length) * 100}%` }}
+          />
+        </div>
+
+        <h2 className="mt-4 text-xl font-semibold">{exercise.name}</h2>
+        <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500" aria-live="polite">
+          {result.score === null
+            ? 'Nothing entered yet — ghosts show last time.'
+            : `Score ${formatScore(result.score)}${
+                !isArx && result.penalty !== null && result.penalty > 0
+                  ? ` · penalty ${formatScore(result.penalty)}`
+                  : ''
+              }`}
+        </p>
+
+        <div className="mt-4">
+          <RoundInputs
+            workoutKey={key}
+            exercise={exercise}
+            occurrences={occurrences}
+            occIndex={occIndex}
+            sessions={sessions}
+            drop={result.drop}
+          />
+        </div>
+
+        <div className="mt-5 flex flex-wrap gap-2">
+          <button
+            type="button"
+            className={ghostBtn}
+            disabled={idx === 0}
+            onClick={() => setIdx(idx - 1)}
+          >
+            Previous
+          </button>
+          {idx < exercises.length - 1 ? (
+            <button
+              type="button"
+              className="rounded-lg bg-red-600 px-5 py-2 text-sm font-medium text-white hover:bg-red-700"
+              onClick={() => setIdx(idx + 1)}
+            >
+              Next
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="rounded-lg bg-emerald-600 px-5 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+              onClick={finish}
+            >
+              Finish workout
+            </button>
+          )}
+        </div>
+      </Card>
+
+      <TimerCard />
+    </Page>
+  )
+}

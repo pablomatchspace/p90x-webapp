@@ -8,53 +8,15 @@ import { dayStatus, workoutState } from '@/lib/schedule/status'
 import { Chip } from '@/features/schedule/Chip'
 import { ProgramStatusBar } from '@/features/schedule/ProgramStatusBar'
 import { RescheduleSection } from '@/features/schedule/RescheduleSection'
+import { CompletionButtons } from '@/features/workouts/CompletionButtons'
 import {
   DAY_STATUS_LABELS,
   DAY_STATUS_TONES,
   WORKOUT_STATE_LABELS,
   WORKOUT_STATE_TONES,
 } from '@/features/schedule/scheduleUi'
-import { setCompletionStatus, setWorkoutCompleted } from '@/state/actions'
+import { setWorkoutCompleted } from '@/state/actions'
 import { useSchedule, useSessionIndex } from '@/state/selectors'
-import type { Session } from '@/lib/schema'
-
-function CompletionButtons({
-  workoutKey,
-  programDayId,
-  session,
-}: {
-  workoutKey: string
-  programDayId: string
-  session: Session | undefined
-}) {
-  const options = [
-    { value: 'yes', label: 'Yes', active: 'border-emerald-600 bg-emerald-600 text-white' },
-    { value: 'not-yet', label: 'Not yet', active: 'border-zinc-500 bg-zinc-600 text-white' },
-    { value: 'no', label: 'No', active: 'border-rose-600 bg-rose-600 text-white' },
-  ] as const
-  return (
-    <div className="flex gap-2" role="group" aria-label="Completed?">
-      {options.map((option) => {
-        const selected = session?.status === option.value
-        return (
-          <button
-            key={option.value}
-            type="button"
-            aria-pressed={selected}
-            onClick={() => setCompletionStatus(workoutKey, programDayId, option.value)}
-            className={`rounded-lg border px-4 py-1.5 text-sm font-medium ${
-              selected
-                ? option.active
-                : 'border-zinc-300 text-zinc-600 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800'
-            }`}
-          >
-            {option.label}
-          </button>
-        )
-      })}
-    </div>
-  )
-}
 
 function WorkoutCard({
   day,
@@ -121,9 +83,18 @@ function WorkoutCard({
               Mark done
             </button>
           )}
-          <p className="w-full text-xs text-zinc-400 dark:text-zinc-500">
-            Set-by-set entry arrives with Epic E4.
-          </p>
+          <Link
+            to={`/workouts/${workoutKey}/focus/${day.programDayId}`}
+            className="rounded-lg bg-red-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-red-700"
+          >
+            Log in focus mode
+          </Link>
+          <Link
+            to={`/workouts/${workoutKey}?day=${day.programDayId}`}
+            className="rounded-lg border border-zinc-300 px-4 py-1.5 text-sm font-medium text-zinc-600 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+          >
+            Open grid
+          </Link>
         </div>
       )}
     </Card>
