@@ -43,7 +43,7 @@ const items = [
     icon: Calculator,
     title: 'Body-fat calculators',
     desc: 'Navy, 3-site, 7-site',
-    ready: false,
+    ready: true,
   },
   {
     to: '/more/help',
