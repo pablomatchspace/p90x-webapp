@@ -1,6 +1,7 @@
 import { HashRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { Layout } from '@/components/Layout'
 import { BodyPage } from '@/features/body/BodyPage'
+import { BodyTrendsPage } from '@/features/dashboard/BodyTrendsPage'
 import { DashboardPage } from '@/features/dashboard/DashboardPage'
 import { DataPage } from '@/features/more/DataPage'
 import { MorePage } from '@/features/more/MorePage'
@@ -28,6 +29,7 @@ export default function App() {
           <Route path="workouts/:key" element={<WorkoutDetailPage />} />
           <Route path="workouts/:key/focus/:programDayId" element={<FocusPage />} />
           <Route path="body" element={<BodyPage />} />
+          <Route path="trends" element={<BodyTrendsPage />} />
           <Route path="more" element={<MorePage />} />
           <Route path="more/data" element={<DataPage />} />
           <Route path="more/timer" element={<TimerPage />} />
