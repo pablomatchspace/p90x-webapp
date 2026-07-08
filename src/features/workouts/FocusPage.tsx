@@ -8,6 +8,7 @@ import { formatScore, scoreExercise, sessionTotals } from '@/lib/scoring'
 import type { Session } from '@/lib/schema'
 import { setWorkoutCompleted } from '@/state/actions'
 import { useSchedule, useScoringSettings, useWorkoutSessions } from '@/state/selectors'
+import { QuoteCard } from '@/features/dashboard/QuoteCard'
 import { RoundInputs } from './entryUi'
 import { TimerCard } from './TimerCard'
 
@@ -152,6 +153,7 @@ export function FocusPage() {
             </Link>
           </div>
         </Card>
+        <QuoteCard seed={day.day} label="Fuel for next time" />
       </Page>
     )
   }

@@ -1,9 +1,12 @@
 import { HashRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { Layout } from '@/components/Layout'
 import { BodyPage } from '@/features/body/BodyPage'
+import { BodyTrendsPage } from '@/features/dashboard/BodyTrendsPage'
 import { DashboardPage } from '@/features/dashboard/DashboardPage'
+import { StrengthProgressPage } from '@/features/dashboard/StrengthProgressPage'
 import { DataPage } from '@/features/more/DataPage'
 import { MorePage } from '@/features/more/MorePage'
+import { QuotesPage } from '@/features/more/QuotesPage'
 import { HistoryPage } from '@/features/schedule/HistoryPage'
 import { SchedulePage } from '@/features/schedule/SchedulePage'
 import { WeeklyEditorPage } from '@/features/schedule/WeeklyEditorPage'
@@ -28,9 +31,12 @@ export default function App() {
           <Route path="workouts/:key" element={<WorkoutDetailPage />} />
           <Route path="workouts/:key/focus/:programDayId" element={<FocusPage />} />
           <Route path="body" element={<BodyPage />} />
+          <Route path="trends" element={<BodyTrendsPage />} />
+          <Route path="progress" element={<StrengthProgressPage />} />
           <Route path="more" element={<MorePage />} />
           <Route path="more/data" element={<DataPage />} />
           <Route path="more/timer" element={<TimerPage />} />
+          <Route path="more/quotes" element={<QuotesPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>

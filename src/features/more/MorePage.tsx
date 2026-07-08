@@ -1,4 +1,4 @@
-import { Calculator, Database, HelpCircle, NotebookPen, Settings, Timer } from 'lucide-react'
+import { Calculator, Database, HelpCircle, NotebookPen, Quote, Settings, Timer } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Card, Page } from '@/components/Page'
 
@@ -15,6 +15,13 @@ const items = [
     icon: Timer,
     title: 'Rest timer',
     desc: 'Interval beeper for strength rests',
+    ready: true,
+  },
+  {
+    to: '/more/quotes',
+    icon: Quote,
+    title: 'Motivation',
+    desc: 'Daily quotes — curate your own pack',
     ready: true,
   },
   {
