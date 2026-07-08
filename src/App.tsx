@@ -7,6 +7,7 @@ import { StrengthProgressPage } from '@/features/dashboard/StrengthProgressPage'
 import { DataPage } from '@/features/more/DataPage'
 import { MorePage } from '@/features/more/MorePage'
 import { QuotesPage } from '@/features/more/QuotesPage'
+import { SettingsPage } from '@/features/more/SettingsPage'
 import { HistoryPage } from '@/features/schedule/HistoryPage'
 import { SchedulePage } from '@/features/schedule/SchedulePage'
 import { WeeklyEditorPage } from '@/features/schedule/WeeklyEditorPage'
@@ -37,6 +38,7 @@ export default function App() {
           <Route path="more/data" element={<DataPage />} />
           <Route path="more/timer" element={<TimerPage />} />
           <Route path="more/quotes" element={<QuotesPage />} />
+          <Route path="more/settings" element={<SettingsPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>

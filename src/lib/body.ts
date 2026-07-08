@@ -110,9 +110,14 @@ export function lossThreshold(
 }
 
 export const KG_PER_LB = 0.45359237
+export const M_PER_INCH = 0.0254
 
 export function weightUnit(units: Settings['units']): 'kg' | 'lb' {
   return units === 'imperial' ? 'lb' : 'kg'
+}
+
+export function heightUnit(units: Settings['units']): 'm' | 'in' {
+  return units === 'imperial' ? 'in' : 'm'
 }
 
 /** Canonical kg → display units. Imperial rounds to 1 dp for readable fields. */
@@ -123,6 +128,15 @@ export function kgToUnit(kg: number, units: Settings['units']): number {
 /** Display units → canonical kg, stored raw (only user edits pass through). */
 export function unitToKg(value: number, units: Settings['units']): number {
   return units === 'imperial' ? value * KG_PER_LB : value
+}
+
+/** Canonical metres → display units (inches, 1 dp). Height stays metric in storage. */
+export function mToUnit(m: number, units: Settings['units']): number {
+  return units === 'imperial' ? Math.round((m / M_PER_INCH) * 10) / 10 : m
+}
+
+export function unitToM(value: number, units: Settings['units']): number {
+  return units === 'imperial' ? value * M_PER_INCH : value
 }
 
 /** Stored fraction (0–1) → display percent, trimmed of float noise (0.212 → 21.2). */

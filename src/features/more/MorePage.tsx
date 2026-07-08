@@ -29,7 +29,7 @@ const items = [
     icon: Settings,
     title: 'Settings',
     desc: 'Stats, targets, units, scoring rules',
-    ready: false,
+    ready: true,
   },
   {
     to: '/more/notes',

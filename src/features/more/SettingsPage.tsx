@@ -1,0 +1,427 @@
+import { type ReactNode, useState } from 'react'
+import { AlertTriangle } from 'lucide-react'
+import { Card, Page } from '@/components/Page'
+import { NumberField } from '@/features/workouts/NumberField'
+import {
+  formatFixed,
+  fractionToPercent,
+  heightUnit,
+  kgToUnit,
+  mToUnit,
+  percentToFraction,
+  unitToKg,
+  unitToM,
+  weightUnit,
+} from '@/lib/body'
+import { diffDays, formatLong } from '@/lib/dates'
+import { setupDerived, settingsWarnings } from '@/lib/setup'
+import {
+  setStartDate,
+  updateLimits,
+  updateScoring,
+  updateSettings,
+  updateTargets,
+} from '@/state/actions'
+import { useSettings } from '@/state/selectors'
+import { useStore } from '@/state/store'
+
+/** A labelled settings row: description on the left, control on the right. */
+function Row({ label, hint, children }: { label: string; hint?: ReactNode; children: ReactNode }) {
+  return (
+    <div className="flex items-center justify-between gap-3 py-1.5">
+      <div className="min-w-0">
+        <div className="text-sm font-medium">{label}</div>
+        {hint ? (
+          <div className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">{hint}</div>
+        ) : null}
+      </div>
+      <div className="shrink-0">{children}</div>
+    </div>
+  )
+}
+
+/** A compact segmented toggle for enum settings (units, gender, penalty on/off). */
+function Segmented<T extends string>({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string
+  value: T
+  options: { value: T; label: string }[]
+  onChange: (value: T) => void
+}) {
+  return (
+    <div
+      role="group"
+      aria-label={label}
+      className="inline-flex rounded-lg border border-zinc-300 p-0.5 dark:border-zinc-700"
+    >
+      {options.map((option) => (
+        <button
+          key={option.value}
+          type="button"
+          aria-pressed={value === option.value}
+          onClick={() => onChange(option.value)}
+          className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+            value === option.value
+              ? 'bg-red-600 text-white'
+              : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800'
+          }`}
+        >
+          {option.label}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+/** A read-only derived stat tile (LBM, BMI, target weight…). */
+function Derived({ label, value, unit }: { label: string; value: string; unit?: string }) {
+  return (
+    <div>
+      <dt className="text-xs text-zinc-500 dark:text-zinc-400">{label}</dt>
+      <dd className="font-semibold tabular-nums">
+        {value}
+        {unit && value !== '—' && value !== 'CHECK VALUES!' ? (
+          <span className="ml-0.5 text-xs font-normal text-zinc-500 dark:text-zinc-400">
+            {unit}
+          </span>
+        ) : null}
+      </dd>
+    </div>
+  )
+}
+
+export function SettingsPage() {
+  const settings = useSettings()
+  const hasData = useStore(
+    (s) =>
+      s.data.bodyLog.length > 0 ||
+      s.data.scheduleOps.length > 0 ||
+      Object.values(s.data.workoutLogs).some((log) => log.sessions.length > 0),
+  )
+  // null = no dialog; { value } holds the candidate start date (value null = clear)
+  const [pendingStart, setPendingStart] = useState<{ value: string | null } | null>(null)
+
+  const units = settings.units
+  const wUnit = weightUnit(units)
+  const derived = setupDerived(settings)
+  const warnings = settingsWarnings(settings)
+
+  const showWeight = (kg: number | null) =>
+    kg === null ? '—' : formatFixed(kgToUnit(kg, units), 1)
+
+  function onDateInput(raw: string) {
+    const next = raw === '' ? null : raw
+    if (next === settings.startDate) return
+    if (settings.startDate !== null && hasData) {
+      setPendingStart({ value: next })
+    } else {
+      setStartDate(next)
+    }
+  }
+
+  function applyPending() {
+    if (pendingStart) setStartDate(pendingStart.value)
+    setPendingStart(null)
+  }
+
+  const shiftDays =
+    pendingStart?.value && settings.startDate ? diffDays(settings.startDate, pendingStart.value) : 0
+
+  return (
+    <Page
+      title="Settings"
+      subtitle="Your stats, targets, units and scoring rules — all stored on this device"
+    >
+      {/* Program & start date */}
+      <Card>
+        <h2 className="text-base font-semibold">Program</h2>
+        <div className="mt-2 divide-y divide-zinc-100 dark:divide-zinc-800">
+          <Row label="Variant" hint="Classic or Lean — switch below in the variant toggle">
+            <span className="text-sm font-semibold capitalize">{settings.program}</span>
+          </Row>
+          <Row
+            label="Start date"
+            hint={
+              settings.startDate
+                ? `Day 1 is ${formatLong(settings.startDate)}`
+                : 'Set the date of your first workout to build the schedule'
+            }
+          >
+            <input
+              type="date"
+              aria-label="Start date"
+              value={settings.startDate ?? ''}
+              onChange={(e) => onDateInput(e.target.value)}
+              className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-950"
+            />
+          </Row>
+        </div>
+      </Card>
+
+      {/* Units & gender */}
+      <Card>
+        <h2 className="text-base font-semibold">Units</h2>
+        <div className="mt-2 divide-y divide-zinc-100 dark:divide-zinc-800">
+          <Row
+            label="Measurement units"
+            hint="Weights and heights re-display instantly; stored values never change"
+          >
+            <Segmented
+              label="Units"
+              value={units}
+              options={[
+                { value: 'metric', label: 'Metric' },
+                { value: 'imperial', label: 'Imperial' },
+              ]}
+              onChange={(value) => updateSettings({ units: value })}
+            />
+          </Row>
+          <Row label="Gender" hint="Used by the body-fat calculators">
+            <Segmented
+              label="Gender"
+              value={settings.gender}
+              options={[
+                { value: 'male', label: 'Male' },
+                { value: 'female', label: 'Female' },
+              ]}
+              onChange={(value) => updateSettings({ gender: value })}
+            />
+          </Row>
+        </div>
+      </Card>
+
+      {/* Start stats + derived */}
+      <Card>
+        <h2 className="text-base font-semibold">Your stats</h2>
+        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+          Your day-1 baseline. Everything below the line is derived and updates live.
+        </p>
+        <div className="mt-2 divide-y divide-zinc-100 dark:divide-zinc-800">
+          <Row label="Age">
+            <NumberField
+              label="Age"
+              value={settings.age ?? null}
+              step={1}
+              onChange={(value) => updateSettings({ age: value })}
+            />
+          </Row>
+          <Row label={`Height (${heightUnit(units)})`}>
+            <NumberField
+              label={`Height (${heightUnit(units)})`}
+              value={settings.height == null ? null : mToUnit(settings.height, units)}
+              step={units === 'imperial' ? 0.5 : 0.01}
+              onChange={(value) =>
+                updateSettings({ height: value === null ? null : unitToM(value, units) })
+              }
+            />
+          </Row>
+          <Row label={`Start weight (${wUnit})`}>
+            <NumberField
+              label={`Start weight (${wUnit})`}
+              value={settings.startWeight == null ? null : kgToUnit(settings.startWeight, units)}
+              step={units === 'imperial' ? 1 : 0.5}
+              onChange={(value) =>
+                updateSettings({ startWeight: value === null ? null : unitToKg(value, units) })
+              }
+            />
+          </Row>
+          <Row label="Start body-fat (%)">
+            <NumberField
+              label="Start body-fat (%)"
+              value={fractionToPercent(settings.startBodyFat ?? null)}
+              step={0.5}
+              onChange={(value) => updateSettings({ startBodyFat: percentToFraction(value) })}
+            />
+          </Row>
+        </div>
+        <dl className="mt-3 grid grid-cols-3 gap-3 border-t border-zinc-100 pt-3 dark:border-zinc-800">
+          <Derived label="Lean mass" value={showWeight(derived.startLean)} unit={wUnit} />
+          <Derived label="Fat mass" value={showWeight(derived.startFat)} unit={wUnit} />
+          <Derived label="BMI" value={formatFixed(derived.startBmi, 1)} />
+        </dl>
+      </Card>
+
+      {/* Targets & limits + derived */}
+      <Card>
+        <h2 className="text-base font-semibold">Targets &amp; limits</h2>
+        <div className="mt-2 divide-y divide-zinc-100 dark:divide-zinc-800">
+          <Row
+            label={`Lean-mass increase (${wUnit})`}
+            hint="Muscle you aim to add over the 90 days"
+          >
+            <NumberField
+              label={`Lean-mass increase (${wUnit})`}
+              value={
+                settings.targets.leanMassIncrease == null
+                  ? null
+                  : kgToUnit(settings.targets.leanMassIncrease, units)
+              }
+              step={units === 'imperial' ? 1 : 0.5}
+              onChange={(value) =>
+                updateTargets({
+                  leanMassIncrease: value === null ? null : unitToKg(value, units),
+                })
+              }
+            />
+          </Row>
+          <Row label="Target body-fat (%)">
+            <NumberField
+              label="Target body-fat (%)"
+              value={fractionToPercent(settings.targets.bodyFat ?? null)}
+              step={0.5}
+              onChange={(value) => updateTargets({ bodyFat: percentToFraction(value) })}
+            />
+          </Row>
+          <Row label={`Upper weight limit (${wUnit})`}>
+            <NumberField
+              label={`Upper weight limit (${wUnit})`}
+              value={
+                settings.limits.weight == null ? null : kgToUnit(settings.limits.weight, units)
+              }
+              step={units === 'imperial' ? 1 : 0.5}
+              onChange={(value) =>
+                updateLimits({ weight: value === null ? null : unitToKg(value, units) })
+              }
+            />
+          </Row>
+          <Row label="Upper body-fat limit (%)">
+            <NumberField
+              label="Upper body-fat limit (%)"
+              value={fractionToPercent(settings.limits.bodyFat ?? null)}
+              step={0.5}
+              onChange={(value) => updateLimits({ bodyFat: percentToFraction(value) })}
+            />
+          </Row>
+          <Row label="Upper BMI limit">
+            <NumberField
+              label="Upper BMI limit"
+              value={settings.limits.bmi ?? null}
+              step={0.5}
+              onChange={(value) => updateLimits({ bmi: value })}
+            />
+          </Row>
+        </div>
+        <dl className="mt-3 grid grid-cols-2 gap-3 border-t border-zinc-100 pt-3 dark:border-zinc-800">
+          <Derived
+            label="Target weight"
+            value={
+              derived.targetWeight === null ? 'CHECK VALUES!' : showWeight(derived.targetWeight)
+            }
+            unit={wUnit}
+          />
+          <Derived label="Target BMI" value={formatFixed(derived.targetBmi, 1)} />
+        </dl>
+        {warnings.length > 0 && (
+          <ul
+            role="alert"
+            className="mt-3 space-y-1 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-200"
+          >
+            {warnings.map((warning) => (
+              <li key={warning} className="flex items-start gap-2">
+                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+                {warning}
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
+
+      {/* Scoring engine */}
+      <Card>
+        <h2 className="text-base font-semibold">Scoring</h2>
+        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+          The workbook&rsquo;s SETUP scoring cells. Divisors must stay above zero.
+        </p>
+        <div className="mt-2 divide-y divide-zinc-100 dark:divide-zinc-800">
+          <Row label="Round-drop penalty" hint="Penalise a drop from round 1 to round 2">
+            <Segmented
+              label="Penalty"
+              value={settings.scoring.penaltyOn ? 'on' : 'off'}
+              options={[
+                { value: 'on', label: 'On' },
+                { value: 'off', label: 'Off' },
+              ]}
+              onChange={(value) => updateScoring({ penaltyOn: value === 'on' })}
+            />
+          </Row>
+          <Row label="Penalty divisor" hint="Divide the round 1→2 drop by this">
+            <NumberField
+              label="Penalty divisor"
+              value={settings.scoring.penaltyDivisor}
+              step={0.5}
+              onChange={(value) => value !== null && updateScoring({ penaltyDivisor: value })}
+            />
+          </Row>
+          <Row label="Chair-assist factor" hint="Knee / chair reps count as 1 ÷ this">
+            <NumberField
+              label="Chair-assist factor"
+              value={settings.scoring.chairFactor}
+              step={0.5}
+              onChange={(value) => value !== null && updateScoring({ chairFactor: value })}
+            />
+          </Row>
+          <Row label="Reps×weight divisor" hint="Cosmetic divisor for R×W chart values">
+            <NumberField
+              label="Reps×weight divisor"
+              value={settings.scoring.rwDivisor}
+              step={1}
+              onChange={(value) => value !== null && updateScoring({ rwDivisor: value })}
+            />
+          </Row>
+        </div>
+      </Card>
+
+      {/* Start-date re-anchor confirm */}
+      {pendingStart && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Confirm start date change"
+        >
+          <Card className="max-w-md">
+            <h2 className="text-base font-semibold">Move your start date?</h2>
+            <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
+              {pendingStart.value === null ? (
+                <>Clearing the start date removes the whole schedule until you set a new one.</>
+              ) : (
+                <>
+                  Day 1 moves to{' '}
+                  <span className="font-medium">{formatLong(pendingStart.value)}</span>, which
+                  re-anchors the entire program — every scheduled workout shifts{' '}
+                  <span className="font-medium">
+                    {Math.abs(shiftDays)} day{Math.abs(shiftDays) === 1 ? '' : 's'}{' '}
+                    {shiftDays >= 0 ? 'later' : 'earlier'}
+                  </span>
+                  .
+                </>
+              )}{' '}
+              Your logged sessions stay attached to their program day; date-specific reschedule
+              tweaks may need a second look.
+            </p>
+            <div className="mt-4 flex gap-2">
+              <button
+                type="button"
+                onClick={applyPending}
+                className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+              >
+                {pendingStart.value === null ? 'Clear start date' : 'Move start date'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setPendingStart(null)}
+                className="rounded-lg px-4 py-2 text-sm font-medium hover:bg-zinc-100 dark:hover:bg-zinc-800"
+              >
+                Cancel
+              </button>
+            </div>
+          </Card>
+        </div>
+      )}
+    </Page>
+  )
+}
