@@ -29,28 +29,28 @@ const items = [
     icon: Settings,
     title: 'Settings',
     desc: 'Stats, targets, units, scoring rules',
-    ready: false,
+    ready: true,
   },
   {
     to: '/more/notes',
     icon: NotebookPen,
     title: 'Notes',
     desc: 'Free-form training notes',
-    ready: false,
+    ready: true,
   },
   {
     to: '/more/calculators',
     icon: Calculator,
     title: 'Body-fat calculators',
     desc: 'Navy, 3-site, 7-site',
-    ready: false,
+    ready: true,
   },
   {
     to: '/more/help',
     icon: HelpCircle,
     title: 'Help',
     desc: 'Abbreviations, privacy, about',
-    ready: false,
+    ready: true,
   },
 ]
 

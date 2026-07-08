@@ -6,10 +6,16 @@ import {
   deleteBodyEntry,
   revertScheduleOp,
   setCompletionStatus,
+  setNotes,
   setRoundValue,
   setSessionAnnotation,
   setSessionNotes,
+  setStartDate,
   setWorkoutCompleted,
+  updateLimits,
+  updateScoring,
+  updateSettings,
+  updateTargets,
   upsertBodyEntry,
 } from '@/state/actions'
 import { useStore } from '@/state/store'
@@ -126,5 +132,40 @@ describe('reschedule op actions', () => {
 
     revertScheduleOp('unknown') // unknown id is a no-op
     expect(useStore.getState().data.scheduleOps).toHaveLength(1)
+  })
+})
+
+describe('settings & notes actions', () => {
+  it('stores free-form notes (US-071)', () => {
+    setNotes('day 15 felt strong')
+    expect(useStore.getState().data.notes).toBe('day 15 felt strong')
+  })
+
+  it('patches core settings and nested target/limit groups', () => {
+    updateSettings({ startWeight: 80, units: 'imperial' })
+    updateTargets({ bodyFat: 0.14 })
+    updateLimits({ bmi: 27 })
+    const s = useStore.getState().data.settings
+    expect(s.startWeight).toBe(80)
+    expect(s.units).toBe('imperial')
+    expect(s.targets.bodyFat).toBe(0.14)
+    expect(s.limits.bmi).toBe(27)
+  })
+
+  it('ignores non-positive scoring divisors but honours the on/off flag', () => {
+    updateScoring({ penaltyDivisor: 0, chairFactor: -1, penaltyOn: false })
+    const scoring = useStore.getState().data.settings.scoring
+    expect(scoring.penaltyDivisor).toBe(2) // 0 rejected — would divide by zero
+    expect(scoring.chairFactor).toBe(2) // -1 rejected
+    expect(scoring.penaltyOn).toBe(false)
+    updateScoring({ penaltyDivisor: 3 })
+    expect(useStore.getState().data.settings.scoring.penaltyDivisor).toBe(3)
+  })
+
+  it('rejects a malformed start date but accepts a valid one', () => {
+    setStartDate('nope')
+    expect(useStore.getState().data.settings.startDate).toBeNull()
+    setStartDate('2026-05-25')
+    expect(useStore.getState().data.settings.startDate).toBe('2026-05-25')
   })
 })

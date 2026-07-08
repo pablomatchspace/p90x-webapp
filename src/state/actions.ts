@@ -1,6 +1,13 @@
 import { compareISO, isISODate, type ISODate } from '@/lib/dates'
 import { getWorkout } from '@/lib/programData'
-import type { AppState, BodyEntry, ScheduleOp, Session } from '@/lib/schema'
+import type {
+  AppState,
+  BodyEntry,
+  ScheduleOp,
+  ScoringSettings,
+  Session,
+  Settings,
+} from '@/lib/schema'
 import { useStore } from '@/state/store'
 
 /**
@@ -187,5 +194,73 @@ export function setQuoteDisabled(id: string, disabled: boolean): void {
     else if (!disabled && has) {
       draft.quotes.disabledIds = draft.quotes.disabledIds.filter((d) => d !== id)
     }
+  })
+}
+
+/**
+ * SETUP-screen mutations (US-070). Only raw inputs are written — every derived
+ * number (LBM, BMI, target weight, scores…) is recomputed by pure functions, so
+ * there is nothing to keep in sync. Nested groups get their own patchers to keep
+ * the immer updates shallow and type-safe.
+ */
+type CoreSettings = Pick<
+  Settings,
+  'program' | 'units' | 'gender' | 'age' | 'height' | 'startWeight' | 'startBodyFat'
+>
+
+export function updateSettings(patch: Partial<CoreSettings>): void {
+  useStore.getState().mutate((draft) => {
+    Object.assign(draft.settings, patch)
+  })
+}
+
+export function updateLimits(patch: Partial<Settings['limits']>): void {
+  useStore.getState().mutate((draft) => {
+    Object.assign(draft.settings.limits, patch)
+  })
+}
+
+export function updateTargets(patch: Partial<Settings['targets']>): void {
+  useStore.getState().mutate((draft) => {
+    Object.assign(draft.settings.targets, patch)
+  })
+}
+
+/**
+ * Scoring params. The three divisors/factors must stay positive (the schema
+ * enforces it on import, but live mutation bypasses Zod) — a zero would divide the
+ * engine by zero — so non-positive values are ignored rather than stored.
+ */
+export function updateScoring(patch: Partial<ScoringSettings>): void {
+  useStore.getState().mutate((draft) => {
+    if (patch.penaltyOn !== undefined) draft.settings.scoring.penaltyOn = patch.penaltyOn
+    for (const key of ['penaltyDivisor', 'chairFactor', 'rwDivisor'] as const) {
+      const value = patch[key]
+      if (value !== undefined && Number.isFinite(value) && value > 0) {
+        draft.settings.scoring[key] = value
+      }
+    }
+  })
+}
+
+/**
+ * Re-anchor the whole schedule to a new day 1 (US-070). The materializer derives
+ * every calendar date from this, so changing it shifts the entire program; the UI
+ * gates the change behind a confirm when logged data already exists.
+ */
+export function setStartDate(date: ISODate | null): void {
+  if (date !== null && !isISODate(date)) return
+  useStore.getState().mutate((draft) => {
+    draft.settings.startDate = date
+  })
+}
+
+/**
+ * Free-form global notes (US-071) — the workbook's YOUR NOTES sheet. Autosaves
+ * through the store's debounced persister and travels with export/import.
+ */
+export function setNotes(notes: string): void {
+  useStore.getState().mutate((draft) => {
+    draft.notes = notes
   })
 }

@@ -39,5 +39,10 @@ export default defineConfig({
       },
     }),
   ],
+  // Surface the package version to the Help/About page (US-074). npm sets
+  // npm_package_version for `npm run *`; fall back for a bare `vite` invocation.
+  define: {
+    __APP_VERSION__: JSON.stringify(process.env.npm_package_version ?? '0.0.0'),
+  },
   resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
 })

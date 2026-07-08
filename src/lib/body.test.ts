@@ -4,12 +4,15 @@ import {
   ffmiCategory,
   formatFixed,
   fractionToPercent,
+  heightUnit,
   kgToUnit,
   lossThreshold,
+  mToUnit,
   percentToFraction,
   targetWeight,
   threshold,
   unitToKg,
+  unitToM,
   weightUnit,
 } from './body'
 import type { BodyEntry } from './schema'
@@ -171,6 +174,15 @@ describe('unit conversion', () => {
     expect(percentToFraction(21.2)).toBeCloseTo(0.212, 10)
     expect(fractionToPercent(null)).toBeNull()
     expect(percentToFraction(null)).toBeNull()
+  })
+
+  it('converts metres to display inches at 1 dp and back raw', () => {
+    expect(mToUnit(1.8, 'imperial')).toBe(70.9)
+    expect(mToUnit(1.8, 'metric')).toBe(1.8)
+    expect(unitToM(70.9, 'imperial')).toBeCloseTo(1.8009, 3)
+    expect(unitToM(1.8, 'metric')).toBe(1.8)
+    expect(heightUnit('metric')).toBe('m')
+    expect(heightUnit('imperial')).toBe('in')
   })
 })
 
