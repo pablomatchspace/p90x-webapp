@@ -1,4 +1,6 @@
 import { useMemo } from 'react'
+import { computeAdherence, type Adherence } from '@/lib/adherence'
+import { todayISO } from '@/lib/dates'
 import { materialize, type Schedule } from '@/lib/schedule/materialize'
 import { previewOp, type OpPreview } from '@/lib/schedule/ops'
 import { indexSessions, type SessionIndex } from '@/lib/schedule/status'
@@ -43,6 +45,17 @@ export function useBodyLog(): AppState['bodyLog'] {
 export function useSessionIndex(): SessionIndex {
   const workoutLogs = useStore((s) => s.data.workoutLogs)
   return useMemo(() => indexSessions(workoutLogs), [workoutLogs])
+}
+
+/** Adherence & pace stats (US-062), recomputed live from the schedule + logs. */
+export function useAdherence(): Adherence | null {
+  const schedule = useSchedule()
+  const index = useSessionIndex()
+  const ops = useStore((s) => s.data.scheduleOps)
+  return useMemo(
+    () => (schedule === null ? null : computeAdherence(schedule, index, ops, todayISO())),
+    [schedule, index, ops],
+  )
 }
 
 /** Live engine-backed preview of a candidate reschedule op against current state. */
