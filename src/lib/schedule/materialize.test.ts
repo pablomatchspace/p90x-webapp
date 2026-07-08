@@ -26,6 +26,31 @@ function programDays(schedule: ReturnType<typeof materialize>): ProgramDay[] {
   return schedule.days.filter((d): d is ProgramDay => d.kind === 'program')
 }
 
+describe('materialize — Lean variant (US-073)', () => {
+  it('puts Core Synergistics on day 1 (the workbook Lean selector)', () => {
+    const s = materialize('lean', START, [])
+    expect(programDays(s)).toHaveLength(90)
+    const [d1] = programDays(s)
+    expect(d1.programDayId).toBe('d001')
+    expect(d1.workouts).toEqual(['core-synergistics'])
+  })
+
+  it('shares its calendar skeleton with Classic, so reschedule ops replay unchanged', () => {
+    const classic = materialize('classic', START, [])
+    const lean = materialize('lean', START, [])
+    // Identical dates and day/week/phase/recovery per position — only the
+    // workouts differ, which is exactly why every date/week-indexed op stays
+    // valid across a variant switch (no invalidation needed).
+    expect(lean.days.map((d) => d.date)).toEqual(classic.days.map((d) => d.date))
+    const skeleton = (s: ReturnType<typeof materialize>) =>
+      s.days.map((d) =>
+        d.kind === 'program' ? `${d.day}/${d.week}/${d.phase}/${d.recovery}` : 'gap',
+      )
+    expect(skeleton(lean)).toEqual(skeleton(classic))
+    expect(lean.plannedCompletion).toBe(classic.plannedCompletion)
+  })
+})
+
 describe('materialize — no ops', () => {
   const s = materialize('classic', START, [])
 
