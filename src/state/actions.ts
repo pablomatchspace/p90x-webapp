@@ -254,3 +254,13 @@ export function setStartDate(date: ISODate | null): void {
     draft.settings.startDate = date
   })
 }
+
+/**
+ * Free-form global notes (US-071) — the workbook's YOUR NOTES sheet. Autosaves
+ * through the store's debounced persister and travels with export/import.
+ */
+export function setNotes(notes: string): void {
+  useStore.getState().mutate((draft) => {
+    draft.notes = notes
+  })
+}

@@ -36,7 +36,7 @@ const items = [
     icon: NotebookPen,
     title: 'Notes',
     desc: 'Free-form training notes',
-    ready: false,
+    ready: true,
   },
   {
     to: '/more/calculators',
