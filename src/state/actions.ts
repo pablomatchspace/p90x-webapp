@@ -141,3 +141,51 @@ export function setWorkoutCompleted(
     session.loggedAt = new Date().toISOString()
   })
 }
+
+/**
+ * Custom motivational quotes (US-064). Stored in user data (so they export/import
+ * with everything else); disabling works by id for built-in and custom alike.
+ */
+export function addCustomQuote(text: string, author?: string): void {
+  const trimmed = text.trim()
+  if (trimmed === '') return
+  const trimmedAuthor = author?.trim()
+  useStore.getState().mutate((draft) => {
+    draft.quotes.custom.push({
+      id: `c-${crypto.randomUUID()}`,
+      text: trimmed,
+      ...(trimmedAuthor ? { author: trimmedAuthor } : {}),
+    })
+  })
+}
+
+export function updateCustomQuote(id: string, text: string, author?: string): void {
+  const trimmed = text.trim()
+  const trimmedAuthor = author?.trim()
+  useStore.getState().mutate((draft) => {
+    const quote = draft.quotes.custom.find((q) => q.id === id)
+    if (quote === undefined) return
+    if (trimmed === '') return
+    quote.text = trimmed
+    if (trimmedAuthor) quote.author = trimmedAuthor
+    else delete quote.author
+  })
+}
+
+export function deleteCustomQuote(id: string): void {
+  useStore.getState().mutate((draft) => {
+    draft.quotes.custom = draft.quotes.custom.filter((q) => q.id !== id)
+    draft.quotes.disabledIds = draft.quotes.disabledIds.filter((d) => d !== id)
+  })
+}
+
+/** Enable/disable any quote (built-in or custom) by id. */
+export function setQuoteDisabled(id: string, disabled: boolean): void {
+  useStore.getState().mutate((draft) => {
+    const has = draft.quotes.disabledIds.includes(id)
+    if (disabled && !has) draft.quotes.disabledIds.push(id)
+    else if (!disabled && has) {
+      draft.quotes.disabledIds = draft.quotes.disabledIds.filter((d) => d !== id)
+    }
+  })
+}
