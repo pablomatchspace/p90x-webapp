@@ -6,6 +6,7 @@ import { DashboardPage } from '@/features/dashboard/DashboardPage'
 import { StrengthProgressPage } from '@/features/dashboard/StrengthProgressPage'
 import { BodyFatCalculatorsPage } from '@/features/more/BodyFatCalculatorsPage'
 import { DataPage } from '@/features/more/DataPage'
+import { HelpPage } from '@/features/more/HelpPage'
 import { MorePage } from '@/features/more/MorePage'
 import { NotesPage } from '@/features/more/NotesPage'
 import { QuotesPage } from '@/features/more/QuotesPage'
@@ -43,6 +44,7 @@ export default function App() {
           <Route path="more/settings" element={<SettingsPage />} />
           <Route path="more/notes" element={<NotesPage />} />
           <Route path="more/calculators" element={<BodyFatCalculatorsPage />} />
+          <Route path="more/help" element={<HelpPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>

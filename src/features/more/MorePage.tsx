@@ -50,7 +50,7 @@ const items = [
     icon: HelpCircle,
     title: 'Help',
     desc: 'Abbreviations, privacy, about',
-    ready: false,
+    ready: true,
   },
 ]
 
