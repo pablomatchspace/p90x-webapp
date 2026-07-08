@@ -1,5 +1,6 @@
 import { CalendarCheck2, CalendarDays, Dumbbell, LayoutDashboard, Menu, Scale } from 'lucide-react'
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { SystemBanners } from '@/components/SystemBanners'
 import { UpdateToast } from '@/components/UpdateToast'
 
@@ -23,6 +24,7 @@ function navClasses(isActive: boolean) {
 }
 
 export function Layout() {
+  const { pathname } = useLocation()
   return (
     <div className="min-h-dvh md:flex">
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-56 flex-col gap-6 border-r border-zinc-200 bg-white p-4 md:flex dark:border-zinc-800 dark:bg-zinc-900">
@@ -45,7 +47,9 @@ export function Layout() {
       <main className="min-w-0 flex-1 pb-24 md:pb-10 md:pl-56">
         <div className="mx-auto w-full max-w-5xl px-4 pt-4 md:px-8 md:pt-8">
           <SystemBanners />
-          <Outlet />
+          <ErrorBoundary key={pathname} inline>
+            <Outlet />
+          </ErrorBoundary>
         </div>
         <UpdateToast />
       </main>
