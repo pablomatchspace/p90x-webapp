@@ -163,7 +163,7 @@ export function StrengthProgressPage() {
         </p>
         <table className="mt-2 w-full text-sm">
           <thead>
-            <tr className="text-left text-xs text-zinc-400 dark:text-zinc-500">
+            <tr className="text-left text-xs text-zinc-500 dark:text-zinc-400">
               <th className="py-1 font-medium">Exercise</th>
               <th className="py-1 text-right font-medium">First</th>
               <th className="py-1 text-right font-medium">Latest</th>
@@ -179,7 +179,7 @@ export function StrengthProgressPage() {
                 <td
                   className={`py-1 text-right font-medium tabular-nums ${
                     m.delta === null || m.delta === 0
-                      ? 'text-zinc-400 dark:text-zinc-500'
+                      ? 'text-zinc-500 dark:text-zinc-400'
                       : m.delta > 0
                         ? 'text-emerald-600 dark:text-emerald-400'
                         : 'text-rose-500 dark:text-rose-400'

@@ -64,5 +64,5 @@ export const CELL_CLASSES: Record<DayStatus, string> = {
   pending:
     'border-zinc-200 bg-white text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300',
   rest: 'border-zinc-200 bg-zinc-50 text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900/60 dark:text-zinc-400',
-  gap: 'border-dashed border-zinc-300 bg-transparent text-zinc-400 dark:border-zinc-700 dark:text-zinc-500',
+  gap: 'border-dashed border-zinc-300 bg-transparent text-zinc-500 dark:border-zinc-700 dark:text-zinc-400',
 }

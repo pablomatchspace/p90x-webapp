@@ -23,7 +23,7 @@ function NextUp() {
     <Card>
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <h2 className="text-xs font-semibold tracking-wide text-zinc-400 uppercase dark:text-zinc-500">
+          <h2 className="text-xs font-semibold tracking-wide text-zinc-500 uppercase dark:text-zinc-400">
             Today
           </h2>
           <p className="mt-0.5 truncate font-semibold">

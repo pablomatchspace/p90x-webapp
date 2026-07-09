@@ -16,7 +16,7 @@ export function QuoteCard({ seed, label = 'Daily motivation' }: { seed: number; 
   return (
     <Card>
       <div className="flex items-center justify-between gap-2">
-        <h2 className="text-xs font-semibold tracking-wide text-zinc-400 uppercase dark:text-zinc-500">
+        <h2 className="text-xs font-semibold tracking-wide text-zinc-500 uppercase dark:text-zinc-400">
           {label}
         </h2>
         <Link

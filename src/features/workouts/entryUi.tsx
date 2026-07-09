@@ -42,7 +42,7 @@ export function RoundInputs({
           setRoundValue(workoutKey, programDayId, exercise.id, round, name, value)
         }
       />
-      <span className="text-[10px] text-zinc-400 dark:text-zinc-500">
+      <span className="text-[10px] text-zinc-500 dark:text-zinc-400">
         {name === 'main' || kind === undefined ? mainLabel(exercise) : SECONDARY_LABELS[kind]}
       </span>
     </div>
@@ -56,7 +56,7 @@ export function RoundInputs({
             ? drop
               ? 'text-rose-600 dark:text-rose-400'
               : 'text-emerald-600 dark:text-emerald-400'
-            : 'text-zinc-400 dark:text-zinc-500'
+            : 'text-zinc-500 dark:text-zinc-400'
         return (
           <div key={round}>
             {exercise.rounds > 1 ? (

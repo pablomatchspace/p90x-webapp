@@ -304,7 +304,7 @@ export function BodyPage() {
         )}
 
         {settings.height == null || settings.startWeight == null ? (
-          <p className="mt-2 text-xs text-zinc-400 dark:text-zinc-500">
+          <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
             Import your data (or set height and start weight) to unlock BMI, FFMI and weight loss.
           </p>
         ) : null}
@@ -325,7 +325,7 @@ export function BodyPage() {
       <Card>
         <div className="flex items-center justify-between gap-2">
           <h2 className="font-semibold">History</h2>
-          <p className="text-xs text-zinc-400 dark:text-zinc-500">
+          <p className="text-xs text-zinc-500 dark:text-zinc-400">
             {bodyLog.length === 1 ? '1 entry' : `${bodyLog.length} entries`}
           </p>
         </div>
@@ -348,7 +348,7 @@ export function BodyPage() {
               ) : (
                 <li
                   key={item.key}
-                  className="px-2 py-1.5 text-center text-xs text-zinc-400 dark:text-zinc-500"
+                  className="px-2 py-1.5 text-center text-xs text-zinc-500 dark:text-zinc-400"
                 >
                   {item.days === 1 ? '1 day' : `${item.days} days`} without a weigh-in
                 </li>

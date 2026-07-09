@@ -38,7 +38,7 @@ export function CompletionLog({
                     {formatLong(day.date)}
                   </Link>
                 </h2>
-                <p className="mt-0.5 text-xs text-zinc-400 dark:text-zinc-500">
+                <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
                   Day {day.day} · Phase {day.phase}
                   {day.recovery ? ' · Recovery week' : ''}
                 </p>

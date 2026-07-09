@@ -52,10 +52,12 @@ export function KpiCards() {
                 <p className="mt-1 text-xl font-bold tabular-nums">
                   {formatFixed(value, m.dp)}
                   {m.unit ? (
-                    <span className="ml-0.5 text-sm font-normal text-zinc-400">{m.unit}</span>
+                    <span className="ml-0.5 text-sm font-normal text-zinc-500 dark:text-zinc-400">
+                      {m.unit}
+                    </span>
                   ) : null}
                 </p>
-                <p className="text-[11px] text-zinc-400 dark:text-zinc-500">
+                <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
                   {m.target !== null
                     ? `Target ${formatFixed(m.target, m.dp)}${pct !== null ? ` · ${pct}%` : ''}`
                     : 'No target set'}

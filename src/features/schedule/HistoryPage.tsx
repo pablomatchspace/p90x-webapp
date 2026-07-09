@@ -60,7 +60,7 @@ export function HistoryPage() {
                 <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{opEffect(op)}</p>
               )}
               <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-                <span className="text-xs text-zinc-400 dark:text-zinc-500">
+                <span className="text-xs text-zinc-500 dark:text-zinc-400">
                   Added {new Date(op.createdAt).toLocaleString()}
                 </span>
                 {!reverted ? (

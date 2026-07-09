@@ -45,3 +45,24 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 7
+
+  lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      # lhci autorun starts `vite preview`, runs Lighthouse 3x against the app,
+      # and asserts perf/a11y/best-practices >= 90 (see lighthouserc.json).
+      # ubuntu-latest ships Google Chrome, which chrome-launcher discovers.
+      - run: npm run lhci
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: lighthouse-report
+          path: .lighthouseci/
+          retention-days: 7

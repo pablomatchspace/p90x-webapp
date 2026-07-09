@@ -195,7 +195,7 @@ export function FocusPage() {
         </div>
 
         <h2 className="mt-4 text-xl font-semibold">{exercise.name}</h2>
-        <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500" aria-live="polite">
+        <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400" aria-live="polite">
           {result.score === null
             ? 'Nothing entered yet — ghosts show last time.'
             : `Score ${formatScore(result.score)}${

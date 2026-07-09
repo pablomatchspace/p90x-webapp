@@ -1,24 +1,70 @@
+import { lazy } from 'react'
 import { HashRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { Layout } from '@/components/Layout'
-import { BodyPage } from '@/features/body/BodyPage'
-import { BodyTrendsPage } from '@/features/dashboard/BodyTrendsPage'
 import { DashboardPage } from '@/features/dashboard/DashboardPage'
-import { StrengthProgressPage } from '@/features/dashboard/StrengthProgressPage'
-import { BodyFatCalculatorsPage } from '@/features/more/BodyFatCalculatorsPage'
-import { DataPage } from '@/features/more/DataPage'
-import { HelpPage } from '@/features/more/HelpPage'
-import { MorePage } from '@/features/more/MorePage'
-import { NotesPage } from '@/features/more/NotesPage'
-import { QuotesPage } from '@/features/more/QuotesPage'
-import { SettingsPage } from '@/features/more/SettingsPage'
-import { HistoryPage } from '@/features/schedule/HistoryPage'
-import { SchedulePage } from '@/features/schedule/SchedulePage'
-import { WeeklyEditorPage } from '@/features/schedule/WeeklyEditorPage'
-import { TodayPage } from '@/features/today/TodayPage'
-import { FocusPage } from '@/features/workouts/FocusPage'
-import { TimerPage } from '@/features/workouts/TimerPage'
-import { WorkoutDetailPage } from '@/features/workouts/WorkoutDetailPage'
-import { WorkoutsPage } from '@/features/workouts/WorkoutsPage'
+
+// The landing route (Dashboard) is imported eagerly: it is the most-visited
+// page and the one the Lighthouse budget audits, so it must paint without a
+// second chunk fetch. Every other page is code-split (US-081) so it stays out
+// of the initial bundle; Layout wraps the outlet in Suspense to cover the load.
+const TodayPage = lazy(() =>
+  import('@/features/today/TodayPage').then((m) => ({ default: m.TodayPage })),
+)
+const SchedulePage = lazy(() =>
+  import('@/features/schedule/SchedulePage').then((m) => ({ default: m.SchedulePage })),
+)
+const WeeklyEditorPage = lazy(() =>
+  import('@/features/schedule/WeeklyEditorPage').then((m) => ({ default: m.WeeklyEditorPage })),
+)
+const HistoryPage = lazy(() =>
+  import('@/features/schedule/HistoryPage').then((m) => ({ default: m.HistoryPage })),
+)
+const WorkoutsPage = lazy(() =>
+  import('@/features/workouts/WorkoutsPage').then((m) => ({ default: m.WorkoutsPage })),
+)
+const WorkoutDetailPage = lazy(() =>
+  import('@/features/workouts/WorkoutDetailPage').then((m) => ({ default: m.WorkoutDetailPage })),
+)
+const FocusPage = lazy(() =>
+  import('@/features/workouts/FocusPage').then((m) => ({ default: m.FocusPage })),
+)
+const BodyPage = lazy(() =>
+  import('@/features/body/BodyPage').then((m) => ({ default: m.BodyPage })),
+)
+const BodyTrendsPage = lazy(() =>
+  import('@/features/dashboard/BodyTrendsPage').then((m) => ({ default: m.BodyTrendsPage })),
+)
+const StrengthProgressPage = lazy(() =>
+  import('@/features/dashboard/StrengthProgressPage').then((m) => ({
+    default: m.StrengthProgressPage,
+  })),
+)
+const MorePage = lazy(() =>
+  import('@/features/more/MorePage').then((m) => ({ default: m.MorePage })),
+)
+const DataPage = lazy(() =>
+  import('@/features/more/DataPage').then((m) => ({ default: m.DataPage })),
+)
+const TimerPage = lazy(() =>
+  import('@/features/workouts/TimerPage').then((m) => ({ default: m.TimerPage })),
+)
+const QuotesPage = lazy(() =>
+  import('@/features/more/QuotesPage').then((m) => ({ default: m.QuotesPage })),
+)
+const SettingsPage = lazy(() =>
+  import('@/features/more/SettingsPage').then((m) => ({ default: m.SettingsPage })),
+)
+const NotesPage = lazy(() =>
+  import('@/features/more/NotesPage').then((m) => ({ default: m.NotesPage })),
+)
+const BodyFatCalculatorsPage = lazy(() =>
+  import('@/features/more/BodyFatCalculatorsPage').then((m) => ({
+    default: m.BodyFatCalculatorsPage,
+  })),
+)
+const HelpPage = lazy(() =>
+  import('@/features/more/HelpPage').then((m) => ({ default: m.HelpPage })),
+)
 
 export default function App() {
   return (
