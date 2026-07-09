@@ -39,6 +39,14 @@ test('reset saves a backup that restore brings back (data safety net)', async ({
 
   // wipe everything from More -> Data
   await page.goto('#/more/data')
+  // The one-time PWA "Ready to work offline" toast is pinned to the bottom of the
+  // viewport and can overlay the reset/restore controls on the mobile profile,
+  // swallowing their clicks. Dismiss it once — it stays dismissed across the hash
+  // navigations below (no reload).
+  await page
+    .getByRole('button', { name: 'OK' })
+    .click({ timeout: 8000 })
+    .catch(() => {})
   await page.getByRole('textbox', { name: 'Type RESET to confirm' }).fill('RESET')
   await page.getByRole('button', { name: 'Reset everything' }).click()
   await expect(page.getByText(/All data cleared/)).toBeVisible()
