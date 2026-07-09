@@ -70,7 +70,7 @@ export class ErrorBoundary extends Component<Props, State> {
             Reload app
           </button>
         </div>
-        <p className="text-xs text-zinc-400">
+        <p className="text-xs text-zinc-500 dark:text-zinc-400">
           If this keeps happening, open More → Data to export a backup or restore the last one.
         </p>
       </div>

@@ -53,7 +53,7 @@ function OrderList({
               key={base[slotIdx].programDayId}
               className="flex items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 text-sm dark:border-zinc-800"
             >
-              <span className="w-12 shrink-0 text-xs font-semibold text-zinc-400 dark:text-zinc-500">
+              <span className="w-12 shrink-0 text-xs font-semibold text-zinc-500 dark:text-zinc-400">
                 Day {pos + 1}
               </span>
               <span className="flex-1">{names}</span>

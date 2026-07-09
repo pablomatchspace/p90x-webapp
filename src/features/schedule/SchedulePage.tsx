@@ -69,7 +69,7 @@ function Week({
         {section.recovery ? (
           <span className="text-amber-700 dark:text-amber-400">Recovery</span>
         ) : null}
-        <span className="ml-auto text-xs text-zinc-400 dark:text-zinc-500">
+        <span className="ml-auto text-xs text-zinc-500 dark:text-zinc-400">
           {formatShort(first.date)} – {formatShort(last.date)}
         </span>
       </header>

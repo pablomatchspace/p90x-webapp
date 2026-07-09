@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { CalendarCheck2, CalendarDays, Dumbbell, LayoutDashboard, Menu, Scale } from 'lucide-react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
@@ -15,7 +16,7 @@ const tabs = [
 
 function navClasses(isActive: boolean) {
   return [
-    'flex flex-col items-center justify-center gap-0.5 rounded-lg px-2 py-1.5 text-[11px] font-medium',
+    'flex min-h-11 flex-col items-center justify-center gap-0.5 rounded-lg px-2 py-1.5 text-[11px] font-medium',
     'md:flex-row md:justify-start md:gap-3 md:px-3 md:py-2 md:text-sm',
     isActive
       ? 'text-red-600 dark:text-red-500 md:bg-red-50 md:dark:bg-red-950/40'
@@ -23,10 +24,35 @@ function navClasses(isActive: boolean) {
   ].join(' ')
 }
 
+/** Shown in the content area while a code-split page chunk loads (US-081). */
+function PageFallback() {
+  return (
+    <div role="status" aria-live="polite" className="flex min-h-[50vh] items-center justify-center">
+      <span className="sr-only">Loading page…</span>
+      <span
+        className="h-6 w-6 animate-spin rounded-full border-2 border-zinc-300 border-t-red-600 dark:border-zinc-700 dark:border-t-red-500"
+        aria-hidden
+      />
+    </div>
+  )
+}
+
 export function Layout() {
   const { pathname } = useLocation()
   return (
     <div className="min-h-dvh md:flex">
+      <a
+        href="#main-content"
+        onClick={(e) => {
+          // Focus the main region directly — a real hash change would be caught
+          // by HashRouter and mistaken for a route.
+          e.preventDefault()
+          document.getElementById('main-content')?.focus()
+        }}
+        className="sr-only rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50"
+      >
+        Skip to content
+      </a>
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-56 flex-col gap-6 border-r border-zinc-200 bg-white p-4 md:flex dark:border-zinc-800 dark:bg-zinc-900">
         <div className="flex items-center gap-2 px-1">
           <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-600 text-sm font-black text-white">
@@ -44,11 +70,17 @@ export function Layout() {
         </nav>
       </aside>
 
-      <main className="min-w-0 flex-1 pb-24 md:pb-10 md:pl-56">
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="min-w-0 flex-1 pb-24 focus:outline-none md:pb-10 md:pl-56"
+      >
         <div className="mx-auto w-full max-w-5xl px-4 pt-4 md:px-8 md:pt-8">
           <SystemBanners />
           <ErrorBoundary key={pathname} inline>
-            <Outlet />
+            <Suspense fallback={<PageFallback />}>
+              <Outlet />
+            </Suspense>
           </ErrorBoundary>
         </div>
         <UpdateToast />

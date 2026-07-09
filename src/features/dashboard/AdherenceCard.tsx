@@ -13,7 +13,7 @@ function Stat({ label, value, sub }: { label: string; value: string; sub?: strin
     <div>
       <p className="text-xl font-bold tabular-nums">{value}</p>
       <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">{label}</p>
-      {sub ? <p className="text-[11px] text-zinc-400 dark:text-zinc-500">{sub}</p> : null}
+      {sub ? <p className="text-[11px] text-zinc-500 dark:text-zinc-400">{sub}</p> : null}
     </div>
   )
 }
@@ -69,7 +69,7 @@ export function AdherenceCard() {
                   style={{ height: `${Math.max((wk.ratio ?? 0) * 100, wk.done > 0 ? 6 : 0)}%` }}
                 />
               </div>
-              <span className="mt-0.5 text-[9px] text-zinc-400 dark:text-zinc-500">{wk.week}</span>
+              <span className="mt-0.5 text-[9px] text-zinc-500 dark:text-zinc-400">{wk.week}</span>
             </div>
           ))}
         </div>

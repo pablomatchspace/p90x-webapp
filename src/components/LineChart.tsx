@@ -69,7 +69,7 @@ export function LineChart({
 
   if (yEx === null || xEx === null) {
     return (
-      <div className="flex h-40 items-center justify-center text-sm text-zinc-400 dark:text-zinc-500">
+      <div className="flex h-40 items-center justify-center text-sm text-zinc-500 dark:text-zinc-400">
         No data yet
       </div>
     )

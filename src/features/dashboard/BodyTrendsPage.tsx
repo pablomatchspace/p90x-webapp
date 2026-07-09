@@ -176,7 +176,7 @@ export function BodyTrendsPage() {
             />
           </div>
 
-          <p className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-zinc-400 dark:text-zinc-500">
+          <p className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-zinc-500 dark:text-zinc-400">
             <span>— — Start</span>
             <span className="text-emerald-600 dark:text-emerald-400">— — Target</span>
             <span className="text-rose-500 dark:text-rose-400">— — Limit</span>

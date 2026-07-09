@@ -31,7 +31,7 @@ export function WorkoutsPage() {
                   <Card className="h-full transition-colors group-hover:border-red-300 dark:group-hover:border-red-800">
                     <div className="flex items-baseline justify-between gap-2">
                       <h3 className="font-semibold">{def.name}</h3>
-                      <span className="text-xs whitespace-nowrap text-zinc-400 dark:text-zinc-500">
+                      <span className="text-xs whitespace-nowrap text-zinc-500 dark:text-zinc-400">
                         {count === 0 ? 'not logged yet' : `${count} logged`}
                       </span>
                     </div>
