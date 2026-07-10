@@ -113,22 +113,39 @@ client clocks disagree.
 
 Two different values come out of the one passphrase:
 
-- **Encryption key** — PBKDF2-SHA256 (600k, OWASP's current floor) → AES-256-GCM.
-  Never leaves the device. The salt travels in the envelope by design, so a second
-  device derives the same key from the passphrase alone; the nonce is fresh per
-  push; `iterations` is recorded so the cost can be raised without orphaning old
+- **Encryption key** — PBKDF2-SHA256 (600k, OWASP's current floor) → AES-256-GCM,
+  created **non-extractable**. The salt travels in the envelope by design, so a
+  second device derives the same key from the passphrase alone; the nonce is fresh
+  per push; `iterations` is recorded so the cost can be raised without orphaning old
   envelopes.
 - **Auth token** — `SHA-256("p90x-sync-auth-v1:" + passphrase)`, base64url. This is
   the `SYNC_TOKEN` the Worker stores. A test pins the consequence: **the token
   cannot decrypt an envelope.** The server it lives on learns nothing.
 
+**The passphrase is never persisted.** It is stretched into the key at enable time
+and then dropped. The key and the token live in IndexedDB
+(`state/syncSecrets.ts`); because the key is non-extractable, `exportKey` refuses
+and a copy of the browser profile yields nothing that decrypts the blob offline.
+Nothing secret is ever written to `localStorage`.
+
+Losing that store (clearing site data, a new browser profile) is not data loss: the
+engine reports "turn sync off and on again to re-enter your passphrase".
+
 ### Client (`lib/sync.ts` pure core, `state/sync.ts` engine)
 
 Config lives under its own `p90x.sync` localStorage key — outside the versioned
 document, so no schema bump, no migration, and exports remain clean and portable.
-It holds `{endpoint, passphrase, salt, deviceId, deviceName, lastRevision, dirty,
-pausedReason}`. The passphrase is stored so background pushes need no prompt; that
-is the stated price of unattended sync.
+It holds `{endpoint, salt, iterations, deviceId, deviceName, lastRevision, dirty,
+pausedReason}` — **no secrets**. `salt` and `iterations` are public: they travel in
+the envelope so another device can derive the same key.
+
+Enabling on a device where the cloud already holds a copy **adopts that envelope's
+salt** rather than minting a new one. Without this the second device would encrypt
+correctly but never be able to read what the first one wrote. If the endpoint is
+unreachable at that moment (the normal first run, before `SYNC_TOKEN` is set on the
+Worker) a fresh salt is used, and a later pull of a foreign envelope reports a
+precise "different passphrase or setup" message rather than an opaque decrypt
+failure.
 
 `decideSync({dirty, lastRevision, remote})` is the entire policy, and is pure:
 
@@ -197,6 +214,8 @@ overwritten, and deep-links to the resolution.
 | Remote ahead, local dirty                    | Conflict banner; keep-mine force-pushes, take-cloud pulls               |
 | Stale push reaches the server                | 409 → conflict → force-push bases on the returned revision              |
 | Wrong passphrase on the second device        | Token mismatch ⇒ 401 before any decryption; clear message, no data loss |
+| Second device enabled after the first pushed | Adopts the cloud envelope's salt, so its key opens that envelope        |
+| Browser site data cleared (the key is gone)  | "Turn sync off and on again to re-enter your passphrase"; no data loss  |
 | Envelope from a newer app schema             | Pull refused, "update the app"; local untouched                         |
 | Envelope from a newer **wire** version       | Refused by the envelope schema; local untouched                         |
 | Corrupt / undecryptable envelope             | Refused; local untouched; error names the passphrase                    |
@@ -209,18 +228,19 @@ overwritten, and deep-links to the resolution.
 
 ## 8. Risks & mitigations
 
-| Risk                                                                | Mitigation                                                                                                                              |
-| ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| A stale device overwrites newer cloud data                          | Server-side compare-and-swap on `baseRevision` → 409 → explicit user choice                                                             |
-| KV is eventually consistent: two near-simultaneous pushes both pass | Single owner + LWW ⇒ rare and low-harm; documented in `worker/README.md`; Durable Object is the escalation path, same contract          |
-| A pull replaces good local data                                     | Every pull goes through `replaceData`, which writes the one-slot backup first                                                           |
-| Passphrase lost                                                     | Local data unaffected; cloud copy re-created by disable → re-enable                                                                     |
-| Passphrase sits in `localStorage`                                   | Necessary for unattended push; stated in the UI and here. Compromise of the device already implies compromise of the plaintext it holds |
-| Secrets leak via the public repo                                    | Repo ships code only; `SYNC_TOKEN` is set by the operator; KV holds ciphertext                                                          |
-| A reset wipes the cloud copy                                        | `resetAll` pauses sync; resuming demands an explicit choice                                                                             |
-| Service worker caches sync responses                                | No Workbox runtime caching (verified); e2e drives real fetches per open                                                                 |
-| Cloudflare free-tier limits (~1k KV writes/day)                     | One person's debounced pushes are tens per day                                                                                          |
-| Multi-tab races on one device                                       | Same single-tab assumption as the existing persistence layer; unchanged                                                                 |
+| Risk                                                                | Mitigation                                                                                                                                                                                                                                |
+| ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A stale device overwrites newer cloud data                          | Server-side compare-and-swap on `baseRevision` → 409 → explicit user choice                                                                                                                                                               |
+| KV is eventually consistent: two near-simultaneous pushes both pass | Single owner + LWW ⇒ rare and low-harm; documented in `worker/README.md`; Durable Object is the escalation path, same contract                                                                                                            |
+| A pull replaces good local data                                     | Every pull goes through `replaceData`, which writes the one-slot backup first                                                                                                                                                             |
+| Passphrase lost                                                     | Local data unaffected; cloud copy re-created by disable → re-enable                                                                                                                                                                       |
+| A stolen browser profile decrypts the blob offline                  | The passphrase is never persisted, and the AES key is non-extractable — `exportKey` refuses, so its bytes cannot be lifted out of IndexedDB. (Script running _in the origin_ can still use the key; that is inherent to unattended sync.) |
+| IndexedDB unavailable or cleared                                    | Enable fails cleanly ("private mode?"); a later loss reports "re-enter your passphrase". Never data loss                                                                                                                                  |
+| Secrets leak via the public repo                                    | Repo ships code only; `SYNC_TOKEN` is set by the operator; KV holds ciphertext                                                                                                                                                            |
+| A reset wipes the cloud copy                                        | `resetAll` pauses sync; resuming demands an explicit choice                                                                                                                                                                               |
+| Service worker caches sync responses                                | No Workbox runtime caching (verified); e2e drives real fetches per open                                                                                                                                                                   |
+| Cloudflare free-tier limits (~1k KV writes/day)                     | One person's debounced pushes are tens per day                                                                                                                                                                                            |
+| Multi-tab races on one device                                       | Same single-tab assumption as the existing persistence layer; unchanged                                                                                                                                                                   |
 
 ## 9. Verification
 

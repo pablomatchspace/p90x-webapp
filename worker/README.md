@@ -21,6 +21,10 @@ The `SYNC_TOKEN` this Worker checks is a SHA-256 of your passphrase under a
 different prefix, so it authenticates you without being able to decrypt anything.
 Someone who steals the token can delete or overwrite your blob; they cannot read it.
 
+Your passphrase is never stored — not on the server, and not in the browser. The
+app stretches it into a key once, keeps that key in IndexedDB in a form the browser
+will not let any script read back out, and forgets the passphrase.
+
 Losing the passphrase orphans the **cloud** copy only — your local data is
 untouched. Disable and re-enable sync with a new passphrase to start a fresh one.
 

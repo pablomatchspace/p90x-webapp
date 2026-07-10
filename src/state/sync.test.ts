@@ -3,7 +3,7 @@ import { webcrypto } from 'node:crypto'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { emptyState, type AppState } from '@/lib/schema'
 import type { SyncEnvelope } from '@/lib/sync'
-import { encryptJson } from '@/lib/syncCrypto'
+import { deriveKey, encryptJson, fromBase64 } from '@/lib/syncCrypto'
 import {
   attachSync,
   disableSync,
@@ -15,6 +15,7 @@ import {
   useSyncStore,
 } from '@/state/sync'
 import { loadSyncConfig, saveSyncConfig, type SyncConfig } from '@/state/syncConfig'
+import type { SyncSecrets } from '@/state/syncSecrets'
 import { readBackup } from '@/state/persist'
 import { useStore } from '@/state/store'
 
@@ -31,10 +32,22 @@ vi.mock('@/lib/syncCrypto', async (importOriginal) => ({
   PBKDF2_ITERATIONS: 1000,
 }))
 
+// jsdom has no IndexedDB. The real store is exercised by the e2e specs in a browser.
+const secrets = vi.hoisted(() => ({ current: null as unknown }))
+vi.mock('@/state/syncSecrets', () => ({
+  loadSecrets: async () => secrets.current,
+  saveSecrets: async (value: unknown) => {
+    secrets.current = value
+    return true
+  },
+  clearSecrets: async () => {
+    secrets.current = null
+  },
+}))
+
 const ENDPOINT = 'https://sync.test'
 const PASSPHRASE = 'a good passphrase'
-/** Remote fixtures encrypt cheaply; `iterations` travels in the envelope so this is honest. */
-const FAST = { iterations: 1000 }
+const ITERATIONS = 1000
 
 type Route = (init: RequestInit) => Response | Promise<Response>
 let routes: Record<string, Route>
@@ -46,17 +59,28 @@ function route(key: string, handler: Route) {
   routes[key] = handler
 }
 
+const config = () => useSyncStore.getState().config!
+const storedSecrets = () => secrets.current as SyncSecrets
+
+/** Build an envelope the current device can actually decrypt (same salt and cost). */
 async function remoteEnvelope(state: AppState, passphrase = PASSPHRASE): Promise<SyncEnvelope> {
+  const { salt, iterations } = config()
+  const key = await deriveKey(passphrase, fromBase64(salt), iterations)
   return {
     v: 1,
     updatedAt: '2026-07-10T10:00:00.000Z',
     deviceId: 'other-device',
     deviceName: 'Phone',
-    cipher: await encryptJson(state, passphrase, FAST),
+    cipher: await encryptJson(key, state, { salt, iterations }),
   }
 }
 
-/** Enable sync, then force the config into a known revision/dirty state. */
+/**
+ * Enable sync (offline: no routes ⇒ a fresh salt), then force a known
+ * revision/dirty state. `enableSync` probes the endpoint to adopt an existing
+ * salt, so the fetch mock is reset afterwards — assertions here are about what the
+ * engine does *next*, not about setting it up.
+ */
 async function enable(overrides: Partial<SyncConfig> = {}): Promise<SyncConfig> {
   const result = await enableSync({
     endpoint: ENDPOINT,
@@ -64,16 +88,18 @@ async function enable(overrides: Partial<SyncConfig> = {}): Promise<SyncConfig> 
     deviceName: 'Desktop',
   })
   if (!result.ok) throw new Error(result.error)
-  const config = { ...useSyncStore.getState().config!, ...overrides }
-  saveSyncConfig(config)
-  useSyncStore.setState({ config })
-  return config
+  const next = { ...config(), ...overrides }
+  saveSyncConfig(next)
+  useSyncStore.setState({ config: next })
+  vi.mocked(fetch).mockClear()
+  return next
 }
 
 beforeEach(() => {
   localStorage.clear()
   routes = {}
   putBodies = []
+  secrets.current = null
   useStore.setState({ data: emptyState(), bootIssue: 'none', storageFailing: false })
   useSyncStore.setState({
     config: null,
@@ -121,26 +147,58 @@ describe('enableSync', () => {
   it('rejects a non-https endpoint and a short passphrase', async () => {
     expect(
       await enableSync({ endpoint: 'http://evil.test', passphrase: PASSPHRASE, deviceName: '' }),
-    ).toEqual({
-      ok: false,
-      error: expect.stringContaining('https://'),
-    })
+    ).toEqual({ ok: false, error: expect.stringContaining('https://') })
     expect(await enableSync({ endpoint: ENDPOINT, passphrase: 'short', deviceName: '' })).toEqual({
       ok: false,
       error: expect.stringContaining('at least 8'),
     })
   })
 
-  it('returns the derived token and persists the config', async () => {
+  it('returns the derived token, and stores it beside a non-extractable key', async () => {
     const result = await enableSync({
       endpoint: `${ENDPOINT}/`,
       passphrase: PASSPHRASE,
       deviceName: '  ',
     })
     expect(result).toEqual({ ok: true, token: expect.stringMatching(/^[A-Za-z0-9_-]{43}$/) })
-    const config = loadSyncConfig()!
-    expect(config.endpoint).toBe(ENDPOINT)
-    expect(config.deviceName).toBe('This device')
+    expect(storedSecrets().authToken).toBe(result.ok && result.token)
+    expect(storedSecrets().key.extractable).toBe(false)
+    expect(loadSyncConfig()).toMatchObject({ endpoint: ENDPOINT, deviceName: 'This device' })
+  })
+
+  it('never writes the passphrase to localStorage', async () => {
+    await enable()
+    expect(JSON.stringify(localStorage)).not.toContain(PASSPHRASE)
+  })
+
+  it('adopts the salt of an existing cloud copy, so it can decrypt what is already there', async () => {
+    // Pretend another device pushed first, with its own salt.
+    const foreignSalt = 'Zm9yZWlnbi1zYWx0LTAwMA=='
+    const key = await deriveKey(PASSPHRASE, fromBase64(foreignSalt), ITERATIONS)
+    const remote = emptyState()
+    remote.notes = 'written elsewhere'
+    const envelope = {
+      v: 1,
+      updatedAt: 'x',
+      deviceId: 'other',
+      deviceName: 'Phone',
+      cipher: await encryptJson(key, remote, { salt: foreignSalt, iterations: ITERATIONS }),
+    }
+    route('GET /v1/meta', () => json({ revision: 1, updatedAt: 'x' }))
+    route('GET /v1/state', () => json({ revision: 1, envelope }))
+
+    await enableSync({ endpoint: ENDPOINT, passphrase: PASSPHRASE, deviceName: 'Laptop' })
+    expect(config().salt).toBe(foreignSalt)
+
+    // …and the very next sync can read it.
+    await syncNow()
+    expect(useStore.getState().data.notes).toBe('written elsewhere')
+  })
+
+  it('falls back to a fresh salt when the endpoint is unreachable (the normal first run)', async () => {
+    await enableSync({ endpoint: ENDPOINT, passphrase: PASSPHRASE, deviceName: 'Desktop' })
+    expect(config().salt).toMatch(/^[A-Za-z0-9+/=]{24}$/)
+    expect(config().iterations).toBe(1000) // the mocked production constant
   })
 
   it('marks a document with data dirty (it seeds the cloud)', async () => {
@@ -148,12 +206,12 @@ describe('enableSync', () => {
       d.settings.startDate = '2026-01-05'
     })
     await enableSync({ endpoint: ENDPOINT, passphrase: PASSPHRASE, deviceName: 'Desktop' })
-    expect(useSyncStore.getState().config?.dirty).toBe(true)
+    expect(config().dirty).toBe(true)
   })
 
   it('leaves a fresh document clean (it adopts the cloud)', async () => {
     await enableSync({ endpoint: ENDPOINT, passphrase: PASSPHRASE, deviceName: 'Desktop' })
-    expect(useSyncStore.getState().config?.dirty).toBe(false)
+    expect(config().dirty).toBe(false)
   })
 })
 
@@ -217,6 +275,26 @@ describe('pull', () => {
     detach()
   })
 
+  it('names the real cause when the cloud copy came from a different setup', async () => {
+    useStore.getState().mutate((d) => {
+      d.notes = 'precious'
+    })
+    await enable({ lastRevision: 1, dirty: false })
+    const envelope = await remoteEnvelope(emptyState())
+    route('GET /v1/meta', () => json({ revision: 2, updatedAt: 'now' }))
+    route('GET /v1/state', () =>
+      json({
+        revision: 2,
+        envelope: { ...envelope, cipher: { ...envelope.cipher, salt: 'ZGlmZmVyZW50LXNhbHQ=' } },
+      }),
+    )
+
+    await syncNow()
+
+    expect(useStore.getState().data.notes).toBe('precious')
+    expect(useSyncStore.getState().message).toContain('different passphrase')
+  })
+
   it('refuses an envelope it cannot decrypt and leaves local data alone', async () => {
     useStore.getState().mutate((d) => {
       d.notes = 'precious'
@@ -236,16 +314,10 @@ describe('pull', () => {
 
   it('refuses a document from a newer schema and says to update the app', async () => {
     await enable({ lastRevision: 1, dirty: false })
-    const future = { ...emptyState(), schemaVersion: 99 }
+    const future = { ...emptyState(), schemaVersion: 99 } as unknown as AppState
     route('GET /v1/meta', () => json({ revision: 2, updatedAt: 'now' }))
     route('GET /v1/state', async () =>
-      json({
-        revision: 2,
-        envelope: {
-          ...(await remoteEnvelope(emptyState())),
-          cipher: await encryptJson(future, PASSPHRASE, FAST),
-        },
-      }),
+      json({ revision: 2, envelope: await remoteEnvelope(future) }),
     )
 
     await syncNow()
@@ -264,6 +336,20 @@ describe('pull', () => {
 
     expect(useSyncStore.getState().status).toBe('error')
     expect(useSyncStore.getState().message).toContain('Update the app')
+  })
+})
+
+describe('missing key', () => {
+  it('asks for the passphrase again rather than failing obscurely', async () => {
+    await enable({ dirty: true })
+    secrets.current = null // site data cleared, or a different browser profile
+    route('GET /v1/meta', () => json({ revision: 1, updatedAt: 'now' }))
+
+    await syncNow()
+
+    expect(useSyncStore.getState().status).toBe('error')
+    expect(useSyncStore.getState().message).toContain('re-enter your passphrase')
+    expect(putBodies).toHaveLength(0)
   })
 })
 
@@ -426,9 +512,9 @@ describe('reset', () => {
   // A reset leaves this device *in step* with the cloud (`lastRevision` never moved),
   // so `decideSync` would answer 'idle'. Restoring has to pull regardless.
   it('resuming with "restore cloud" pulls even though the revisions match', async () => {
+    await enable({ lastRevision: 3, dirty: true, pausedReason: 'after-reset' })
     const remote = emptyState()
     remote.notes = 'survived the reset'
-    await enable({ lastRevision: 3, dirty: true, pausedReason: 'after-reset' })
     route('GET /v1/meta', () => json({ revision: 3, updatedAt: 'now' }))
     route('GET /v1/state', async () =>
       json({ revision: 3, envelope: await remoteEnvelope(remote) }),
@@ -460,10 +546,11 @@ describe('pause and disable', () => {
     expect(loadSyncConfig()?.pausedReason).toBe('manual')
   })
 
-  it('disable forgets the config and leaves the cloud copy alone', async () => {
+  it('disable forgets the config and the key, and leaves the cloud copy alone', async () => {
     await enable()
     await disableSync(false)
     expect(loadSyncConfig()).toBeNull()
+    expect(secrets.current).toBeNull()
     expect(useSyncStore.getState().status).toBe('disabled')
     expect(fetch).not.toHaveBeenCalled()
   })
@@ -478,12 +565,14 @@ describe('pause and disable', () => {
     await disableSync(true)
     expect(deleted).toBe(true)
     expect(loadSyncConfig()).toBeNull()
+    expect(secrets.current).toBeNull()
   })
 
-  it('disable still forgets the config when the endpoint is unreachable', async () => {
+  it('disable still forgets everything when the endpoint is unreachable', async () => {
     await enable()
     await disableSync(true) // no DELETE route → network error
     expect(loadSyncConfig()).toBeNull()
+    expect(secrets.current).toBeNull()
     expect(useSyncStore.getState().status).toBe('disabled')
   })
 })

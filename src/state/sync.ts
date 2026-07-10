@@ -6,16 +6,19 @@ import {
   MIN_PASSPHRASE_LENGTH,
   normalizeEndpoint,
   SYNC_WIRE_VERSION,
+  type Cipher,
   type RemoteMeta,
   type SyncEnvelope,
 } from '@/lib/sync'
 import {
   decryptJson,
   deriveAuthToken,
+  deriveKey,
   encryptJson,
   fromBase64,
   PBKDF2_ITERATIONS,
   randomBytes,
+  SALT_BYTES,
   toBase64,
 } from '@/lib/syncCrypto'
 import {
@@ -24,6 +27,7 @@ import {
   saveSyncConfig,
   type SyncConfig,
 } from '@/state/syncConfig'
+import { clearSecrets, loadSecrets, saveSecrets, type SyncSecrets } from '@/state/syncSecrets'
 import {
   deleteState,
   describeFailure,
@@ -45,6 +49,13 @@ import { setResetListener, useStore } from '@/state/store'
 
 /** Long enough to collapse a burst of stepper taps; short enough to survive a tab close. */
 const PUSH_DEBOUNCE_MS = 3000
+
+const NEEDS_PASSPHRASE =
+  'This browser no longer holds the sync key. Turn sync off and on again to re-enter your passphrase.'
+const SALT_MISMATCH =
+  'The cloud copy was encrypted with a different passphrase or a different setup. Turn sync off and on again to re-enter it.'
+const WRONG_PASSPHRASE =
+  'Could not decrypt the cloud copy. Is the passphrase exactly the same as on the other device?'
 
 export type SyncStatus =
   'disabled' | 'idle' | 'syncing' | 'synced' | 'offline' | 'error' | 'conflict' | 'paused'
@@ -102,6 +113,10 @@ function fail(failure: ApiFailure) {
   })
 }
 
+function setError(message: string) {
+  useSyncStore.setState({ status: 'error', message })
+}
+
 function succeed(message: string) {
   useSyncStore.setState({
     status: 'synced',
@@ -111,25 +126,26 @@ function succeed(message: string) {
   })
 }
 
-async function encryptCurrentState(config: SyncConfig): Promise<SyncEnvelope> {
-  const cipher = await encryptJson(useStore.getState().data, config.passphrase, {
-    salt: fromBase64(config.salt),
-    // Stated rather than defaulted, so the engine's suite can run the real
-    // algorithms at a cheap cost without weakening what ships.
-    iterations: PBKDF2_ITERATIONS,
+/** The key lives in IndexedDB; without it there is nothing this engine can do. */
+async function requireSecrets(): Promise<SyncSecrets | null> {
+  const secrets = await loadSecrets()
+  if (secrets === null) setError(NEEDS_PASSPHRASE)
+  return secrets
+}
+
+async function push(config: SyncConfig, secrets: SyncSecrets, baseRevision: number): Promise<void> {
+  const cipher = await encryptJson(secrets.key, useStore.getState().data, {
+    salt: config.salt,
+    iterations: config.iterations,
   })
-  return {
+  const envelope: SyncEnvelope = {
     v: SYNC_WIRE_VERSION,
     updatedAt: new Date().toISOString(),
     deviceId: config.deviceId,
     deviceName: config.deviceName,
     cipher,
   }
-}
-
-async function push(config: SyncConfig, token: string, baseRevision: number): Promise<void> {
-  const envelope = await encryptCurrentState(config)
-  const result = await putState(config.endpoint, token, baseRevision, envelope)
+  const result = await putState(config.endpoint, secrets.authToken, baseRevision, envelope)
   if (result.ok) {
     patchConfig({ dirty: false, lastRevision: result.value.revision })
     succeed(`Uploaded — revision ${result.value.revision}.`)
@@ -146,29 +162,31 @@ async function push(config: SyncConfig, token: string, baseRevision: number): Pr
   fail(result)
 }
 
-async function pull(config: SyncConfig, token: string): Promise<void> {
-  const result = await getState(config.endpoint, token)
+/** The stored key only opens envelopes made with the same salt and cost. */
+function keyFits(cipher: Cipher, config: SyncConfig): boolean {
+  return cipher.salt === config.salt && cipher.iterations === config.iterations
+}
+
+async function pull(config: SyncConfig, secrets: SyncSecrets): Promise<void> {
+  const result = await getState(config.endpoint, secrets.authToken)
   if (!result.ok) return fail(result)
+
+  const { cipher } = result.value.envelope
+  // Distinguish "a different setup wrote this" from "wrong passphrase": both would
+  // otherwise surface as an opaque decrypt failure.
+  if (!keyFits(cipher, config)) return setError(SALT_MISMATCH)
 
   let plain: unknown
   try {
-    plain = await decryptJson(result.value.envelope.cipher, config.passphrase)
+    plain = await decryptJson(secrets.key, cipher)
   } catch {
-    useSyncStore.setState({
-      status: 'error',
-      message:
-        'Could not decrypt the cloud copy. Is the passphrase exactly the same as on the other device?',
-    })
-    return
+    return setError(WRONG_PASSPHRASE)
   }
 
   // The cloud copy is untrusted input, exactly like an imported file: a document
   // from a newer schema is refused (never downgraded), and a malformed one never lands.
   const migrated = migrateToCurrent(plain)
-  if (!migrated.ok) {
-    useSyncStore.setState({ status: 'error', message: migrated.error })
-    return
-  }
+  if (!migrated.ok) return setError(migrated.error)
 
   applyingRemote = true
   try {
@@ -185,10 +203,10 @@ async function pull(config: SyncConfig, token: string): Promise<void> {
  * Fetch the current revision, then write over it. This is the deliberate
  * "my copy wins" path: conflict resolution and resuming after a reset.
  */
-async function forcePush(config: SyncConfig, token: string): Promise<void> {
-  const meta = await getMeta(config.endpoint, token)
+async function forcePush(config: SyncConfig, secrets: SyncSecrets): Promise<void> {
+  const meta = await getMeta(config.endpoint, secrets.authToken)
   if (!meta.ok && meta.kind !== 'notfound') return fail(meta)
-  await push(config, token, meta.ok ? meta.value.revision : 0)
+  await push(config, secrets, meta.ok ? meta.value.revision : 0)
 }
 
 /** Run one full sync cycle. Safe to call at any time; overlapping calls collapse. */
@@ -198,8 +216,10 @@ export async function syncNow(): Promise<void> {
   running = true
   useSyncStore.setState({ status: 'syncing', message: null })
   try {
-    const token = await deriveAuthToken(config.passphrase)
-    const meta = await getMeta(config.endpoint, token)
+    const secrets = await requireSecrets()
+    if (secrets === null) return
+
+    const meta = await getMeta(config.endpoint, secrets.authToken)
     if (!meta.ok && meta.kind !== 'notfound') return fail(meta)
     const remote = meta.ok ? meta.value : null
 
@@ -213,11 +233,11 @@ export async function syncNow(): Promise<void> {
         })
         return
       case 'first-push':
-        return await push(config, token, 0)
+        return await push(config, secrets, 0)
       case 'push':
-        return await push(config, token, config.lastRevision)
+        return await push(config, secrets, config.lastRevision)
       case 'pull':
-        return await pull(config, token)
+        return await pull(config, secrets)
       case 'conflict':
         useSyncStore.setState({
           status: 'conflict',
@@ -239,9 +259,10 @@ export async function resolveConflict(choice: ConflictChoice): Promise<void> {
   running = true
   useSyncStore.setState({ status: 'syncing', message: null })
   try {
-    const token = await deriveAuthToken(config.passphrase)
-    if (choice === 'keep-local') await forcePush(config, token)
-    else await pull(config, token)
+    const secrets = await requireSecrets()
+    if (secrets === null) return
+    if (choice === 'keep-local') await forcePush(config, secrets)
+    else await pull(config, secrets)
   } finally {
     running = false
   }
@@ -256,9 +277,18 @@ export interface EnableInput {
 export type EnableResult = { ok: true; token: string } | { ok: false; error: string }
 
 /**
- * Turn sync on for this device. Whether the first cycle seeds the cloud or adopts
- * it comes down to `hasUserData`: a fresh second device must pull, not be told it
- * conflicts with the data it is trying to fetch.
+ * Turn sync on for this device.
+ *
+ * If the cloud already holds a copy we **adopt its salt** rather than minting a new
+ * one, so the key derived here opens that envelope: without this a second device
+ * would encrypt correctly but never be able to read what the first one wrote. When
+ * the endpoint is unreachable (or the token is not set on the Worker yet, which is
+ * the normal first-run state) a fresh salt is used instead — a later pull of a
+ * foreign envelope reports `SALT_MISMATCH` rather than failing obscurely.
+ *
+ * Whether the first cycle seeds the cloud or adopts it comes down to `hasUserData`:
+ * a fresh second device must pull, not be told it conflicts with the data it is
+ * trying to fetch.
  *
  * @returns the derived `SYNC_TOKEN` for the user to set on their Worker.
  */
@@ -273,10 +303,32 @@ export async function enableSync(input: EnableInput): Promise<EnableResult> {
       error: `The passphrase must be at least ${MIN_PASSPHRASE_LENGTH} characters — it is the encryption key.`,
     }
   }
+
+  const authToken = await deriveAuthToken(input.passphrase)
+  let salt = toBase64(randomBytes(SALT_BYTES))
+  let iterations = PBKDF2_ITERATIONS
+
+  const meta = await getMeta(endpoint, authToken)
+  if (meta.ok) {
+    const remote = await getState(endpoint, authToken)
+    if (remote.ok) {
+      salt = remote.value.envelope.cipher.salt
+      iterations = remote.value.envelope.cipher.iterations
+    }
+  }
+
+  const key = await deriveKey(input.passphrase, fromBase64(salt), iterations)
+  if (!(await saveSecrets({ key, authToken }))) {
+    return {
+      ok: false,
+      error: 'This browser refused to store the sync key (private mode?). Sync stays off.',
+    }
+  }
+
   const config: SyncConfig = {
     endpoint,
-    passphrase: input.passphrase,
-    salt: toBase64(randomBytes(16)),
+    salt,
+    iterations,
     deviceId: crypto.randomUUID(),
     deviceName: input.deviceName.trim() === '' ? 'This device' : input.deviceName.trim(),
     lastRevision: 0,
@@ -285,17 +337,18 @@ export async function enableSync(input: EnableInput): Promise<EnableResult> {
   }
   saveSyncConfig(config)
   useSyncStore.setState({ config, status: 'idle', message: null, conflictRemote: null })
-  return { ok: true, token: await deriveAuthToken(config.passphrase) }
+  return { ok: true, token: authToken }
 }
 
-/** Forget the config on this device, optionally removing the cloud copy first. */
+/** Forget this device's key and config, optionally removing the cloud copy first. */
 export async function disableSync(deleteRemote = false): Promise<void> {
   const config = useSyncStore.getState().config
   cancelPush()
   if (config !== null && deleteRemote) {
-    const token = await deriveAuthToken(config.passphrase)
-    await deleteState(config.endpoint, token)
+    const secrets = await loadSecrets()
+    if (secrets !== null) await deleteState(config.endpoint, secrets.authToken)
   }
+  await clearSecrets()
   clearSyncConfig()
   useSyncStore.setState({
     config: null,
@@ -330,13 +383,14 @@ export async function resumeAfterReset(choice: 'upload-empty' | 'restore-cloud')
   running = true
   useSyncStore.setState({ status: 'syncing', message: null })
   try {
-    const token = await deriveAuthToken(resumed.passphrase)
+    const secrets = await requireSecrets()
+    if (secrets === null) return
     // Both branches bypass `decideSync` deliberately. After a reset this device is
     // still *in step* with the cloud (`lastRevision` never moved), so the decision
     // core would answer `idle` and neither restoring nor uploading would happen.
     // The user has already told us which copy wins.
-    if (choice === 'restore-cloud') await pull(resumed, token)
-    else await forcePush(resumed, token)
+    if (choice === 'restore-cloud') await pull(resumed, secrets)
+    else await forcePush(resumed, secrets)
   } finally {
     running = false
   }

@@ -31,11 +31,15 @@ day 1 afterwards is `setStartDate`, which Settings guards behind a confirm.
 3. **Personal data is local-only by default (D3, as amended by E10).** The app
    never auto-loads or auto-uploads data. Cloud sync is strictly opt-in,
    end-to-end encrypted on the device, and points at a backend the user hosts —
-   the plaintext and the passphrase never leave the browser, and with sync off
-   there are zero network calls. Real converter output (`p90x-data*.json`) is
-   gitignored. The repo ships only the fabricated `public/sample-data.json`. Do
-   not commit real figures — not in code, tests, fixtures, or docs (`docs/PRD.md`
-   is a sanitized copy). Never commit a `SYNC_TOKEN`, endpoint, or KV id.
+   the plaintext never leaves the browser, and with sync off there are zero
+   network calls. **No secret is ever written to `localStorage`:** the passphrase
+   is never persisted at all, and the non-extractable AES key plus the auth token
+   live in IndexedDB (`state/syncSecrets.ts`). Keep it that way — CodeQL's
+   clear-text-storage rule guards this, and it is right to. Real converter output
+   (`p90x-data*.json`) is gitignored. The repo ships only the fabricated
+   `public/sample-data.json`. Do not commit real figures — not in code, tests,
+   fixtures, or docs (`docs/PRD.md` is a sanitized copy). Never commit a
+   `SYNC_TOKEN`, endpoint, or KV id.
 4. **No fabricated quote attributions (D5).** Built-in quotes are unattributed
    unless the attribution is verifiable.
 5. **Dates are local-calendar ISO strings** (`YYYY-MM-DD`). Never do `Date` UTC

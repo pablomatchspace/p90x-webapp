@@ -6,11 +6,12 @@ import { z } from 'zod'
  *
  * - no `SCHEMA_VERSION` bump and no migration for a feature that adds no user data;
  * - exports stay byte-identical to v1.0.0 and portable between devices, which they
- *   would not be if they carried one device's endpoint and passphrase.
+ *   would not be if they carried one device's endpoint and credentials.
  *
- * The passphrase is stored so background pushes need no prompt. It is the price of
- * unattended sync; it never leaves the device, and the blob it protects is useless
- * to anyone holding only the server's copy.
+ * **Nothing here is a secret.** The passphrase is never persisted at all, and the
+ * encryption key and auth token live in IndexedDB (`state/syncSecrets.ts`). `salt`
+ * and `iterations` are public by design — they travel in the envelope so a second
+ * device can derive the same key from the passphrase alone.
  */
 const SYNC_KEY = 'p90x.sync'
 
@@ -18,9 +19,9 @@ export const pausedReasonSchema = z.enum(['after-reset', 'manual'])
 
 export const syncConfigSchema = z.object({
   endpoint: z.string().min(1),
-  passphrase: z.string().min(1),
-  /** base64 PBKDF2 salt, fixed at enable so the derived key can be cached */
+  /** base64 PBKDF2 salt — public; adopted from the cloud copy when one already exists */
   salt: z.string().min(1),
+  iterations: z.number().int().positive(),
   deviceId: z.string().min(1),
   deviceName: z.string(),
   /** revision this device last agreed with; 0 = never synced */

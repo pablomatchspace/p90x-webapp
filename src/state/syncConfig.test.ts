@@ -9,8 +9,8 @@ import {
 
 const config: SyncConfig = {
   endpoint: 'https://p90x-sync.example.workers.dev',
-  passphrase: 'a good passphrase',
   salt: 'c2FsdA==',
+  iterations: 600000,
   deviceId: 'device-1',
   deviceName: 'Desktop',
   lastRevision: 3,
@@ -26,6 +26,14 @@ describe('sync config persistence', () => {
   it('round-trips through its own key', () => {
     expect(saveSyncConfig(config)).toBe(true)
     expect(loadSyncConfig()).toEqual(config)
+  })
+
+  it('holds no secret: no passphrase, no key, no token', () => {
+    saveSyncConfig(config)
+    const raw = localStorage.getItem('p90x.sync')!
+    expect(raw).not.toMatch(/passphrase|token|secret|key"/i)
+    // salt and iterations are public — they travel in the envelope by design
+    expect(JSON.parse(raw)).toMatchObject({ salt: 'c2FsdA==', iterations: 600000 })
   })
 
   it('is stored outside the app document, so exports never carry it', () => {
@@ -44,6 +52,8 @@ describe('sync config persistence', () => {
     localStorage.setItem('p90x.sync', JSON.stringify({ ...config, lastRevision: -1 }))
     expect(loadSyncConfig()).toBeNull()
     localStorage.setItem('p90x.sync', JSON.stringify({ ...config, pausedReason: 'whenever' }))
+    expect(loadSyncConfig()).toBeNull()
+    localStorage.setItem('p90x.sync', JSON.stringify({ ...config, iterations: 0 }))
     expect(loadSyncConfig()).toBeNull()
   })
 

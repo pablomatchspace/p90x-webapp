@@ -2,11 +2,13 @@ import type { Cipher } from '@/lib/sync'
 
 /**
  * End-to-end encryption for cloud sync (E10, US-090). WebCrypto only — no
- * dependencies, no key material ever leaves the device.
+ * dependencies, and no key material ever leaves the device.
  *
  * Two *different* values are derived from the one passphrase:
  *
- * - the **encryption key** (PBKDF2 → AES-GCM), which never leaves the browser;
+ * - the **encryption key** (PBKDF2 → AES-GCM), which is created **non-extractable**:
+ *   script can encrypt and decrypt with it, but cannot read its bytes back out, and
+ *   the passphrase itself is never persisted (see `state/syncSecrets.ts`);
  * - the **auth token** (a plain SHA-256 of a domain-separated string), which the
  *   Worker stores and compares.
  *
@@ -17,8 +19,9 @@ import type { Cipher } from '@/lib/sync'
 /** OWASP's current PBKDF2-SHA256 floor. Recorded per-envelope so it can be raised. */
 export const PBKDF2_ITERATIONS = 600_000
 
+export const SALT_BYTES = 16
+
 const AUTH_PREFIX = 'p90x-sync-auth-v1:'
-const SALT_BYTES = 16
 const IV_BYTES = 12
 
 export function randomBytes(length: number): Uint8Array {
@@ -54,7 +57,15 @@ export async function deriveAuthToken(passphrase: string): Promise<string> {
   return toBase64Url(new Uint8Array(digest))
 }
 
-async function deriveKey(
+/**
+ * Stretch the passphrase into an AES-GCM key.
+ *
+ * `extractable: false` is the point: the key can be structured-cloned into
+ * IndexedDB and used forever, but `exportKey` will refuse, so neither an XSS
+ * payload nor a copy of the browser profile yields anything that decrypts the
+ * blob offline. The passphrase is dropped as soon as this returns.
+ */
+export async function deriveKey(
   passphrase: string,
   salt: Uint8Array,
   iterations: number,
@@ -76,23 +87,19 @@ async function deriveKey(
 }
 
 export interface EncryptOptions {
-  /** reused across pushes so the derived key can be cached; random at first enable */
-  salt?: Uint8Array
+  /** base64 — echoed into the envelope so another device can derive the same key */
+  salt: string
+  iterations: number
   /** fresh per push — never reuse an AES-GCM nonce under the same key */
   iv?: Uint8Array
-  /** lowered in tests; production always uses PBKDF2_ITERATIONS */
-  iterations?: number
 }
 
 export async function encryptJson(
+  key: CryptoKey,
   value: unknown,
-  passphrase: string,
-  options: EncryptOptions = {},
+  options: EncryptOptions,
 ): Promise<Cipher> {
-  const salt = options.salt ?? randomBytes(SALT_BYTES)
   const iv = options.iv ?? randomBytes(IV_BYTES)
-  const iterations = options.iterations ?? PBKDF2_ITERATIONS
-  const key = await deriveKey(passphrase, salt, iterations)
   const plaintext = new TextEncoder().encode(JSON.stringify(value))
   const buffer = await crypto.subtle.encrypt(
     { name: 'AES-GCM', iv: iv as BufferSource },
@@ -100,16 +107,19 @@ export async function encryptJson(
     plaintext,
   )
   return {
-    salt: toBase64(salt),
+    salt: options.salt,
     iv: toBase64(iv),
-    iterations,
+    iterations: options.iterations,
     data: toBase64(new Uint8Array(buffer)),
   }
 }
 
-/** Throws when the passphrase is wrong or the ciphertext was tampered with (GCM auth tag). */
-export async function decryptJson(cipher: Cipher, passphrase: string): Promise<unknown> {
-  const key = await deriveKey(passphrase, fromBase64(cipher.salt), cipher.iterations)
+/**
+ * Throws when the key is wrong (different passphrase) or the ciphertext was
+ * tampered with (GCM auth tag). Callers compare `cipher.salt` against their own
+ * first, so a mismatch reports the real cause instead of a bare decrypt failure.
+ */
+export async function decryptJson(key: CryptoKey, cipher: Cipher): Promise<unknown> {
   const buffer = await crypto.subtle.decrypt(
     { name: 'AES-GCM', iv: fromBase64(cipher.iv) as BufferSource },
     key,

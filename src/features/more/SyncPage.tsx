@@ -12,7 +12,7 @@ import {
 } from 'lucide-react'
 import { Card, Page } from '@/components/Page'
 import { MIN_PASSPHRASE_LENGTH } from '@/lib/sync'
-import { deriveAuthToken } from '@/lib/syncCrypto'
+import { loadSecrets } from '@/state/syncSecrets'
 import {
   disableSync,
   enableSync,
@@ -162,8 +162,9 @@ function EnableForm() {
           />
           <span id="sync-passphrase-hint" className="text-xs text-zinc-500 dark:text-zinc-400">
             At least {MIN_PASSPHRASE_LENGTH} characters. This is the encryption key: the same
-            passphrase on your other device, and nowhere else. If you lose it, the cloud copy cannot
-            be read — your data on this device is unaffected.
+            passphrase on your other device, and nowhere else. It is never stored or uploaded — only
+            the key it unlocks is kept, and this browser cannot read that key back out. If you lose
+            the passphrase the cloud copy cannot be read; your data on this device is unaffected.
           </span>
         </div>
         <div className="flex flex-col gap-1 text-sm">
@@ -321,7 +322,7 @@ export function SyncPage() {
           <button
             type="button"
             className={secondary}
-            onClick={() => void deriveAuthToken(config.passphrase).then(setToken)}
+            onClick={() => void loadSecrets().then((s) => setToken(s?.authToken ?? null))}
           >
             Show setup token
           </button>
