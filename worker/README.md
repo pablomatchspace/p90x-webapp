@@ -26,15 +26,9 @@ untouched. Disable and re-enable sync with a new passphrase to start a fresh one
 
 ## Setup — pick one
 
-You need a free Cloudflare account for all three.
+You need a free Cloudflare account for both.
 
-### 1. Deploy button (easiest)
-
-Follow the **Deploy to Cloudflare** link in the [project README](../README.md).
-Cloudflare signs you in, copies this Worker into your account and deploys it.
-Then jump to [Connect the app](#connect-the-app).
-
-### 2. Cloudflare dashboard — no terminal, no clone
+### 1. Cloudflare dashboard — no terminal, no clone
 
 `index.js` is a single file with **no imports** precisely so it can be pasted.
 
@@ -53,7 +47,7 @@ Then jump to [Connect the app](#connect-the-app).
 
 Copy your Worker's URL (`https://p90x-sync.<your-subdomain>.workers.dev`).
 
-### 3. wrangler CLI
+### 2. wrangler CLI
 
 ```bash
 npm install -g wrangler        # or use npx below

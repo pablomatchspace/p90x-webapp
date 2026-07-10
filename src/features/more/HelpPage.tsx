@@ -41,9 +41,14 @@ export function HelpPage() {
         <h2 className="text-base font-semibold">Your data stays here</h2>
         <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
           Everything you enter lives on this device — in your browser&rsquo;s local storage and in
-          the backup files you export. There is no server, no account and no analytics; nothing is
-          ever uploaded. Because a browser can clear local storage on its own, back up regularly
-          with <span className="font-medium">Data → Export</span> and keep the file somewhere safe.
+          the backup files you export. There is no account and no analytics, and nothing is uploaded
+          anywhere. Because a browser can clear local storage on its own, back up regularly with{' '}
+          <span className="font-medium">Data → Export</span> and keep the file somewhere safe.
+        </p>
+        <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
+          The one exception is <span className="font-medium">Cloud sync</span>, which is off unless
+          you turn it on. It uploads to a backend <em>you</em> run, and encrypts everything on this
+          device first with a passphrase only you know — the server stores data it cannot read.
         </p>
       </Card>
 
