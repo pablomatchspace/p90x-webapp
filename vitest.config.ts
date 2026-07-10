@@ -13,7 +13,7 @@ export default defineConfig({
     include: ['src/**/*.test.{ts,tsx}', 'worker/**/*.test.ts'],
     coverage: {
       provider: 'v8',
-      include: ['src/lib/**', 'src/state/**'],
+      include: ['src/lib/**', 'src/state/**', 'worker/index.js'],
     },
   },
 })

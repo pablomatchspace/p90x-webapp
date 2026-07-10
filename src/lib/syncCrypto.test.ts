@@ -30,22 +30,63 @@ describe('base64 helpers', () => {
 
 describe('deriveAuthToken', () => {
   it('is deterministic and base64url (no +, /, or padding)', async () => {
-    const a = await deriveAuthToken('correct horse battery')
-    const b = await deriveAuthToken('correct horse battery')
+    const a = await deriveAuthToken('correct horse battery', FAST)
+    const b = await deriveAuthToken('correct horse battery', FAST)
     expect(a).toBe(b)
     expect(a).toMatch(/^[A-Za-z0-9_-]{43}$/)
   })
 
+  it('derives at the production cost by default — a stolen token is as slow to brute-force as the key', async () => {
+    const token = await deriveAuthToken('correct horse battery')
+    expect(token).toMatch(/^[A-Za-z0-9_-]{43}$/)
+    // PBKDF2 output depends on the iteration count, so the default differs from FAST.
+    expect(token).not.toBe(await deriveAuthToken('correct horse battery', FAST))
+  })
+
   it('differs for different passphrases', async () => {
-    expect(await deriveAuthToken('passphrase-a')).not.toBe(await deriveAuthToken('passphrase-b'))
+    expect(await deriveAuthToken('passphrase-a', FAST)).not.toBe(
+      await deriveAuthToken('passphrase-b', FAST),
+    )
   })
 
   it('is not the encryption key: the token cannot open an envelope', async () => {
     const passphrase = 'shared secret phrase'
     const cipher = await encryptJson(await key(passphrase), { hello: 'world' }, opts())
-    const token = await deriveAuthToken(passphrase)
+    const token = await deriveAuthToken(passphrase, FAST)
     // The Worker only ever holds `token`. A key stretched from it must not decrypt.
     await expect(decryptJson(await key(token), cipher)).rejects.toThrow()
+  })
+
+  it('stays domain-separated even under an attacker-chosen salt', async () => {
+    // The envelope's salt is server-supplied. A malicious server can set it to the
+    // token derivation's fixed salt hoping the token it already holds *is* the
+    // encryption key. The AUTH_PREFIX on the password input must make the two
+    // derivations disjoint for every possible salt — including this one.
+    const passphrase = 'shared secret phrase'
+    const authSalt = toBase64(new TextEncoder().encode('p90x-sync-auth-v1'))
+    const cipher = await encryptJson(
+      await key(passphrase, FAST, authSalt),
+      { secret: 1 },
+      opts(FAST, authSalt),
+    )
+
+    const token = await deriveAuthToken(passphrase, FAST)
+    const padded = token.replace(/-/g, '+').replace(/_/g, '/')
+    const tokenBytes = fromBase64(padded + '='.repeat((4 - (padded.length % 4)) % 4))
+    const tokenAsKey = await crypto.subtle.importKey(
+      'raw',
+      tokenBytes as BufferSource,
+      'AES-GCM',
+      false,
+      ['decrypt'],
+    )
+    await expect(
+      crypto.subtle.decrypt(
+        { name: 'AES-GCM', iv: fromBase64(cipher.iv) as BufferSource },
+        tokenAsKey,
+        fromBase64(cipher.data) as BufferSource,
+      ),
+    ).rejects.toThrow()
   })
 })
 

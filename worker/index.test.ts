@@ -193,6 +193,17 @@ describe('round trip', () => {
     expect(await (await call('/v1/meta')).json()).toMatchObject({ revision: 1 })
   })
 
+  it('normalises partial metadata instead of echoing it (the app schema requires every field)', async () => {
+    await put(0)
+    const stored = env.SYNC_KV.store.get('state')!
+    env.SYNC_KV.store.set('state', { value: stored.value, metadata: { revision: 3 } })
+    expect(await (await call('/v1/meta')).json()).toEqual({
+      revision: 3,
+      updatedAt: '',
+      deviceName: null,
+    })
+  })
+
   it('deletes, and then reports empty again', async () => {
     await put(0)
     expect((await call('/v1/state', { method: 'DELETE' })).status).toBe(200)
@@ -205,5 +216,13 @@ describe('routing', () => {
   it('404s an unknown path and 405s an unsupported method', async () => {
     expect((await call('/v1/nope')).status).toBe(404)
     expect((await call('/v1/state', { method: 'POST' })).status).toBe(405)
+    expect((await call('/v1/meta', { method: 'POST' })).status).toBe(405)
+  })
+
+  it('serves the same routes behind a mounted path prefix — the app accepts endpoint URLs with a path', async () => {
+    await put(0)
+    expect((await call('/tenant/p90x/v1/meta')).status).toBe(200)
+    expect((await call('/tenant/p90x/v1/state')).status).toBe(200)
+    expect((await call('/xv1/state')).status).toBe(404) // suffix must sit on a path boundary
   })
 })

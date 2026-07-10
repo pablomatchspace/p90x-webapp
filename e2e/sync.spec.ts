@@ -78,11 +78,12 @@ async function startProgram(page: Page) {
   await expect(page.getByText('Day 1 of 90', { exact: true })).toBeVisible()
 }
 
-async function enableSync(page: Page) {
+async function enableSync(page: Page, deviceName = 'Desktop') {
   await page.goto('#/more/sync')
+  await dismissToast(page)
   await page.getByLabel('Endpoint URL').fill(ENDPOINT)
   await page.getByLabel('Passphrase', { exact: true }).fill(PASSPHRASE)
-  await page.getByLabel('Device name').fill('Desktop')
+  await page.getByLabel('Device name').fill(deviceName)
   await page.getByRole('button', { name: 'Enable sync' }).click()
 }
 
@@ -95,6 +96,10 @@ test('enabling sync uploads an encrypted copy, and a second device pulls it back
   await startProgram(page)
   await enableSync(page)
 
+  // The setup token appears without another click — the README promises this, and
+  // on a real first run the sync below would 401 until it is set on the Worker.
+  await expect(page.getByText('Set this as SYNC_TOKEN on your Worker')).toBeVisible()
+
   await expect(page.getByText('Uploaded — revision 1.')).toBeVisible()
   expect(server.revision).toBe(1)
 
@@ -104,16 +109,21 @@ test('enabling sync uploads an encrypted copy, and a second device pulls it back
   expect(server.puts[0]).not.toContain('startDate')
   expect(server.puts[0]).toContain('cipher')
 
-  // Simulate a second device: same endpoint and passphrase, no local document and
-  // no knowledge of any revision.
-  await page.evaluate(() => {
-    localStorage.removeItem('p90x.state')
-    const config = JSON.parse(localStorage.getItem('p90x.sync')!)
-    localStorage.setItem('p90x.sync', JSON.stringify({ ...config, lastRevision: 0, dirty: false }))
+  // A true second device: no document, no config, no key — only the endpoint and
+  // the passphrase, entered through the form. Everything else must be recovered:
+  // the token re-derived, the cloud envelope's salt adopted, the blob decrypted.
+  await page.evaluate(async () => {
+    localStorage.clear()
+    await new Promise<void>((resolve) => {
+      const request = indexedDB.deleteDatabase('p90x-sync')
+      request.onsuccess = () => resolve()
+      request.onerror = () => resolve()
+      request.onblocked = () => resolve()
+    })
   })
   await page.reload()
+  await enableSync(page, 'Phone')
 
-  // Boot decides `pull`, fetches, decrypts with the passphrase alone, and applies.
   await expect(page.getByText('Downloaded — revision 1.')).toBeVisible()
   await page.goto('#/today')
   await expect(page.getByText('Day 1 of 90', { exact: true })).toBeVisible()

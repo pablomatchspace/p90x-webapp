@@ -201,6 +201,45 @@ describe('enableSync', () => {
     expect(config().iterations).toBe(1000) // the mocked production constant
   })
 
+  it('refuses to adopt out-of-bounds KDF iterations — no silent downgrade, no stall', async () => {
+    const envelope = {
+      v: 1,
+      updatedAt: 'x',
+      deviceId: 'other',
+      deviceName: 'Phone',
+      cipher: { salt: 'c2FsdA==', iv: 'aXY=', iterations: 500, data: 'ZGF0YQ==' },
+    }
+    route('GET /v1/meta', () => json({ revision: 1, updatedAt: 'x' }))
+    route('GET /v1/state', () => json({ revision: 1, envelope }))
+
+    const low = await enableSync({ endpoint: ENDPOINT, passphrase: PASSPHRASE, deviceName: 'D' })
+    expect(low).toEqual({ ok: false, error: expect.stringContaining('unsupported encryption') })
+
+    envelope.cipher.iterations = 99_999_999
+    const high = await enableSync({ endpoint: ENDPOINT, passphrase: PASSPHRASE, deviceName: 'D' })
+    expect(high).toEqual({ ok: false, error: expect.stringContaining('unsupported encryption') })
+    expect(loadSyncConfig()).toBeNull()
+  })
+
+  it('a malformed envelope at enable falls back to a fresh salt instead of crashing', async () => {
+    route('GET /v1/meta', () => json({ revision: 1, updatedAt: 'x' }))
+    route('GET /v1/state', () =>
+      json({
+        revision: 1,
+        envelope: {
+          v: 1,
+          updatedAt: 'x',
+          deviceId: 'other',
+          deviceName: 'Phone',
+          cipher: { salt: '!!!', iv: 'aXY=', iterations: 1000, data: 'ZGF0YQ==' },
+        },
+      }),
+    )
+    const result = await enableSync({ endpoint: ENDPOINT, passphrase: PASSPHRASE, deviceName: 'D' })
+    expect(result.ok).toBe(true)
+    expect(config().salt).not.toBe('!!!')
+  })
+
   it('marks a document with data dirty (it seeds the cloud)', async () => {
     useStore.getState().mutate((d) => {
       d.settings.startDate = '2026-01-05'
@@ -350,6 +389,93 @@ describe('missing key', () => {
     expect(useSyncStore.getState().status).toBe('error')
     expect(useSyncStore.getState().message).toContain('re-enter your passphrase')
     expect(putBodies).toHaveLength(0)
+  })
+})
+
+describe('mid-flight edits (the lost-update race)', () => {
+  it('an edit made while a push is in flight stays dirty and is pushed afterwards', async () => {
+    useStore.getState().mutate((d) => {
+      d.notes = 'first'
+    })
+    const detach = attachSync()
+    await enable({ lastRevision: 0, dirty: true })
+
+    let resolvePut: ((response: Response) => void) | null = null
+    let revision = 0
+    route('GET /v1/meta', () =>
+      revision === 0 ? json({ error: 'empty' }, 404) : json({ revision, updatedAt: 'x' }),
+    )
+    route('PUT /v1/state', () => {
+      if (resolvePut === null) {
+        // First PUT: hold the response so an edit can land mid-flight.
+        return new Promise<Response>((res) => {
+          resolvePut = res
+        })
+      }
+      revision = 2
+      return json({ revision: 2, updatedAt: 'x' })
+    })
+
+    const cycle = syncNow()
+    await vi.waitFor(() => expect(putBodies).toHaveLength(1))
+    useStore.getState().mutate((d) => {
+      d.notes = 'second — landed during the flight'
+    })
+    revision = 1
+    resolvePut!(json({ revision: 1, updatedAt: 'x' }))
+    await cycle
+
+    // The interim edit must NOT have been marked clean by the completed upload.
+    expect(loadSyncConfig()).toMatchObject({ dirty: true, lastRevision: 1 })
+
+    // The next cycle carries it up, based on the revision the first one earned.
+    await syncNow()
+    expect(putBodies).toHaveLength(2)
+    expect(putBodies[1].baseRevision).toBe(1)
+    expect(loadSyncConfig()).toMatchObject({ dirty: false, lastRevision: 2 })
+    detach()
+  })
+})
+
+describe('stale cycles (the generation fence)', () => {
+  it('a cycle resolving after disable changes nothing', async () => {
+    useStore.getState().mutate((d) => {
+      d.notes = 'data'
+    })
+    await enable({ lastRevision: 0, dirty: true })
+    let resolvePut: (response: Response) => void
+    route('GET /v1/meta', () => json({ error: 'empty' }, 404))
+    route(
+      'PUT /v1/state',
+      () =>
+        new Promise<Response>((res) => {
+          resolvePut = res
+        }),
+    )
+
+    const cycle = syncNow()
+    await vi.waitFor(() => expect(putBodies).toHaveLength(1))
+    await disableSync(false)
+    resolvePut!(json({ revision: 1, updatedAt: 'x' }))
+    await cycle
+
+    expect(useSyncStore.getState().status).toBe('disabled')
+    expect(useSyncStore.getState().config).toBeNull()
+    expect(loadSyncConfig()).toBeNull()
+  })
+})
+
+describe('unexpected failures', () => {
+  it('end as an error status, never a stuck "Syncing…"', async () => {
+    await enable({ dirty: true })
+    // A tampered IndexedDB record: present, but not a usable CryptoKey.
+    secrets.current = { key: 'not a key' as unknown as CryptoKey, authToken: 'a'.repeat(43) }
+    route('GET /v1/meta', () => json({ error: 'empty' }, 404))
+
+    await syncNow()
+
+    expect(useSyncStore.getState().status).toBe('error')
+    expect(useSyncStore.getState().message).toContain('Sync failed unexpectedly')
   })
 })
 
@@ -524,6 +650,16 @@ describe('reset', () => {
 
     expect(useStore.getState().data.notes).toBe('survived the reset')
     expect(loadSyncConfig()).toMatchObject({ pausedReason: null, dirty: false, lastRevision: 3 })
+  })
+
+  it('resuming without the key keeps the after-reset safety pause up', async () => {
+    await enable({ lastRevision: 3, dirty: true, pausedReason: 'after-reset' })
+    secrets.current = null
+
+    await resumeAfterReset('restore-cloud')
+
+    expect(loadSyncConfig()?.pausedReason).toBe('after-reset')
+    expect(useSyncStore.getState().message).toContain('re-enter your passphrase')
   })
 
   it('resuming with "upload empty" force-pushes the cleared document', async () => {

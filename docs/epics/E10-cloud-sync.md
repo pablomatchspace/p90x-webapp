@@ -118,9 +118,15 @@ Two different values come out of the one passphrase:
   second device derives the same key from the passphrase alone; the nonce is fresh
   per push; `iterations` is recorded so the cost can be raised without orphaning old
   envelopes.
-- **Auth token** — `SHA-256("p90x-sync-auth-v1:" + passphrase)`, base64url. This is
-  the `SYNC_TOKEN` the Worker stores. A test pins the consequence: **the token
-  cannot decrypt an envelope.** The server it lives on learns nothing.
+- **Auth token** — PBKDF2-SHA256 at the same 600k cost over the domain-separated
+  input `"p90x-sync-auth-v1:" + passphrase` (fixed salt), base64url. This is the
+  `SYNC_TOKEN` the Worker stores. It is deliberately as expensive to brute-force
+  as the key: the server necessarily holds it, and the adversary E2EE exists for
+  _is_ a compromised server — a fast hash here would hand that adversary a cheap
+  passphrase oracle. Two tests pin the consequences: **the token cannot decrypt an
+  envelope**, and the domain separation holds **even under an attacker-chosen
+  salt** (the prefix on the password input, not the salt, is what keeps the two
+  derivations disjoint — the envelope's salt is server-supplied).
 
 **The passphrase is never persisted.** It is stretched into the key at enable time
 and then dropped. The key and the token live in IndexedDB
@@ -145,7 +151,17 @@ correctly but never be able to read what the first one wrote. If the endpoint is
 unreachable at that moment (the normal first run, before `SYNC_TOKEN` is set on the
 Worker) a fresh salt is used, and a later pull of a foreign envelope reports a
 precise "different passphrase or setup" message rather than an opaque decrypt
-failure.
+failure. Adoption is **bounded**: the envelope is server-supplied, so its
+`iterations` must sit within `[PBKDF2_ITERATIONS, KDF_MAX_ITERATIONS]` (no silent
+KDF downgrade, no minutes-long stall) and every cipher field is validated as
+strict base64 before anything feeds `atob`.
+
+The engine is fenced by a **generation counter**: enable, disable, pause, and
+reset each bump it, and an in-flight cycle discards its own results if the world
+moved on — a push resolving after "turn off sync" changes nothing. Push completion
+compares the document against the exact **snapshot it encrypted**: an edit that
+lands mid-flight keeps the dirty flag and schedules a follow-up push, instead of
+being marked clean and later clobbered by a pull.
 
 `decideSync({dirty, lastRevision, remote})` is the entire policy, and is pure:
 
@@ -216,6 +232,10 @@ overwritten, and deep-links to the resolution.
 | Wrong passphrase on the second device        | Token mismatch ⇒ 401 before any decryption; clear message, no data loss |
 | Second device enabled after the first pushed | Adopts the cloud envelope's salt, so its key opens that envelope        |
 | Browser site data cleared (the key is gone)  | "Turn sync off and on again to re-enter your passphrase"; no data loss  |
+| Edit lands while a push is in flight         | Stays dirty (snapshot comparison); a follow-up push is scheduled        |
+| Sync disabled while a cycle is in flight     | Late results discarded (generation fence); status stays disabled        |
+| Envelope demands out-of-bounds KDF cost      | Enable refuses — no silent downgrade, no stall                          |
+| Envelope carries malformed base64            | Rejected by schema before anything reaches `atob`                       |
 | Envelope from a newer app schema             | Pull refused, "update the app"; local untouched                         |
 | Envelope from a newer **wire** version       | Refused by the envelope schema; local untouched                         |
 | Corrupt / undecryptable envelope             | Refused; local untouched; error names the passphrase                    |
@@ -235,6 +255,8 @@ overwritten, and deep-links to the resolution.
 | A pull replaces good local data                                     | Every pull goes through `replaceData`, which writes the one-slot backup first                                                                                                                                                             |
 | Passphrase lost                                                     | Local data unaffected; cloud copy re-created by disable → re-enable                                                                                                                                                                       |
 | A stolen browser profile decrypts the blob offline                  | The passphrase is never persisted, and the AES key is non-extractable — `exportKey` refuses, so its bytes cannot be lifted out of IndexedDB. (Script running _in the origin_ can still use the key; that is inherent to unattended sync.) |
+| Server-held token brute-forced back to the passphrase               | The token is PBKDF2 at the full 600k cost, so each guess is as expensive as attacking the key itself; passphrase entropy still matters (≥ 8 chars enforced, longer advised)                                                               |
+| Malicious server tricks a device into weak or hostile KDF params    | Adopted `iterations` bounded to `[600k, 10M]`; cipher fields schema-validated as strict base64; key/token domain separation holds under attacker-chosen salts (pinned by test)                                                            |
 | IndexedDB unavailable or cleared                                    | Enable fails cleanly ("private mode?"); a later loss reports "re-enter your passphrase". Never data loss                                                                                                                                  |
 | Secrets leak via the public repo                                    | Repo ships code only; `SYNC_TOKEN` is set by the operator; KV holds ciphertext                                                                                                                                                            |
 | A reset wipes the cloud copy                                        | `resetAll` pauses sync; resuming demands an explicit choice                                                                                                                                                                               |

@@ -114,9 +114,17 @@ async function readMeta(env) {
   const listed = await env.SYNC_KV.list({ prefix: STATE_KEY, limit: 1 })
   const entry = listed.keys.find((key) => key.name === STATE_KEY)
   if (entry === undefined) return null
-  if (entry.metadata && Number.isInteger(entry.metadata.revision)) return entry.metadata
-  // Metadata missing (hand-seeded key, or a write from a future version): fall back
-  // to the value so a readable record never looks empty.
+  if (entry.metadata && Number.isInteger(entry.metadata.revision)) {
+    // Normalise rather than echo: hand-seeded or future-version metadata missing a
+    // field would otherwise serialise a meta the app's schema rejects.
+    return {
+      revision: entry.metadata.revision,
+      updatedAt: typeof entry.metadata.updatedAt === 'string' ? entry.metadata.updatedAt : '',
+      deviceName: typeof entry.metadata.deviceName === 'string' ? entry.metadata.deviceName : null,
+    }
+  }
+  // Metadata missing entirely: fall back to the value so a readable record never
+  // looks empty.
   const record = await env.SYNC_KV.get(STATE_KEY, { type: 'json' })
   if (record === null || !Number.isInteger(record.revision)) return null
   return { revision: record.revision, updatedAt: record.envelope?.updatedAt ?? '' }
@@ -195,12 +203,16 @@ export async function handleRequest(request, env) {
 
   const { pathname } = new URL(request.url)
 
-  if (pathname === '/v1/meta' && request.method === 'GET') {
+  // Suffix matching, not equality: the app deliberately accepts endpoint URLs with
+  // a path (a Worker mounted behind a route prefix on a custom domain), so the
+  // reference implementation has to accept the prefixed form too.
+  if (pathname.endsWith('/v1/meta')) {
+    if (request.method !== 'GET') return json({ error: 'method not allowed' }, 405, cors)
     const meta = await readMeta(env)
     return meta === null ? json({ error: 'empty' }, 404, cors) : json(meta, 200, cors)
   }
 
-  if (pathname === '/v1/state') {
+  if (pathname.endsWith('/v1/state')) {
     if (request.method === 'GET') {
       const record = await env.SYNC_KV.get(STATE_KEY, { type: 'json' })
       return record === null ? json({ error: 'empty' }, 404, cors) : json(record, 200, cors)

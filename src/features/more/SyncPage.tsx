@@ -79,7 +79,7 @@ function TokenCard({ token }: { token: string }) {
   )
 }
 
-function EnableForm() {
+function EnableForm({ onEnabled }: { onEnabled: (token: string) => void }) {
   const [endpoint, setEndpoint] = useState('')
   const [passphrase, setPassphrase] = useState('')
   const [deviceName, setDeviceName] = useState('')
@@ -96,6 +96,10 @@ function EnableForm() {
       setError(result.error)
       return
     }
+    // Hand the token up before this form unmounts, so the status view opens with
+    // it already on screen — on a first setup, the sync below will 401 until the
+    // user has copied this value onto the Worker.
+    onEnabled(result.token)
     void syncNow()
   }
 
@@ -202,7 +206,7 @@ export function SyncPage() {
   if (config === null) {
     return (
       <Page title="Cloud sync" subtitle="Off — your data stays on this device">
-        <EnableForm />
+        <EnableForm onEnabled={setToken} />
       </Page>
     )
   }

@@ -17,9 +17,11 @@ The Worker sees an envelope like `{v, updatedAt, deviceId, deviceName, cipher}`
 where `cipher.data` is AES-256-GCM ciphertext. The key is derived from your
 passphrase inside the browser and **never sent anywhere**.
 
-The `SYNC_TOKEN` this Worker checks is a SHA-256 of your passphrase under a
-different prefix, so it authenticates you without being able to decrypt anything.
-Someone who steals the token can delete or overwrite your blob; they cannot read it.
+The `SYNC_TOKEN` this Worker checks is a slow PBKDF2 hash (600k rounds) of your
+passphrase under a different context, so it authenticates you without being able
+to decrypt anything — and even someone who steals it faces the same brute-force
+cost as attacking the encryption itself. A stolen token can delete or overwrite
+your blob; it cannot read it, and it does not cheaply reveal your passphrase.
 
 Your passphrase is never stored — not on the server, and not in the browser. The
 app stretches it into a key once, keeps that key in IndexedDB in a form the browser

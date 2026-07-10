@@ -71,6 +71,13 @@ describe('hasUserData', () => {
       (s: ReturnType<typeof emptyState>) => s.quotes.custom.push({ id: 'c-1', text: 'Go' }),
     ],
     ['notes', (s: ReturnType<typeof emptyState>) => (s.notes = 'hello')],
+    // A field list used to miss this: someone who had only filled in Settings
+    // would have had them silently replaced by the first pull.
+    ['settings-only changes', (s: ReturnType<typeof emptyState>) => (s.settings.height = 1.8)],
+    [
+      'a scoring tweak',
+      (s: ReturnType<typeof emptyState>) => (s.settings.scoring.penaltyOn = false),
+    ],
   ])('is true with %s', (_label, mutate) => {
     const state = emptyState()
     mutate(state)
@@ -120,6 +127,15 @@ describe('wire schemas', () => {
   it('rejects a cipher missing its iteration count', () => {
     const { iterations: _iterations, ...cipher } = envelope.cipher
     expect(syncEnvelopeSchema.safeParse({ ...envelope, cipher }).success).toBe(false)
+  })
+
+  it('rejects non-base64 cipher fields — they feed atob, which throws', () => {
+    const withSalt = { ...envelope, cipher: { ...envelope.cipher, salt: '!!!' } }
+    expect(syncEnvelopeSchema.safeParse(withSalt).success).toBe(false)
+    const unpaddedIv = { ...envelope, cipher: { ...envelope.cipher, iv: 'aXY' } }
+    expect(syncEnvelopeSchema.safeParse(unpaddedIv).success).toBe(false)
+    const withData = { ...envelope, cipher: { ...envelope.cipher, data: 'not base64!' } }
+    expect(syncEnvelopeSchema.safeParse(withData).success).toBe(false)
   })
 
   it('accepts meta with a null deviceName', () => {
