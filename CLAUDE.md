@@ -6,9 +6,11 @@ surrounding style.
 
 ## What this is
 
-A client-only, offline-first PWA replacing a P90X Excel workbook. No backend, no
-accounts, no network calls at runtime. Vite + React 19 + TypeScript, Zustand +
-Immer state, Zod-validated import, Tailwind, hand-rolled SVG charts, `vite-plugin-pwa`.
+A client-only, offline-first PWA replacing a P90X Excel workbook. No accounts, and
+no network calls at runtime **except** the opt-in cloud sync of E10, which is off
+unless the user configures an endpoint they host themselves. Vite + React 19 +
+TypeScript, Zustand + Immer state, Zod-validated import, Tailwind, hand-rolled SVG
+charts, `vite-plugin-pwa`.
 
 A program exists exactly when `settings.startDate` is non-null — the schedule is
 `materialize(program, startDate, ops)`, nothing is stored. So there are three ways
@@ -26,10 +28,18 @@ day 1 afterwards is `setStartDate`, which Settings guards behind a confirm.
 2. **Never store derived values.** Only raw inputs live in state; every score,
    penalty, BMI, FFMI, adherence number is a pure function in `src/lib`. This
    keeps import/export minimal and testable.
-3. **Personal data is local-only (D3).** The app never auto-loads data. Real
-   converter output (`p90x-data*.json`) is gitignored. The repo ships only the
-   fabricated `public/sample-data.json`. Do not commit real figures — not in
-   code, tests, fixtures, or docs (`docs/PRD.md` is a sanitized copy).
+3. **Personal data is local-only by default (D3, as amended by E10).** The app
+   never auto-loads or auto-uploads data. Cloud sync is strictly opt-in,
+   end-to-end encrypted on the device, and points at a backend the user hosts —
+   the plaintext never leaves the browser, and with sync off there are zero
+   network calls. **No secret is ever written to `localStorage`:** the passphrase
+   is never persisted at all, and the non-extractable AES key plus the auth token
+   live in IndexedDB (`state/syncSecrets.ts`). Keep it that way — CodeQL's
+   clear-text-storage rule guards this, and it is right to. Real converter output
+   (`p90x-data*.json`) is gitignored. The repo ships only the fabricated
+   `public/sample-data.json`. Do not commit real figures — not in code, tests,
+   fixtures, or docs (`docs/PRD.md` is a sanitized copy). Never commit a
+   `SYNC_TOKEN`, endpoint, or KV id.
 4. **No fabricated quote attributions (D5).** Built-in quotes are unattributed
    unless the attribution is verifiable.
 5. **Dates are local-calendar ISO strings** (`YYYY-MM-DD`). Never do `Date` UTC
@@ -45,6 +55,9 @@ src/components/ Layout, Page, NoProgramCard, ErrorBoundary, SystemBanners, LineC
 src/data/       templates.json + catalog.json — generated from the workbook by tools/, never hand-edited
 e2e/            Playwright specs (per-feature + journeys.spec.ts)
 tools/          convert_xlsm.py (workbook→JSON) and program/catalog generators
+worker/         optional self-hosted sync Worker — plain JS, no imports (paste-able
+                into the Cloudflare dashboard); typechecked via checkJs, tested in
+                the main Vitest run, and NEVER deployed by CI
 ```
 
 Path alias: `@/*` → `src/*`. TS is strict with `verbatimModuleSyntax` (use
@@ -69,7 +82,8 @@ properties / namespaces).
   with `// @vitest-environment jsdom`. Globals are **off** — import `describe`,
   `it`, `expect`, `vi` from `vitest`. `@testing-library/jest-dom` is set up via
   `src/test/setup.ts`; call `cleanup()` yourself in `afterEach` (no auto-cleanup).
-- Coverage is collected on `src/lib/**` and `src/state/**`.
+- Coverage is collected on `src/lib/**`, `src/state/**`, and the sync Worker
+  (`worker/index.js`).
 - **Playwright** serves the **built** app — run `npm run build` before `npm run e2e`.
   Runs chromium + a Pixel 7 mobile profile.
 - **E2E pitfalls (learned the hard way):**

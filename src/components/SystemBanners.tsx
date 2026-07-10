@@ -1,18 +1,42 @@
-import { AlertTriangle, DatabaseBackup } from 'lucide-react'
+import { AlertTriangle, CloudAlert, DatabaseBackup } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { useSyncStore } from '@/state/sync'
 import { useStore } from '@/state/store'
 
 /**
- * App-level notices: corrupted-storage recovery (US-004/US-082) and
- * failing-writes warning (quota / private mode). Rendered inside Layout.
+ * App-level notices: corrupted-storage recovery (US-004/US-082), failing-writes
+ * warning (quota / private mode), and the two cloud-sync states that only the user
+ * can resolve (US-093). Rendered inside Layout.
  */
 export function SystemBanners() {
   const bootIssue = useStore((s) => s.bootIssue)
   const storageFailing = useStore((s) => s.storageFailing)
   const restoreBackup = useStore((s) => s.restoreBackup)
   const acknowledge = useStore((s) => s.acknowledgeBootIssue)
+  const syncStatus = useSyncStore((s) => s.status)
+  const pausedAfterReset = useSyncStore((s) => s.config?.pausedReason === 'after-reset')
 
   return (
     <>
+      {(syncStatus === 'conflict' || pausedAfterReset) && (
+        <div
+          role="alert"
+          className="mb-4 flex flex-wrap items-center gap-3 rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-200"
+        >
+          <CloudAlert className="h-5 w-5 shrink-0" aria-hidden />
+          <span className="flex-1">
+            {syncStatus === 'conflict'
+              ? 'This device and the cloud copy both changed. Nothing has been overwritten — choose which one to keep.'
+              : 'Sync is paused after a reset, so the empty document is not uploaded. Choose which copy to keep.'}
+          </span>
+          <Link
+            to="/more/sync"
+            className="rounded-lg bg-amber-600 px-3 py-1.5 font-medium text-white hover:bg-amber-700"
+          >
+            Resolve
+          </Link>
+        </div>
+      )}
       {bootIssue === 'corrupt' && (
         <div
           role="alert"

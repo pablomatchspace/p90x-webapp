@@ -27,6 +27,17 @@ export interface Store {
 
 const boot = loadState()
 
+/**
+ * The sync engine registers here (E10). A reset must not look like an ordinary
+ * edit: without this, the debounced push that follows would replace the cloud copy
+ * with the empty document the user just created locally.
+ */
+let resetListener: (() => void) | null = null
+
+export function setResetListener(listener: (() => void) | null): void {
+  resetListener = listener
+}
+
 export const useStore = create<Store>()(
   immer((set, get) => ({
     data: boot.state,
@@ -47,6 +58,9 @@ export const useStore = create<Store>()(
       set((s) => {
         s.data = emptyState()
       })
+      // After `set`, so the sync engine can cancel the push its own subscription
+      // has just scheduled.
+      resetListener?.()
     },
     restoreBackup: () => {
       const backup = readBackup()

@@ -1,0 +1,20 @@
+name = "p90x-sync"
+main = "index.js"
+compatibility_date = "2026-07-01"
+
+# Created with: npx wrangler kv namespace create SYNC_KV
+# Paste the id it prints here (it is not a secret — it names a namespace in your
+# own Cloudflare account, and nothing can read it without SYNC_TOKEN).
+[[kv_namespaces]]
+binding = "SYNC_KV"
+id = "PASTE_YOUR_KV_NAMESPACE_ID_HERE"
+
+[vars]
+# Origins allowed to call this Worker from a browser. The default is the public
+# app; add http://localhost:4173 to sync against a local `npm run preview`, or set
+# "*" if you would rather not maintain a list.
+ALLOWED_ORIGINS = "https://pablomatchspace.github.io"
+
+# SYNC_TOKEN is a *secret* and is deliberately absent from this file.
+# Set it with:  npx wrangler secret put SYNC_TOKEN
+# The value is shown by the app under More → Cloud sync once you pick a passphrase.

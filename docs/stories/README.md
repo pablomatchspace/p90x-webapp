@@ -90,3 +90,15 @@ Post-v1.0.0. Full write-up: [`docs/epics/E9-fresh-start-onboarding.md`](../epics
 - ✅ US-086 · Shared `NoProgramCard` empty state (S, P0)
 - ✅ US-087 · E2E first-visit journey (S, P0)
 - ✅ US-088 · Docs & README (S, P0)
+
+## E10 — Cloud sync
+
+Post-v1.0.0. Full write-up: [`docs/epics/E10-cloud-sync.md`](../epics/E10-cloud-sync.md).
+
+- ✅ US-089 · Wire format, decision core, config store (S, P0)
+- ✅ US-090 · End-to-end encryption layer (M, P0)
+- ✅ US-091 · Self-hosted Cloudflare sync Worker (M, P0)
+- ✅ US-092 · Client sync engine (M, P0)
+- ✅ US-093 · Cloud sync screen and banners (M, P0)
+- ✅ US-094 · E2E journeys against a mocked Worker (S, P0)
+- ✅ US-095 · Docs and the D3 amendment (S, P0)

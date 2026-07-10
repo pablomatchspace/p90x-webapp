@@ -345,6 +345,12 @@ unchanged. The story index links both.
 | Epic                                                              | Stories         | Status       |
 | ----------------------------------------------------------------- | --------------- | ------------ |
 | [E9 — Fresh-start onboarding](epics/E9-fresh-start-onboarding.md) | US-084 → US-088 | ✅ delivered |
+| [E10 — Cloud sync](epics/E10-cloud-sync.md)                       | US-089 → US-095 | ✅ delivered |
+
+E10 amends decision **D3** to _"personal data is local-only **by default**; cloud
+sync is strictly opt-in, end-to-end encrypted, and runs on a backend the user
+hosts themselves"_. With sync off — the default — the app behaves exactly as this
+document specifies.
 
 ## 10. Success metrics
 
@@ -382,7 +388,7 @@ All ACs demonstrably met · unit tests for new logic (lib code: required) · E2E
 | --------------- | ----------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- | ------------------------------ |
 | **V1 core**     | E0 → E1 → E2 → E3 (US-030/031/032/034) → E4 (minus US-046) → E5 → E6 → US-070, US-080, US-082, US-083 | Owner demo: import real file locally, use for a real workout day | ✅ shipped · ⏳ demo gate open |
 | **V1.1 extras** | US-033, US-046, US-071, US-072, US-073, US-074, US-081                                                | CI green + owner spot-check                                      | ✅ shipped                     |
-| **Post-v1.0.0** | E9 (US-084 → US-088) and any later epic, each spec'd under `docs/epics/`                              | CI green + per-epic merge                                        | ✅ E9 shipped                  |
+| **Post-v1.0.0** | E9 (US-084 → US-088), E10 (US-089 → US-095), and any later epic, each spec'd under `docs/epics/`      | CI green + per-epic merge                                        | ✅ E9, E10 shipped             |
 | Ongoing         | Hardening, quote-pack curation, feedback fixes                                                        | —                                                                | —                              |
 
 E0–E8 shipped as **v1.0.0**; E9 followed on `main`. The one V1 gate still open is

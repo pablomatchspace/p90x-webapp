@@ -241,27 +241,35 @@ describe('materialize — invariants under arbitrary op soups (US-034 groundwork
     { maxLength: 25 },
   )
 
-  it('every program day appears exactly once, dates contiguous, ends consistent', () => {
-    fc.assert(
-      fc.property(opsArb, (ops) => {
-        const s = materialize('classic', START, ops as ScheduleOp[])
-        const program = programDays(s)
-        expect(program).toHaveLength(90)
-        const ids = new Set(program.map((d) => d.programDayId))
-        expect(ids.size).toBe(90)
-        for (let n = 1; n <= 90; n++) expect(ids.has(slotId(n))).toBe(true)
-        s.days.forEach((d, i) => expect(d.date).toBe(addDays(START, i)))
-        program.forEach((d, i) => expect(d.day).toBe(i + 1))
-        expect(s.projectedCompletion).toBe(addDays(s.lastProgramDate, 1))
-        // every active op either applied (skips: consumed as a gap) or was ignored with a reason
-        const gaps = s.days.filter((d) => d.kind === 'gap')
-        const activeSkips = ops.filter((o) => o.kind === 'skip' && o.revertedAt === undefined)
-        const ignoredIds = new Set(s.ignoredOps.map((x) => x.opId))
-        expect(gaps.length).toBe(activeSkips.filter((o) => !ignoredIds.has(o.id)).length)
-      }),
-      { numRuns: 150 },
-    )
-  })
+  // 150 materializations of a 90-day schedule: ~0.7 s alone, but the wall clock is
+  // shared with every other suite running in parallel. Vitest's 5 s default left no
+  // headroom and timed out under load once the E10 suites joined the run. The
+  // property itself is unchanged — only the budget it is allowed to take.
+  it(
+    'every program day appears exactly once, dates contiguous, ends consistent',
+    { timeout: 30_000 },
+    () => {
+      fc.assert(
+        fc.property(opsArb, (ops) => {
+          const s = materialize('classic', START, ops as ScheduleOp[])
+          const program = programDays(s)
+          expect(program).toHaveLength(90)
+          const ids = new Set(program.map((d) => d.programDayId))
+          expect(ids.size).toBe(90)
+          for (let n = 1; n <= 90; n++) expect(ids.has(slotId(n))).toBe(true)
+          s.days.forEach((d, i) => expect(d.date).toBe(addDays(START, i)))
+          program.forEach((d, i) => expect(d.day).toBe(i + 1))
+          expect(s.projectedCompletion).toBe(addDays(s.lastProgramDate, 1))
+          // every active op either applied (skips: consumed as a gap) or was ignored with a reason
+          const gaps = s.days.filter((d) => d.kind === 'gap')
+          const activeSkips = ops.filter((o) => o.kind === 'skip' && o.revertedAt === undefined)
+          const ignoredIds = new Set(s.ignoredOps.map((x) => x.opId))
+          expect(gaps.length).toBe(activeSkips.filter((o) => !ignoredIds.has(o.id)).length)
+        }),
+        { numRuns: 150 },
+      )
+    },
+  )
 
   it('materialization is pure: same inputs → identical output, inputs untouched', () => {
     const ops = [

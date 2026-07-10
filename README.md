@@ -6,10 +6,12 @@ rescheduling, a body-metrics dashboard, and the workbook's exact scoring engine.
 
 **Live:** https://pablomatchspace.github.io/p90x-webapp/
 
-> **Your data stays on your device.** There is no backend, no account, and no
-> analytics. Everything lives in your browser's `localStorage` and in the JSON
-> file you export. The public app and its tests use a **fabricated sample
-> dataset** — no real personal data is in this repository (PRD decision D3).
+> **Your data stays on your device.** There is no account and no analytics.
+> Everything lives in your browser's `localStorage` and in the JSON file you
+> export. The one exception is [cloud sync](#cloud-sync-optional-self-hosted) —
+> **off by default**, end-to-end encrypted, and running on a backend **you** host.
+> The public app and its tests use a **fabricated sample dataset** — no real
+> personal data is in this repository (PRD decision D3).
 
 ## Why
 
@@ -39,6 +41,8 @@ steppers, focus mode, rest timer), and a Classic⇄Lean toggle.
 - **Resilience** — a global error boundary, corrupted-storage quarantine +
   recovery, a one-slot backup written before every destructive action, and a
   storage-full warning.
+- **Cloud sync (optional)** — keep two devices in step through a Cloudflare Worker
+  you deploy yourself. Encrypted on your device; the server cannot read it.
 
 ## Getting started
 
@@ -66,6 +70,29 @@ python tools/convert_xlsm.py "P90X Classic ….xlsm" -o p90x-data.json
 Then **More → Data → Choose file** and confirm the preview. The converter output
 (`p90x-data*.json`) is gitignored and never leaves your machine. You can export a
 backup at any time from the same screen; import→export→import is lossless.
+
+## Cloud sync (optional, self-hosted)
+
+Off by default. Turn it on and two devices stay in step — log on the phone, review
+on the desktop, no files to shuffle.
+
+**You run the backend.** There is no shared service and no account system: you
+deploy [`worker/`](worker/) to **your own** free Cloudflare account, and the app
+asks only for that endpoint's URL and a passphrase. It never asks for a Cloudflare
+credential. Your data is encrypted on your device with a key derived from the
+passphrase, so the Worker stores ciphertext it cannot read — and neither can
+anyone else, including whoever runs this repo.
+
+1. Deploy the Worker — paste one file into the Cloudflare dashboard, or use
+   `wrangler`. Both paths are written out in [`worker/README.md`](worker/README.md).
+2. In the app: **More → Cloud sync** → your Worker's URL + a passphrase.
+3. Copy the `SYNC_TOKEN` the page shows onto the Worker, and sync.
+4. On your second device: same URL, same passphrase.
+
+A stale device can never silently overwrite a newer copy — the Worker rejects the
+write and the app asks which one wins. Every download saves the replaced document
+to the backup slot first. Losing the passphrase orphans the cloud copy only; the
+data on your devices is untouched.
 
 ## Tech stack
 
@@ -109,6 +136,7 @@ src/data/       generated static assets — Classic/Lean templates + exercise ca
 public/         icons, favicon, and the fabricated sample-data.json
 e2e/            Playwright specs — per-feature + cross-feature journeys
 tools/          xlsm→JSON converter and the program/catalog generator
+worker/         optional self-hosted cloud-sync Worker (never deployed by CI)
 docs/           sanitized PRD.md, the story index, and per-epic write-ups
 ```
 
@@ -138,5 +166,6 @@ affiliated with or endorsed by them.
 - [`docs/PRD.md`](docs/PRD.md) — the product requirements (sanitized).
 - [`docs/stories/`](docs/stories/) — the delivered user-story index.
 - [`docs/epics/`](docs/epics/) — per-epic write-ups for work after v1.0.0.
+- [`worker/README.md`](worker/README.md) — deploy your own cloud-sync backend.
 - [`CLAUDE.md`](CLAUDE.md) — conventions and the story-execution protocol for
   contributors (human or AI agent).

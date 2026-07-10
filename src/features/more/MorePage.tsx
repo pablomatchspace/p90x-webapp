@@ -1,4 +1,13 @@
-import { Calculator, Database, HelpCircle, NotebookPen, Quote, Settings, Timer } from 'lucide-react'
+import {
+  Calculator,
+  Cloud,
+  Database,
+  HelpCircle,
+  NotebookPen,
+  Quote,
+  Settings,
+  Timer,
+} from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Card, Page } from '@/components/Page'
 
@@ -8,6 +17,12 @@ const items = [
     icon: Database,
     title: 'Data',
     desc: 'Import your Excel conversion, export backups, reset',
+  },
+  {
+    to: '/more/sync',
+    icon: Cloud,
+    title: 'Cloud sync',
+    desc: 'Optional, encrypted, on a backend you run',
   },
   {
     to: '/more/timer',
