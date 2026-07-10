@@ -7,6 +7,10 @@
     "lib": ["ES2023", "DOM"],
     "types": ["node"],
     "skipLibCheck": true,
+    // worker/index.js is deliberately plain JS (paste-able into the Cloudflare
+    // dashboard editor); checkJs keeps its JSDoc types honest all the same.
+    "allowJs": true,
+    "checkJs": true,
 
     /* Bundler mode */
     "module": "nodenext",
@@ -21,5 +25,5 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["vite.config.ts", "vitest.config.ts", "playwright.config.ts", "e2e"]
+  "include": ["vite.config.ts", "vitest.config.ts", "playwright.config.ts", "e2e", "worker"]
 }
