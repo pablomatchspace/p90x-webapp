@@ -14,6 +14,7 @@ import {
   deriveAuthToken,
   encryptJson,
   fromBase64,
+  PBKDF2_ITERATIONS,
   randomBytes,
   toBase64,
 } from '@/lib/syncCrypto'
@@ -113,6 +114,9 @@ function succeed(message: string) {
 async function encryptCurrentState(config: SyncConfig): Promise<SyncEnvelope> {
   const cipher = await encryptJson(useStore.getState().data, config.passphrase, {
     salt: fromBase64(config.salt),
+    // Stated rather than defaulted, so the engine's suite can run the real
+    // algorithms at a cheap cost without weakening what ships.
+    iterations: PBKDF2_ITERATIONS,
   })
   return {
     v: SYNC_WIRE_VERSION,

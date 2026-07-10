@@ -23,6 +23,14 @@ if (globalThis.crypto?.subtle === undefined) {
   Object.defineProperty(globalThis, 'crypto', { value: webcrypto, configurable: true })
 }
 
+// Real AES-GCM and real PBKDF2 — just not 600k rounds. This suite is about sync
+// decisions, and a full-cost derivation per push would burn seconds of CPU and
+// starve the parallel property-based suites. syncCrypto.test.ts pins the shipped cost.
+vi.mock('@/lib/syncCrypto', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/syncCrypto')>()),
+  PBKDF2_ITERATIONS: 1000,
+}))
+
 const ENDPOINT = 'https://sync.test'
 const PASSPHRASE = 'a good passphrase'
 /** Remote fixtures encrypt cheaply; `iterations` travels in the envelope so this is honest. */
