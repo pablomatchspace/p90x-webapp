@@ -1,5 +1,6 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
+import { NoProgramCard } from '@/components/NoProgramCard'
 import { Card, Page } from '@/components/Page'
 import { addDays, compareISO, formatLong, isISODate, todayISO, type ISODate } from '@/lib/dates'
 import { getWorkout } from '@/lib/programData'
@@ -113,18 +114,7 @@ export function TodayPage() {
   if (schedule === null) {
     return (
       <Page title="Today" subtitle="What's on the plan">
-        <Card>
-          <h2 className="font-semibold">No program yet</h2>
-          <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-            Import your data and today's workout shows up here.
-          </p>
-          <Link
-            to="/more/data"
-            className="mt-3 inline-block rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
-          >
-            Go to Import
-          </Link>
-        </Card>
+        <NoProgramCard hint="Set a start date and today's workout shows up here — or import your existing data." />
       </Page>
     )
   }

@@ -10,6 +10,12 @@ A client-only, offline-first PWA replacing a P90X Excel workbook. No backend, no
 accounts, no network calls at runtime. Vite + React 19 + TypeScript, Zustand +
 Immer state, Zod-validated import, Tailwind, hand-rolled SVG charts, `vite-plugin-pwa`.
 
+A program exists exactly when `settings.startDate` is non-null — the schedule is
+`materialize(program, startDate, ops)`, nothing is stored. So there are three ways
+one comes into being: `startProgram` (the `/start` screen, no import), import, and
+backup restore. `startProgram` refuses to overwrite an existing program; moving
+day 1 afterwards is `setStartDate`, which Settings guards behind a confirm.
+
 ## Non-negotiable rules
 
 1. **The workbook is the oracle.** Scoring, schedule, and body/setup formulas
@@ -34,8 +40,8 @@ Immer state, Zod-validated import, Tailwind, hand-rolled SVG charts, `vite-plugi
 ```
 src/lib/        pure logic (scoring, schedule/*, body, setup, bodyFat, adherence, progression, chart, quotes, dates)
 src/state/      store.ts (Zustand+Immer), actions.ts (all mutations funnel through useStore.getState().mutate), persist.ts
-src/features/   screens by area: today, schedule, workouts, body, dashboard, more
-src/components/ Layout, Page, ErrorBoundary, SystemBanners, LineChart, UpdateToast
+src/features/   screens by area: start, today, schedule, workouts, body, dashboard, more
+src/components/ Layout, Page, NoProgramCard, ErrorBoundary, SystemBanners, LineChart, UpdateToast
 e2e/            Playwright specs (per-feature + journeys.spec.ts)
 tools/          convert_xlsm.py (workbook→JSON) and program/catalog generators
 ```

@@ -12,6 +12,7 @@ import {
   setSessionNotes,
   setStartDate,
   setWorkoutCompleted,
+  startProgram,
   updateLimits,
   updateScoring,
   updateSettings,
@@ -167,5 +168,31 @@ describe('settings & notes actions', () => {
     expect(useStore.getState().data.settings.startDate).toBeNull()
     setStartDate('2026-05-25')
     expect(useStore.getState().data.settings.startDate).toBe('2026-05-25')
+  })
+})
+
+describe('startProgram (US-084)', () => {
+  it('begins a program on a fresh document without importing anything', () => {
+    startProgram('2026-01-05', 'lean')
+    const { settings, workoutLogs, bodyLog } = useStore.getState().data
+    expect(settings.startDate).toBe('2026-01-05')
+    expect(settings.program).toBe('lean')
+    // the schedule derives from (program, startDate) alone — nothing else is seeded
+    expect(workoutLogs).toEqual({})
+    expect(bodyLog).toEqual([])
+    expect(settings.scoring).toEqual(emptyState().settings.scoring)
+  })
+
+  it('refuses to overwrite an existing program', () => {
+    startProgram('2026-01-05', 'classic')
+    startProgram('2026-03-01', 'lean')
+    const { settings } = useStore.getState().data
+    expect(settings.startDate).toBe('2026-01-05')
+    expect(settings.program).toBe('classic')
+  })
+
+  it('ignores a malformed start date', () => {
+    startProgram('05/01/2026', 'classic')
+    expect(useStore.getState().data.settings.startDate).toBeNull()
   })
 })

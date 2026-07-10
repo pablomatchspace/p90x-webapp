@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { Card, Page } from '@/components/Page'
+import { NoProgramCard } from '@/components/NoProgramCard'
+import { Page } from '@/components/Page'
 import { formatLong, formatShort, todayISO } from '@/lib/dates'
 import { getWorkout } from '@/lib/programData'
 import { groupByWeek, type ScheduleDay, type WeekSection } from '@/lib/schedule/materialize'
@@ -103,18 +104,7 @@ export function SchedulePage() {
   if (schedule === null) {
     return (
       <Page title="Schedule" subtitle="90 days, 3 phases">
-        <Card>
-          <h2 className="font-semibold">No program yet</h2>
-          <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-            Import your data to see the 13-week calendar.
-          </p>
-          <Link
-            to="/more/data"
-            className="mt-3 inline-block rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
-          >
-            Go to Import
-          </Link>
-        </Card>
+        <NoProgramCard hint="Set a start date to build the 13-week calendar — or import your existing data." />
       </Page>
     )
   }

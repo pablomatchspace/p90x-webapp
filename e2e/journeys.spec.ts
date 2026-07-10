@@ -16,6 +16,58 @@ async function importSample(page: Page) {
   await expect(page.getByText(/Imported sample dataset/)).toBeVisible()
 }
 
+test('a first-time visitor starts a program from a date and logs a workout', async ({ page }) => {
+  await page.clock.install({ time: new Date('2026-01-05T09:00:00') })
+
+  // nothing seeded into localStorage — this is a genuine first visit
+  await page.goto('/')
+  await expect(page.getByText('No program yet')).toBeVisible()
+
+  await page.getByRole('link', { name: 'Start a program' }).click()
+  // the field defaults to today, so a date pick is optional
+  await expect(page.getByLabel('Start date')).toHaveValue('2026-01-05')
+
+  // the offline-ready toast is pinned bottom-centre and can swallow the submit
+  // click on the mobile profile (see the reset journey below)
+  await page
+    .getByRole('button', { name: 'OK' })
+    .click({ timeout: 3000 })
+    .catch(() => {})
+  await page.getByRole('button', { name: 'Start program' }).click()
+
+  // the whole 90-day schedule materialized from the start date alone — no import
+  // exact: on Today the subtitle also reads "Day 1 of 90 · Week 1 · Phase 1"
+  await expect(page.getByText('Day 1 of 90', { exact: true })).toBeVisible()
+
+  await page.getByRole('button', { name: 'Mark done' }).first().click()
+  await expect(page.getByRole('button', { name: 'Mark not done' }).first()).toBeVisible()
+
+  // flush the debounced write, then prove it survives a real reload
+  await page.clock.fastForward(500)
+  await page.goto('/')
+  // exact: on Today the subtitle also reads "Day 1 of 90 · Week 1 · Phase 1"
+  await expect(page.getByText('Day 1 of 90', { exact: true })).toBeVisible()
+  await expect(page.getByText('No program yet')).toHaveCount(0)
+})
+
+test('/start never clobbers a program that already exists', async ({ page }) => {
+  await page.clock.install({ time: new Date('2026-01-05T09:00:00') })
+  await page.goto('/')
+  await page.getByRole('link', { name: 'Start a program' }).click()
+  await page
+    .getByRole('button', { name: 'OK' })
+    .click({ timeout: 3000 })
+    .catch(() => {})
+  await page.getByRole('button', { name: 'Start program' }).click()
+  // exact: on Today the subtitle also reads "Day 1 of 90 · Week 1 · Phase 1"
+  await expect(page.getByText('Day 1 of 90', { exact: true })).toBeVisible()
+
+  // reaching /start again (typed URL, back button) must not offer to overwrite
+  await page.goto('#/start')
+  await expect(page.getByText('Program already started')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Start program' })).toHaveCount(0)
+})
+
 test('a weigh-in logged on Today flows through to the dashboard body KPI', async ({ page }) => {
   await page.clock.install({ time: new Date('2026-01-20T09:00:00') })
   await importSample(page)
