@@ -65,6 +65,9 @@ const BodyFatCalculatorsPage = lazy(() =>
     default: m.BodyFatCalculatorsPage,
   })),
 )
+const SyncPage = lazy(() =>
+  import('@/features/more/SyncPage').then((m) => ({ default: m.SyncPage })),
+)
 const HelpPage = lazy(() =>
   import('@/features/more/HelpPage').then((m) => ({ default: m.HelpPage })),
 )
@@ -94,6 +97,7 @@ export default function App() {
           <Route path="more/settings" element={<SettingsPage />} />
           <Route path="more/notes" element={<NotesPage />} />
           <Route path="more/calculators" element={<BodyFatCalculatorsPage />} />
+          <Route path="more/sync" element={<SyncPage />} />
           <Route path="more/help" element={<HelpPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
