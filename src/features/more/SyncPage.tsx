@@ -127,10 +127,17 @@ function EnableForm() {
         </div>
       )}
 
+      {/*
+        Hints sit outside the <label> and attach via aria-describedby: a hint nested
+        inside the label would be folded into the input's accessible name.
+      */}
       <form className="mt-4 flex flex-col gap-3" onSubmit={(e) => void onSubmit(e)}>
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="font-medium">Endpoint URL</span>
+        <div className="flex flex-col gap-1 text-sm">
+          <label htmlFor="sync-endpoint" className="font-medium">
+            Endpoint URL
+          </label>
           <input
+            id="sync-endpoint"
             type="url"
             required
             value={endpoint}
@@ -138,33 +145,40 @@ function EnableForm() {
             placeholder="https://p90x-sync.your-name.workers.dev"
             className="min-h-11 rounded-lg border border-zinc-300 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-950"
           />
-        </label>
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="font-medium">Passphrase</span>
+        </div>
+        <div className="flex flex-col gap-1 text-sm">
+          <label htmlFor="sync-passphrase" className="font-medium">
+            Passphrase
+          </label>
           <input
+            id="sync-passphrase"
             type="password"
             required
             autoComplete="new-password"
+            aria-describedby="sync-passphrase-hint"
             value={passphrase}
             onChange={(e) => setPassphrase(e.target.value)}
             className="min-h-11 rounded-lg border border-zinc-300 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-950"
           />
-          <span className="text-xs text-zinc-500 dark:text-zinc-400">
+          <span id="sync-passphrase-hint" className="text-xs text-zinc-500 dark:text-zinc-400">
             At least {MIN_PASSPHRASE_LENGTH} characters. This is the encryption key: the same
             passphrase on your other device, and nowhere else. If you lose it, the cloud copy cannot
             be read — your data on this device is unaffected.
           </span>
-        </label>
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="font-medium">Device name</span>
+        </div>
+        <div className="flex flex-col gap-1 text-sm">
+          <label htmlFor="sync-device" className="font-medium">
+            Device name
+          </label>
           <input
+            id="sync-device"
             type="text"
             value={deviceName}
             onChange={(e) => setDeviceName(e.target.value)}
             placeholder="Desktop"
             className="min-h-11 rounded-lg border border-zinc-300 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-950"
           />
-        </label>
+        </div>
         <div>
           <button type="submit" disabled={busy} className={primary}>
             {busy ? 'Enabling…' : 'Enable sync'}

@@ -325,17 +325,18 @@ export function resumeSync(): void {
 export async function resumeAfterReset(choice: 'upload-empty' | 'restore-cloud'): Promise<void> {
   const config = useSyncStore.getState().config
   if (config === null || running) return
-  if (choice === 'restore-cloud') {
-    const resumed = patchConfig({ pausedReason: null, dirty: false })
-    if (resumed !== null) await syncNow()
-    return
-  }
-  const resumed = patchConfig({ pausedReason: null, dirty: true })
+  const resumed = patchConfig({ pausedReason: null, dirty: choice === 'upload-empty' })
   if (resumed === null) return
   running = true
   useSyncStore.setState({ status: 'syncing', message: null })
   try {
-    await forcePush(resumed, await deriveAuthToken(resumed.passphrase))
+    const token = await deriveAuthToken(resumed.passphrase)
+    // Both branches bypass `decideSync` deliberately. After a reset this device is
+    // still *in step* with the cloud (`lastRevision` never moved), so the decision
+    // core would answer `idle` and neither restoring nor uploading would happen.
+    // The user has already told us which copy wins.
+    if (choice === 'restore-cloud') await pull(resumed, token)
+    else await forcePush(resumed, token)
   } finally {
     running = false
   }

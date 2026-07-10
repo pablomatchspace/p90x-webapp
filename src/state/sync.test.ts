@@ -423,19 +423,21 @@ describe('reset', () => {
     expect(fetch).not.toHaveBeenCalled()
   })
 
-  it('resuming with "restore cloud" pulls the cloud copy back', async () => {
+  // A reset leaves this device *in step* with the cloud (`lastRevision` never moved),
+  // so `decideSync` would answer 'idle'. Restoring has to pull regardless.
+  it('resuming with "restore cloud" pulls even though the revisions match', async () => {
     const remote = emptyState()
     remote.notes = 'survived the reset'
     await enable({ lastRevision: 3, dirty: true, pausedReason: 'after-reset' })
-    route('GET /v1/meta', () => json({ revision: 4, updatedAt: 'now' }))
+    route('GET /v1/meta', () => json({ revision: 3, updatedAt: 'now' }))
     route('GET /v1/state', async () =>
-      json({ revision: 4, envelope: await remoteEnvelope(remote) }),
+      json({ revision: 3, envelope: await remoteEnvelope(remote) }),
     )
 
     await resumeAfterReset('restore-cloud')
 
     expect(useStore.getState().data.notes).toBe('survived the reset')
-    expect(loadSyncConfig()?.pausedReason).toBeNull()
+    expect(loadSyncConfig()).toMatchObject({ pausedReason: null, dirty: false, lastRevision: 3 })
   })
 
   it('resuming with "upload empty" force-pushes the cleared document', async () => {
