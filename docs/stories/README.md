@@ -1,9 +1,13 @@
 # User stories
 
-The authoritative story text (full acceptance criteria) lives in
-[`docs/PRD.md` §9](../PRD.md#9-epics--user-stories). This file is the delivery
-index: every story below shipped, grouped by the epic (one squash-merged PR per
-epic). Story sizes: **S** ≤150 LOC · **M** ≤350 · **L** ≤500. Priority: **P0**
+This file is the delivery index: every story below shipped, grouped by the epic
+(one squash-merged PR per epic). The authoritative story text (full acceptance
+criteria) lives in two places:
+
+- **E0–E8** (the v1.0.0 scope) → [`docs/PRD.md` §9](../PRD.md#9-epics--user-stories).
+- **E9 onwards** → the epic's own document under [`docs/epics/`](../epics/).
+
+Story sizes: **S** ≤150 LOC · **M** ≤350 · **L** ≤500. Priority: **P0**
 V1-blocking · **P1** fast-follow.
 
 ## E0 — Foundation & infrastructure

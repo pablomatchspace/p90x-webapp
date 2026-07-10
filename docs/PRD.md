@@ -9,7 +9,8 @@
 **Product:** P90X companion web app replacing the `P90X Classic 05_2026_Codex.xlsm` workbook (P90Xcel v2.05)
 **Repo:** `p90x-webapp` — public GitHub repository
 **Author:** Claude (Fable 5) with the owner — PRD confirmed via structured Q&A on 2026-07-06
-**Status:** delivered (E0–E8)
+**Status:** delivered — this document is the **v1.0.0 scope** (E0–E8). Epics after
+v1.0.0 are specified in [`docs/epics/`](epics/); see §9.
 
 ---
 
@@ -116,8 +117,10 @@ Let `chairFactor` = SETUP!C47 (=2), `penaltyOn` = SETUP!C45 (=1), `penaltyDiv` =
 
 ## 7. Information architecture
 
+Six primary tabs (bottom bar on mobile, sidebar on desktop):
+
 ```
-Dashboard  |  Today  |  Schedule  |  Workouts  |  Body  |  More (Notes · Calculators · Settings · Help)
+Dashboard  |  Today  |  Schedule  |  Workouts  |  Body  |  More
 ```
 
 - **Dashboard** — phase/next-workout card, quote of the day, KPI cards (body vs targets, adherence), trend + progression charts.
@@ -125,7 +128,14 @@ Dashboard  |  Today  |  Schedule  |  Workouts  |  Body  |  More (Notes · Calcul
 - **Schedule** — 13-week calendar (mobile: week strip; desktop: grid), status colors, phase bands, reschedule actions, history/audit.
 - **Workouts** — index of the 12 log sheets → grid view + focus mode.
 - **Body** — daily scale log list + entry form, target/limit color coding.
-- **Settings** — everything from SETUP + units + quotes editor + data (import/export/reset).
+- **More** — a hub of seven pages: **Data** (import / export / sample / reset), **Rest timer**, **Motivation** (quote pack editor), **Settings** (every SETUP field + units + scoring params), **Notes**, **Body-fat calculators**, **Help & About**.
+
+Reachable but off the tab bar: **`/start`** (the no-import onboarding screen — see
+[`docs/epics/E9-fresh-start-onboarding.md`](epics/E9-fresh-start-onboarding.md)),
+day detail, weekly editor, reschedule history, workout detail, focus mode, and
+the two chart pages (`/trends`, `/progress`). Every screen that needs a program
+falls back to a shared empty state offering **Start a program** or **Import your
+data**.
 
 ## 8. Data model (summary)
 
@@ -148,7 +158,14 @@ Single versioned JSON document, persisted to `localStorage`, identical shape for
     "scoring": { "penaltyDivisor": 2, "penaltyOn": true, "chairFactor": 2, "rwDivisor": 10 },
   },
   "scheduleOps": [
-    { "kind": "skip", "date": "2026-01-14", "id": "..." } /* move/swap/template ops */,
+    // every op carries `id` + `createdAt`; a reverted op keeps `revertedAt` and
+    // stays in the list for the audit trail, but stops applying
+    {
+      "kind": "skip",
+      "id": "...",
+      "createdAt": "...",
+      "date": "2026-01-14",
+    } /* + swap / remap ops */,
   ],
   "workoutLogs": {
     "chest-back": {
@@ -185,12 +202,19 @@ Single versioned JSON document, persisted to `localStorage`, identical shape for
 }
 ```
 
-Principles: **raw inputs only are stored** — every derived number (scores, penalties, BMI, FFMI, adherence) is computed by pure functions in `src/lib` (mirrors Excel's formula design, keeps import/export minimal and testable). The Classic/Lean program templates and the exercise catalog (names, entry type, rounds, per-arm/leg flags, ARX pairing) are **static app assets** generated once from the workbook — they contain no personal data and live in the repo.
+Principles: **raw inputs only are stored** — every derived number (scores, penalties, BMI, FFMI, adherence) is computed by pure functions in `src/lib` (mirrors Excel's formula design, keeps import/export minimal and testable). The Classic/Lean program templates and the exercise catalog (names, entry type, rounds, per-arm/leg flags, ARX pairing) are **static app assets** generated once from the workbook (`src/data/`) — they contain no personal data and live in the repo.
+
+The schedule itself is never stored: it is `materialize(program, startDate, ops)`. Consequently **a program exists exactly when `settings.startDate` is non-null**, and `startDate` is `null` on a fresh document — every body/setup field is nullable too, so the app boots into a valid, schema-passing empty state with nothing filled in.
 
 ## 9. Epics & user stories
 
 Sizing: S ≈ ≤150 changed LOC, M ≈ ≤350, L ≈ ≤500 (hard cap per story; split if larger). Priorities: P0 = V1 cannot ship without; P1 = fast follow; P2 = future.
 Every story additionally inherits the **Definition of Done** (§11.3) and the QA scenario matrix dimensions (§11.2).
+
+E0–E8 below are the **v1.0.0 scope** and all shipped. Epics after v1.0.0 are
+specified in their own documents rather than here — see _Post-v1.0.0 epics_ at
+the end of this section. [`docs/stories/`](stories/) indexes every story, whichever
+document defines it.
 
 ### EPIC E0 — Foundation & infrastructure
 
@@ -311,6 +335,17 @@ Every story additionally inherits the **Definition of Done** (§11.3) and the QA
 - **US-083 · Docs & handover (S, P0)** — As the owner, I want README + agent playbook so that humans and AI agents can operate the repo.
   AC: README (what/why, converter usage, privacy stance, dev commands); CLAUDE.md with the story-execution protocol (Appendix C); sanitized PRD.md and docs/stories/ checked in.
 
+### Post-v1.0.0 epics
+
+This PRD is frozen at the v1.0.0 scope. Each later epic carries its own
+specification — problem, goals, non-goals, design, stories with ACs, scenario
+matrix, risks — under [`docs/epics/`](epics/), and inherits §11.2 and §11.3
+unchanged. The story index links both.
+
+| Epic                                                              | Stories         | Status       |
+| ----------------------------------------------------------------- | --------------- | ------------ |
+| [E9 — Fresh-start onboarding](epics/E9-fresh-start-onboarding.md) | US-084 → US-088 | ✅ delivered |
+
 ## 10. Success metrics
 
 | Metric          | Target                                                                                | How measured                                |
@@ -343,11 +378,16 @@ All ACs demonstrably met · unit tests for new logic (lib code: required) · E2E
 
 ## 12. Release plan
 
-| Phase           | Contents                                                                                              | Gate                                                             |
-| --------------- | ----------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| **V1 core**     | E0 → E1 → E2 → E3 (US-030/031/032/034) → E4 (minus US-046) → E5 → E6 → US-070, US-080, US-082, US-083 | Owner demo: import real file locally, use for a real workout day |
-| **V1.1 extras** | US-033, US-046, US-071, US-072, US-073, US-074, US-081                                                | CI green + owner spot-check                                      |
-| Ongoing         | Hardening, quote-pack curation, feedback fixes                                                        | —                                                                |
+| Phase           | Contents                                                                                              | Gate                                                             | Status                         |
+| --------------- | ----------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- | ------------------------------ |
+| **V1 core**     | E0 → E1 → E2 → E3 (US-030/031/032/034) → E4 (minus US-046) → E5 → E6 → US-070, US-080, US-082, US-083 | Owner demo: import real file locally, use for a real workout day | ✅ shipped · ⏳ demo gate open |
+| **V1.1 extras** | US-033, US-046, US-071, US-072, US-073, US-074, US-081                                                | CI green + owner spot-check                                      | ✅ shipped                     |
+| **Post-v1.0.0** | E9 (US-084 → US-088) and any later epic, each spec'd under `docs/epics/`                              | CI green + per-epic merge                                        | ✅ E9 shipped                  |
+| Ongoing         | Hardening, quote-pack curation, feedback fixes                                                        | —                                                                | —                              |
+
+E0–E8 shipped as **v1.0.0**; E9 followed on `main`. The one V1 gate still open is
+the **owner demo** — importing the real workbook locally and using the app for a
+real workout day. It is a human check, not a build task.
 
 Sequencing note: epics are ordered by dependency (E0/E1 unblock everything; E3 depends on E2's engine; E6 depends on E4/E5 data). Delivered epic-by-epic, one PR per epic, squash-merged after CI is green.
 

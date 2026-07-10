@@ -42,6 +42,7 @@ src/lib/        pure logic (scoring, schedule/*, body, setup, bodyFat, adherence
 src/state/      store.ts (Zustand+Immer), actions.ts (all mutations funnel through useStore.getState().mutate), persist.ts
 src/features/   screens by area: start, today, schedule, workouts, body, dashboard, more
 src/components/ Layout, Page, NoProgramCard, ErrorBoundary, SystemBanners, LineChart, UpdateToast
+src/data/       templates.json + catalog.json — generated from the workbook by tools/, never hand-edited
 e2e/            Playwright specs (per-feature + journeys.spec.ts)
 tools/          convert_xlsm.py (workbook→JSON) and program/catalog generators
 ```
@@ -84,10 +85,10 @@ properties / namespaces).
 
 ## Quality gates
 
-CI runs three jobs (`.github/workflows/ci.yml`): **CI** (lint, format check,
-typecheck, coverage, build), **e2e**, and **lighthouse** (perf / a11y /
-best-practices ≥ 90 via `lighthouserc.json`). CodeQL + Dependabot are enabled;
-`main` deploys to GitHub Pages.
+The `CI` workflow (`.github/workflows/ci.yml`) runs three jobs: **validate**
+(lint, format check, typecheck, coverage, build), **e2e**, and **lighthouse**
+(perf / a11y / best-practices ≥ 90 via `lighthouserc.json`). Separate workflows
+run **CodeQL** and, on `main`, **Deploy to GitHub Pages**. Dependabot is enabled.
 
 ## Schema changes
 

@@ -105,6 +105,8 @@ src/lib/        pure logic — scoring, schedule, body/setup math, adherence, ch
 src/state/      Zustand store, actions, localStorage persistence + recovery
 src/features/   screens by area (start, today, schedule, workouts, body, dashboard, more)
 src/components/ shared UI (Layout, Page, NoProgramCard, ErrorBoundary, SystemBanners, LineChart)
+src/data/       generated static assets — Classic/Lean templates + exercise catalog (no personal data)
+public/         icons, favicon, and the fabricated sample-data.json
 e2e/            Playwright specs — per-feature + cross-feature journeys
 tools/          xlsm→JSON converter and the program/catalog generator
 docs/           sanitized PRD.md, the story index, and per-epic write-ups
@@ -112,14 +114,16 @@ docs/           sanitized PRD.md, the story index, and per-epic write-ups
 
 ## Testing & CI
 
-Every PR and push to `main` runs three GitHub Actions jobs:
+Every PR and push to `main` runs the **CI** workflow, whose three jobs go in
+parallel:
 
-- **CI** — lint, format check, typecheck, unit tests (+ coverage), build.
+- **validate** — lint, format check, typecheck, unit tests (+ coverage), build.
 - **e2e** — the full Playwright suite on chromium + a mobile profile.
 - **lighthouse** — Lighthouse CI asserting performance / accessibility /
   best-practices ≥ 90 on the built app.
 
-CodeQL and Dependabot are enabled. `main` auto-deploys to GitHub Pages.
+Two more workflows run alongside it: **CodeQL** (security scanning) and, on
+`main` only, **Deploy to GitHub Pages**. Dependabot is enabled.
 
 ## Attribution & disclaimer
 
