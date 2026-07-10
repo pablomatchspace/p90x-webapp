@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { ArrowDown, ArrowUp } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { NoProgramCard } from '@/components/NoProgramCard'
 import { Card, Page } from '@/components/Page'
 import { compareISO, todayISO } from '@/lib/dates'
 import { getWorkout } from '@/lib/programData'
@@ -116,18 +117,7 @@ export function WeeklyEditorPage() {
   if (schedule === null || startDate === null) {
     return (
       <Page title="Weekly order" subtitle="Remap workouts to weekdays">
-        <Card>
-          <h2 className="font-semibold">No program yet</h2>
-          <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-            Import your data first, then shape the week to your reality.
-          </p>
-          <Link
-            to="/more/data"
-            className="mt-3 inline-block rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
-          >
-            Go to Import
-          </Link>
-        </Card>
+        <NoProgramCard hint="Start a program first, then shape the week to your reality." />
       </Page>
     )
   }
