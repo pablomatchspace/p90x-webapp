@@ -1,5 +1,5 @@
 import { compareISO, isISODate, type ISODate } from '@/lib/dates'
-import { getWorkout } from '@/lib/programData'
+import { getWorkout, type ProgramKey } from '@/lib/programData'
 import type {
   AppState,
   BodyEntry,
@@ -240,6 +240,23 @@ export function updateScoring(patch: Partial<ScoringSettings>): void {
         draft.settings.scoring[key] = value
       }
     }
+  })
+}
+
+/**
+ * Begin a program on a fresh document (US-084) — the no-import entry path. The
+ * schedule materializes from `(program, startDate)` alone, so a start date is the
+ * only input a brand-new user has to supply; stats and targets stay optional.
+ *
+ * Refuses to overwrite an existing program: re-anchoring day 1 goes through
+ * `setStartDate` on the Settings screen, which confirms first when data exists.
+ */
+export function startProgram(startDate: ISODate, program: ProgramKey): void {
+  if (!isISODate(startDate)) return
+  useStore.getState().mutate((draft) => {
+    if (draft.settings.startDate !== null) return
+    draft.settings.program = program
+    draft.settings.startDate = startDate
   })
 }
 
