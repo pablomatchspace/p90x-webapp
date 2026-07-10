@@ -7,6 +7,9 @@ import { DashboardPage } from '@/features/dashboard/DashboardPage'
 // page and the one the Lighthouse budget audits, so it must paint without a
 // second chunk fetch. Every other page is code-split (US-081) so it stays out
 // of the initial bundle; Layout wraps the outlet in Suspense to cover the load.
+const StartPage = lazy(() =>
+  import('@/features/start/StartPage').then((m) => ({ default: m.StartPage })),
+)
 const TodayPage = lazy(() =>
   import('@/features/today/TodayPage').then((m) => ({ default: m.TodayPage })),
 )
@@ -72,6 +75,7 @@ export default function App() {
       <Routes>
         <Route element={<Layout />}>
           <Route index element={<DashboardPage />} />
+          <Route path="start" element={<StartPage />} />
           <Route path="today" element={<TodayPage />} />
           <Route path="day/:date" element={<TodayPage />} />
           <Route path="schedule" element={<SchedulePage />} />
