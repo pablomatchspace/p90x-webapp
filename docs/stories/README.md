@@ -76,3 +76,13 @@ V1-blocking · **P1** fast-follow.
 - ✅ US-081 · Performance & accessibility pass (M, P1)
 - ✅ US-082 · Resilience & error UX (M, P0)
 - ✅ US-083 · Docs & handover (S, P0)
+
+## E9 — Fresh-start onboarding
+
+Post-v1.0.0. Full write-up: [`docs/epics/E9-fresh-start-onboarding.md`](../epics/E9-fresh-start-onboarding.md).
+
+- ✅ US-084 · `startProgram` action + no-overwrite guard (S, P0)
+- ✅ US-085 · `/start` onboarding screen (M, P0)
+- ✅ US-086 · Shared `NoProgramCard` empty state (S, P0)
+- ✅ US-087 · E2E first-visit journey (S, P0)
+- ✅ US-088 · Docs & README (S, P0)

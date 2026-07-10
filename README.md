@@ -21,6 +21,8 @@ steppers, focus mode, rest timer), and a Classic⇄Lean toggle.
 
 ## Features
 
+- **Start in one step** — pick the date of your first workout and the whole
+  13-week schedule builds itself. No spreadsheet, no import, no account.
 - **Today & Schedule** — 13-week calendar with per-day status, phase bands, and
   one-tap logging; four rescheduling modes (skip/shift, move/swap, pull-forward,
   weekly template remap) with preview, undo, and an audit trail.
@@ -38,10 +40,24 @@ steppers, focus mode, rest timer), and a Classic⇄Lean toggle.
   recovery, a one-slot backup written before every destructive action, and a
   storage-full warning.
 
-## Your data & the converter
+## Getting started
 
-The app **never auto-loads** data — a fresh install is empty. To bring in your
-existing workbook, run the converter locally and import the resulting file:
+The app **never auto-loads** data, so nothing happens until you choose one of
+three ways in:
+
+1. **Start a program** _(no import)_ — open the app, hit **Start a program**, pick
+   the date of your first workout and choose Classic or Lean. That's it: the
+   schedule is derived from the start date, so you're logging immediately. Height,
+   weight and targets are optional and can be filled in later under
+   **More → Settings**.
+2. **Import your workbook** — if you already tracked in Excel, convert and import
+   it (below); your history comes with you.
+3. **Try the sample** — **More → Data → Try sample data** loads the fabricated
+   demo dataset so you can look around.
+
+### Bringing in an existing workbook
+
+Run the converter locally and import the resulting file:
 
 ```bash
 python tools/convert_xlsm.py "P90X Classic ….xlsm" -o p90x-data.json
@@ -50,8 +66,6 @@ python tools/convert_xlsm.py "P90X Classic ….xlsm" -o p90x-data.json
 Then **More → Data → Choose file** and confirm the preview. The converter output
 (`p90x-data*.json`) is gitignored and never leaves your machine. You can export a
 backup at any time from the same screen; import→export→import is lossless.
-
-Not ready to import? **More → Data → Try sample data** loads the fabricated demo.
 
 ## Tech stack
 
@@ -89,11 +103,11 @@ first if the source changed.
 ```
 src/lib/        pure logic — scoring, schedule, body/setup math, adherence, charts (fully unit-tested)
 src/state/      Zustand store, actions, localStorage persistence + recovery
-src/features/   screens by area (today, schedule, workouts, body, dashboard, more)
-src/components/ shared UI (Layout, Page, ErrorBoundary, SystemBanners, LineChart)
+src/features/   screens by area (start, today, schedule, workouts, body, dashboard, more)
+src/components/ shared UI (Layout, Page, NoProgramCard, ErrorBoundary, SystemBanners, LineChart)
 e2e/            Playwright specs — per-feature + cross-feature journeys
 tools/          xlsm→JSON converter and the program/catalog generator
-docs/           sanitized PRD.md and the story index
+docs/           sanitized PRD.md, the story index, and per-epic write-ups
 ```
 
 ## Testing & CI
@@ -119,5 +133,6 @@ affiliated with or endorsed by them.
 
 - [`docs/PRD.md`](docs/PRD.md) — the product requirements (sanitized).
 - [`docs/stories/`](docs/stories/) — the delivered user-story index.
+- [`docs/epics/`](docs/epics/) — per-epic write-ups for work after v1.0.0.
 - [`CLAUDE.md`](CLAUDE.md) — conventions and the story-execution protocol for
   contributors (human or AI agent).
