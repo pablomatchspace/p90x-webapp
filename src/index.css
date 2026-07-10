@@ -3,6 +3,19 @@
 @layer base {
   html {
     -webkit-tap-highlight-color: transparent;
+    /*
+     * The primary nav is fixed to the bottom on mobile (Layout.tsx). Scrolling an
+     * element into view is *minimal* — it stops with the element flush against the
+     * viewport bottom, i.e. underneath that nav. Reserve its height so anything
+     * scrolled to (a tapped card, a focused input, the last item in a list) lands
+     * above it. Desktop puts the nav in a sidebar and needs no reservation.
+     */
+    scroll-padding-bottom: 6.5rem;
+  }
+  @media (min-width: 768px) {
+    html {
+      scroll-padding-bottom: 0;
+    }
   }
   body {
     @apply bg-zinc-100 text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100;

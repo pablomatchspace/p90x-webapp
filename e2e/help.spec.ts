@@ -8,6 +8,12 @@ import { expect, test } from '@playwright/test'
 test('help page shows abbreviations, privacy note and version', async ({ page }) => {
   await page.goto('/')
   await page.getByRole('link', { name: 'More' }).first().click()
+  // The one-time "ready to work offline" toast is pinned bottom-centre and swallows
+  // clicks on the lower cards of the mobile viewport (the E8 pitfall).
+  await page
+    .getByRole('button', { name: 'OK' })
+    .click({ timeout: 3000 })
+    .catch(() => {})
   await page.getByRole('link', { name: /Help\s+Abbreviations/ }).click()
   await expect(page.getByRole('heading', { name: /Help/ })).toBeVisible()
 
