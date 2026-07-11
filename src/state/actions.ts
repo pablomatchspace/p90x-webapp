@@ -244,6 +244,22 @@ export function updateScoring(patch: Partial<ScoringSettings>): void {
 }
 
 /**
+ * Focus-playback + rest-timer durations (E12). Whole seconds, clamped to
+ * 5–3600 — mirrors updateScoring's guard style: live mutation bypasses Zod,
+ * so invalid values are corrected rather than stored.
+ */
+export function updateTimerSettings(patch: Partial<Settings['timer']>): void {
+  useStore.getState().mutate((draft) => {
+    for (const key of ['workSeconds', 'restSeconds'] as const) {
+      const value = patch[key]
+      if (value !== undefined && Number.isFinite(value)) {
+        draft.settings.timer[key] = Math.min(3600, Math.max(5, Math.round(value)))
+      }
+    }
+  })
+}
+
+/**
  * Begin a program on a fresh document (US-084) — the no-import entry path. The
  * schedule materializes from `(program, startDate)` alone, so a start date is the
  * only input a brand-new user has to supply; stats and targets stay optional.
