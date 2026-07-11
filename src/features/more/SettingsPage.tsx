@@ -39,11 +39,16 @@ import {
 import { useBodyLog, useSettings } from '@/state/selectors'
 import { useStore } from '@/state/store'
 
-/** A labelled settings row: description on the left, control on the right. */
+/**
+ * A labelled settings row: text on top, control below on narrow (mobile)
+ * viewports; side by side from the `sm` breakpoint up. Consistent single-column
+ * stacking avoids squeezing the label into an unreadable sliver next to a wide
+ * control (E20 mobile legibility fix).
+ */
 function Row({ label, hint, children }: { label: string; hint?: ReactNode; children: ReactNode }) {
   return (
-    <div className="flex items-center justify-between gap-3 py-1.5">
-      <div className="min-w-0">
+    <div className="flex flex-col gap-2 py-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+      <div className="min-w-0 sm:flex-1">
         <div className="text-sm font-medium">{label}</div>
         {hint ? (
           <div className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">{hint}</div>
@@ -127,11 +132,13 @@ function GainModelBar({
   low,
   high,
   required,
+  unit,
 }: {
   label: string
   low: number
   high: number
   required: number
+  unit: string
 }) {
   const scale = Math.max(required, high, 0.1) * 1.1
   const lowPct = Math.max(0, (low / scale) * 100)
@@ -139,12 +146,12 @@ function GainModelBar({
   const requiredPct = Math.max(0, Math.min(100, (required / scale) * 100))
   return (
     <div
-      aria-label={`${label}: ${formatFixed(low, 2)}–${formatFixed(high, 2)} kg; ${formatFixed(required, 2)} kg required`}
+      aria-label={`${label}: ${formatFixed(low, 2)}–${formatFixed(high, 2)} ${unit}; ${formatFixed(required, 2)} ${unit} required`}
     >
       <div className="flex items-center justify-between gap-2 text-xs">
         <span className="font-medium">{label}</span>
         <span className="tabular-nums text-zinc-500 dark:text-zinc-400">
-          {formatFixed(low, 2)}–{formatFixed(high, 2)} kg <Chip tone="zinc">Tier B</Chip>
+          {formatFixed(low, 2)}–{formatFixed(high, 2)} {unit} <Chip tone="zinc">Tier B</Chip>
         </span>
       </div>
       <div className="relative mt-1 h-2 rounded-full bg-zinc-200 dark:bg-zinc-800">
@@ -301,6 +308,8 @@ export function SettingsPage() {
 
   const showWeight = (kg: number | null) =>
     kg === null ? '—' : formatFixed(kgToUnit(kg, units), 1)
+  // The Reality check panel shows finer precision than the stat tiles above.
+  const showKg = (kg: number, dp = 2) => formatFixed(kgToUnit(kg, units), dp)
 
   function onDateInput(raw: string) {
     const next = raw === '' ? null : raw
@@ -431,7 +440,7 @@ export function SettingsPage() {
           </Row>
           <Row
             label="Training experience"
-            hint="Sets realistic muscle-gain rates in the FFMI feasibility check"
+            hint="Years spent regularly lifting weights or doing resistance workouts before this program — Novice under 1 year, Intermediate 1–3 years, Advanced 3+ years. Sets the realistic muscle-gain rates in the FFMI feasibility check."
           >
             <Segmented
               label="Training experience"
@@ -659,12 +668,14 @@ export function SettingsPage() {
                 <Chip tone="zinc">Tier A</Chip>
               </div>
               <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-300">
-                {feasibility.fat.fatLossKg > 0
-                  ? `${formatFixed(feasibility.fat.fatLossKg, 2)} kg fat loss · ${formatFixed(
-                      feasibility.fat.weeklyPctBw * 100,
-                      2,
-                    )}% bodyweight/week required`
-                  : 'No fat-mass loss required by this plan.'}
+                {feasibility.fat.fatLossKg <= 0
+                  ? 'No fat-mass loss required by this plan.'
+                  : feasibility.fat.weeklyPctBw > 0
+                    ? `${showKg(feasibility.fat.fatLossKg)} ${wUnit} fat loss · ${formatFixed(
+                        feasibility.fat.weeklyPctBw * 100,
+                        2,
+                      )}% bodyweight/week required`
+                    : `${showKg(feasibility.fat.fatLossKg)} ${wUnit} fat loss while body weight holds or rises (recomp) — Helms' weekly pace limit doesn't apply.`}
               </p>
               <p className="mt-1 text-[11px] text-zinc-500 dark:text-zinc-400">
                 Muscle-sparing reference band: 0.5–1% bodyweight/week (Helms).
@@ -681,21 +692,23 @@ export function SettingsPage() {
                 <Chip tone="zinc">Tier B</Chip>
               </div>
               <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-300">
-                {formatFixed(feasibility.lean.requiredGainKg, 2)} kg required ·{' '}
-                {formatFixed(feasibility.lean.requiredPaceKgPerMonth, 2)} kg/month
+                {showKg(feasibility.lean.requiredGainKg)} {wUnit} required ·{' '}
+                {showKg(feasibility.lean.requiredPaceKgPerMonth)} {wUnit}/month
               </p>
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
                 <GainModelBar
                   label="Aragon %BW model"
-                  low={feasibility.lean.models.aragon.maxGain.low}
-                  high={feasibility.lean.models.aragon.maxGain.high}
-                  required={Math.max(0, feasibility.lean.requiredGainKg)}
+                  low={kgToUnit(feasibility.lean.models.aragon.maxGain.low, units)}
+                  high={kgToUnit(feasibility.lean.models.aragon.maxGain.high, units)}
+                  required={kgToUnit(Math.max(0, feasibility.lean.requiredGainKg), units)}
+                  unit={wUnit}
                 />
                 <GainModelBar
                   label="Lyle absolute model"
-                  low={feasibility.lean.models.lyle.maxGain.low}
-                  high={feasibility.lean.models.lyle.maxGain.high}
-                  required={Math.max(0, feasibility.lean.requiredGainKg)}
+                  low={kgToUnit(feasibility.lean.models.lyle.maxGain.low, units)}
+                  high={kgToUnit(feasibility.lean.models.lyle.maxGain.high, units)}
+                  required={kgToUnit(Math.max(0, feasibility.lean.requiredGainKg), units)}
+                  unit={wUnit}
                 />
               </div>
               <p className="mt-2 text-[11px] text-zinc-500 dark:text-zinc-400">
@@ -731,7 +744,7 @@ export function SettingsPage() {
                     <Chip tone="zinc">Tier B</Chip>
                   </div>
                   <p className="text-xs text-zinc-600 dark:text-zinc-300">
-                    Conservative gain: {formatFixed(feasibility.suggestion.gainKg, 2)} kg
+                    Conservative gain: {showKg(feasibility.suggestion.gainKg)} {wUnit}
                   </p>
                 </div>
                 <button
