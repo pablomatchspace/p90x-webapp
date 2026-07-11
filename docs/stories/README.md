@@ -115,3 +115,11 @@ Post-v1.0.0. Full write-up: [`docs/epics/E13-versioning.md`](../epics/E13-versio
 - ✅ US-098 — step-based FocusPage, single-round cards, e2e rewrite
 
 Post-v1.0.0. Full write-up: [`docs/epics/E11-chest-back-focus-sequence.md`](../epics/E11-chest-back-focus-sequence.md).
+
+## E12 — Focus play timer
+
+- ✅ US-100 — persisted timer settings: schema v2 + migration pipeline
+- ✅ US-101 — pure playback engine
+- ✅ US-102 — Play UI in FocusPage + e2e
+
+Post-v1.0.0. Full write-up: [`docs/epics/E12-focus-play-timer.md`](../epics/E12-focus-play-timer.md).

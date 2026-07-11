@@ -5,6 +5,14 @@ work bumps **patch**. The bump and its entry land inside the epic's own PR, so
 the deployed app (More → Help, via `__APP_VERSION__`) always names the last
 merged epic.
 
+## 1.4.0 — 2026-07-11
+
+- **E12 — Focus play timer** (PR #24): press Play and focus mode runs itself —
+  work slot per step (default 60 s, adjustable), cue, rest at your configured
+  duration with inputs still on the step you just did, auto-advance to the end.
+  Pause / resume, +10 s, skip. Durations persist (schema v2 with a stepwise
+  migration pipeline; old exports and the v1 sample import cleanly).
+
 ## 1.3.0 — 2026-07-11
 
 - **E11 — Chest & Back focus sequence** (PR #23): focus mode plays Chest & Back
