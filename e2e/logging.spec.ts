@@ -44,11 +44,13 @@ test('strength grid shows live workbook scores and edits update them', async ({ 
   await expect(page.locator('p', { hasText: 'Total reps:' })).toContainText('210')
 })
 
-test('focus mode prefills, resumes, and finishes with a PR summary', async ({ page }) => {
+test('focus mode plays C&B as 24 steps, resumes, and finishes with a PR summary', async ({
+  page,
+}) => {
   await page.goto('#/today')
   await page.getByRole('link', { name: 'Log in focus mode' }).first().click()
 
-  await expect(page.getByText('Exercise 1 of 12')).toBeVisible()
+  await expect(page.getByText('Step 1 of 24 · Round 1')).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Standard Push-Ups' })).toBeVisible()
 
   // ghost prefill from the latest earlier session (week 2: 9 reps); one tap copies it
@@ -58,17 +60,32 @@ test('focus mode prefills, resumes, and finishes with a PR summary', async ({ pa
   await expect(round1).toHaveValue('9')
 
   await page.getByRole('button', { name: 'Next' }).click()
-  await expect(page.getByText('Exercise 2 of 12')).toBeVisible()
+  await expect(page.getByText('Step 2 of 24 · Round 1')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Wide Front Pull-Ups' })).toBeVisible()
 
-  // interrupted → re-entering resumes at the first unlogged exercise
+  // interrupted → re-entering resumes at the first unlogged step
   await page.goto('#/today')
   await page.getByRole('link', { name: 'Log in focus mode' }).first().click()
-  await expect(page.getByText('Exercise 2 of 12')).toBeVisible()
+  await expect(page.getByText('Step 2 of 24 · Round 1')).toBeVisible()
+
+  // round 2 starts at step 13 with the pair swapped: pull-ups before push-ups
+  for (let i = 0; i < 11; i++) {
+    await page.getByRole('button', { name: 'Next' }).click()
+  }
+  await expect(page.getByText('Step 13 of 24 · Round 2')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Wide Front Pull-Ups' })).toBeVisible()
+
+  // the swapped partner follows, showing this session's round-1 value read-only
+  await page.getByRole('button', { name: 'Next' }).click()
+  await expect(page.getByText('Step 14 of 24 · Round 2')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Standard Push-Ups' })).toBeVisible()
+  await expect(page.getByText('Round 1: 9 · knee reps: —')).toBeVisible()
 
   for (let i = 0; i < 10; i++) {
     await page.getByRole('button', { name: 'Next' }).click()
   }
-  await expect(page.getByText('Exercise 12 of 12')).toBeVisible()
+  await expect(page.getByText('Step 24 of 24 · Round 2')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Dive-Bomber Push-Ups' })).toBeVisible()
   await page.getByRole('button', { name: 'Finish workout' }).click()
 
   await expect(page.getByRole('heading', { name: /Workout complete/ })).toBeVisible()

@@ -19,6 +19,7 @@ export function RoundInputs({
   occIndex,
   sessions,
   drop,
+  rounds,
 }: {
   workoutKey: string
   exercise: CatalogExercise
@@ -26,6 +27,8 @@ export function RoundInputs({
   occIndex: number
   sessions: Map<string, Session>
   drop: boolean | null
+  /** subset of 0-based rounds to render; omitted = all (grid view) */
+  rounds?: number[]
 }) {
   const programDayId = occurrences[occIndex].programDayId
   const entry = sessions.get(programDayId)?.entries?.[exercise.id]
@@ -50,27 +53,29 @@ export function RoundInputs({
 
   return (
     <div className="flex flex-wrap gap-x-5 gap-y-2">
-      {Array.from({ length: exercise.rounds }, (_, round) => {
-        const verdict =
-          round === 1 && exercise.rounds === 2 && drop !== null
-            ? drop
-              ? 'text-rose-600 dark:text-rose-400'
-              : 'text-emerald-600 dark:text-emerald-400'
-            : 'text-zinc-500 dark:text-zinc-400'
-        return (
-          <div key={round}>
-            {exercise.rounds > 1 ? (
-              <p className={`mb-1 text-[10px] font-semibold tracking-wide uppercase ${verdict}`}>
-                Round {round + 1}
-              </p>
-            ) : null}
-            <div className="flex items-start gap-3">
-              {field(round, 'main')}
-              {kind !== undefined ? field(round, 'secondary') : null}
+      {Array.from({ length: exercise.rounds }, (_, round) => round)
+        .filter((round) => rounds === undefined || rounds.includes(round))
+        .map((round) => {
+          const verdict =
+            round === 1 && exercise.rounds === 2 && drop !== null
+              ? drop
+                ? 'text-rose-600 dark:text-rose-400'
+                : 'text-emerald-600 dark:text-emerald-400'
+              : 'text-zinc-500 dark:text-zinc-400'
+          return (
+            <div key={round}>
+              {exercise.rounds > 1 ? (
+                <p className={`mb-1 text-[10px] font-semibold tracking-wide uppercase ${verdict}`}>
+                  Round {round + 1}
+                </p>
+              ) : null}
+              <div className="flex items-start gap-3">
+                {field(round, 'main')}
+                {kind !== undefined ? field(round, 'secondary') : null}
+              </div>
             </div>
-          </div>
-        )
-      })}
+          )
+        })}
     </div>
   )
 }

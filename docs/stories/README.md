@@ -108,3 +108,10 @@ Post-v1.0.0. Full write-up: [`docs/epics/E10-cloud-sync.md`](../epics/E10-cloud-
 Post-v1.0.0. Full write-up: [`docs/epics/E13-versioning.md`](../epics/E13-versioning.md).
 
 - ✅ US-096 · Version policy, `CHANGELOG.md`, correction of the deployed version to 1.2.0 (S, P1)
+
+## E11 — Chest & Back focus sequence
+
+- ✅ US-097 — focusSteps lib: 24-step C&B order, step-aware resume
+- ✅ US-098 — step-based FocusPage, single-round cards, e2e rewrite
+
+Post-v1.0.0. Full write-up: [`docs/epics/E11-chest-back-focus-sequence.md`](../epics/E11-chest-back-focus-sequence.md).
