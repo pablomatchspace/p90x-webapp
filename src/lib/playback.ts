@@ -18,6 +18,10 @@ export interface PlaybackOpts {
   stepCount: number
   workSeconds: number
   restSeconds: number
+  /** E16: per-step work-duration overrides (index = stepIndex); missing entry → workSeconds */
+  stepSeconds?: number[]
+  /** E16: rest after step i; missing entry → restSeconds; 0 ⇒ skip the rest phase entirely */
+  restAfter?: number[]
 }
 
 export type PlaybackEvent = 'rest-started' | 'step-advanced' | 'sequence-finished'
@@ -54,6 +58,14 @@ export function remainingMs(state: PlaybackState, now: number): number {
   return state.endsAt === null ? 0 : Math.max(0, state.endsAt - now)
 }
 
+/** E16: resolve work duration for a step (override or uniform). */
+const workFor = (opts: PlaybackOpts, step: number): number =>
+  opts.stepSeconds?.[step] ?? opts.workSeconds
+
+/** E16: resolve rest duration after a step (override or uniform). */
+const restFor = (opts: PlaybackOpts, step: number): number =>
+  opts.restAfter?.[step] ?? opts.restSeconds
+
 /** Returns the SAME state reference when nothing changed (cheap no-op detect). */
 export function tickPlayback(state: PlaybackState, opts: PlaybackOpts, now: number): TickResult {
   if (state.pausedMs !== null || state.endsAt === null || now < state.endsAt) {
@@ -63,21 +75,35 @@ export function tickPlayback(state: PlaybackState, opts: PlaybackOpts, now: numb
     if (state.stepIndex >= opts.stepCount - 1) {
       return { state: null, event: 'sequence-finished' }
     }
+    // E16: per-step rest duration; 0 ⇒ skip rest phase entirely
+    const rest = restFor(opts, state.stepIndex)
+    if (rest <= 0) {
+      return {
+        state: {
+          phase: 'work',
+          stepIndex: state.stepIndex + 1,
+          endsAt: now + workFor(opts, state.stepIndex + 1) * 1000,
+          pausedMs: null,
+        },
+        event: 'step-advanced',
+      }
+    }
     return {
       state: {
         phase: 'rest',
         stepIndex: state.stepIndex,
-        endsAt: now + opts.restSeconds * 1000,
+        endsAt: now + rest * 1000,
         pausedMs: null,
       },
       event: 'rest-started',
     }
   }
+  // E16: per-step work duration for the next step
   return {
     state: {
       phase: 'work',
       stepIndex: state.stepIndex + 1,
-      endsAt: now + opts.workSeconds * 1000,
+      endsAt: now + workFor(opts, state.stepIndex + 1) * 1000,
       pausedMs: null,
     },
     event: 'step-advanced',
