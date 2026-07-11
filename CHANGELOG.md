@@ -5,6 +5,11 @@ work bumps **patch**. The bump and its entry land inside the epic's own PR, so
 the deployed app (More → Help, via `__APP_VERSION__`) always names the last
 merged epic.
 
+## 1.5.1 — 2026-07-11
+
+- **Chore — Playwright test device replacement** (PR #<N>): Replace emulated test
+  device Pixel 7 with custom realme 16 Pro+ profile (RMX5131 specs).
+
 ## 1.5.0 — 2026-07-11
 
 - **E14 — FFMI target estimator** (PR #<N>): Settings → Targets & limits can now
