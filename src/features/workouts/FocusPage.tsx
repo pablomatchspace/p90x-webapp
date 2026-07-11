@@ -5,25 +5,13 @@ import { formatLong } from '@/lib/dates'
 import { getWorkout, hasWorkout, type WorkoutDef } from '@/lib/programData'
 import { workoutOccurrences } from '@/lib/schedule/occurrences'
 import { formatScore, scoreExercise, sessionTotals } from '@/lib/scoring'
-import type { Session } from '@/lib/schema'
 import { setWorkoutCompleted } from '@/state/actions'
 import { useSchedule, useScoringSettings, useWorkoutSessions } from '@/state/selectors'
 import { QuoteCard } from '@/features/dashboard/QuoteCard'
+import { focusSteps, resumeIndex } from '@/lib/focusSteps'
+import { SECONDARY_LABELS } from './entryLabels'
 import { RoundInputs } from './entryUi'
 import { TimerCard } from './TimerCard'
-
-/** Resume where the athlete left off: the first exercise with no data yet. */
-function resumeIndex(def: WorkoutDef | null, session: Session | undefined): number {
-  const exercises = def?.exercises ?? []
-  const first = exercises.findIndex((e) => {
-    const entry = session?.entries?.[e.id]
-    return (
-      entry === undefined ||
-      entry.rounds.every((r) => (r.main ?? null) === null && (r.secondary ?? null) === null)
-    )
-  })
-  return first === -1 ? Math.max(0, exercises.length - 1) : first
-}
 
 function Sparkline({ points }: { points: number[] }) {
   if (points.length < 2) return null
@@ -62,12 +50,13 @@ export function FocusPage() {
   const programDayId = params.programDayId ?? ''
   const valid = hasWorkout(key)
   const def = valid ? getWorkout(key) : null
+  const steps = def === null ? [] : focusSteps(def)
 
   const schedule = useSchedule()
   const sessions = useWorkoutSessions(key)
   const scoring = useScoringSettings()
   const session = sessions.get(programDayId)
-  const [idx, setIdx] = useState(() => resumeIndex(def, session))
+  const [idx, setIdx] = useState(() => resumeIndex(steps, session))
   const [finished, setFinished] = useState(false)
 
   if (!valid) return <Navigate to="/workouts" replace />
@@ -77,9 +66,14 @@ export function FocusPage() {
   if (occIndex < 0) return <Navigate to={`/workouts/${key}`} replace />
 
   const exercises = def?.exercises ?? []
-  if (exercises.length === 0) return <Navigate to={`/workouts/${key}`} replace />
+  if (steps.length === 0) return <Navigate to={`/workouts/${key}`} replace />
   const day = occurrences[occIndex]
-  const exercise = exercises[Math.min(idx, exercises.length - 1)]
+  const step = steps[Math.min(idx, steps.length - 1)]
+  const exercise = step.exercise
+  const prior =
+    step.rounds.length === 1 && step.rounds[0] > 0
+      ? session?.entries?.[exercise.id]?.rounds[step.rounds[0] - 1]
+      : undefined
   const result = scoreExercise(session?.entries?.[exercise.id], exercise, scoring)
   const isArx = def?.style === 'arx'
 
@@ -176,7 +170,10 @@ export function FocusPage() {
       <Card>
         <div className="flex items-center justify-between gap-2 text-xs text-zinc-500 dark:text-zinc-400">
           <span>
-            Exercise {idx + 1} of {exercises.length}
+            Step {idx + 1} of {steps.length}
+            {step.rounds.length === 1 && exercise.rounds > 1
+              ? ` · Round ${step.rounds[0] + 1}`
+              : null}
           </span>
           {sparkPoints.length >= 2 ? (
             <span className="flex items-center gap-2">
@@ -190,7 +187,7 @@ export function FocusPage() {
         >
           <div
             className="h-full rounded-full bg-red-600 transition-all"
-            style={{ width: `${((idx + 1) / exercises.length) * 100}%` }}
+            style={{ width: `${((idx + 1) / steps.length) * 100}%` }}
           />
         </div>
 
@@ -204,6 +201,15 @@ export function FocusPage() {
                   : ''
               }`}
         </p>
+        {prior !== undefined &&
+        ((prior.main ?? null) !== null || (prior.secondary ?? null) !== null) ? (
+          <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+            Round {step.rounds[0]}: {prior.main ?? '—'}
+            {exercise.secondary !== undefined
+              ? ` · ${SECONDARY_LABELS[exercise.secondary]}: ${prior.secondary ?? '—'}`
+              : null}
+          </p>
+        ) : null}
 
         <div className="mt-4">
           <RoundInputs
@@ -213,6 +219,7 @@ export function FocusPage() {
             occIndex={occIndex}
             sessions={sessions}
             drop={result.drop}
+            rounds={step.rounds}
           />
         </div>
 
@@ -225,7 +232,7 @@ export function FocusPage() {
           >
             Previous
           </button>
-          {idx < exercises.length - 1 ? (
+          {idx < steps.length - 1 ? (
             <button
               type="button"
               className="rounded-lg bg-red-600 px-5 py-2 text-sm font-medium text-white hover:bg-red-700"
