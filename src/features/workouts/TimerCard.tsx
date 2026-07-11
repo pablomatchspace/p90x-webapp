@@ -1,35 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { Card } from '@/components/Page'
+import { updateTimerSettings } from '@/state/actions'
+import { useSettings } from '@/state/selectors'
+import { beep, mmss } from './timerUtils'
 
 const PRESETS = [30, 60, 90, 120]
-
-function beep() {
-  try {
-    const ctx = new AudioContext()
-    const tone = (at: number) => {
-      const osc = ctx.createOscillator()
-      const gain = ctx.createGain()
-      osc.connect(gain)
-      gain.connect(ctx.destination)
-      osc.frequency.value = 880
-      gain.gain.setValueAtTime(0.15, at)
-      gain.gain.exponentialRampToValueAtTime(0.001, at + 0.25)
-      osc.start(at)
-      osc.stop(at + 0.3)
-    }
-    tone(ctx.currentTime)
-    tone(ctx.currentTime + 0.35)
-    setTimeout(() => void ctx.close(), 1200)
-  } catch {
-    // no audio available — vibration and the visual cue still fire
-  }
-}
-
-function mmss(totalSeconds: number): string {
-  const minutes = Math.floor(totalSeconds / 60)
-  const seconds = totalSeconds % 60
-  return `${minutes}:${String(seconds).padStart(2, '0')}`
-}
 
 /**
  * Rest/interval timer (US-046): presets or custom seconds, beep + vibration
@@ -37,7 +12,8 @@ function mmss(totalSeconds: number): string {
  * More → Rest timer and embedded in focus mode.
  */
 export function TimerCard() {
-  const [duration, setDuration] = useState(60)
+  const restDefault = useSettings().timer.restSeconds
+  const [duration, setDuration] = useState(restDefault)
   const [remaining, setRemaining] = useState<number | null>(null) // null = idle at `duration`
   const [running, setRunning] = useState(false)
   const [done, setDone] = useState(false)
@@ -86,6 +62,7 @@ export function TimerCard() {
     setDone(false)
   }
   const pick = (seconds: number) => {
+    updateTimerSettings({ restSeconds: seconds })
     setDuration(seconds)
     setRunning(false)
     setRemaining(null)

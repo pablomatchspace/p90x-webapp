@@ -5,7 +5,7 @@ import { z } from 'zod'
  * (scores, penalties, BMI, adherence…) is recomputed by pure functions, mirroring
  * the Excel design where formulas derive everything from entered cells (PRD §8).
  */
-export const SCHEMA_VERSION = 1
+export const SCHEMA_VERSION = 2
 
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'expected YYYY-MM-DD')
 
@@ -36,6 +36,11 @@ export const settingsSchema = z.object({
   limits: z.object({ weight: nullableNumber, bodyFat: nullableNumber, bmi: nullableNumber }),
   targets: z.object({ leanMassIncrease: nullableNumber, bodyFat: nullableNumber }),
   scoring: scoringSettingsSchema,
+  /** E12: focus-playback + rest-timer durations, whole seconds */
+  timer: z.object({
+    workSeconds: z.number().int().min(5).max(3600),
+    restSeconds: z.number().int().min(5).max(3600),
+  }),
 })
 
 const opBase = {
@@ -136,6 +141,7 @@ export function emptyState(): AppState {
       limits: { weight: null, bodyFat: null, bmi: null },
       targets: { leanMassIncrease: null, bodyFat: null },
       scoring: { penaltyDivisor: 2, penaltyOn: true, chairFactor: 2, rwDivisor: 10 },
+      timer: { workSeconds: 60, restSeconds: 60 },
     },
     scheduleOps: [],
     workoutLogs: {},

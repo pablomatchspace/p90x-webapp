@@ -15,6 +15,7 @@ const sample: Settings = {
   limits: { weight: 90, bodyFat: 0.25, bmi: 28 },
   targets: { leanMassIncrease: 4, bodyFat: 0.15 },
   scoring: { penaltyDivisor: 2, penaltyOn: true, chairFactor: 2, rwDivisor: 10 },
+  timer: { workSeconds: 60, restSeconds: 60 },
 }
 
 describe('setupDerived (golden vs sample SETUP)', () => {

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { webcrypto } from 'node:crypto'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { emptyState, type AppState } from '@/lib/schema'
+import { emptyState, SCHEMA_VERSION, type AppState } from '@/lib/schema'
 import type { SyncEnvelope } from '@/lib/sync'
 import { deriveKey, encryptJson, fromBase64 } from '@/lib/syncCrypto'
 import {
@@ -363,7 +363,7 @@ describe('pull', () => {
 
     expect(useSyncStore.getState().status).toBe('error')
     expect(useSyncStore.getState().message).toContain('newer app version')
-    expect(useStore.getState().data.schemaVersion).toBe(1)
+    expect(useStore.getState().data.schemaVersion).toBe(SCHEMA_VERSION)
   })
 
   it('refuses an envelope whose wire format it does not understand', async () => {
