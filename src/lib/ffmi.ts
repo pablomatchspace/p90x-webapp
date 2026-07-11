@@ -22,3 +22,35 @@ export function weightForLeanMass(leanMass: number, bf: number): number | null {
   if (bf < 0 || bf >= 1) return null
   return leanMass / (1 - bf)
 }
+
+export interface FfmiPlan {
+  /** lean mass the target FFMI implies at this height (kg) */
+  lean: number
+  /** FFMI-implied total weight at the plan body-fat (kg) */
+  weight: number
+  /** honest lean-mass increase vs start lean, 3-dp (kg) — E14 option A */
+  increase: number
+  /** the workbook's quirky target-weight formula with the applied increase (kg) */
+  sheetTargetWeight: number
+}
+
+/**
+ * Compose an E14 target plan from a normalized-FFMI goal, a plan body-fat
+ * fraction, the height and the current start lean. Pure; null when any input
+ * makes the plan undefined (bad height/bf/lean). Extracted verbatim from the
+ * E14 SettingsPage IIFE so the estimator and the E20 feasibility engine share
+ * one source of truth.
+ */
+export function planFromFfmi(
+  ffmi: number,
+  bf: number,
+  height: number,
+  startLean: number,
+): FfmiPlan | null {
+  const lean = leanMassForFfmi(ffmi, height)
+  if (lean === null) return null
+  const weight = weightForLeanMass(lean, bf)
+  if (weight === null) return null
+  const increase = Math.round((lean - startLean) * 1000) / 1000
+  return { lean, weight, increase, sheetTargetWeight: increase + startLean + startLean * bf }
+}

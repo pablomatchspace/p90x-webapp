@@ -18,6 +18,7 @@ const sample: Settings = {
   timer: { workSeconds: 60, restSeconds: 60 },
   player: { autoMarkDone: false },
   yoga: 'classic',
+  training: 'intermediate',
 }
 
 describe('setupDerived (golden vs sample SETUP)', () => {
