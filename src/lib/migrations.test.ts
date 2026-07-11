@@ -3,14 +3,15 @@ import { migrateToCurrent } from './migrations'
 import { emptyState, SCHEMA_VERSION } from './schema'
 
 /** A faithful document at an older version: current empty state minus later fields. */
-function docAt(version: 1 | 2): Record<string, unknown> {
+function docAt(version: 1 | 2 | 3): Record<string, unknown> {
   const doc = JSON.parse(JSON.stringify(emptyState())) as {
     schemaVersion: number
-    settings: { timer?: unknown; targets: Record<string, unknown> }
+    settings: { timer?: unknown; targets: Record<string, unknown>; player?: unknown }
   }
   doc.schemaVersion = version
-  delete doc.settings.targets.ffmi // v3 field
-  if (version === 1) delete doc.settings.timer // v2 field
+  if (version < 4) delete doc.settings.player // v4 field
+  if (version < 3) delete doc.settings.targets.ffmi // v3 field
+  if (version < 2) delete doc.settings.timer // v2 field
   return doc
 }
 
@@ -23,6 +24,7 @@ describe('migration pipeline', () => {
       expect(result.state.schemaVersion).toBe(SCHEMA_VERSION)
       expect(result.state.settings.timer).toEqual({ workSeconds: 60, restSeconds: 60 })
       expect(result.state.settings.targets.ffmi).toBeNull()
+      expect(result.state.settings.player).toEqual({ autoMarkDone: false })
     }
   })
 
@@ -35,6 +37,20 @@ describe('migration pipeline', () => {
       expect(result.migrated).toBe(true)
       expect(result.state.settings.timer).toEqual({ workSeconds: 45, restSeconds: 90 })
       expect(result.state.settings.targets.ffmi).toBeNull()
+      expect(result.state.settings.player).toEqual({ autoMarkDone: false })
+    }
+  })
+
+  it('upgrades a v3 document, keeping custom timer/ffmi values and gaining player', () => {
+    const doc = docAt(3)
+    ;(doc.settings as { timer?: unknown }).timer = { workSeconds: 45, restSeconds: 90 }
+    const result = migrateToCurrent(doc)
+    expect(result.ok).toBe(true)
+    if (result.ok) {
+      expect(result.migrated).toBe(true)
+      expect(result.state.settings.timer).toEqual({ workSeconds: 45, restSeconds: 90 })
+      expect(result.state.settings.targets.ffmi).toBeNull()
+      expect(result.state.settings.player).toEqual({ autoMarkDone: false })
     }
   })
 

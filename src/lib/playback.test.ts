@@ -135,7 +135,13 @@ describe('per-step overrides (E16)', () => {
 
   it('mixed array with holes falls back to uniforms', () => {
     // Short arrays: index 0 only → steps 1,2,3 are holes (undefined at runtime) → fall back to uniforms.
-    const opts = { stepCount: 4, workSeconds: 60, restSeconds: 30, stepSeconds: [60], restAfter: [30, 0] }
+    const opts = {
+      stepCount: 4,
+      workSeconds: 60,
+      restSeconds: 30,
+      stepSeconds: [60],
+      restAfter: [30, 0],
+    }
     const work0 = startPlayback(0, 60, T0)
     const r0 = tickPlayback(work0, opts, T0 + 60_000)
     expect(r0.state?.endsAt).toBe(T0 + 90_000) // restAfter[0]=30
