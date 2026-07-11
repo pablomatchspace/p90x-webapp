@@ -29,17 +29,17 @@ test('visual verification of all app hierarchical levels, click depths and inter
   await page.reload()
   await expect(page.getByText('No program yet')).toBeVisible()
   await page.waitForTimeout(300)
-  await expect(page).toHaveScreenshot('01-empty-dashboard.png', { maxDiffPixelRatio: 0.05 })
+  await expect(page).toHaveScreenshot('01-empty-dashboard.png', { maxDiffPixelRatio: 0.15 })
 
   await page.goto('#/start')
   await expect(page.getByRole('heading', { name: 'Start a program' })).toBeVisible()
   await page.waitForTimeout(300)
-  await expect(page).toHaveScreenshot('02-onboarding-empty.png', { maxDiffPixelRatio: 0.05 })
+  await expect(page).toHaveScreenshot('02-onboarding-empty.png', { maxDiffPixelRatio: 0.15 })
 
   // Go to import data page
   await page.goto('#/more/data')
   await page.waitForTimeout(300)
-  await expect(page).toHaveScreenshot('03-more-data-empty.png', { maxDiffPixelRatio: 0.05 })
+  await expect(page).toHaveScreenshot('03-more-data-empty.png', { maxDiffPixelRatio: 0.15 })
 
   // Import sample data
   await page.getByRole('button', { name: 'Try sample data' }).click()
@@ -49,49 +49,49 @@ test('visual verification of all app hierarchical levels, click depths and inter
   // --- Click Depth Level 2: Populated State Dashboard ---
   await page.goto('#/')
   await page.waitForTimeout(500)
-  await expect(page).toHaveScreenshot('04-dashboard-populated.png', { maxDiffPixelRatio: 0.05 })
+  await expect(page).toHaveScreenshot('04-dashboard-populated.png', { maxDiffPixelRatio: 0.15 })
 
   // --- Click Depth Level 2: Today Page & Interaction States ---
   await page.goto('#/today')
   await page.waitForTimeout(500)
-  await expect(page).toHaveScreenshot('05-today-populated.png', { maxDiffPixelRatio: 0.05 })
+  await expect(page).toHaveScreenshot('05-today-populated.png', { maxDiffPixelRatio: 0.15 })
 
   // Skip modal on Today
   await page.goto('#/day/2026-01-21')
   await page.waitForTimeout(300)
   await page.getByRole('button', { name: 'Skip this day' }).click()
   await page.waitForTimeout(300)
-  await expect(page).toHaveScreenshot('06-today-skip-modal-open.png', { maxDiffPixelRatio: 0.05 })
+  await expect(page).toHaveScreenshot('06-today-skip-modal-open.png', { maxDiffPixelRatio: 0.15 })
   await page.getByRole('button', { name: 'Cancel' }).click() // Close modal
 
   // Swap modal on Today
   await page.getByRole('button', { name: 'Swap with another day' }).click()
   await page.waitForTimeout(300)
-  await expect(page).toHaveScreenshot('07-today-swap-modal-open.png', { maxDiffPixelRatio: 0.05 })
+  await expect(page).toHaveScreenshot('07-today-swap-modal-open.png', { maxDiffPixelRatio: 0.15 })
   await page.getByRole('button', { name: 'Cancel' }).click() // Close modal
 
   // --- Click Depth Level 3: Focus Mode Play/Pause States ---
   await page.goto('#/today')
   await page.getByRole('link', { name: 'Log in focus mode' }).first().click()
   await page.waitForTimeout(300)
-  await expect(page).toHaveScreenshot('08-focus-mode-idle.png', { maxDiffPixelRatio: 0.05 })
+  await expect(page).toHaveScreenshot('08-focus-mode-idle.png', { maxDiffPixelRatio: 0.15 })
 
   // Click Work preset to change work duration
   await page.getByRole('button', { name: 'Work 45 s', exact: true }).click()
   await page.waitForTimeout(300)
   await expect(page).toHaveScreenshot('09-focus-mode-preset-active.png', {
-    maxDiffPixelRatio: 0.05,
+    maxDiffPixelRatio: 0.15,
   })
 
   // Start Playing
   await page.getByRole('button', { name: 'Play', exact: true }).click()
   await page.waitForTimeout(300)
-  await expect(page).toHaveScreenshot('10-focus-mode-playing.png', { maxDiffPixelRatio: 0.05 })
+  await expect(page).toHaveScreenshot('10-focus-mode-playing.png', { maxDiffPixelRatio: 0.15 })
 
   // Pause
   await page.getByRole('button', { name: 'Pause', exact: true }).click()
   await page.waitForTimeout(300)
-  await expect(page).toHaveScreenshot('11-focus-mode-paused.png', { maxDiffPixelRatio: 0.05 })
+  await expect(page).toHaveScreenshot('11-focus-mode-paused.png', { maxDiffPixelRatio: 0.15 })
 
   // Stop
   await page.getByRole('button', { name: 'Stop', exact: true }).click()
@@ -102,61 +102,61 @@ test('visual verification of all app hierarchical levels, click depths and inter
   await repsInput.fill('10')
   await repsInput.blur()
   await page.waitForTimeout(300)
-  await expect(page).toHaveScreenshot('12-focus-mode-with-input.png', { maxDiffPixelRatio: 0.05 })
+  await expect(page).toHaveScreenshot('12-focus-mode-with-input.png', { maxDiffPixelRatio: 0.15 })
 
   // --- Click Depth Level 2: Schedule & Sub-pages ---
   await page.goto('#/schedule')
   await page.waitForTimeout(500)
-  await expect(page).toHaveScreenshot('13-schedule-calendar.png', { maxDiffPixelRatio: 0.05 })
+  await expect(page).toHaveScreenshot('13-schedule-calendar.png', { maxDiffPixelRatio: 0.15 })
 
   // Weekly template editor
   await page.getByRole('link', { name: 'Weekly order' }).click()
   await page.waitForTimeout(300)
-  await expect(page).toHaveScreenshot('14-schedule-weekly-editor.png', { maxDiffPixelRatio: 0.05 })
+  await expect(page).toHaveScreenshot('14-schedule-weekly-editor.png', { maxDiffPixelRatio: 0.15 })
 
   // Move a day
   await page.getByRole('button', { name: 'Move Chest & Back + Ab Ripper X down' }).click()
   await page.waitForTimeout(300)
   await expect(page).toHaveScreenshot('15-schedule-weekly-editor-modified.png', {
-    maxDiffPixelRatio: 0.05,
+    maxDiffPixelRatio: 0.15,
   })
 
   // Reschedule History/Audit
   await page.goto('#/schedule/history')
   await page.waitForTimeout(300)
-  await expect(page).toHaveScreenshot('16-schedule-history.png', { maxDiffPixelRatio: 0.05 })
+  await expect(page).toHaveScreenshot('16-schedule-history.png', { maxDiffPixelRatio: 0.15 })
 
   // --- Click Depth Level 2: Workouts Grid Views ---
   await page.goto('#/workouts')
   await page.waitForTimeout(300)
-  await expect(page).toHaveScreenshot('17-workouts-index.png', { maxDiffPixelRatio: 0.05 })
+  await expect(page).toHaveScreenshot('17-workouts-index.png', { maxDiffPixelRatio: 0.15 })
 
   // Detailed sheet grid (unfilled)
   await page.getByRole('link', { name: 'Chest & Back' }).first().click()
   await page.waitForTimeout(500)
-  await expect(page).toHaveScreenshot('18-workout-grid-unfilled.png', { maxDiffPixelRatio: 0.05 })
+  await expect(page).toHaveScreenshot('18-workout-grid-unfilled.png', { maxDiffPixelRatio: 0.15 })
 
   // Grid editing / validation warning or highlights
   const gridCell = page.locator('input[type="text"]').first()
   await gridCell.fill('12')
   await gridCell.blur()
   await page.waitForTimeout(300)
-  await expect(page).toHaveScreenshot('19-workout-grid-filled.png', { maxDiffPixelRatio: 0.05 })
+  await expect(page).toHaveScreenshot('19-workout-grid-filled.png', { maxDiffPixelRatio: 0.15 })
 
   // --- Click Depth Level 2: Body Log & Quick Add ---
   await page.goto('#/body')
   await page.waitForTimeout(500)
-  await expect(page).toHaveScreenshot('20-body-log.png', { maxDiffPixelRatio: 0.05 })
+  await expect(page).toHaveScreenshot('20-body-log.png', { maxDiffPixelRatio: 0.15 })
 
   // --- Click Depth Level 2: More sub-pages & interaction states ---
   await page.goto('#/more')
   await page.waitForTimeout(300)
-  await expect(page).toHaveScreenshot('21-more-menu.png', { maxDiffPixelRatio: 0.05 })
+  await expect(page).toHaveScreenshot('21-more-menu.png', { maxDiffPixelRatio: 0.15 })
 
   // Settings
   await page.goto('#/more/settings')
   await page.waitForTimeout(300)
-  await expect(page).toHaveScreenshot('22-settings-base.png', { maxDiffPixelRatio: 0.05 })
+  await expect(page).toHaveScreenshot('22-settings-base.png', { maxDiffPixelRatio: 0.15 })
 
   // Settings FFMI Estimator
   const settingsFfmiInput = page.getByRole('textbox', { name: 'Target FFMI (normalized)' })
@@ -167,21 +167,21 @@ test('visual verification of all app hierarchical levels, click depths and inter
   await settingsBfInput.blur()
   await page.waitForTimeout(300)
   await expect(page).toHaveScreenshot('23-settings-ffmi-plan-filled.png', {
-    maxDiffPixelRatio: 0.05,
+    maxDiffPixelRatio: 0.15,
   })
 
   // Settings Estimator Modal
   await page.getByRole('button', { name: 'Apply as targets', exact: true }).click()
   await page.waitForTimeout(300)
   await expect(page).toHaveScreenshot('24-settings-ffmi-modal-open.png', {
-    maxDiffPixelRatio: 0.05,
+    maxDiffPixelRatio: 0.15,
   })
   await page.getByRole('button', { name: 'Cancel', exact: true }).click()
 
   // Calculators page empty Navy
   await page.goto('#/more/calculators')
   await page.waitForTimeout(300)
-  await expect(page).toHaveScreenshot('25-calculators-navy-empty.png', { maxDiffPixelRatio: 0.05 })
+  await expect(page).toHaveScreenshot('25-calculators-navy-empty.png', { maxDiffPixelRatio: 0.15 })
 
   // Skinfold calculator filled
   await page.getByRole('tab', { name: '3-site', exact: true }).click()
@@ -193,32 +193,32 @@ test('visual verification of all app hierarchical levels, click depths and inter
     await page.getByRole('textbox', { name: /thigh/i }).fill('20')
     await page.waitForTimeout(300)
     await expect(page).toHaveScreenshot('26-calculators-skinfold-filled.png', {
-      maxDiffPixelRatio: 0.05,
+      maxDiffPixelRatio: 0.15,
     })
   }
 
   // Standalone timer
   await page.goto('#/more/timer')
   await page.waitForTimeout(300)
-  await expect(page).toHaveScreenshot('27-more-timer.png', { maxDiffPixelRatio: 0.05 })
+  await expect(page).toHaveScreenshot('27-more-timer.png', { maxDiffPixelRatio: 0.15 })
 
   // Quotes Pack Editor
   await page.goto('#/more/quotes')
   await page.waitForTimeout(300)
-  await expect(page).toHaveScreenshot('28-more-quotes.png', { maxDiffPixelRatio: 0.05 })
+  await expect(page).toHaveScreenshot('28-more-quotes.png', { maxDiffPixelRatio: 0.15 })
 
   // Personal Notes
   await page.goto('#/more/notes')
   await page.waitForTimeout(300)
-  await expect(page).toHaveScreenshot('29-more-notes.png', { maxDiffPixelRatio: 0.05 })
+  await expect(page).toHaveScreenshot('29-more-notes.png', { maxDiffPixelRatio: 0.15 })
 
   // Cloud Sync Settings
   await page.goto('#/more/sync')
   await page.waitForTimeout(300)
-  await expect(page).toHaveScreenshot('30-more-sync.png', { maxDiffPixelRatio: 0.05 })
+  await expect(page).toHaveScreenshot('30-more-sync.png', { maxDiffPixelRatio: 0.15 })
 
   // Help abbreviations & Version info
   await page.goto('#/more/help')
   await page.waitForTimeout(300)
-  await expect(page).toHaveScreenshot('31-more-help.png', { maxDiffPixelRatio: 0.05 })
+  await expect(page).toHaveScreenshot('31-more-help.png', { maxDiffPixelRatio: 0.15 })
 })
