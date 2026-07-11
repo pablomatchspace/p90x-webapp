@@ -46,27 +46,6 @@ jobs:
           path: playwright-report/
           retention-days: 7
 
-  # TEMPORARY (PR #26 only): generate linux visual baselines. Removed once committed.
-  update-snapshots:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 22
-          cache: npm
-      - run: npm ci
-      - run: npx playwright install --with-deps chromium
-      - run: npm run build
-      - run: npx playwright test e2e/smoke.spec.ts --update-snapshots
-        env:
-          CI: 'true'
-      - uses: actions/upload-artifact@v7
-        with:
-          name: linux-snapshots
-          path: e2e/smoke.spec.ts-snapshots/
-          retention-days: 3
-
   lighthouse:
     runs-on: ubuntu-latest
     steps:
