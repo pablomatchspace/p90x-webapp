@@ -17,6 +17,13 @@ const MIGRATIONS: Record<number, (doc: Record<string, unknown>) => void> = {
       settings.timer = { workSeconds: 60, restSeconds: 60 }
     }
   },
+  // v2 → v3 (E14): normalized-FFMI target.
+  2: (doc) => {
+    const settings = doc.settings as { targets?: Record<string, unknown> } | undefined
+    if (settings?.targets !== undefined && settings.targets.ffmi === undefined) {
+      settings.targets.ffmi = null
+    }
+  },
 }
 
 export function migrateToCurrent(raw: unknown): MigrationResult {

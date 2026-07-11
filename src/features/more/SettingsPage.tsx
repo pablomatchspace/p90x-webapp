@@ -4,6 +4,7 @@ import { Card, Page } from '@/components/Page'
 import { NumberField } from '@/features/workouts/NumberField'
 import {
   formatFixed,
+  ffmiCategory,
   fractionToPercent,
   heightUnit,
   kgToUnit,
@@ -13,6 +14,7 @@ import {
   unitToM,
   weightUnit,
 } from '@/lib/body'
+import { leanMassForFfmi, weightForLeanMass } from '@/lib/ffmi'
 import { diffDays, formatLong } from '@/lib/dates'
 import { getTemplate, getWorkout, type ProgramKey } from '@/lib/programData'
 import { setupDerived, settingsWarnings } from '@/lib/setup'
@@ -106,11 +108,53 @@ export function SettingsPage() {
   // null = no dialog; { value } holds the candidate start date (value null = clear)
   const [pendingStart, setPendingStart] = useState<{ value: string | null } | null>(null)
   const [pendingProgram, setPendingProgram] = useState<ProgramKey | null>(null)
+  // FFMI estimator drafts (E14) — FFMI as-is, body-fat as display percent
+  const [ffmiDraft, setFfmiDraft] = useState<number | null>(settings.targets.ffmi ?? null)
+  const [bfDraft, setBfDraft] = useState<number | null>(
+    fractionToPercent(settings.targets.bodyFat ?? null),
+  )
+  const [pendingFfmi, setPendingFfmi] = useState(false)
 
   const units = settings.units
   const wUnit = weightUnit(units)
   const derived = setupDerived(settings)
   const warnings = settingsWarnings(settings)
+  // E14: everything below derives live from the two drafts + start stats. The
+  // applied lean-mass increase is the HONEST one (option A): implied lean minus
+  // start lean; the sheet's quirky target-weight formula stays the oracle and
+  // both weights are shown side by side.
+  const ffmiPlan = (() => {
+    if (
+      ffmiDraft === null ||
+      bfDraft === null ||
+      settings.height == null ||
+      derived.startLean === null
+    ) {
+      return null
+    }
+    const bf = percentToFraction(bfDraft)
+    const lean = ffmiDraft === null ? null : leanMassForFfmi(ffmiDraft, settings.height)
+    if (bf === null || lean === null) return null
+    const weight = weightForLeanMass(lean, bf)
+    if (weight === null) return null
+    const increase = Math.round((lean - derived.startLean) * 1000) / 1000
+    return {
+      lean,
+      weight,
+      increase,
+      sheetTargetWeight: increase + derived.startLean + derived.startLean * bf,
+    }
+  })()
+
+  function applyFfmiTargets() {
+    if (ffmiPlan === null || ffmiDraft === null || bfDraft === null) return
+    updateTargets({
+      leanMassIncrease: ffmiPlan.increase,
+      bodyFat: percentToFraction(bfDraft),
+      ffmi: ffmiDraft,
+    })
+    setPendingFfmi(false)
+  }
 
   const showWeight = (kg: number | null) =>
     kg === null ? '—' : formatFixed(kgToUnit(kg, units), 1)
@@ -352,6 +396,70 @@ export function SettingsPage() {
           />
           <Derived label="Target BMI" value={formatFixed(derived.targetBmi, 1)} />
         </dl>
+        <div className="mt-4 border-t border-zinc-100 pt-3 dark:border-zinc-800">
+          <h3 className="text-sm font-semibold">Estimate from FFMI</h3>
+          <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+            Pick a normalized-FFMI goal and a plan body-fat; applying writes the target inputs above
+            and stores the FFMI target for the dashboard. Uses the workbook&rsquo;s 6.1
+            normalization at 1.8 m.
+          </p>
+          <div className="mt-2 divide-y divide-zinc-100 dark:divide-zinc-800">
+            <Row
+              label="Target FFMI (normalized)"
+              hint={
+                ffmiDraft !== null
+                  ? `Category: ${ffmiCategory(ffmiDraft)}`
+                  : 'e.g. 20–22 = Above Average'
+              }
+            >
+              <NumberField
+                label="Target FFMI (normalized)"
+                value={ffmiDraft}
+                step={0.1}
+                onChange={setFfmiDraft}
+              />
+            </Row>
+            <Row label="FFMI plan body-fat (%)">
+              <NumberField
+                label="FFMI plan body-fat (%)"
+                value={bfDraft}
+                step={0.5}
+                onChange={setBfDraft}
+              />
+            </Row>
+          </div>
+          {ffmiPlan !== null ? (
+            <dl className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <Derived label="Lean mass (plan)" value={showWeight(ffmiPlan.lean)} unit={wUnit} />
+              <Derived
+                label="Lean gain"
+                value={`${ffmiPlan.increase >= 0 ? '+' : ''}${formatFixed(
+                  kgToUnit(ffmiPlan.increase, units),
+                  1,
+                )}`}
+                unit={wUnit}
+              />
+              <Derived label="Implied weight" value={showWeight(ffmiPlan.weight)} unit={wUnit} />
+              <Derived
+                label="Sheet target (plan)"
+                value={showWeight(ffmiPlan.sheetTargetWeight)}
+                unit={wUnit}
+              />
+            </dl>
+          ) : (
+            <p className="mt-3 text-xs text-zinc-500 dark:text-zinc-400">
+              Set height, start weight and start body-fat (plus both fields above) to see the plan.
+            </p>
+          )}
+          <button
+            type="button"
+            disabled={ffmiPlan === null}
+            onClick={() => setPendingFfmi(true)}
+            className="mt-3 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-40"
+          >
+            Apply as targets
+          </button>
+        </div>
         {warnings.length > 0 && (
           <ul
             role="alert"
@@ -490,6 +598,45 @@ export function SettingsPage() {
               <button
                 type="button"
                 onClick={() => setPendingProgram(null)}
+                className="rounded-lg px-4 py-2 text-sm font-medium hover:bg-zinc-100 dark:hover:bg-zinc-800"
+              >
+                Cancel
+              </button>
+            </div>
+          </Card>
+        </div>
+      )}
+      {/* FFMI estimator apply confirm (E14) */}
+      {pendingFfmi && ffmiPlan !== null && ffmiDraft !== null && bfDraft !== null && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Confirm FFMI targets"
+        >
+          <Card className="max-w-md">
+            <h2 className="text-base font-semibold">Apply FFMI-based targets?</h2>
+            <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
+              This writes your target inputs: lean-mass increase{' '}
+              <span className="font-medium">
+                {formatFixed(kgToUnit(ffmiPlan.increase, units), 2)} {wUnit}
+              </span>
+              , target body-fat <span className="font-medium">{formatFixed(bfDraft, 1)}%</span> and
+              FFMI target <span className="font-medium">{formatFixed(ffmiDraft, 1)}</span>. The
+              sheet&rsquo;s target weight then derives from these, exactly as from hand-entered
+              values.
+            </p>
+            <div className="mt-4 flex gap-2">
+              <button
+                type="button"
+                onClick={applyFfmiTargets}
+                className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+              >
+                Apply targets
+              </button>
+              <button
+                type="button"
+                onClick={() => setPendingFfmi(false)}
                 className="rounded-lg px-4 py-2 text-sm font-medium hover:bg-zinc-100 dark:hover:bg-zinc-800"
               >
                 Cancel
