@@ -117,7 +117,7 @@ npm run lint          # oxlint (zero warnings)
 npm run typecheck     # tsc -b
 npm run test          # Vitest unit/logic suites
 npm run test:coverage # + coverage on src/lib and src/state
-npm run e2e           # Playwright (build first) — chromium + Pixel 7
+npm run e2e           # Playwright (build first) — realme 16 Pro+
 npm run lhci          # Lighthouse CI budget (build first)
 npm run format        # Prettier
 ```
@@ -146,7 +146,7 @@ Every PR and push to `main` runs the **CI** workflow, whose three jobs go in
 parallel:
 
 - **validate** — lint, format check, typecheck, unit tests (+ coverage), build.
-- **e2e** — the full Playwright suite on chromium + a mobile profile.
+- **e2e** — the full Playwright suite on the realme 16 Pro+ mobile profile.
 - **lighthouse** — Lighthouse CI asserting performance / accessibility /
   best-practices ≥ 90 on the built app.
 

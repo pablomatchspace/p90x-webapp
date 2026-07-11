@@ -10,10 +10,38 @@ export default defineConfig({
   use: {
     baseURL: 'http://localhost:4173/p90x-webapp/',
     trace: 'on-first-retry',
+    // Pin the timezone so `new Date(...)`-derived UI (and the frozen clock) render
+    // identically regardless of the host machine's local tz.
+    timezoneId: 'Europe/Madrid',
   },
+  expect: {
+    toHaveScreenshot: {
+      // Baselines are per-platform (win32 committed from the dev machine, linux from CI),
+      // so same-platform runs should be near-identical; 1% guards minor AA jitter only.
+      maxDiffPixelRatio: 0.01,
+    },
+  },
+  // {platform} keeps win32 and linux baselines side by side so each OS compares
+  // only against snapshots rendered by its own font/rasterization stack.
+  snapshotPathTemplate:
+    '{testDir}/{testFileDir}/{testFileName}-snapshots/{arg}{-projectName}-{platform}{ext}',
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
-    { name: 'mobile', use: { ...devices['Pixel 7'] } },
+    {
+      // Custom mobile device profile for realme 16 Pro+ (RMX5131)
+      // Viewport width/height mapped to typical logical CSS pixels for this device class (412x902)
+      // scaled from the hardware 1280x2800 display, matching its 19.5:9 aspect ratio.
+      name: 'realme 16 Pro+',
+      use: {
+        browserName: 'chromium',
+        viewport: { width: 412, height: 902 },
+        deviceScaleFactor: 3.1,
+        isMobile: true,
+        hasTouch: true,
+        userAgent:
+          'Mozilla/5.0 (Linux; Android 14; RMX5131 Build/UKQ1.230924.001) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Mobile Safari/537.36',
+      },
+    },
   ],
   webServer: {
     command: 'npm run preview -- --port 4173 --strictPort',

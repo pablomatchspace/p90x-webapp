@@ -5,6 +5,16 @@ work bumps **patch**. The bump and its entry land inside the epic's own PR, so
 the deployed app (More → Help, via `__APP_VERSION__`) always names the last
 merged epic.
 
+## 1.5.1 — 2026-07-11
+
+- **E15 — Playwright test device replacement & UI validation** (PR #26): Replace emulated test
+  device Pixel 7 with custom realme 16 Pro+ profile (RMX5131 specs), ensuring Playwright
+  also verifies UI issues visible in screens for both desktop and the specific mobile device.
+  - _Hardening pass (same PR):_ per-platform visual baselines (`-win32` committed from the dev
+    machine, `-linux` from CI) so the diff threshold could tighten from 15% to **1%**; full-page
+    captures instead of viewport-only; deterministic timer states (`clock.fastForward`) and a
+    pinned timezone; soft, stepped assertions so all 31 comparisons run and report.
+
 ## 1.5.0 — 2026-07-11
 
 - **E14 — FFMI target estimator** (PR #<N>): Settings → Targets & limits can now
