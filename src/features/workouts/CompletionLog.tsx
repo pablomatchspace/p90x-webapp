@@ -5,6 +5,7 @@ import type { WorkoutDef } from '@/lib/programData'
 import type { ProgramDay } from '@/lib/schedule/materialize'
 import { setSessionNotes } from '@/state/actions'
 import { useWorkoutSessions } from '@/state/selectors'
+import { hasTimeline } from '@/lib/timelines'
 import { CompletionButtons } from './CompletionButtons'
 
 /**
@@ -43,11 +44,22 @@ export function CompletionLog({
                   {day.recovery ? ' · Recovery week' : ''}
                 </p>
               </div>
-              <CompletionButtons
-                workoutKey={def.key}
-                programDayId={day.programDayId}
-                session={session}
-              />
+              <div className="flex flex-wrap items-center gap-2">
+                <CompletionButtons
+                  workoutKey={def.key}
+                  programDayId={day.programDayId}
+                  session={session}
+                />
+                {/* E16: guided play for completion workouts with an authored timeline */}
+                {hasTimeline(def.key) ? (
+                  <Link
+                    to={`/workouts/${def.key}/play/${day.programDayId}`}
+                    className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-600 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                  >
+                    Play workout
+                  </Link>
+                ) : null}
+              </div>
             </div>
             <input
               type="text"

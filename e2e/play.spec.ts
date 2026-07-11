@@ -1,0 +1,105 @@
+import { expect, test, type Page } from '@playwright/test'
+// The full 76-segment skip journey is intentionally exhaustive; the emulated
+// mobile device needs more than the default 30s to render all transitions.
+test.setTimeout(60_000)
+
+/**
+ * Plyometrics play mode (E16) on the migrated sample dataset. The sample starts
+ * 2026-01-05 and skips 2026-01-14; therefore Plyometrics slot d016 lands on
+ * 2026-01-21 (day 16). Playwright's clock drives Date.now and the 200ms player
+ * interval deterministically.
+ */
+
+async function importSample(page: Page) {
+  await page.goto('/')
+  await page.getByRole('link', { name: 'More' }).first().click()
+  await page.getByRole('link', { name: 'Data Import your Excel conversion' }).click()
+  await page.getByRole('button', { name: 'Try sample data' }).click()
+  await page.getByRole('button', { name: 'Import & replace' }).click()
+  await expect(page.getByText(/Imported sample dataset/)).toBeVisible()
+}
+
+async function openPlyometrics(page: Page) {
+  await page.goto('#/today')
+  await page.getByRole('link', { name: 'Play workout', exact: true }).click()
+  await expect(page.getByText('Segment 1 of 76')).toBeVisible()
+  await expect(page.getByText('March in Place')).toBeVisible()
+}
+
+/** Skip work/rest phases until the summary appears; split continuations have no rest. */
+async function skipToSummary(page: Page) {
+  await page.getByRole('button', { name: 'Start', exact: true }).click()
+  for (let i = 0; i < 150; i++) {
+    await page.getByRole('button', { name: 'Skip', exact: true }).click()
+    // Let React commit the transition before checking for the terminal summary.
+    await page.clock.fastForward(1)
+    if (await page.getByRole('heading', { name: 'Workout complete 🎉' }).isVisible()) return
+  }
+  await expect(page.getByRole('heading', { name: 'Workout complete 🎉' })).toBeVisible()
+}
+
+test.beforeEach(async ({ page }) => {
+  await page.clock.install({ time: new Date('2026-01-21T09:00:00') })
+  await importSample(page)
+  await openPlyometrics(page)
+})
+
+test('runs authored work/get-ready phases with pause, +10s, and skip', async ({ page }) => {
+  await page.getByRole('button', { name: 'Start', exact: true }).click()
+  const countdown = page.getByRole('timer', { name: 'Segment time remaining' })
+  await expect(page.getByText('Work', { exact: true })).toBeVisible()
+  await expect(countdown).toHaveText('0:30')
+
+  // March in Place ends; the authored 5s get-ready phase precedes Run in Place.
+  await page.clock.fastForward(30_300)
+  await expect(
+    page.getByRole('heading', { name: /Get ready — up next: Run in Place/ }),
+  ).toBeVisible()
+  await expect(countdown).toHaveText('0:05')
+
+  // Pause freezes the countdown, then +10s and Skip advance the authored phase.
+  await page.getByRole('button', { name: 'Pause', exact: true }).click()
+  const frozen = await countdown.textContent()
+  await page.clock.fastForward(15_000)
+  await expect(countdown).toHaveText(frozen ?? '')
+  await page.getByRole('button', { name: 'Resume', exact: true }).click()
+  await page.getByRole('button', { name: '+10 s', exact: true }).click()
+  await page.getByRole('button', { name: 'Skip', exact: true }).click()
+  await expect(page.getByRole('heading', { name: 'Run in Place' })).toBeVisible()
+  await page.getByRole('button', { name: 'Stop', exact: true }).click()
+  await expect(page.getByRole('button', { name: 'Start', exact: true })).toBeVisible()
+})
+
+test('persists per-jump corrections and explicit completion', async ({ page }) => {
+  await skipToSummary(page)
+
+  // Skipping all segments leaves every logged jump unchecked; correct one on the summary.
+  const jumpSquats = page.getByLabel('jump squats', { exact: true })
+  await expect(jumpSquats).not.toBeChecked()
+  await jumpSquats.check()
+  await expect(page.getByText('Jumps done 1 of 23')).toBeVisible()
+  await page.getByRole('button', { name: 'Mark completed — YES', exact: true }).click()
+  await page.getByRole('status').getByRole('button', { name: 'OK', exact: true }).click()
+
+  // The explicit completion is reflected in Today after returning.
+  await page.getByRole('link', { name: 'Back to Today', exact: true }).click()
+  await expect(page.getByText('Done', { exact: true }).first()).toBeVisible()
+})
+
+test('auto-mark toggle persists and marks completion at sequence end', async ({ page }) => {
+  const toggle = page.getByRole('button', { name: 'Auto-mark done', exact: true })
+  await expect(toggle).toHaveAttribute('aria-pressed', 'false')
+  await toggle.click()
+  await expect(toggle).toHaveAttribute('aria-pressed', 'true')
+  await page.clock.fastForward(500)
+  await page.reload()
+  await expect(page.getByRole('button', { name: 'Auto-mark done', exact: true })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  )
+
+  await skipToSummary(page)
+  await expect(page.getByText('Marked done automatically — setting')).toBeVisible()
+  await page.getByRole('link', { name: 'Back to Today', exact: true }).click()
+  await expect(page.getByText('Done', { exact: true }).first()).toBeVisible()
+})

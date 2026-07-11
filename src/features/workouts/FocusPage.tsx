@@ -23,6 +23,7 @@ import { SECONDARY_LABELS } from './entryLabels'
 import { RoundInputs } from './entryUi'
 import { TimerCard } from './TimerCard'
 import { beep, mmss } from './timerUtils'
+import { useWakeLock } from './playerHooks'
 
 function Sparkline({ points }: { points: number[] }) {
   if (points.length < 2) return null
@@ -102,29 +103,8 @@ export function FocusPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- interval is rebuilt on every playback change by design
   }, [playback, steps.length, settings.timer.workSeconds, settings.timer.restSeconds])
 
-  // hold the screen awake for the whole play session; re-acquire on tab return
-  useEffect(() => {
-    if (playback === null || !('wakeLock' in navigator)) return
-    let sentinel: WakeLockSentinel | null = null
-    const acquire = () => {
-      navigator.wakeLock
-        .request('screen')
-        .then((s) => {
-          sentinel = s
-        })
-        .catch(() => {})
-    }
-    acquire()
-    const onVisible = () => {
-      if (document.visibilityState === 'visible') acquire()
-    }
-    document.addEventListener('visibilitychange', onVisible)
-    return () => {
-      document.removeEventListener('visibilitychange', onVisible)
-      void sentinel?.release().catch(() => {})
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- only cares whether a session is active
-  }, [playback === null])
+  // hold the screen awake for the whole play session (E12/E16 shared hook)
+  useWakeLock(playback !== null)
 
   if (!valid) return <Navigate to="/workouts" replace />
   if (schedule === null) return <Navigate to={`/workouts/${key}`} replace />
