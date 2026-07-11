@@ -1,4 +1,5 @@
 import type { PlayTimeline } from './types'
+import { cardioX } from './cardioX'
 import { kenpoX } from './kenpoX'
 import { plyometrics } from './plyometrics'
 import { xStretch } from './xStretch'
@@ -9,7 +10,7 @@ import { xStretch } from './xStretch'
  * a workout may carry multiple variants (E19 yoga classic/x3) resolved via
  * `getTimeline`.
  */
-const TIMELINES: PlayTimeline[] = [plyometrics, kenpoX, xStretch]
+const TIMELINES: PlayTimeline[] = [plyometrics, kenpoX, xStretch, cardioX]
 
 export function hasTimeline(workoutKey: string): boolean {
   return TIMELINES.some((t) => t.workoutKey === workoutKey)

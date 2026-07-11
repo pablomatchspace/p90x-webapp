@@ -137,3 +137,54 @@ test('Kenpo day shows Play workout with untimed rep waits (E17)', async ({ page 
   await page.clock.fastForward(1)
   await expect(page.getByText('Segment 28 of 93')).toBeVisible()
 })
+
+/**
+ * X Stretch play mode (E18): the first segment is an untimed Sun Salutation
+ * flow, so Start immediately enters a Done-to-advance wait (no countdown). The
+ * sample is classic; X Stretch is day 25 = 2026-01-30 (after the 01-14 skip).
+ */
+test('X Stretch day shows Play workout with an untimed flow wait (E18)', async ({ page }) => {
+  // Move the frozen clock from the Plyo day (set in beforeEach) to the X Stretch day.
+  await page.clock.setFixedTime(new Date('2026-01-30T09:00:00Z'))
+  await page.goto('#/today')
+  await page.getByRole('link', { name: 'Play workout', exact: true }).click()
+  await expect(page.getByText('Segment 1 of 62')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Sun Salutation Round 1' })).toBeVisible()
+
+  // First segment is an untimed flow — Start enters a Done-to-advance wait.
+  await page.getByRole('button', { name: 'Start', exact: true }).click()
+  await expect(page.getByRole('button', { name: 'Done — next', exact: true })).toBeVisible()
+})
+
+/**
+ * Cardio X play mode (E18): Cardio X is lean-only, so the test switches the
+ * sample from classic to lean first. With start date 2026-01-05 and the 01-14
+ * skip, lean day 16 (Cardio X) lands on 2026-01-21 — the same date the
+ * beforeEach clock is already pinned to. Kenpo rep drills wait for a Done tap.
+ */
+test('Cardio X (lean) shows Play workout with untimed rep waits (E18)', async ({ page }) => {
+  // Switch the sample's program from classic to lean via Settings.
+  await page.goto('#/more/settings')
+  await page.getByRole('button', { name: 'Switch to lean', exact: true }).click()
+  // Confirm the variant change in the modal (scoped to the dialog to avoid the
+  // row button of the same name).
+  await page
+    .getByRole('dialog', { name: 'Confirm program variant' })
+    .getByRole('button', { name: 'Switch to lean', exact: true })
+    .click()
+
+  // The clock is still 2026-01-21 (beforeEach) = lean day 16 = Cardio X.
+  await page.goto('#/today')
+  await page.getByRole('link', { name: 'Play workout', exact: true }).click()
+  await expect(page.getByText('Segment 1 of 53')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Run in Place' })).toBeVisible()
+
+  // Browse to the first Kenpo rep drill (segment 20) — an untimed 20-rep wait.
+  for (let i = 0; i < 19; i++) {
+    await page.getByRole('button', { name: 'Next', exact: true }).click()
+  }
+  await expect(page.getByText('Segment 20 of 53')).toBeVisible()
+  await page.getByRole('button', { name: 'Start', exact: true }).click()
+  await expect(page.getByRole('button', { name: 'Done — next', exact: true })).toBeVisible()
+  await expect(page.getByLabel('Rep target')).toHaveText('20 reps')
+})
