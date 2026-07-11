@@ -5,6 +5,12 @@ work bumps **patch**. The bump and its entry land inside the epic's own PR, so
 the deployed app (More → Help, via `__APP_VERSION__`) always names the last
 merged epic.
 
+## 1.3.0 — 2026-07-11
+
+- **E11 — Chest & Back focus sequence** (PR #23): focus mode plays Chest & Back
+  as 24 single-round steps — round 1 in sheet order, round 2 with each push/pull
+  pair swapped, matching the video. Grid, storage and scoring unchanged.
+
 ## 1.2.0 — 2026-07-10
 
 - **E10 — Cloud sync** (PR #21): opt-in, end-to-end-encrypted cross-device sync
