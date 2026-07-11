@@ -3,14 +3,16 @@ import { cardioX } from './cardioX'
 import { kenpoX } from './kenpoX'
 import { plyometrics } from './plyometrics'
 import { xStretch } from './xStretch'
+import { yogaClassic } from './yogaClassic'
+import { yogaX3 } from './yogaX3'
 
 /**
- * Registry of authored play timelines (E16/E17/E18). Pure data lookup — no side
+ * Registry of authored play timelines (E16/E17/E18/E19). Pure data lookup — no side
  * effects. Each timeline attaches to a completion-style workout by `workoutKey`;
  * a workout may carry multiple variants (E19 yoga classic/x3) resolved via
  * `getTimeline`.
  */
-const TIMELINES: PlayTimeline[] = [plyometrics, kenpoX, xStretch, cardioX]
+const TIMELINES: PlayTimeline[] = [plyometrics, kenpoX, xStretch, cardioX, yogaClassic, yogaX3]
 
 export function hasTimeline(workoutKey: string): boolean {
   return TIMELINES.some((t) => t.workoutKey === workoutKey)

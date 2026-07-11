@@ -14,7 +14,7 @@ import {
 } from '@/lib/playback'
 import { getWorkout, hasWorkout } from '@/lib/programData'
 import { workoutOccurrences } from '@/lib/schedule/occurrences'
-import { getTimeline } from '@/lib/timelines'
+import { getTimeline, timelinesFor } from '@/lib/timelines'
 import type { PlaySegment, PlayTimeline } from '@/lib/timelines'
 import {
   setCompletionStatus,
@@ -41,16 +41,31 @@ export function PlayPage() {
   const key = params.key ?? ''
   const programDayId = params.programDayId ?? ''
   const valid = hasWorkout(key)
-  const timeline: PlayTimeline | null = valid ? getTimeline(key) : null
-  // Memoized so derived arrays keep stable refs across renders (timeline is a
-  // stable module constant), satisfying exhaustive-deps without churn.
-  const segments: PlaySegment[] = useMemo(() => timeline?.segments ?? [], [timeline])
-  const loggedIds: string[] = useMemo(() => timeline?.loggedExerciseIds ?? [], [timeline])
 
   const schedule = useSchedule()
   const sessions = useWorkoutSessions(key)
   const settings = useSettings()
   const session = sessions.get(programDayId)
+
+  // Local variant override (e.g. choice between classic vs x3 Yoga). One-off, not persisted.
+  const [chosenVariant, setChosenVariant] = useState<string | undefined>(undefined)
+
+  // Sync with default persisted setting on load
+  useEffect(() => {
+    if (key === 'yoga-x') {
+      setChosenVariant(settings.yoga)
+    }
+  }, [settings.yoga, key])
+
+  const timeline: PlayTimeline | null = useMemo(() => {
+    if (!valid) return null
+    return getTimeline(key, chosenVariant)
+  }, [valid, key, chosenVariant])
+
+  // Memoized so derived arrays keep stable refs across renders (timeline is a
+  // stable module constant), satisfying exhaustive-deps without churn.
+  const segments: PlaySegment[] = useMemo(() => timeline?.segments ?? [], [timeline])
+  const loggedIds: string[] = useMemo(() => timeline?.loggedExerciseIds ?? [], [timeline])
 
   const [idx, setIdx] = useState(0)
   const [playback, setPlayback] = useState<PlaybackState | null>(null)
@@ -157,9 +172,27 @@ export function PlayPage() {
     }
   }, [finished, settings.player.autoMarkDone, session?.status, key, programDayId])
 
+  // Occurrences for this key, incl. rest-day X Stretch guided-play entries.
+  // Computed before the early returns below so the hook runs unconditionally
+  // (rules-of-hooks); guards the null schedule internally.
+  const occurrences = useMemo(() => {
+    if (schedule === null) return []
+    const standard = workoutOccurrences(schedule, key)
+    if (key !== 'x-stretch') return standard
+    const out = [...standard]
+    for (const d of schedule.days) {
+      if (d.kind === 'program' && d.workouts.every((wk) => getWorkout(wk).style === 'rest')) {
+        if (!out.some((exist) => exist.programDayId === d.programDayId)) {
+          out.push(d)
+        }
+      }
+    }
+    return out.sort((a, b) => a.day - b.day)
+  }, [schedule, key])
+
   if (!valid || timeline === null) return <Navigate to={`/workouts/${key}`} replace />
   if (schedule === null) return <Navigate to={`/workouts/${key}`} replace />
-  const occurrences = workoutOccurrences(schedule, key)
+
   const occIndex = occurrences.findIndex((d) => d.programDayId === programDayId)
   if (occIndex < 0) return <Navigate to={`/workouts/${key}`} replace />
   const day = occurrences[occIndex]
@@ -438,20 +471,48 @@ export function PlayPage() {
         </div>
 
         {playback === null ? (
-          <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
-            <button
-              type="button"
-              onClick={toggleAutoMark}
-              aria-pressed={settings.player.autoMarkDone}
-              className={`rounded-lg border px-2.5 py-1.5 font-medium ${
-                settings.player.autoMarkDone
-                  ? 'border-emerald-600 bg-emerald-600 text-white'
-                  : 'border-zinc-300 text-zinc-600 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800'
-              }`}
-            >
-              Auto-mark done
-            </button>
-            <span>· When on, reaching the end marks this workout YES automatically.</span>
+          <div className="mt-3 flex flex-col gap-2">
+            {timelinesFor(key).length > 1 ? (
+              <div className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
+                <span className="font-semibold">Timeline:</span>
+                <div
+                  role="group"
+                  aria-label="Yoga timeline picker"
+                  className="inline-flex rounded-lg border border-zinc-300 p-0.5 dark:border-zinc-700"
+                >
+                  {timelinesFor(key).map((t) => (
+                    <button
+                      key={t.variant}
+                      type="button"
+                      aria-pressed={chosenVariant === t.variant}
+                      onClick={() => setChosenVariant(t.variant)}
+                      className={`rounded-md px-2.5 py-1 text-xs font-semibold transition-colors ${
+                        chosenVariant === t.variant
+                          ? 'bg-red-600 text-white'
+                          : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800'
+                      }`}
+                    >
+                      {t.variant === 'classic' ? 'Classic (90 min)' : 'P90X3 (30 min)'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+            <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
+              <button
+                type="button"
+                onClick={toggleAutoMark}
+                aria-pressed={settings.player.autoMarkDone}
+                className={`rounded-lg border px-2.5 py-1.5 font-medium ${
+                  settings.player.autoMarkDone
+                    ? 'border-emerald-600 bg-emerald-600 text-white'
+                    : 'border-zinc-300 text-zinc-600 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800'
+                }`}
+              >
+                Auto-mark done
+              </button>
+              <span>· When on, reaching the end marks this workout YES automatically.</span>
+            </div>
           </div>
         ) : null}
       </Card>

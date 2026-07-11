@@ -163,3 +163,11 @@ Post-v1.0.0. Full write-up: [`docs/epics/E17-kenpo-play.md`](../epics/E17-kenpo-
 - ✅ US-118 · Docs and release (S, P1)
 
 Post-v1.0.0. Full write-up: [`docs/epics/E18-stretch-cardio-play.md`](../epics/E18-stretch-cardio-play.md).
+
+## E19 — Yoga play variants
+
+- ✅ US-119 · Both Yoga timelines (classic truncated, P90X3) and golden pins (L, P0)
+- ✅ US-120 · Schema v5 yoga preference, Settings toggle and PlayPage picker (M, P0)
+- ✅ US-121 · Docs and release (S, P1)
+
+Post-v1.0.0. Full write-up: [`docs/epics/E19-yoga-play-variants.md`](../epics/E19-yoga-play-variants.md).

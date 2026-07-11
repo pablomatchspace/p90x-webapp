@@ -31,6 +31,13 @@ const MIGRATIONS: Record<number, (doc: Record<string, unknown>) => void> = {
       settings.player = { autoMarkDone: false }
     }
   },
+  // v4 → v5 (E19): yoga variant preference.
+  4: (doc) => {
+    const settings = doc.settings as { yoga?: unknown } | undefined
+    if (settings !== undefined && settings.yoga === undefined) {
+      settings.yoga = 'classic'
+    }
+  },
 }
 
 export function migrateToCurrent(raw: unknown): MigrationResult {
