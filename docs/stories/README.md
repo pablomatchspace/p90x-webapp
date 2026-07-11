@@ -102,3 +102,9 @@ Post-v1.0.0. Full write-up: [`docs/epics/E10-cloud-sync.md`](../epics/E10-cloud-
 - ✅ US-093 · Cloud sync screen and banners (M, P0)
 - ✅ US-094 · E2E journeys against a mocked Worker (S, P0)
 - ✅ US-095 · Docs and the D3 amendment (S, P0)
+
+## E13 — Per-epic versioning & changelog
+
+Post-v1.0.0. Full write-up: [`docs/epics/E13-versioning.md`](../epics/E13-versioning.md).
+
+- ✅ US-096 · Version policy, `CHANGELOG.md`, correction of the deployed version to 1.2.0 (S, P1)
