@@ -1,9 +1,18 @@
 # Changelog
 
-One entry per merged epic. Feature epics bump the **minor** version; pure-fix
-work bumps **patch**. The bump and its entry land inside the epic's own PR, so
-the deployed app (More → Help, via `__APP_VERSION__`) always names the last
-merged epic.
+One entry per merged epic. From E16 onward, package semver maps to the
+`1.E{epic}.U{story}` display format; this supersedes E13's minor/patch rule.
+The bump and its entry land inside the epic's own PR, so the deployed app
+(More → Help) always names the last merged epic.
+
+## 1.E16.U112 (package 1.16.112) — 2026-07-11
+
+- **E16 — Plyometrics play** (PR #<N>): “Play workout” runs the full Plyo video
+  timeline — 76 segments (flattened splits, water breaks), authored 5s get-ready
+  gaps, beep at every switch, per-jump done/skipped log (schema v4), optional
+  auto-mark-done setting. Playback engine generalized; strength focus play
+  unchanged. Versioning convention now `1.E{epic}.U{story}` (supersedes E13's
+  minor/patch rule).
 
 ## 1.5.1 — 2026-07-11
 

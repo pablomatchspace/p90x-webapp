@@ -1,4 +1,5 @@
 import { Card, Page } from '@/components/Page'
+import { formatAppVersion } from '@/lib/version'
 
 /**
  * Help / About (US-074). The abbreviations legend is transcribed from the
@@ -61,7 +62,7 @@ export function HelpPage() {
           </div>
           <div className="flex justify-between gap-4">
             <dt className="text-zinc-500 dark:text-zinc-400">Version</dt>
-            <dd className="font-medium tabular-nums">{__APP_VERSION__}</dd>
+            <dd className="font-medium tabular-nums">{formatAppVersion(__APP_VERSION__)}</dd>
           </div>
           <div className="flex justify-between gap-4">
             <dt className="text-zinc-500 dark:text-zinc-400">Source</dt>
