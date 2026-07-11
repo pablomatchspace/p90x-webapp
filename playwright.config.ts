@@ -11,6 +11,7 @@ export default defineConfig({
     baseURL: 'http://localhost:4173/p90x-webapp/',
     trace: 'on-first-retry',
   },
+  snapshotPathTemplate: '{testDir}/{testFileDir}/{testFileName}-snapshots/{arg}{-projectName}{ext}',
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
     {
