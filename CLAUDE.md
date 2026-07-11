@@ -89,7 +89,7 @@ properties / namespaces).
 - Coverage is collected on `src/lib/**`, `src/state/**`, and the sync Worker
   (`worker/index.js`).
 - **Playwright** serves the **built** app — run `npm run build` before `npm run e2e`.
-  Runs chromium + a Pixel 7 mobile profile.
+  Runs the realme 16 Pro+ mobile profile.
 - **E2E pitfalls (learned the hard way):**
   - `getByLabel` substring-matches — `'X round 1 reps'` also hits the
     `'Increase X round 1 reps'` stepper. Prefer `getByRole('textbox', { name })`
