@@ -1,17 +1,28 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { Card, Page } from '@/components/Page'
 import { formatLong } from '@/lib/dates'
 import { getWorkout, hasWorkout, type WorkoutDef } from '@/lib/programData'
+import {
+  extendPlayback,
+  pausePlayback,
+  remainingMs,
+  resumePlayback,
+  skipPhase,
+  startPlayback,
+  tickPlayback,
+  type PlaybackState,
+} from '@/lib/playback'
 import { workoutOccurrences } from '@/lib/schedule/occurrences'
 import { formatScore, scoreExercise, sessionTotals } from '@/lib/scoring'
-import { setWorkoutCompleted } from '@/state/actions'
-import { useSchedule, useScoringSettings, useWorkoutSessions } from '@/state/selectors'
+import { setWorkoutCompleted, updateTimerSettings } from '@/state/actions'
+import { useSchedule, useScoringSettings, useSettings, useWorkoutSessions } from '@/state/selectors'
 import { QuoteCard } from '@/features/dashboard/QuoteCard'
 import { focusSteps, resumeIndex } from '@/lib/focusSteps'
 import { SECONDARY_LABELS } from './entryLabels'
 import { RoundInputs } from './entryUi'
 import { TimerCard } from './TimerCard'
+import { beep, mmss } from './timerUtils'
 
 function Sparkline({ points }: { points: number[] }) {
   if (points.length < 2) return null
@@ -58,6 +69,62 @@ export function FocusPage() {
   const session = sessions.get(programDayId)
   const [idx, setIdx] = useState(() => resumeIndex(steps, session))
   const [finished, setFinished] = useState(false)
+  const settings = useSettings()
+  const [playback, setPlayback] = useState<PlaybackState | null>(null)
+  const [playDone, setPlayDone] = useState(false)
+  const [nowTick, setNowTick] = useState(() => Date.now())
+
+  const playbackOpts = {
+    stepCount: steps.length,
+    workSeconds: settings.timer.workSeconds,
+    restSeconds: settings.timer.restSeconds,
+  }
+
+  const applyTick = (result: { state: PlaybackState | null; event: string | null }) => {
+    if (result.event !== null) {
+      beep()
+      if ('vibrate' in navigator) navigator.vibrate([200, 100, 200])
+    }
+    if (result.event === 'step-advanced' && result.state !== null) setIdx(result.state.stepIndex)
+    if (result.event === 'sequence-finished') setPlayDone(true)
+    setPlayback(result.state)
+  }
+
+  useEffect(() => {
+    if (playback === null || playback.pausedMs !== null) return
+    const id = setInterval(() => {
+      const now = Date.now()
+      setNowTick(now)
+      const result = tickPlayback(playback, playbackOpts, now)
+      if (result.state !== playback || result.event !== null) applyTick(result)
+    }, 200)
+    return () => clearInterval(id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- interval is rebuilt on every playback change by design
+  }, [playback, steps.length, settings.timer.workSeconds, settings.timer.restSeconds])
+
+  // hold the screen awake for the whole play session; re-acquire on tab return
+  useEffect(() => {
+    if (playback === null || !('wakeLock' in navigator)) return
+    let sentinel: WakeLockSentinel | null = null
+    const acquire = () => {
+      navigator.wakeLock
+        .request('screen')
+        .then((s) => {
+          sentinel = s
+        })
+        .catch(() => {})
+    }
+    acquire()
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') acquire()
+    }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => {
+      document.removeEventListener('visibilitychange', onVisible)
+      void sentinel?.release().catch(() => {})
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only cares whether a session is active
+  }, [playback === null])
 
   if (!valid) return <Navigate to="/workouts" replace />
   if (schedule === null) return <Navigate to={`/workouts/${key}`} replace />
@@ -94,6 +161,29 @@ export function FocusPage() {
     setWorkoutCompleted(key, programDayId, true)
     setFinished(true)
   }
+
+  const onPlay = () => {
+    setPlayDone(false)
+    const now = Date.now()
+    setNowTick(now)
+    setPlayback(startPlayback(idx, settings.timer.workSeconds, now))
+  }
+  const onPause = () => setPlayback((p) => (p === null ? p : pausePlayback(p, Date.now())))
+  const onResume = () => setPlayback((p) => (p === null ? p : resumePlayback(p, Date.now())))
+  const onExtend = () => setPlayback((p) => (p === null ? p : extendPlayback(p, 10_000)))
+  const onSkip = () => {
+    if (playback === null) return
+    applyTick(skipPhase(playback, playbackOpts, Date.now()))
+  }
+  const onStop = () => {
+    setPlayback(null)
+    setPlayDone(false)
+  }
+
+  const nextStep =
+    playback !== null && playback.phase === 'rest' && playback.stepIndex + 1 < steps.length
+      ? steps[playback.stepIndex + 1]
+      : null
 
   const ghostBtn =
     'rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-50 disabled:opacity-30 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800'
@@ -223,33 +313,116 @@ export function FocusPage() {
           />
         </div>
 
-        <div className="mt-5 flex flex-wrap gap-2">
-          <button
-            type="button"
-            className={ghostBtn}
-            disabled={idx === 0}
-            onClick={() => setIdx(idx - 1)}
-          >
-            Previous
-          </button>
-          {idx < steps.length - 1 ? (
-            <button
-              type="button"
-              className="rounded-lg bg-red-600 px-5 py-2 text-sm font-medium text-white hover:bg-red-700"
-              onClick={() => setIdx(idx + 1)}
+        {playback === null ? (
+          <>
+            {playDone ? (
+              <p className="mt-4 text-sm font-medium text-emerald-600 dark:text-emerald-400">
+                Sequence complete — review your entries, then finish below.
+              </p>
+            ) : null}
+            <div className="mt-5 flex flex-wrap gap-2">
+              <button
+                type="button"
+                className={ghostBtn}
+                disabled={idx === 0}
+                onClick={() => setIdx(idx - 1)}
+              >
+                Previous
+              </button>
+              {idx < steps.length - 1 ? (
+                <button
+                  type="button"
+                  className="rounded-lg bg-red-600 px-5 py-2 text-sm font-medium text-white hover:bg-red-700"
+                  onClick={() => setIdx(idx + 1)}
+                >
+                  Next
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="rounded-lg bg-emerald-600 px-5 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+                  onClick={finish}
+                >
+                  Finish workout
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={onPlay}
+                className="rounded-lg bg-zinc-900 px-5 py-2 text-sm font-medium text-white hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+              >
+                Play
+              </button>
+            </div>
+            <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
+              <span>Work slot:</span>
+              {[30, 45, 60, 90].map((seconds) => (
+                <button
+                  key={seconds}
+                  type="button"
+                  aria-pressed={settings.timer.workSeconds === seconds}
+                  onClick={() => updateTimerSettings({ workSeconds: seconds })}
+                  className={`rounded-lg border px-2.5 py-1.5 font-medium ${
+                    settings.timer.workSeconds === seconds
+                      ? 'border-red-600 bg-red-600 text-white'
+                      : 'border-zinc-300 text-zinc-600 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800'
+                  }`}
+                >
+                  Work {seconds} s
+                </button>
+              ))}
+              <span>
+                · Rest between steps: {settings.timer.restSeconds} s — set it on the rest timer
+                below.
+              </span>
+            </div>
+          </>
+        ) : (
+          <div className="mt-5 flex flex-wrap items-center gap-3">
+            <span
+              className={`rounded-md px-2 py-1 text-xs font-semibold tracking-wide uppercase ${
+                playback.phase === 'work' ? 'bg-red-600 text-white' : 'bg-emerald-600 text-white'
+              }`}
             >
-              Next
-            </button>
-          ) : (
-            <button
-              type="button"
-              className="rounded-lg bg-emerald-600 px-5 py-2 text-sm font-medium text-white hover:bg-emerald-700"
-              onClick={finish}
+              {playback.phase === 'work' ? 'Work' : 'Rest'}
+            </span>
+            <span
+              role="timer"
+              aria-label="Sequence time remaining"
+              className="text-2xl font-bold tabular-nums"
             >
-              Finish workout
-            </button>
-          )}
-        </div>
+              {mmss(Math.ceil(remainingMs(playback, nowTick) / 1000))}
+            </span>
+            {nextStep !== null ? (
+              <span className="text-sm text-zinc-600 dark:text-zinc-300">
+                Rest — up next: {nextStep.exercise.name}
+                {nextStep.rounds.length === 1 && nextStep.exercise.rounds > 1
+                  ? ` · Round ${nextStep.rounds[0] + 1}`
+                  : null}
+              </span>
+            ) : null}
+            <div className="flex flex-wrap gap-2">
+              {playback.pausedMs === null ? (
+                <button type="button" onClick={onPause} className={ghostBtn}>
+                  Pause
+                </button>
+              ) : (
+                <button type="button" onClick={onResume} className={ghostBtn}>
+                  Resume
+                </button>
+              )}
+              <button type="button" onClick={onExtend} className={ghostBtn}>
+                +10 s
+              </button>
+              <button type="button" onClick={onSkip} className={ghostBtn}>
+                Skip
+              </button>
+              <button type="button" onClick={onStop} className={ghostBtn}>
+                Stop
+              </button>
+            </div>
+          </div>
+        )}
       </Card>
 
       <TimerCard />
