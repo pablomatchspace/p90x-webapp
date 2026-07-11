@@ -86,7 +86,13 @@ export function assessLeanGain(
   }
 }
 
-/** Fat-mass loss required, expressed as weekly %BW vs the muscle-sparing band. */
+/**
+ * Fat-mass loss required (informational), paced against Helms' band, which
+ * targets *scale-weight* loss (docs/requirements/ffmi-feasibility.md §4), not
+ * fat-mass loss. During a recomp the scale can hold or even rise while fat
+ * still drops — lean gain offsets it — so the weekly-%BW guardrail only
+ * applies once the plan actually calls for the scale to move down.
+ */
 export function assessFatLoss(
   currentWeightKg: number,
   currentBf: number,
@@ -97,7 +103,9 @@ export function assessFatLoss(
   if (weeks <= 0 || currentWeightKg <= 0) return null
   const fatLossKg = currentWeightKg * currentBf - targetWeightKg * targetBf
   if (fatLossKg <= 0) return { fatLossKg, weeklyPctBw: 0, verdict: 'realistic' }
-  const weeklyPctBw = fatLossKg / weeks / currentWeightKg
+  const weightLossKg = currentWeightKg - targetWeightKg
+  if (weightLossKg <= 0) return { fatLossKg, weeklyPctBw: 0, verdict: 'realistic' }
+  const weeklyPctBw = weightLossKg / weeks / currentWeightKg
   // The upper safe bound drives the fat-loss verdict, using the shared policy thresholds.
   const ratio = weeklyPctBw / FAT_LOSS_BAND.high
   return { fatLossKg, weeklyPctBw, verdict: bandVerdict(ratio) }

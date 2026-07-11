@@ -88,3 +88,7 @@ Two peer-reviewed practitioner heuristic models are presented side by side (with
   - Capped at the sex-specific natural FFMI ceiling.
   - Hidden from the UI if the suggested target is not at least $0.1$ higher than the current FFMI.
 - **Disclaimer**: All outputs are presented with the disclaimer: "Not medical or coaching advice."
+- **Training Experience Self-Assessment Guidance**: `settings.training` asks about time spent *regularly lifting weights or doing resistance workouts before this program*, not P90X program history, since it drives the gain-rate models above. Generalized from the McDonald model's Year 1/2/3 mapping (§2.2), shown in the UI so users can self-classify:
+  - **Novice**: under 1 year.
+  - **Intermediate**: roughly 1–3 years.
+  - **Advanced**: 3+ years, close to natural potential.

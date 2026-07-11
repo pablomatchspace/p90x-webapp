@@ -51,11 +51,21 @@ describe('assessLeanGain', () => {
 })
 
 describe('assessFatLoss', () => {
-  it('matches the sample fat-loss golden', () => {
+  it('matches the sample fat-loss golden, paced on scale-weight loss', () => {
     const result = assessFatLoss(80.8, 0.212, 80.0471, 0.15, 10.9285)
     expect(result).not.toBeNull()
     expect(result!.fatLossKg).toBeCloseTo(5.1225, 4)
-    expect(result!.weeklyPctBw).toBeCloseTo(0.0058, 4)
+    // (80.8 - 80.0471) / 10.9285 weeks / 80.8 kg — weight loss, not fat-mass loss.
+    expect(result!.weeklyPctBw).toBeCloseTo(0.0008527, 6)
+    expect(result!.verdict).toBe('realistic')
+  })
+
+  it('does not apply the weight-loss pace guardrail to a recomp (scale holds or rises)', () => {
+    // Fat drops (19.6% -> 15%) but the scale rises slightly — lean gain offsets it.
+    const result = assessFatLoss(79.4, 0.196, 80.047, 0.15, 2.5714)
+    expect(result).not.toBeNull()
+    expect(result!.fatLossKg).toBeCloseTo(3.555, 2)
+    expect(result!.weeklyPctBw).toBe(0)
     expect(result!.verdict).toBe('realistic')
   })
 
