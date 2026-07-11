@@ -10,8 +10,21 @@ export default defineConfig({
   use: {
     baseURL: 'http://localhost:4173/p90x-webapp/',
     trace: 'on-first-retry',
+    // Pin the timezone so `new Date(...)`-derived UI (and the frozen clock) render
+    // identically regardless of the host machine's local tz.
+    timezoneId: 'Europe/Madrid',
   },
-  snapshotPathTemplate: '{testDir}/{testFileDir}/{testFileName}-snapshots/{arg}{-projectName}{ext}',
+  expect: {
+    toHaveScreenshot: {
+      // Baselines are per-platform (win32 committed from the dev machine, linux from CI),
+      // so same-platform runs should be near-identical; 1% guards minor AA jitter only.
+      maxDiffPixelRatio: 0.01,
+    },
+  },
+  // {platform} keeps win32 and linux baselines side by side so each OS compares
+  // only against snapshots rendered by its own font/rasterization stack.
+  snapshotPathTemplate:
+    '{testDir}/{testFileDir}/{testFileName}-snapshots/{arg}{-projectName}-{platform}{ext}',
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
     {
@@ -25,7 +38,6 @@ export default defineConfig({
         deviceScaleFactor: 3.1,
         isMobile: true,
         hasTouch: true,
-        defaultBrowserType: 'chromium',
         userAgent:
           'Mozilla/5.0 (Linux; Android 14; RMX5131 Build/UKQ1.230924.001) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Mobile Safari/537.36',
       },

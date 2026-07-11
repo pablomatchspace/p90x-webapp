@@ -91,7 +91,21 @@ properties / namespaces).
 - **Playwright** serves the **built** app — run `npm run build` before `npm run e2e`.
   Runs the desktop chromium and realme 16 Pro+ mobile profiles.
   **Playwright must also verify any UI issues visible in screens for both desktop and specific mobile device defined.**
+  - **Per-platform visual baselines.** `e2e/smoke.spec.ts` compares full-page screenshots
+    against `{platform}`-suffixed baselines (`snapshotPathTemplate`), so each OS matches only
+    snapshots rendered by its own font/rasterization stack and the config threshold can stay
+    tight (`maxDiffPixelRatio: 0.01`). Both `-win32` and `-linux` sets are committed.
+    Regenerate **win32** on this machine:
+    `npm run build && npx playwright test e2e/smoke.spec.ts --update-snapshots`.
+    Regenerate **linux** via a temporary CI `--update-snapshots` job that uploads the
+    `e2e/smoke.spec.ts-snapshots/` dir as an artifact (download with `gh run download`, keep the
+    `*-linux.png` files), or via the `mcr.microsoft.com/playwright` Docker image when the daemon
+    is running. macOS has no committed baselines — a contributor would generate `-darwin` locally.
 - **E2E pitfalls (learned the hard way):**
+  - A frozen `page.clock` (`clock.install`) **never advances by itself** — elapsed-time UI
+    (focus playing/paused, any `now`-driven timer) needs an explicit `page.clock.fastForward(ms)`.
+    Anchor the install time in UTC (`new Date('…Z')`) and pin `timezoneId` so it renders the same
+    on every host.
   - `getByLabel` substring-matches — `'X round 1 reps'` also hits the
     `'Increase X round 1 reps'` stepper. Prefer `getByRole('textbox', { name })`
     or `{ exact: true }`.
