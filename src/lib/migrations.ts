@@ -24,6 +24,13 @@ const MIGRATIONS: Record<number, (doc: Record<string, unknown>) => void> = {
       settings.targets.ffmi = null
     }
   },
+  // v3 → v4 (E16): play-mode preferences (session.exerciseDone is optional — no backfill).
+  3: (doc) => {
+    const settings = doc.settings as { player?: unknown } | undefined
+    if (settings !== undefined && settings.player === undefined) {
+      settings.player = { autoMarkDone: false }
+    }
+  },
 }
 
 export function migrateToCurrent(raw: unknown): MigrationResult {

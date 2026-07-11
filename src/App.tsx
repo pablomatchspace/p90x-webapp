@@ -31,6 +31,9 @@ const WorkoutDetailPage = lazy(() =>
 const FocusPage = lazy(() =>
   import('@/features/workouts/FocusPage').then((m) => ({ default: m.FocusPage })),
 )
+const PlayPage = lazy(() =>
+  import('@/features/workouts/PlayPage').then((m) => ({ default: m.PlayPage })),
+)
 const BodyPage = lazy(() =>
   import('@/features/body/BodyPage').then((m) => ({ default: m.BodyPage })),
 )
@@ -87,6 +90,7 @@ export default function App() {
           <Route path="workouts" element={<WorkoutsPage />} />
           <Route path="workouts/:key" element={<WorkoutDetailPage />} />
           <Route path="workouts/:key/focus/:programDayId" element={<FocusPage />} />
+          <Route path="workouts/:key/play/:programDayId" element={<PlayPage />} />
           <Route path="body" element={<BodyPage />} />
           <Route path="trends" element={<BodyTrendsPage />} />
           <Route path="progress" element={<StrengthProgressPage />} />

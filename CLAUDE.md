@@ -68,10 +68,12 @@ properties / namespaces).
 
 - **One epic = one branch = one PR**, squash-merged after CI is green. Branch
   name `claude/epic-eN-<slug>`. Story-level Conventional Commits within the branch.
-- **Version per epic:** every epic PR bumps the version — minor for feature
-  epics, patch for pure-fix work — via `npm version <x.y.z> --no-git-tag-version`,
-  plus a matching `CHANGELOG.md` entry (version — date — epic — PR). The deployed
-  app must always report the last merged epic's version on More → Help.
+- **Version from E16 onward (Q20):** package.json stays semver, mapped as
+  `1.{epicNumber}.{lastStoryNumber}` via `npm version <x.y.z> --no-git-tag-version`.
+  More → Help displays `1.E{epic}.U{story}` through `formatAppVersion`; historical
+  versions before E16 keep their plain semver display. CHANGELOG headings use
+  `## 1.E{epic}.U{story} (package 1.{epic}.{story}) — YYYY-MM-DD`. This
+  supersedes E13's minor/patch version rule.
 - **Validate before every commit:** `npm run format` then
   `npm run lint && npm run typecheck && npm run test && npm run build`
   (+ `npm run e2e` if a journey changed, + `npm run lhci` if UI/perf changed).

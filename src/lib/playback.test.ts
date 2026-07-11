@@ -97,3 +97,85 @@ describe('playback engine', () => {
     expect(remainingMs(startPlayback(0, 60, T0), T0 + 61_000)).toBe(0)
   })
 })
+
+describe('per-step overrides (E16)', () => {
+  it('stepSeconds respected on rest-end advance', () => {
+    const opts = { stepCount: 3, workSeconds: 60, restSeconds: 30, stepSeconds: [45, 90, 60] }
+    const rest = { phase: 'rest' as const, stepIndex: 0, endsAt: T0, pausedMs: null }
+    const r = tickPlayback(rest, opts, T0)
+    expect(r.event).toBe('step-advanced')
+    expect(r.state?.phase).toBe('work')
+    expect(r.state?.stepIndex).toBe(1)
+    expect(r.state?.endsAt).toBe(T0 + 90_000)
+  })
+
+  it('restAfter per-boundary duration', () => {
+    const opts = { stepCount: 3, workSeconds: 60, restSeconds: 30, restAfter: [10, 20, 30] }
+    const work = startPlayback(0, 60, T0)
+    const r = tickPlayback(work, opts, T0 + 60_000)
+    expect(r.event).toBe('rest-started')
+    expect(r.state?.endsAt).toBe(T0 + 70_000)
+  })
+
+  it('restAfter: 0 ⇒ work-end advances straight to next work with step-advanced', () => {
+    const opts = {
+      stepCount: 3,
+      workSeconds: 60,
+      restSeconds: 30,
+      restAfter: [0, 30, 30],
+      stepSeconds: [60, 45, 60],
+    }
+    const work = startPlayback(0, 60, T0)
+    const r = tickPlayback(work, opts, T0 + 60_000)
+    expect(r.event).toBe('step-advanced')
+    expect(r.state?.phase).toBe('work')
+    expect(r.state?.stepIndex).toBe(1)
+    expect(r.state?.endsAt).toBe(T0 + 105_000)
+  })
+
+  it('mixed array with holes falls back to uniforms', () => {
+    // Short arrays: index 0 only → steps 1,2,3 are holes (undefined at runtime) → fall back to uniforms.
+    const opts = {
+      stepCount: 4,
+      workSeconds: 60,
+      restSeconds: 30,
+      stepSeconds: [60],
+      restAfter: [30, 0],
+    }
+    const work0 = startPlayback(0, 60, T0)
+    const r0 = tickPlayback(work0, opts, T0 + 60_000)
+    expect(r0.state?.endsAt).toBe(T0 + 90_000) // restAfter[0]=30
+    const rest1 = { phase: 'rest' as const, stepIndex: 1, endsAt: T0, pausedMs: null }
+    const r1 = tickPlayback(rest1, opts, T0)
+    expect(r1.state?.endsAt).toBe(T0 + 60_000) // stepSeconds[2] is a hole → falls back to workSeconds=60
+    const work2 = { phase: 'work' as const, stepIndex: 2, endsAt: T0, pausedMs: null }
+    const r2 = tickPlayback(work2, opts, T0 + 60_000)
+    expect(r2.state?.endsAt).toBe(T0 + 90_000) // restAfter[2] is a hole → falls back to restSeconds=30
+  })
+
+  it('skipPhase across a zero-rest boundary lands on next step work', () => {
+    const opts = {
+      stepCount: 3,
+      workSeconds: 60,
+      restSeconds: 30,
+      restAfter: [0, 30, 30],
+      stepSeconds: [60, 45, 60],
+    }
+    const work = startPlayback(0, 60, T0)
+    const r = skipPhase(work, opts, T0 + 30_000)
+    expect(r.event).toBe('step-advanced')
+    expect(r.state?.phase).toBe('work')
+    expect(r.state?.stepIndex).toBe(1)
+    expect(r.state?.endsAt).toBe(T0 + 75_000)
+  })
+
+  it('uniform-only opts produce results identical to pre-E16 fixtures (regression pin)', () => {
+    const opts = { stepCount: 3, workSeconds: 60, restSeconds: 30 }
+    const work = startPlayback(0, 60, T0)
+    const r = tickPlayback(work, opts, T0 + 60_000)
+    expect(r).toEqual({
+      state: { phase: 'rest', stepIndex: 0, endsAt: T0 + 90_000, pausedMs: null },
+      event: 'rest-started',
+    })
+  })
+})

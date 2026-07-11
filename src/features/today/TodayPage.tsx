@@ -4,6 +4,7 @@ import { NoProgramCard } from '@/components/NoProgramCard'
 import { Card, Page } from '@/components/Page'
 import { addDays, compareISO, formatLong, isISODate, todayISO, type ISODate } from '@/lib/dates'
 import { getWorkout } from '@/lib/programData'
+import { hasTimeline } from '@/lib/timelines'
 import type { ProgramDay } from '@/lib/schedule/materialize'
 import { dayStatus, workoutState } from '@/lib/schedule/status'
 import { BodyQuickAdd } from '@/features/body/BodyQuickAdd'
@@ -56,6 +57,15 @@ function WorkoutCard({
             programDayId={day.programDayId}
             session={session}
           />
+          {/* E16: guided play for completion workouts with an authored timeline */}
+          {hasTimeline(workoutKey) ? (
+            <Link
+              to={`/workouts/${workoutKey}/play/${day.programDayId}`}
+              className="mt-2 inline-block rounded-lg bg-red-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-red-700"
+            >
+              Play workout
+            </Link>
+          ) : null}
         </div>
       ) : (
         <div className="mt-3 flex flex-wrap items-center gap-3">

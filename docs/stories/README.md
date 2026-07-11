@@ -137,3 +137,13 @@ Post-v1.0.0. Full write-up: [`docs/epics/E14-ffmi-target-estimator.md`](../epics
 - ✅ US-108 · Playwright test device replacement and UI validation (S, P1)
 
 Post-v1.0.0. Full write-up: [`docs/epics/E15-playwright-device-replacement.md`](../epics/E15-playwright-device-replacement.md).
+
+## E16 — Plyometrics play
+
+- ✅ US-108 · Playback engine per-step durations and skippable rests (M, P0)
+- ✅ US-109 · Schema v4 play settings and per-exercise log (M, P0)
+- ✅ US-110 · Plyometrics authored timeline and golden pins (M, P0)
+- ✅ US-111 · Guided Plyometrics player, entries and e2e (L, P0)
+- ✅ US-112 · Versioning convention, docs and release (S, P1)
+
+Post-v1.0.0. Full write-up: [`docs/epics/E16-plyometrics-play.md`](../epics/E16-plyometrics-play.md).

@@ -5,7 +5,7 @@ import { z } from 'zod'
  * (scores, penalties, BMI, adherence…) is recomputed by pure functions, mirroring
  * the Excel design where formulas derive everything from entered cells (PRD §8).
  */
-export const SCHEMA_VERSION = 3
+export const SCHEMA_VERSION = 4
 
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'expected YYYY-MM-DD')
 
@@ -45,6 +45,8 @@ export const settingsSchema = z.object({
     workSeconds: z.number().int().min(5).max(3600),
     restSeconds: z.number().int().min(5).max(3600),
   }),
+  /** E16: play-mode preferences */
+  player: z.object({ autoMarkDone: z.boolean() }),
 })
 
 const opBase = {
@@ -87,6 +89,8 @@ export const sessionSchema = z.object({
   completed: z.boolean().optional(),
   /** cardio-style sheets: the Excel COMPLETED? dropdown */
   status: z.enum(['yes', 'no', 'not-yet']).optional(),
+  /** E16 play mode (Q21c): per-exercise done/skipped log for interval workouts */
+  exerciseDone: z.record(z.string(), z.boolean()).optional(),
   entries: z.record(z.string(), exerciseEntrySchema).optional(),
   notes: z.string().optional(),
   loggedAt: z.string().optional(),
@@ -146,6 +150,7 @@ export function emptyState(): AppState {
       targets: { leanMassIncrease: null, bodyFat: null, ffmi: null },
       scoring: { penaltyDivisor: 2, penaltyOn: true, chairFactor: 2, rwDivisor: 10 },
       timer: { workSeconds: 60, restSeconds: 60 },
+      player: { autoMarkDone: false },
     },
     scheduleOps: [],
     workoutLogs: {},

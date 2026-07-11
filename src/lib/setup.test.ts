@@ -16,6 +16,7 @@ const sample: Settings = {
   targets: { leanMassIncrease: 4, bodyFat: 0.15 },
   scoring: { penaltyDivisor: 2, penaltyOn: true, chairFactor: 2, rwDivisor: 10 },
   timer: { workSeconds: 60, restSeconds: 60 },
+  player: { autoMarkDone: false },
 }
 
 describe('setupDerived (golden vs sample SETUP)', () => {

@@ -8,12 +8,14 @@ import {
   setCompletionStatus,
   setNotes,
   setRoundValue,
+  setExerciseDone,
   setSessionAnnotation,
   setSessionNotes,
   setStartDate,
   setWorkoutCompleted,
   startProgram,
   updateLimits,
+  updatePlayerSettings,
   updateScoring,
   updateSettings,
   updateTargets,
@@ -168,6 +170,47 @@ describe('settings & notes actions', () => {
     expect(useStore.getState().data.settings.startDate).toBeNull()
     setStartDate('2026-05-25')
     expect(useStore.getState().data.settings.startDate).toBe('2026-05-25')
+  })
+})
+
+describe('player settings & per-exercise play log (E16)', () => {
+  it('toggles the persisted auto-mark-done preference (Q17)', () => {
+    expect(useStore.getState().data.settings.player.autoMarkDone).toBe(false)
+    updatePlayerSettings({ autoMarkDone: true })
+    expect(useStore.getState().data.settings.player.autoMarkDone).toBe(true)
+    updatePlayerSettings({ autoMarkDone: false })
+    expect(useStore.getState().data.settings.player.autoMarkDone).toBe(false)
+  })
+
+  it('coerces non-boolean autoMarkDone to a real boolean', () => {
+    updatePlayerSettings({ autoMarkDone: 'truthy' as unknown as boolean })
+    expect(useStore.getState().data.settings.player.autoMarkDone).toBe(true)
+    updatePlayerSettings({ autoMarkDone: undefined })
+    expect(useStore.getState().data.settings.player.autoMarkDone).toBe(true) // undefined = no-op
+  })
+
+  it('merges per-exercise done/skipped flags into the session (Q21c)', () => {
+    setExerciseDone('plyometrics', 'd002', { 'jump-squats': true, 'hop-squats': false })
+    const session = useStore.getState().data.workoutLogs['plyometrics'].sessions[0]
+    expect(session.exerciseDone).toEqual({ 'jump-squats': true, 'hop-squats': false })
+    expect(session.loggedAt).toBeTruthy()
+  })
+
+  it('merges successive patches in place (corrections on the summary checklist)', () => {
+    setExerciseDone('plyometrics', 'd002', { 'jump-squats': true, 'hop-squats': false })
+    setExerciseDone('plyometrics', 'd002', { 'hop-squats': true }) // corrected on the summary
+    const session = useStore.getState().data.workoutLogs['plyometrics'].sessions[0]
+    expect(session.exerciseDone).toEqual({ 'jump-squats': true, 'hop-squats': true })
+    expect(useStore.getState().data.workoutLogs['plyometrics'].sessions).toHaveLength(1)
+  })
+
+  it('keeps per-day play logs separate', () => {
+    setExerciseDone('plyometrics', 'd002', { 'jump-squats': true })
+    setExerciseDone('plyometrics', 'd009', { 'jump-squats': false })
+    const logs = useStore.getState().data.workoutLogs['plyometrics'].sessions
+    expect(logs).toHaveLength(2)
+    expect(logs[0].exerciseDone).toEqual({ 'jump-squats': true })
+    expect(logs[1].exerciseDone).toEqual({ 'jump-squats': false })
   })
 })
 

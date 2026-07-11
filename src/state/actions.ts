@@ -260,6 +260,40 @@ export function updateTimerSettings(patch: Partial<Settings['timer']>): void {
 }
 
 /**
+ * E16: play-mode preferences (Q17). Only raw inputs are written; auto-mark-done
+ * is a persisted boolean defaulting to false. Mirrors the nested-patcher style of
+ * updateTimerSettings: live mutation bypasses Zod, so booleans are coerced.
+ */
+export function updatePlayerSettings(patch: Partial<Settings['player']>): void {
+  useStore.getState().mutate((draft) => {
+    if (patch.autoMarkDone !== undefined) {
+      draft.settings.player.autoMarkDone = Boolean(patch.autoMarkDone)
+    }
+  })
+}
+
+/**
+ * E16 (Q21c): merge per-exercise done/skipped flags into a session's play log.
+ * Raw user input (done/skipped taps), not derived — allowed under the
+ * "never store derived" rule. Lazily creates the session like the other quick-log
+ * actions, so an untouched play session never leaves a residue entry.
+ */
+export function setExerciseDone(
+  workoutKey: string,
+  programDayId: string,
+  patch: Record<string, boolean>,
+): void {
+  useStore.getState().mutate((draft) => {
+    const session = upsertSession(draft, workoutKey, programDayId)
+    const next = { ...(session.exerciseDone ?? {}), ...patch }
+    // Drop keys flipped back to the default-untouched shape would lose information;
+    // the Q21c log keeps explicit true/false, so we keep all keys as written.
+    session.exerciseDone = next
+    session.loggedAt = new Date().toISOString()
+  })
+}
+
+/**
  * Begin a program on a fresh document (US-084) — the no-import entry path. The
  * schedule materializes from `(program, startDate)` alone, so a start date is the
  * only input a brand-new user has to supply; stats and targets stay optional.
