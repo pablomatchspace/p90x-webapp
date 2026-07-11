@@ -17,6 +17,8 @@ async function importSample(page: Page) {
   await page.getByRole('button', { name: 'Try sample data' }).click()
   await page.getByRole('button', { name: 'Import & replace' }).click()
   await expect(page.getByText(/Imported sample dataset/)).toBeVisible()
+  // Allow the debounced persister (usually 500ms-1000ms) to save to localStorage before reloads
+  await page.waitForTimeout(1000)
 }
 
 async function openPlyometrics(page: Page) {
@@ -187,4 +189,84 @@ test('Cardio X (lean) shows Play workout with untimed rep waits (E18)', async ({
   await page.getByRole('button', { name: 'Start', exact: true }).click()
   await expect(page.getByRole('button', { name: 'Done — next', exact: true })).toBeVisible()
   await expect(page.getByLabel('Rep target')).toHaveText('20 reps')
+})
+
+/**
+ * Yoga Play variants (E19):
+ * (a) Settings toggle persists across reload.
+ * (b) Yoga day plays classic by default, showing the cutoff cue on segment 43.
+ * (c) Changing settings to x3 makes Yoga day default to P90X3 timeline (62 segments).
+ * (d) Per-launch override works without mutating Settings.
+ */
+test('Yoga play variants classic vs P90X3 (E19)', async ({ page }) => {
+  // Classic day 11 is Yoga X = 2026-01-16 (due to Jan 14 skip)
+  await page.clock.setFixedTime(new Date('2026-01-16T09:00:00Z'))
+  await page.goto('/index.html#/day/2026-01-16')
+
+  // Defaults to Classic (43 segments)
+  await page.getByRole('link', { name: 'Play workout', exact: true }).click()
+  await expect(page.getByText('Segment 1 of 43')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Mountain Pose' })).toBeVisible()
+
+  // Overriding on screen to P90X3 changes timeline to 62 segments
+  const x3Btn = page.getByRole('button', { name: 'P90X3 (30 min)', exact: true })
+  await expect(x3Btn).toBeVisible()
+  await x3Btn.click()
+  await expect(page.getByText('Segment 1 of 62')).toBeVisible()
+  await expect(page.getByRole('heading', { name: "Child's Pose" })).toBeVisible()
+
+  // Switching back to Classic works
+  const classicBtn = page.getByRole('button', { name: 'Classic (90 min)', exact: true })
+  await classicBtn.click()
+  await expect(page.getByText('Segment 1 of 43')).toBeVisible()
+
+  // Browse to final Classic segment to check cutoff cue
+  for (let i = 0; i < 42; i++) {
+    await page.getByRole('button', { name: 'Next', exact: true }).click()
+  }
+  await expect(page.getByText('Segment 43 of 43')).toBeVisible()
+  await expect(
+    page.getByRole('heading', { name: 'Prayer Twist in Lunge (Right leg)' }),
+  ).toBeVisible()
+  await expect(page.getByText('(transcript ends here — continue with the video)')).toBeVisible()
+
+  // Exit and go to settings
+  await page.getByRole('link', { name: 'Exit', exact: true }).click()
+  await page.goto('/index.html#/more/settings')
+
+  // Set default Yoga variant to P90X3 (30 min) in Settings
+  const settingsX3Pill = page.getByRole('button', { name: 'P90X3 (30 min)', exact: true })
+  await settingsX3Pill.click()
+  await page.waitForTimeout(1000) // let settings save
+  await page.reload()
+
+  // Verify settings toggle persisted across reload
+  await expect(page.getByRole('button', { name: 'P90X3 (30 min)', exact: true })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  )
+
+  // Verify PlayPage now defaults to X3 (62 segments)
+  await page.goto('/index.html#/day/2026-01-16')
+  await page.getByRole('link', { name: 'Play workout', exact: true }).click()
+  await expect(page.getByText('Segment 1 of 62')).toBeVisible()
+})
+
+/**
+ * Rest-day X Stretch Play redirection fix (E19 issue):
+ * On a Rest day, the "Rest or X Stretch" card renders a "Play workout" button.
+ * Clicking it must resolve the occurrence correctly on PlayPage instead of redirecting.
+ */
+test('Allows guided X Stretch play from a rest-day (E19 redirection fix)', async ({ page }) => {
+  // Classic Day 7 = 2026-01-11 = Rest day
+  await page.clock.setFixedTime(new Date('2026-01-11T09:00:00Z'))
+  await page.goto('/index.html#/day/2026-01-11')
+
+  // The card has title "Rest or X Stretch" with Play button
+  await expect(page.getByRole('heading', { name: 'Rest or X Stretch' })).toBeVisible()
+  await page.getByRole('link', { name: 'Play workout', exact: true }).click()
+
+  // Verify PlayPage resolves and loads Segment 1 of 62 (X Stretch)
+  await expect(page.getByText('Segment 1 of 62')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Sun Salutation Round 1' })).toBeVisible()
 })

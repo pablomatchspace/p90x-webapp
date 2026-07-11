@@ -273,6 +273,15 @@ export function updatePlayerSettings(patch: Partial<Settings['player']>): void {
 }
 
 /**
+ * E19: update the default yoga play variant.
+ */
+export function updateYogaVariant(variant: Settings['yoga']): void {
+  useStore.getState().mutate((draft) => {
+    draft.settings.yoga = variant
+  })
+}
+
+/**
  * E16 (Q21c): merge per-exercise done/skipped flags into a session's play log.
  * Raw user input (done/skipped taps), not derived — allowed under the
  * "never store derived" rule. Lazily creates the session like the other quick-log

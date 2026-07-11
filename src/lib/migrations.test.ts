@@ -3,12 +3,18 @@ import { migrateToCurrent } from './migrations'
 import { emptyState, SCHEMA_VERSION } from './schema'
 
 /** A faithful document at an older version: current empty state minus later fields. */
-function docAt(version: 1 | 2 | 3): Record<string, unknown> {
+function docAt(version: 1 | 2 | 3 | 4): Record<string, unknown> {
   const doc = JSON.parse(JSON.stringify(emptyState())) as {
     schemaVersion: number
-    settings: { timer?: unknown; targets: Record<string, unknown>; player?: unknown }
+    settings: {
+      timer?: unknown
+      targets: Record<string, unknown>
+      player?: unknown
+      yoga?: unknown
+    }
   }
   doc.schemaVersion = version
+  if (version < 5) delete doc.settings.yoga // v5 field
   if (version < 4) delete doc.settings.player // v4 field
   if (version < 3) delete doc.settings.targets.ffmi // v3 field
   if (version < 2) delete doc.settings.timer // v2 field
@@ -25,6 +31,7 @@ describe('migration pipeline', () => {
       expect(result.state.settings.timer).toEqual({ workSeconds: 60, restSeconds: 60 })
       expect(result.state.settings.targets.ffmi).toBeNull()
       expect(result.state.settings.player).toEqual({ autoMarkDone: false })
+      expect(result.state.settings.yoga).toBe('classic')
     }
   })
 
@@ -38,6 +45,7 @@ describe('migration pipeline', () => {
       expect(result.state.settings.timer).toEqual({ workSeconds: 45, restSeconds: 90 })
       expect(result.state.settings.targets.ffmi).toBeNull()
       expect(result.state.settings.player).toEqual({ autoMarkDone: false })
+      expect(result.state.settings.yoga).toBe('classic')
     }
   })
 
@@ -51,6 +59,19 @@ describe('migration pipeline', () => {
       expect(result.state.settings.timer).toEqual({ workSeconds: 45, restSeconds: 90 })
       expect(result.state.settings.targets.ffmi).toBeNull()
       expect(result.state.settings.player).toEqual({ autoMarkDone: false })
+      expect(result.state.settings.yoga).toBe('classic')
+    }
+  })
+
+  it('upgrades a v4 document, keeping custom player values and gaining yoga', () => {
+    const doc = docAt(4)
+    ;(doc.settings as { player?: unknown }).player = { autoMarkDone: true }
+    const result = migrateToCurrent(doc)
+    expect(result.ok).toBe(true)
+    if (result.ok) {
+      expect(result.migrated).toBe(true)
+      expect(result.state.settings.player).toEqual({ autoMarkDone: true })
+      expect(result.state.settings.yoga).toBe('classic')
     }
   })
 

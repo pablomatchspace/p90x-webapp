@@ -24,6 +24,7 @@ import {
   updateScoring,
   updateSettings,
   updateTargets,
+  updateYogaVariant,
 } from '@/state/actions'
 import { useSettings } from '@/state/selectors'
 import { useStore } from '@/state/store'
@@ -223,6 +224,20 @@ export function SettingsPage() {
                 Switch to <span className="capitalize">{otherProgram}</span>
               </button>
             </div>
+          </Row>
+          <Row
+            label="Yoga timeline"
+            hint="Choose the default timeline that plays on Yoga X days — can be overridden per session"
+          >
+            <Segmented
+              label="Yoga timeline"
+              value={settings.yoga}
+              options={[
+                { value: 'classic', label: 'Classic (90 min)' },
+                { value: 'x3', label: 'P90X3 (30 min)' },
+              ]}
+              onChange={(value) => updateYogaVariant(value)}
+            />
           </Row>
           <Row
             label="Start date"

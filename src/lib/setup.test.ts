@@ -17,6 +17,7 @@ const sample: Settings = {
   scoring: { penaltyDivisor: 2, penaltyOn: true, chairFactor: 2, rwDivisor: 10 },
   timer: { workSeconds: 60, restSeconds: 60 },
   player: { autoMarkDone: false },
+  yoga: 'classic',
 }
 
 describe('setupDerived (golden vs sample SETUP)', () => {
