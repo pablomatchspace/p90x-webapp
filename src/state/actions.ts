@@ -281,6 +281,13 @@ export function updateYogaVariant(variant: Settings['yoga']): void {
   })
 }
 
+/** E20: self-reported training experience (feasibility rate tier). */
+export function updateTraining(level: Settings['training']): void {
+  useStore.getState().mutate((draft) => {
+    draft.settings.training = level
+  })
+}
+
 /**
  * E16 (Q21c): merge per-exercise done/skipped flags into a session's play log.
  * Raw user input (done/skipped taps), not derived — allowed under the

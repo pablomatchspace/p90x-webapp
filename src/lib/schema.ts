@@ -5,7 +5,7 @@ import { z } from 'zod'
  * (scores, penalties, BMI, adherence…) is recomputed by pure functions, mirroring
  * the Excel design where formulas derive everything from entered cells (PRD §8).
  */
-export const SCHEMA_VERSION = 5
+export const SCHEMA_VERSION = 6
 
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'expected YYYY-MM-DD')
 
@@ -49,6 +49,8 @@ export const settingsSchema = z.object({
   player: z.object({ autoMarkDone: z.boolean() }),
   /** E19: which Yoga timeline plays on Yoga X days */
   yoga: z.enum(['classic', 'x3']),
+  /** E20: self-reported resistance-training experience — drives feasibility rate tiers */
+  training: z.enum(['novice', 'intermediate', 'advanced']),
 })
 
 const opBase = {
@@ -154,6 +156,7 @@ export function emptyState(): AppState {
       timer: { workSeconds: 60, restSeconds: 60 },
       player: { autoMarkDone: false },
       yoga: 'classic',
+      training: 'intermediate',
     },
     scheduleOps: [],
     workoutLogs: {},

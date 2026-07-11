@@ -3,7 +3,7 @@ import { migrateToCurrent } from './migrations'
 import { emptyState, SCHEMA_VERSION } from './schema'
 
 /** A faithful document at an older version: current empty state minus later fields. */
-function docAt(version: 1 | 2 | 3 | 4): Record<string, unknown> {
+function docAt(version: 1 | 2 | 3 | 4 | 5): Record<string, unknown> {
   const doc = JSON.parse(JSON.stringify(emptyState())) as {
     schemaVersion: number
     settings: {
@@ -11,9 +11,11 @@ function docAt(version: 1 | 2 | 3 | 4): Record<string, unknown> {
       targets: Record<string, unknown>
       player?: unknown
       yoga?: unknown
+      training?: unknown
     }
   }
   doc.schemaVersion = version
+  if (version < 6) delete doc.settings.training // v6 field
   if (version < 5) delete doc.settings.yoga // v5 field
   if (version < 4) delete doc.settings.player // v4 field
   if (version < 3) delete doc.settings.targets.ffmi // v3 field
@@ -32,6 +34,7 @@ describe('migration pipeline', () => {
       expect(result.state.settings.targets.ffmi).toBeNull()
       expect(result.state.settings.player).toEqual({ autoMarkDone: false })
       expect(result.state.settings.yoga).toBe('classic')
+      expect(result.state.settings.training).toBe('intermediate')
     }
   })
 
@@ -72,6 +75,18 @@ describe('migration pipeline', () => {
       expect(result.migrated).toBe(true)
       expect(result.state.settings.player).toEqual({ autoMarkDone: true })
       expect(result.state.settings.yoga).toBe('classic')
+    }
+  })
+
+  it('upgrades a v5 document, keeping yoga and gaining training experience', () => {
+    const doc = docAt(5)
+    ;(doc.settings as { yoga?: unknown }).yoga = 'x3'
+    const result = migrateToCurrent(doc)
+    expect(result.ok).toBe(true)
+    if (result.ok) {
+      expect(result.migrated).toBe(true)
+      expect(result.state.settings.yoga).toBe('x3')
+      expect(result.state.settings.training).toBe('intermediate')
     }
   })
 

@@ -24,6 +24,7 @@ import {
   updateScoring,
   updateSettings,
   updateTargets,
+  updateTraining,
   updateYogaVariant,
 } from '@/state/actions'
 import { useSettings } from '@/state/selectors'
@@ -272,6 +273,21 @@ export function SettingsPage() {
                 { value: 'female', label: 'Female' },
               ]}
               onChange={(value) => updateSettings({ gender: value })}
+            />
+          </Row>
+          <Row
+            label="Training experience"
+            hint="Sets realistic muscle-gain rates in the FFMI feasibility check"
+          >
+            <Segmented
+              label="Training experience"
+              value={settings.training}
+              options={[
+                { value: 'novice', label: 'Novice' },
+                { value: 'intermediate', label: 'Interm.' },
+                { value: 'advanced', label: 'Advanced' },
+              ]}
+              onChange={(value) => updateTraining(value)}
             />
           </Row>
         </div>

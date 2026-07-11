@@ -38,6 +38,13 @@ const MIGRATIONS: Record<number, (doc: Record<string, unknown>) => void> = {
       settings.yoga = 'classic'
     }
   },
+  // v5 → v6 (E20): resistance-training experience for feasibility.
+  5: (doc) => {
+    const settings = doc.settings as { training?: unknown } | undefined
+    if (settings !== undefined && settings.training === undefined) {
+      settings.training = 'intermediate'
+    }
+  },
 }
 
 export function migrateToCurrent(raw: unknown): MigrationResult {
