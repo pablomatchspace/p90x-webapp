@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { deriveBody } from './body'
-import { leanMassForFfmi, normalizedFfmi, weightForLeanMass } from './ffmi'
+import { leanMassForFfmi, normalizedFfmi, planFromFfmi, weightForLeanMass } from './ffmi'
 
 describe('normalizedFfmi', () => {
   it('matches the sample-data goldens (height 1.8 → zero adjustment)', () => {
@@ -54,5 +54,19 @@ describe('weightForLeanMass', () => {
   it('rejects impossible body-fat fractions', () => {
     expect(weightForLeanMass(68, -0.01)).toBeNull()
     expect(weightForLeanMass(68, 1)).toBeNull()
+  })
+})
+
+describe('planFromFfmi', () => {
+  it('reproduces the E14 sample-plan goldens (FFMI 21 @ 15%, start lean 63.96)', () => {
+    const p = planFromFfmi(21, 0.15, 1.8, 63.96)
+    expect(p).not.toBeNull()
+    expect(p!.lean).toBeCloseTo(68.04, 10)
+    expect(p!.increase).toBeCloseTo(4.08, 10)
+    expect(p!.weight).toBeCloseTo(80.04705882352943, 9)
+    expect(p!.sheetTargetWeight).toBeCloseTo(77.634, 6)
+  })
+  it('returns null for impossible body-fat', () => {
+    expect(planFromFfmi(21, 1, 1.8, 63.96)).toBeNull()
   })
 })

@@ -14,7 +14,7 @@ import {
   unitToM,
   weightUnit,
 } from '@/lib/body'
-import { leanMassForFfmi, weightForLeanMass } from '@/lib/ffmi'
+import { planFromFfmi } from '@/lib/ffmi'
 import { diffDays, formatLong } from '@/lib/dates'
 import { getTemplate, getWorkout, type ProgramKey } from '@/lib/programData'
 import { setupDerived, settingsWarnings } from '@/lib/setup'
@@ -124,28 +124,15 @@ export function SettingsPage() {
   // applied lean-mass increase is the HONEST one (option A): implied lean minus
   // start lean; the sheet's quirky target-weight formula stays the oracle and
   // both weights are shown side by side.
-  const ffmiPlan = (() => {
-    if (
-      ffmiDraft === null ||
-      bfDraft === null ||
-      settings.height == null ||
-      derived.startLean === null
-    ) {
-      return null
-    }
-    const bf = percentToFraction(bfDraft)
-    const lean = ffmiDraft === null ? null : leanMassForFfmi(ffmiDraft, settings.height)
-    if (bf === null || lean === null) return null
-    const weight = weightForLeanMass(lean, bf)
-    if (weight === null) return null
-    const increase = Math.round((lean - derived.startLean) * 1000) / 1000
-    return {
-      lean,
-      weight,
-      increase,
-      sheetTargetWeight: increase + derived.startLean + derived.startLean * bf,
-    }
-  })()
+  const ffmiPlan =
+    ffmiDraft === null || bfDraft === null || settings.height == null || derived.startLean === null
+      ? null
+      : planFromFfmi(
+          ffmiDraft,
+          percentToFraction(bfDraft) ?? NaN,
+          settings.height,
+          derived.startLean,
+        )
 
   function applyFfmiTargets() {
     if (ffmiPlan === null || ffmiDraft === null || bfDraft === null) return
