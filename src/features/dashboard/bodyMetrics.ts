@@ -1,4 +1,5 @@
 import { fractionToPercent, kgToUnit, targetWeight, weightUnit, type BodyDerived } from '@/lib/body'
+import { normalizedFfmi } from '@/lib/ffmi'
 import type { BodyEntry, Settings } from '@/lib/schema'
 import type { ChipTone } from '@/features/schedule/Chip'
 
@@ -55,8 +56,8 @@ export function buildBodyMetrics(settings: Settings): BodyMetric[] {
   const startBmi = startW !== null && h2 !== null ? startW / h2 : null
   const targetBmi = tW !== null && h2 !== null ? tW / h2 : null
   const startFfmi =
-    startLean !== null && h2 !== null && height !== null && height !== undefined
-      ? startLean / h2 + 6.1 * (1.8 - height)
+    startLean !== null && height !== null && height !== undefined
+      ? normalizedFfmi(startLean, height)
       : null
 
   return [
@@ -117,7 +118,7 @@ export function buildBodyMetrics(settings: Settings): BodyMetric[] {
       higherIsBetter: true,
       value: (_e, d) => d.ffmi,
       start: startFfmi,
-      target: null,
+      target: settings.targets.ffmi ?? null,
       limit: null,
     },
   ]

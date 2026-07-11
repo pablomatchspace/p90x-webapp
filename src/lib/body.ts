@@ -1,4 +1,5 @@
 import type { BodyEntry, Settings } from '@/lib/schema'
+import { normalizedFfmi } from '@/lib/ffmi'
 
 /**
  * Body-log derivations (US-050/051, PRD §6.3) — pure functions mirroring the
@@ -35,10 +36,7 @@ export function deriveBody(entry: BodyEntry, settings: BodySettings): BodyDerive
   const h2 = height !== null && height > 0 ? height * height : null
 
   const leanMass = weight !== null && bf !== null ? weight * (1 - bf) : null
-  const ffmi =
-    leanMass !== null && h2 !== null && height !== null
-      ? leanMass / h2 + 6.1 * (1.8 - height)
-      : null
+  const ffmi = leanMass !== null && height !== null ? normalizedFfmi(leanMass, height) : null
   return {
     weightLoss: weight !== null && start !== null ? start - weight : null,
     bodyFatKg: weight !== null && bf !== null ? weight * bf : null,
