@@ -58,14 +58,16 @@ export function PlayPage() {
   const [finished, setFinished] = useState(false)
   const [doneMap, setDoneMap] = useState<Map<string, boolean>>(() => new Map())
 
-  // E16 engine opts: each segment's work duration is authored; a rest phase
-  // exists ONLY where the next segment authored a get-ready `leadIn` (Q13b).
+  // E16/E17 engine opts: each segment's work duration is authored; a null
+  // duration (untimed rep drill) passes straight through so the engine enters
+  // a wait. A rest phase exists ONLY where the next segment authored a
+  // get-ready `leadIn` (Q13b).
   const opts = useMemo(
     () => ({
       stepCount: segments.length,
       workSeconds: 0,
       restSeconds: 0,
-      stepSeconds: segments.map((s) => s.seconds ?? 0),
+      stepSeconds: segments.map((s) => s.seconds),
       restAfter: segments.map((_s, i) => segments[i + 1]?.leadIn ?? 0),
     }),
     [segments],
@@ -168,7 +170,8 @@ export function PlayPage() {
     setDoneMap(new Map())
     const now = Date.now()
     setNowTick(now)
-    setPlayback(startPlayback(idx, segments[idx].seconds ?? 0, now))
+    // E17: pass null straight through for untimed rep drills → engine wait.
+    setPlayback(startPlayback(idx, segments[idx].seconds, now))
   }
   const onPause = () => setPlayback((p) => (p === null ? p : pausePlayback(p, Date.now())))
   const onResume = () => setPlayback((p) => (p === null ? p : resumePlayback(p, Date.now())))
@@ -177,6 +180,14 @@ export function PlayPage() {
     if (playback === null) return
     // Skipping a WORK phase = didn't do that exercise → mark its instance skipped.
     if (playback.phase === 'work') markInstance(playback.stepIndex, false)
+    commitResult(skipPhase(playback, opts, Date.now()))
+  }
+  // E17: Done — next on an untimed wait records the drill done (true), then
+  // advances via the same skipPhase path Skip uses (which records false). One
+  // engine call; the handler records intent before advancing.
+  const onDone = () => {
+    if (playback === null) return
+    if (playback.phase === 'work') markInstance(playback.stepIndex, true)
     commitResult(skipPhase(playback, opts, Date.now()))
   }
   const onStop = () => {
@@ -270,6 +281,9 @@ export function PlayPage() {
 
   // ── Running / idle ────────────────────────────────────────────────────────
   const isRest = playback !== null && playback.phase === 'rest'
+  // E17: an untimed work segment waits with endsAt null and pausedMs null —
+  // the tick guard holds it forever until Done/Skip advances it.
+  const isWait = playback !== null && playback.endsAt === null && playback.pausedMs === null
   const cursorIndex =
     playback === null
       ? idx
@@ -344,15 +358,22 @@ export function PlayPage() {
               >
                 {isRest ? 'Get ready' : isBreak ? 'Break' : 'Work'}
               </span>
-              <span
-                role="timer"
-                aria-label="Segment time remaining"
-                className="text-2xl font-bold tabular-nums"
-              >
-                {mmss(countdownSec)}
-              </span>
+              {isWait ? (
+                // E17: untimed rep drill — show the rep target instead of a countdown.
+                <span className="text-2xl font-bold tabular-nums" aria-label="Rep target">
+                  {current?.reps ? `${current.reps} reps` : 'Ready'}
+                </span>
+              ) : (
+                <span
+                  role="timer"
+                  aria-label="Segment time remaining"
+                  className="text-2xl font-bold tabular-nums"
+                >
+                  {mmss(countdownSec)}
+                </span>
+              )}
               <div className="flex flex-wrap gap-2">
-                {playback.pausedMs === null ? (
+                {isWait ? null : playback.pausedMs === null ? (
                   <button type="button" onClick={onPause} className={ghostBtn}>
                     Pause
                   </button>
@@ -361,9 +382,20 @@ export function PlayPage() {
                     Resume
                   </button>
                 )}
-                <button type="button" onClick={onExtend} className={ghostBtn}>
-                  +10 s
-                </button>
+                {isWait ? (
+                  // E17: Done records this drill done, then advances (Skip records not-done).
+                  <button
+                    type="button"
+                    onClick={onDone}
+                    className="rounded-lg bg-emerald-600 px-5 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+                  >
+                    Done — next
+                  </button>
+                ) : (
+                  <button type="button" onClick={onExtend} className={ghostBtn}>
+                    +10 s
+                  </button>
+                )}
                 <button type="button" onClick={onSkip} className={ghostBtn}>
                   Skip
                 </button>

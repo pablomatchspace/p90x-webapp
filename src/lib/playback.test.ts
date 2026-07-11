@@ -179,3 +179,81 @@ describe('per-step overrides (E16)', () => {
     })
   })
 })
+
+describe('untimed waits (E17)', () => {
+  it('startPlayback with null workSeconds enters a wait (endsAt null, pausedMs null)', () => {
+    expect(startPlayback(0, null, T0)).toEqual({
+      phase: 'work',
+      stepIndex: 0,
+      endsAt: null,
+      pausedMs: null,
+    })
+  })
+
+  it('tick is a no-op forever on a wait — never auto-advances', () => {
+    const opts = { stepCount: 3, workSeconds: 60, restSeconds: 30, stepSeconds: [null, 60, 60] }
+    const wait = startPlayback(0, null, T0)
+    expect(tickPlayback(wait, opts, T0 + 999_999)).toEqual({ state: wait, event: null })
+  })
+
+  it('zero-rest advance onto an untimed next step lands as a wait', () => {
+    const opts = {
+      stepCount: 3,
+      workSeconds: 60,
+      restSeconds: 30,
+      restAfter: [0, 30, 30],
+      stepSeconds: [60, null, 60],
+    }
+    const r = tickPlayback(startPlayback(0, 60, T0), opts, T0 + 60_000)
+    expect(r.event).toBe('step-advanced')
+    expect(r.state).toEqual({ phase: 'work', stepIndex: 1, endsAt: null, pausedMs: null })
+  })
+
+  it('rest-end advance onto an untimed next step lands as a wait', () => {
+    const opts = { stepCount: 3, workSeconds: 60, restSeconds: 30, stepSeconds: [60, null, 60] }
+    const rest = { phase: 'rest' as const, stepIndex: 0, endsAt: T0, pausedMs: null }
+    const r = tickPlayback(rest, opts, T0)
+    expect(r.event).toBe('step-advanced')
+    expect(r.state).toEqual({ phase: 'work', stepIndex: 1, endsAt: null, pausedMs: null })
+  })
+
+  it('skipPhase completes a wait straight into the next work when restAfter is 0', () => {
+    const opts = {
+      stepCount: 3,
+      workSeconds: 60,
+      restSeconds: 30,
+      restAfter: [0, 30, 30],
+      stepSeconds: [null, 60, 60],
+    }
+    const r = skipPhase(startPlayback(0, null, T0), opts, T0 + 5_000)
+    expect(r.event).toBe('step-advanced')
+    expect(r.state?.phase).toBe('work')
+    expect(r.state?.stepIndex).toBe(1)
+    expect(r.state?.endsAt).toBe(T0 + 65_000)
+  })
+
+  it('skipPhase completes a wait into a rest when restAfter > 0', () => {
+    const opts = {
+      stepCount: 3,
+      workSeconds: 60,
+      restSeconds: 30,
+      restAfter: [30, 30, 30],
+      stepSeconds: [null, 60, 60],
+    }
+    const r = skipPhase(startPlayback(0, null, T0), opts, T0 + 5_000)
+    expect(r.event).toBe('rest-started')
+    expect(r.state?.endsAt).toBe(T0 + 35_000)
+  })
+
+  it('pause and extend are no-ops on a wait', () => {
+    const wait = startPlayback(0, null, T0)
+    expect(pausePlayback(wait, T0 + 10_000)).toBe(wait)
+    expect(extendPlayback(wait, 10_000)).toBe(wait)
+  })
+
+  it('last-step wait → skip → sequence-finished', () => {
+    const opts = { stepCount: 2, workSeconds: 60, restSeconds: 30, stepSeconds: [60, null] }
+    const lastWait = { phase: 'work' as const, stepIndex: 1, endsAt: null, pausedMs: null }
+    expect(skipPhase(lastWait, opts, T0)).toEqual({ state: null, event: 'sequence-finished' })
+  })
+})

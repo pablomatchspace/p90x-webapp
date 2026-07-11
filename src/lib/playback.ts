@@ -2,8 +2,9 @@
  * Pure focus-playback engine (E12): work → rest (same step) → work (next step)
  * … → finished after the last step's work (no trailing rest). Every function
  * takes `now` (epoch ms) — no Date.now() inside, so tests are exact and the UI
- * drives it from an interval. Invariant: `endsAt === null` ⇔ paused, with the
- * remaining time parked in `pausedMs`.
+ * drives it from an interval. Invariant: `endsAt === null` ⇒ either paused
+ * (remaining time parked in `pausedMs`) or an untimed wait (E17: `pausedMs` is
+ * null too — advance only via skip/Done, never auto-advance).
  */
 export type PlaybackPhase = 'work' | 'rest'
 
@@ -18,8 +19,8 @@ export interface PlaybackOpts {
   stepCount: number
   workSeconds: number
   restSeconds: number
-  /** E16: per-step work-duration overrides (index = stepIndex); missing entry → workSeconds */
-  stepSeconds?: number[]
+  /** E16/E17: per-step work-duration overrides (index = stepIndex); missing entry → workSeconds; null ⇒ untimed wait (advance via skip/Done) */
+  stepSeconds?: (number | null)[]
   /** E16: rest after step i; missing entry → restSeconds; 0 ⇒ skip the rest phase entirely */
   restAfter?: number[]
 }
@@ -32,8 +33,18 @@ export interface TickResult {
   event: PlaybackEvent | null
 }
 
-export function startPlayback(stepIndex: number, workSeconds: number, now: number): PlaybackState {
-  return { phase: 'work', stepIndex, endsAt: now + workSeconds * 1000, pausedMs: null }
+export function startPlayback(
+  stepIndex: number,
+  workSeconds: number | null,
+  now: number,
+): PlaybackState {
+  // E17: null workSeconds ⇒ untimed wait — endsAt null makes the tick guard hold forever.
+  return {
+    phase: 'work',
+    stepIndex,
+    endsAt: workSeconds === null ? null : now + workSeconds * 1000,
+    pausedMs: null,
+  }
 }
 
 export function pausePlayback(state: PlaybackState, now: number): PlaybackState {
@@ -58,9 +69,12 @@ export function remainingMs(state: PlaybackState, now: number): number {
   return state.endsAt === null ? 0 : Math.max(0, state.endsAt - now)
 }
 
-/** E16: resolve work duration for a step (override or uniform). */
-const workFor = (opts: PlaybackOpts, step: number): number =>
-  opts.stepSeconds?.[step] ?? opts.workSeconds
+/** E16/E17: resolve work duration for a step. An explicit null override ⇒ untimed
+ *  wait (returns null); an undefined hole (no override at that index) ⇒ uniform. */
+const workFor = (opts: PlaybackOpts, step: number): number | null => {
+  const override = opts.stepSeconds?.[step]
+  return override === undefined ? opts.workSeconds : override
+}
 
 /** E16: resolve rest duration after a step (override or uniform). */
 const restFor = (opts: PlaybackOpts, step: number): number =>
@@ -78,11 +92,13 @@ export function tickPlayback(state: PlaybackState, opts: PlaybackOpts, now: numb
     // E16: per-step rest duration; 0 ⇒ skip rest phase entirely
     const rest = restFor(opts, state.stepIndex)
     if (rest <= 0) {
+      // E17: the next step may be untimed (workFor → null) ⇒ wait state.
+      const w = workFor(opts, state.stepIndex + 1)
       return {
         state: {
           phase: 'work',
           stepIndex: state.stepIndex + 1,
-          endsAt: now + workFor(opts, state.stepIndex + 1) * 1000,
+          endsAt: w === null ? null : now + w * 1000,
           pausedMs: null,
         },
         event: 'step-advanced',
@@ -98,12 +114,13 @@ export function tickPlayback(state: PlaybackState, opts: PlaybackOpts, now: numb
       event: 'rest-started',
     }
   }
-  // E16: per-step work duration for the next step
+  // E16/E17: per-step work duration for the next step (null ⇒ untimed wait).
+  const w = workFor(opts, state.stepIndex + 1)
   return {
     state: {
       phase: 'work',
       stepIndex: state.stepIndex + 1,
-      endsAt: now + workFor(opts, state.stepIndex + 1) * 1000,
+      endsAt: w === null ? null : now + w * 1000,
       pausedMs: null,
     },
     event: 'step-advanced',
