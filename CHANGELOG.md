@@ -5,6 +5,13 @@ One entry per merged epic. From E16 onward, package semver maps to the
 The bump and its entry land inside the epic's own PR, so the deployed app
 (More → Help) always names the last merged epic.
 
+## 1.E19.U121 (package 1.19.121) — 2026-07-11
+
+- **E19 — Yoga play variants** (PR #<N>): Yoga X days play the classic timeline
+  (transcript-faithful, truncated where the transcript ends) or the P90X3
+  30-minute timeline — persisted preference in Settings (schema v5) with a
+  per-launch override on the play screen.
+
 ## 1.E18.U118 (package 1.18.118) — 2026-07-11
 
 - **E18 — X Stretch + Cardio X play** (PR #<N>): both workouts join play mode as
