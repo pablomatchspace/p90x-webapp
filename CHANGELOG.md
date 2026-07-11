@@ -5,6 +5,12 @@ One entry per merged epic. From E16 onward, package semver maps to the
 The bump and its entry land inside the epic's own PR, so the deployed app
 (More → Help) always names the last merged epic.
 
+## 1.E18.U118 (package 1.18.118) — 2026-07-11
+
+- **E18 — X Stretch + Cardio X play** (PR #<N>): both workouts join play mode as
+  data-only timelines — timed holds, Done-to-advance flows and rep drills;
+  Cardio X logs its 12 drills done/skipped. No engine or schema changes.
+
 ## 1.E17.U115 (package 1.17.115) — 2026-07-11
 
 - **E17 — Kenpo X play** (PR #<N>): 93-segment Kenpo timeline — timed stretch/

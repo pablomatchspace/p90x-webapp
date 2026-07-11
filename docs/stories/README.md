@@ -155,3 +155,11 @@ Post-v1.0.0. Full write-up: [`docs/epics/E16-plyometrics-play.md`](../epics/E16-
 - ✅ US-115 · Docs and release (S, P1)
 
 Post-v1.0.0. Full write-up: [`docs/epics/E17-kenpo-play.md`](../epics/E17-kenpo-play.md).
+
+## E18 — X Stretch + Cardio X play
+
+- ✅ US-116 · X Stretch authored timeline and golden pins (M, P0)
+- ✅ US-117 · Cardio X authored timeline, golden pins and e2e (M, P0)
+- ✅ US-118 · Docs and release (S, P1)
+
+Post-v1.0.0. Full write-up: [`docs/epics/E18-stretch-cardio-play.md`](../epics/E18-stretch-cardio-play.md).
