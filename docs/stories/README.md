@@ -131,3 +131,9 @@ Post-v1.0.0. Full write-up: [`docs/epics/E12-focus-play-timer.md`](../epics/E12-
 - ✅ US-106 — end-to-end estimator and dashboard progress journey
 
 Post-v1.0.0. Full write-up: [`docs/epics/E14-ffmi-target-estimator.md`](../epics/E14-ffmi-target-estimator.md).
+
+## E15 — Playwright test device replacement & UI validation
+
+- ✅ US-108 · Playwright test device replacement and UI validation (S, P1)
+
+Post-v1.0.0. Full write-up: [`docs/epics/E15-playwright-device-replacement.md`](../epics/E15-playwright-device-replacement.md).

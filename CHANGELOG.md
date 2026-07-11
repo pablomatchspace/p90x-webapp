@@ -7,8 +7,9 @@ merged epic.
 
 ## 1.5.1 — 2026-07-11
 
-- **Chore — Playwright test device replacement** (PR #<N>): Replace emulated test
-  device Pixel 7 with custom realme 16 Pro+ profile (RMX5131 specs).
+- **E15 — Playwright test device replacement & UI validation** (PR #26): Replace emulated test
+  device Pixel 7 with custom realme 16 Pro+ profile (RMX5131 specs), ensuring Playwright
+  also verifies UI issues visible in screens for both desktop and the specific mobile device.
 
 ## 1.5.0 — 2026-07-11
 

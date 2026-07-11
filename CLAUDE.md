@@ -89,7 +89,8 @@ properties / namespaces).
 - Coverage is collected on `src/lib/**`, `src/state/**`, and the sync Worker
   (`worker/index.js`).
 - **Playwright** serves the **built** app — run `npm run build` before `npm run e2e`.
-  Runs the realme 16 Pro+ mobile profile.
+  Runs the desktop chromium and realme 16 Pro+ mobile profiles.
+  **Playwright must also verify any UI issues visible in screens for both desktop and specific mobile device defined.**
 - **E2E pitfalls (learned the hard way):**
   - `getByLabel` substring-matches — `'X round 1 reps'` also hits the
     `'Increase X round 1 reps'` stepper. Prefer `getByRole('textbox', { name })`
