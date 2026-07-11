@@ -171,3 +171,15 @@ Post-v1.0.0. Full write-up: [`docs/epics/E18-stretch-cardio-play.md`](../epics/E
 - ✅ US-121 · Docs and release (S, P1)
 
 Post-v1.0.0. Full write-up: [`docs/epics/E19-yoga-play-variants.md`](../epics/E19-yoga-play-variants.md).
+
+## E20 — FFMI target feasibility ("rub targets against reality")
+
+- ✅ US-122 · Foundational hardening & the shared plan helper (M, P0)
+- ✅ US-123 · Schema v6 + `settings.training` (M, P0)
+- ✅ US-124 · Pure feasibility engine `src/lib/feasibility.ts` (L, P0)
+- ✅ US-125 · The "Reality check" panel in Settings (L, P0)
+- ✅ US-126 · Dashboard on-pace chip (M, P0)
+- ✅ US-127 · E2E journey + visual baselines (M, P0)
+- ✅ US-128 · Docs, oracle & release (S, P1)
+
+Post-v1.0.0. Full write-up: [`docs/epics/E20-ffmi-feasibility.md`](../epics/E20-ffmi-feasibility.md).

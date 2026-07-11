@@ -5,6 +5,16 @@ One entry per merged epic. From E16 onward, package semver maps to the
 The bump and its entry land inside the epic's own PR, so the deployed app
 (More → Help) always names the last merged epic.
 
+## 1.E20.U128 (package 1.20.128) — 2026-07-11
+
+- **E20 — FFMI target feasibility** (PR #<N>): the estimator now rubs the target
+  against reality — remaining-horizon fat-loss and muscle-gain pace verdicts
+  (fat-loss first) from two published rate models shown side by side, a recomp
+  flag, an approximate natural-FFMI ceiling, and a suggested achievable target,
+  plus an on-pace chip on the dashboard FFMI tile. New `settings.training`
+  (schema v6). Evidence-tiered and cited in `docs/requirements/ffmi-feasibility.md`;
+  gain-rate models are practitioner heuristics, not RCTs — labelled as such.
+
 ## 1.E19.U121 (package 1.19.121) — 2026-07-11
 
 - **E19 — Yoga play variants** (PR #<N>): Yoga X days play the classic timeline
