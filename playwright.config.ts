@@ -25,7 +25,8 @@ export default defineConfig({
         isMobile: true,
         hasTouch: true,
         defaultBrowserType: 'chromium',
-        userAgent: 'Mozilla/5.0 (Linux; Android 14; RMX5131 Build/UKQ1.230924.001) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Mobile Safari/537.36',
+        userAgent:
+          'Mozilla/5.0 (Linux; Android 14; RMX5131 Build/UKQ1.230924.001) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Mobile Safari/537.36',
       },
     },
   ],
