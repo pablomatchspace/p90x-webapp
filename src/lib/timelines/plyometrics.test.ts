@@ -10,7 +10,7 @@ describe('Plyometrics timeline — golden pins (E16)', () => {
     expect(hasTimeline('plyometrics')).toBe(true)
     expect(hasTimeline('chest-back')).toBe(false)
     expect(getTimeline('plyometrics')).toBe(plyometrics)
-    expect(getTimeline('yoga-x')).toBeNull()
+    expect(getTimeline('chest-back')).toBeNull()
     expect(timelinesFor('plyometrics')).toHaveLength(1)
   })
 
