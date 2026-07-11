@@ -68,6 +68,10 @@ properties / namespaces).
 
 - **One epic = one branch = one PR**, squash-merged after CI is green. Branch
   name `claude/epic-eN-<slug>`. Story-level Conventional Commits within the branch.
+- **Version per epic:** every epic PR bumps the version — minor for feature
+  epics, patch for pure-fix work — via `npm version <x.y.z> --no-git-tag-version`,
+  plus a matching `CHANGELOG.md` entry (version — date — epic — PR). The deployed
+  app must always report the last merged epic's version on More → Help.
 - **Validate before every commit:** `npm run format` then
   `npm run lint && npm run typecheck && npm run test && npm run build`
   (+ `npm run e2e` if a journey changed, + `npm run lhci` if UI/perf changed).
