@@ -147,3 +147,11 @@ Post-v1.0.0. Full write-up: [`docs/epics/E15-playwright-device-replacement.md`](
 - ✅ US-112 · Versioning convention, docs and release (S, P1)
 
 Post-v1.0.0. Full write-up: [`docs/epics/E16-plyometrics-play.md`](../epics/E16-plyometrics-play.md).
+
+## E17 — Kenpo X play
+
+- ✅ US-113 · Untimed rep segments — engine waits and Done-to-advance UI (M, P0)
+- ✅ US-114 · Kenpo X authored timeline and golden pins (M, P0)
+- ✅ US-115 · Docs and release (S, P1)
+
+Post-v1.0.0. Full write-up: [`docs/epics/E17-kenpo-play.md`](../epics/E17-kenpo-play.md).
