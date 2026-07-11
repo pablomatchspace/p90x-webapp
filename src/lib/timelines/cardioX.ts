@@ -150,7 +150,7 @@ export const cardioX: PlayTimeline = {
       seconds: 30,
       kind: 'exercise',
       leadIn: 5,
-      cue: 'Vinyasa entry to Downward Dog -> Float right heel high -> Swing through to Runner\'s Pose (30s) -> Vinyasa exit',
+      cue: "Vinyasa entry to Downward Dog -> Float right heel high -> Swing through to Runner's Pose (30s) -> Vinyasa exit",
       section: 'Yoga Warm-Up Series',
     },
     {

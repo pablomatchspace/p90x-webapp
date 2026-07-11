@@ -5,3 +5,8 @@ coverage/
 playwright-report/
 test-results/
 package-lock.json
+# E18: verbatim oracle/spec copies under docs/requirements and docs/epics must
+# stay byte-identical to ../specs, so exclude them from Prettier (it would
+# rewrap/reformat the markdown and break the SHA256-verified copy invariant).
+docs/requirements/
+docs/epics/
