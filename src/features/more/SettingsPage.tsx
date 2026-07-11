@@ -1,8 +1,10 @@
 import { type ReactNode, useState } from 'react'
 import { AlertTriangle } from 'lucide-react'
 import { Card, Page } from '@/components/Page'
+import { Chip } from '@/features/schedule/Chip'
 import { NumberField } from '@/features/workouts/NumberField'
 import {
+  deriveBody,
   formatFixed,
   ffmiCategory,
   fractionToPercent,
@@ -14,8 +16,15 @@ import {
   unitToM,
   weightUnit,
 } from '@/lib/body'
-import { planFromFfmi } from '@/lib/ffmi'
-import { diffDays, formatLong } from '@/lib/dates'
+import { diffDays, formatLong, todayISO } from '@/lib/dates'
+import {
+  assessFatLoss,
+  assessLeanGain,
+  ceilingStatus,
+  recompFlag,
+  suggestedTarget,
+} from '@/lib/feasibility'
+import { normalizedFfmi, planFromFfmi } from '@/lib/ffmi'
 import { getTemplate, getWorkout, type ProgramKey } from '@/lib/programData'
 import { setupDerived, settingsWarnings } from '@/lib/setup'
 import {
@@ -27,7 +36,7 @@ import {
   updateTraining,
   updateYogaVariant,
 } from '@/state/actions'
-import { useSettings } from '@/state/selectors'
+import { useBodyLog, useSettings } from '@/state/selectors'
 import { useStore } from '@/state/store'
 
 /** A labelled settings row: description on the left, control on the right. */
@@ -99,8 +108,62 @@ function Derived({ label, value, unit }: { label: string; value: string; unit?: 
   )
 }
 
+const VERDICT_TONE = {
+  realistic: 'green',
+  aggressive: 'amber',
+  unrealistic: 'rose',
+} as const
+
+const RECOMP_TONE = {
+  'not-applicable': 'zinc',
+  ok: 'green',
+  harder: 'amber',
+  unlikely: 'rose',
+} as const
+
+/** Compare one published model's window band against the plan's required gain. */
+function GainModelBar({
+  label,
+  low,
+  high,
+  required,
+}: {
+  label: string
+  low: number
+  high: number
+  required: number
+}) {
+  const scale = Math.max(required, high, 0.1) * 1.1
+  const lowPct = Math.max(0, (low / scale) * 100)
+  const widthPct = Math.max(1, ((high - low) / scale) * 100)
+  const requiredPct = Math.max(0, Math.min(100, (required / scale) * 100))
+  return (
+    <div
+      aria-label={`${label}: ${formatFixed(low, 2)}–${formatFixed(high, 2)} kg; ${formatFixed(required, 2)} kg required`}
+    >
+      <div className="flex items-center justify-between gap-2 text-xs">
+        <span className="font-medium">{label}</span>
+        <span className="tabular-nums text-zinc-500 dark:text-zinc-400">
+          {formatFixed(low, 2)}–{formatFixed(high, 2)} kg <Chip tone="zinc">Tier B</Chip>
+        </span>
+      </div>
+      <div className="relative mt-1 h-2 rounded-full bg-zinc-200 dark:bg-zinc-800">
+        <span
+          className="absolute top-0 h-2 rounded-full bg-sky-500"
+          style={{ left: `${lowPct}%`, width: `${widthPct}%` }}
+        />
+        <span
+          className="absolute -top-1 h-4 w-0.5 bg-red-600"
+          style={{ left: `${requiredPct}%` }}
+          title="Required gain"
+        />
+      </div>
+    </div>
+  )
+}
 export function SettingsPage() {
   const settings = useSettings()
+  const bodyLog = useBodyLog()
   const hasData = useStore(
     (s) =>
       s.data.bodyLog.length > 0 ||
@@ -134,6 +197,97 @@ export function SettingsPage() {
           settings.height,
           derived.startLean,
         )
+
+  // E20 always compares the plan with the latest complete weigh-in; start stats
+  // remain the honest fallback when no complete body-log entry exists yet.
+  const latestWeighIn =
+    [...bodyLog].reverse().find((entry) => entry.weight != null && entry.bodyFat != null) ?? null
+  const latestDerived = latestWeighIn === null ? null : deriveBody(latestWeighIn, settings)
+  const startFfmi =
+    derived.startLean !== null && settings.height != null
+      ? normalizedFfmi(derived.startLean, settings.height)
+      : null
+  const baseline =
+    latestWeighIn !== null &&
+    latestDerived !== null &&
+    latestWeighIn.weight != null &&
+    latestWeighIn.bodyFat != null &&
+    latestDerived.leanMass !== null &&
+    latestDerived.ffmi !== null
+      ? {
+          lean: latestDerived.leanMass,
+          weight: latestWeighIn.weight,
+          bodyFat: latestWeighIn.bodyFat,
+          ffmi: latestDerived.ffmi,
+          date: latestWeighIn.date,
+          source: 'latest' as const,
+        }
+      : derived.startLean !== null &&
+          settings.startWeight != null &&
+          settings.startBodyFat != null &&
+          startFfmi !== null
+        ? {
+            lean: derived.startLean,
+            weight: settings.startWeight,
+            bodyFat: settings.startBodyFat,
+            ffmi: startFfmi,
+            date: settings.startDate,
+            source: 'start' as const,
+          }
+        : null
+
+  // A finished program gets a fresh 90-day planning block; future starts and
+  // missing dates never inflate the comparison beyond one program window.
+  const rawRemainingDays =
+    settings.startDate === null ? 90 : 90 - diffDays(settings.startDate, todayISO())
+  const freshBlock = settings.startDate !== null && rawRemainingDays <= 0
+  const horizonDays = freshBlock ? 90 : Math.min(90, Math.max(0, rawRemainingDays))
+  const months = horizonDays / 30
+  const weeks = horizonDays / 7
+
+  const feasibility = (() => {
+    if (
+      ffmiPlan === null ||
+      baseline === null ||
+      ffmiDraft === null ||
+      bfDraft === null ||
+      settings.height == null
+    ) {
+      return null
+    }
+    const targetBf = percentToFraction(bfDraft)
+    if (targetBf === null) return null
+    const lean = assessLeanGain(
+      ffmiPlan.lean - baseline.lean,
+      months,
+      settings.training,
+      settings.gender,
+      baseline.weight,
+    )
+    const fat = assessFatLoss(baseline.weight, baseline.bodyFat, ffmiPlan.weight, targetBf, weeks)
+    if (fat === null) return null
+    return {
+      lean,
+      fat,
+      recomp: recompFlag(
+        lean.requiredGainKg > 0,
+        fat.fatLossKg > 0,
+        settings.training,
+        baseline.bodyFat,
+      ),
+      ceiling: ceilingStatus(ffmiDraft, settings.gender),
+      suggestion: suggestedTarget(
+        baseline.lean,
+        settings.height,
+        settings.training,
+        settings.gender,
+        baseline.weight,
+        months,
+        baseline.ffmi,
+        normalizedFfmi,
+      ),
+    }
+  })()
 
   function applyFfmiTargets() {
     if (ffmiPlan === null || ffmiDraft === null || bfDraft === null) return
@@ -478,6 +632,125 @@ export function SettingsPage() {
             Apply as targets
           </button>
         </div>
+        {feasibility !== null && baseline !== null ? (
+          <section
+            aria-label="Reality check"
+            className="mt-4 rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-900/60"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h3 className="text-sm font-semibold">Reality check</h3>
+              <Chip tone={freshBlock ? 'amber' : 'zinc'}>
+                {freshBlock ? 'Program complete — fresh 90-day block' : `${horizonDays} days left`}
+              </Chip>
+            </div>
+            <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+              {baseline.source === 'latest'
+                ? `Latest weigh-in · ${formatLong(baseline.date)}`
+                : baseline.date !== null
+                  ? `From your start stats · ${formatLong(baseline.date)}`
+                  : 'From your start stats'}
+            </p>
+
+            {/* Product policy ranks fat-loss feasibility before lean-gain feasibility. */}
+            <div className="mt-4 rounded-lg border border-zinc-200 bg-white p-3 dark:border-zinc-700 dark:bg-zinc-950">
+              <div className="flex flex-wrap items-center gap-2">
+                <h4 className="text-sm font-semibold">Fat-loss pace</h4>
+                <Chip tone={VERDICT_TONE[feasibility.fat.verdict]}>{feasibility.fat.verdict}</Chip>
+                <Chip tone="zinc">Tier A</Chip>
+              </div>
+              <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-300">
+                {feasibility.fat.fatLossKg > 0
+                  ? `${formatFixed(feasibility.fat.fatLossKg, 2)} kg fat loss · ${formatFixed(
+                      feasibility.fat.weeklyPctBw * 100,
+                      2,
+                    )}% bodyweight/week required`
+                  : 'No fat-mass loss required by this plan.'}
+              </p>
+              <p className="mt-1 text-[11px] text-zinc-500 dark:text-zinc-400">
+                Muscle-sparing reference band: 0.5–1% bodyweight/week (Helms).
+              </p>
+            </div>
+
+            {/* Both Tier-B models stay visible together; no selector hides either result. */}
+            <div className="mt-3 rounded-lg border border-zinc-200 bg-white p-3 dark:border-zinc-700 dark:bg-zinc-950">
+              <div className="flex flex-wrap items-center gap-2">
+                <h4 className="text-sm font-semibold">Muscle-gain pace</h4>
+                <Chip tone={VERDICT_TONE[feasibility.lean.verdict]}>
+                  {feasibility.lean.verdict}
+                </Chip>
+                <Chip tone="zinc">Tier B</Chip>
+              </div>
+              <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-300">
+                {formatFixed(feasibility.lean.requiredGainKg, 2)} kg required ·{' '}
+                {formatFixed(feasibility.lean.requiredPaceKgPerMonth, 2)} kg/month
+              </p>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                <GainModelBar
+                  label="Aragon %BW model"
+                  low={feasibility.lean.models.aragon.maxGain.low}
+                  high={feasibility.lean.models.aragon.maxGain.high}
+                  required={Math.max(0, feasibility.lean.requiredGainKg)}
+                />
+                <GainModelBar
+                  label="Lyle absolute model"
+                  low={feasibility.lean.models.lyle.maxGain.low}
+                  high={feasibility.lean.models.lyle.maxGain.high}
+                  required={Math.max(0, feasibility.lean.requiredGainKg)}
+                />
+              </div>
+              <p className="mt-2 text-[11px] text-zinc-500 dark:text-zinc-400">
+                Blue = published model range for this window · red marker = required gain.
+              </p>
+            </div>
+
+            {/* Recomp and ceiling flags qualify the pace verdicts without blocking the target. */}
+            <div className="mt-3 flex flex-wrap gap-2">
+              {feasibility.recomp !== 'not-applicable' ? (
+                <Chip tone={RECOMP_TONE[feasibility.recomp]}>Recomp: {feasibility.recomp}</Chip>
+              ) : null}
+              <Chip tone={feasibility.ceiling.withinLimit ? 'green' : 'rose'}>
+                Ceiling: {feasibility.ceiling.withinLimit ? 'within' : 'over limit'}
+              </Chip>
+              <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                Approx. {formatFixed(feasibility.ceiling.ceiling, 1)} normalized FFMI{' '}
+                <Chip tone="zinc">Tier A/A−</Chip>
+              </span>
+            </div>
+            {feasibility.recomp !== 'not-applicable' ? (
+              <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
+                Simultaneous fat loss and lean gain is harder, not impossible (Barakat).
+              </p>
+            ) : null}
+
+            {/* The conservative model overlap can replace only the local estimator draft. */}
+            {feasibility.suggestion !== null ? (
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg bg-sky-50 p-3 dark:bg-sky-950/30">
+                <div>
+                  <div className="flex items-center gap-2 text-sm font-semibold">
+                    Suggested target: {formatFixed(feasibility.suggestion.ffmi, 1)}
+                    <Chip tone="zinc">Tier B</Chip>
+                  </div>
+                  <p className="text-xs text-zinc-600 dark:text-zinc-300">
+                    Conservative gain: {formatFixed(feasibility.suggestion.gainKg, 2)} kg
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setFfmiDraft(feasibility.suggestion?.ffmi ?? null)}
+                  className="rounded-lg bg-sky-700 px-3 py-2 text-sm font-medium text-white hover:bg-sky-800"
+                >
+                  Use realistic target
+                </button>
+              </div>
+            ) : null}
+
+            {/* Disclose concurrent-training uncertainty without inventing a discount multiplier. */}
+            <p className="mt-3 text-[11px] text-zinc-500 dark:text-zinc-400">
+              Concurrent endurance and resistance work can blunt strength and hypertrophy responses
+              (Wilson); no discount multiplier is applied. Not medical or coaching advice.
+            </p>
+          </section>
+        ) : null}
         {warnings.length > 0 && (
           <ul
             role="alert"
