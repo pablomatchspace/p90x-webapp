@@ -123,3 +123,11 @@ Post-v1.0.0. Full write-up: [`docs/epics/E11-chest-back-focus-sequence.md`](../e
 - ✅ US-102 — Play UI in FocusPage + e2e
 
 Post-v1.0.0. Full write-up: [`docs/epics/E12-focus-play-timer.md`](../epics/E12-focus-play-timer.md).
+
+## E14 — FFMI target estimator
+
+- ✅ US-104 — shared FFMI math, schema v3 migration and dashboard target
+- ✅ US-105 — Settings estimator with live plan and confirm-gated apply
+- ✅ US-106 — end-to-end estimator and dashboard progress journey
+
+Post-v1.0.0. Full write-up: [`docs/epics/E14-ffmi-target-estimator.md`](../epics/E14-ffmi-target-estimator.md).

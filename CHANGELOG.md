@@ -5,6 +5,14 @@ work bumps **patch**. The bump and its entry land inside the epic's own PR, so
 the deployed app (More → Help, via `__APP_VERSION__`) always names the last
 merged epic.
 
+## 1.5.0 — 2026-07-11
+
+- **E14 — FFMI target estimator** (PR #<N>): Settings → Targets & limits can now
+  derive your targets from a normalized-FFMI goal (workbook 6.1 normalization) —
+  implied lean mass, lean gain and weight shown live, applied behind a confirm as
+  the honest lean-mass increase + target body-fat + a stored FFMI target
+  (schema v3) that the dashboard KPI and trends track.
+
 ## 1.4.0 — 2026-07-11
 
 - **E12 — Focus play timer** (PR #24): press Play and focus mode runs itself —
