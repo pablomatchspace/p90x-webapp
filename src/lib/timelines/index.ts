@@ -1,12 +1,14 @@
 import type { PlayTimeline } from './types'
+import { kenpoX } from './kenpoX'
 import { plyometrics } from './plyometrics'
 
 /**
- * Registry of authored play timelines (E16). Pure data lookup — no side effects.
- * Each timeline attaches to a completion-style workout by `workoutKey`; a workout
- * may carry multiple variants (E19 yoga classic/x3) resolved via `getTimeline`.
+ * Registry of authored play timelines (E16/E17). Pure data lookup — no side
+ * effects. Each timeline attaches to a completion-style workout by `workoutKey`;
+ * a workout may carry multiple variants (E19 yoga classic/x3) resolved via
+ * `getTimeline`.
  */
-const TIMELINES: PlayTimeline[] = [plyometrics]
+const TIMELINES: PlayTimeline[] = [plyometrics, kenpoX]
 
 export function hasTimeline(workoutKey: string): boolean {
   return TIMELINES.some((t) => t.workoutKey === workoutKey)
