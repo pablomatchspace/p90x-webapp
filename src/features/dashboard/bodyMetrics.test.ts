@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import type { Settings } from '@/lib/schema'
-import { buildBodyMetrics, progressToTarget, type BodyMetric } from './bodyMetrics'
+import {
+  buildBodyMetrics,
+  expectedProgressPct,
+  progressToTarget,
+  type BodyMetric,
+} from './bodyMetrics'
 
 /** Fabricated sample settings used by the public import fixture. */
 const sample: Settings = {
@@ -55,6 +60,18 @@ describe('progressToTarget', () => {
   it('returns null without a target or with a zero denominator', () => {
     expect(progressToTarget(metric({ target: null }), 20)).toBeNull()
     expect(progressToTarget(metric({ start: 21, target: 21 }), 21)).toBeNull()
+  })
+})
+
+describe('expectedProgressPct', () => {
+  it('rounds elapsed day 15 of 90 to 17%', () => {
+    expect(expectedProgressPct('2026-01-05', '2026-01-20')).toBe(17)
+  })
+
+  it('requires a start date and clamps outside the horizon', () => {
+    expect(expectedProgressPct(null, '2026-01-20')).toBeNull()
+    expect(expectedProgressPct('2026-02-01', '2026-01-20')).toBe(0)
+    expect(expectedProgressPct('2026-01-05', '2026-05-01')).toBe(100)
   })
 })
 

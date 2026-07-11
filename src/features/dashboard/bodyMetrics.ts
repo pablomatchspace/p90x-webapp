@@ -1,5 +1,6 @@
 import { fractionToPercent, kgToUnit, targetWeight, weightUnit, type BodyDerived } from '@/lib/body'
 import { normalizedFfmi } from '@/lib/ffmi'
+import { diffDays, type ISODate } from '@/lib/dates'
 import type { BodyEntry, Settings } from '@/lib/schema'
 import type { ChipTone } from '@/features/schedule/Chip'
 
@@ -39,6 +40,16 @@ export function progressToTarget(metric: BodyMetric, latest: number | null): num
   const num = metric.higherIsBetter ? latest - metric.start : metric.start - latest
   if (denom === 0) return null
   return Math.round((num / denom) * 100)
+}
+
+/** Expected whole-percent progress through a target over the program horizon. */
+export function expectedProgressPct(
+  startDate: ISODate | null,
+  today: ISODate,
+  horizonDays = 90,
+): number | null {
+  if (startDate === null || horizonDays <= 0) return null
+  return Math.round(Math.max(0, Math.min(1, diffDays(startDate, today) / horizonDays)) * 100)
 }
 
 export function buildBodyMetrics(settings: Settings): BodyMetric[] {

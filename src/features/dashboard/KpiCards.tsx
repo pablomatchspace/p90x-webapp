@@ -2,8 +2,9 @@ import { Link } from 'react-router-dom'
 import { Card } from '@/components/Page'
 import { deriveBody, formatFixed, threshold } from '@/lib/body'
 import { Chip } from '@/features/schedule/Chip'
+import { todayISO } from '@/lib/dates'
 import { useBodyLog, useSettings } from '@/state/selectors'
-import { buildBodyMetrics, progressToTarget, TONE_CHIP } from './bodyMetrics'
+import { buildBodyMetrics, expectedProgressPct, progressToTarget, TONE_CHIP } from './bodyMetrics'
 
 /**
  * Body-vs-target KPI cards (US-060): the latest weigh-in's derived metrics, each
@@ -16,6 +17,7 @@ export function KpiCards() {
   const latest = bodyLog.length > 0 ? bodyLog[bodyLog.length - 1] : null
   const metrics = buildBodyMetrics(settings)
   const derived = latest ? deriveBody(latest, settings) : null
+  const expected = expectedProgressPct(settings.startDate, todayISO())
 
   return (
     <Card>
@@ -38,6 +40,15 @@ export function KpiCards() {
             const value = m.value(latest, derived)
             const tone = m.higherIsBetter ? null : threshold(value, m.target, m.limit)
             const pct = progressToTarget(m, value)
+            // Only FFMI compares target progress with elapsed program time.
+            const pace =
+              m.key === 'ffmi' && m.target !== null && pct !== null && expected !== null
+                ? pct >= expected + 10
+                  ? 'ahead'
+                  : pct >= expected - 5
+                    ? 'on pace'
+                    : 'behind'
+                : null
             return (
               <div
                 key={m.key}
@@ -48,6 +59,9 @@ export function KpiCards() {
                     {m.label}
                   </span>
                   {tone !== null ? <Chip tone={TONE_CHIP[tone]}>{tone}</Chip> : null}
+                  {pace !== null ? (
+                    <Chip tone={pace === 'behind' ? TONE_CHIP.watch : TONE_CHIP.good}>{pace}</Chip>
+                  ) : null}
                 </div>
                 <p className="mt-1 text-xl font-bold tabular-nums">
                   {formatFixed(value, m.dp)}
