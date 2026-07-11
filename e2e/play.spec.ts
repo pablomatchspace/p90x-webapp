@@ -103,3 +103,37 @@ test('auto-mark toggle persists and marks completion at sequence end', async ({ 
   await page.getByRole('link', { name: 'Back to Today', exact: true }).click()
   await expect(page.getByText('Done', { exact: true }).first()).toBeVisible()
 })
+
+/**
+ * Kenpo X play mode (E17): registry-driven — the Play button auto-appears on a
+ * Kenpo day. Timed warm-up stretches count down; rep drills wait for a Done tap.
+ * The sample starts 2026-01-05; day 6 (Kenpo) = 2026-01-10, before the 01-14
+ * skip, so the date is unaffected.
+ */
+test('Kenpo day shows Play workout with untimed rep waits (E17)', async ({ page }) => {
+  // Move the frozen clock from the Plyo day (set in beforeEach) to the Kenpo day.
+  await page.clock.setFixedTime(new Date('2026-01-10T09:00:00Z'))
+  await page.goto('#/today')
+  await page.getByRole('link', { name: 'Play workout', exact: true }).click()
+  await expect(page.getByText('Segment 1 of 93')).toBeVisible()
+
+  // First segment is a timed 60s warm-up stretch — a countdown renders.
+  await page.getByRole('button', { name: 'Start', exact: true }).click()
+  await expect(page.getByRole('timer', { name: 'Segment time remaining' })).toHaveText('1:00')
+  await page.getByRole('button', { name: 'Stop', exact: true }).click()
+
+  // Browse to the first Punch Section drill (segment 27) — an untimed rep wait.
+  for (let i = 0; i < 26; i++) {
+    await page.getByRole('button', { name: 'Next', exact: true }).click()
+  }
+  await expect(page.getByText('Segment 27 of 93')).toBeVisible()
+  await page.getByRole('button', { name: 'Start', exact: true }).click()
+  // Untimed wait: rep target + a Done — next button (no countdown, no Pause/+10s).
+  await expect(page.getByRole('button', { name: 'Done — next', exact: true })).toBeVisible()
+  await expect(page.getByLabel('Rep target')).toHaveText('25 reps')
+
+  // Done records the drill done and advances to the next drill.
+  await page.getByRole('button', { name: 'Done — next', exact: true }).click()
+  await page.clock.fastForward(1)
+  await expect(page.getByText('Segment 28 of 93')).toBeVisible()
+})
