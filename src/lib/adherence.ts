@@ -1,3 +1,4 @@
+import type { Pt } from '@/lib/chart'
 import { compareISO, diffDays, type ISODate } from '@/lib/dates'
 import { getWorkout } from '@/lib/programData'
 import type { ScheduleOp } from '@/lib/schema'
@@ -69,6 +70,28 @@ export interface Adherence {
   /** projected − planned completion in days (≥ 0) */
   slipDays: number
   weeks: WeekBar[]
+}
+
+/**
+ * Cumulative adherence rate (%) after each elapsed program day (E21) — the
+ * dashboard trend line. Uses the SAME done/scheduled convention as the
+ * headline rate above (rest days excluded, a still-pending today counted in
+ * the denominator), so the line's last point always equals the headline.
+ * y is null until the first non-rest day has elapsed.
+ */
+export function adherenceTrend(schedule: Schedule, index: SessionIndex, today: ISODate): Pt[] {
+  const points: Pt[] = []
+  let done = 0
+  let scheduled = 0
+  for (const day of schedule.days) {
+    if (day.kind !== 'program' || compareISO(day.date, today) > 0) continue
+    if (!isRestDay(day)) {
+      scheduled += 1
+      if (dayStatus(day, index, today) === 'done') done += 1
+    }
+    points.push({ x: day.day, y: scheduled > 0 ? (done / scheduled) * 100 : null })
+  }
+  return points
 }
 
 export function computeAdherence(

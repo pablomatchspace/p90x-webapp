@@ -1,11 +1,16 @@
+import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { Card } from '@/components/Page'
-import { useAdherence } from '@/state/selectors'
+import { LineChart } from '@/components/LineChart'
+import { adherenceTrend } from '@/lib/adherence'
+import { todayISO } from '@/lib/dates'
+import { useAdherence, useSchedule, useSessionIndex } from '@/state/selectors'
 
 /**
- * Adherence & pace card (US-060/062): discipline at a glance — adherence rate,
- * current streak, skips + slip, program progress — plus the weekly completion
- * bars and a link into the strength charts.
+ * Adherence & pace card (US-060/062, upgraded in E21): discipline at a glance —
+ * adherence rate, current streak, skips + slip, program progress — plus the
+ * weekly completion bars, a cumulative adherence trend line, and a link into
+ * the strength charts.
  */
 
 function Stat({ label, value, sub }: { label: string; value: string; sub?: string }) {
@@ -20,8 +25,17 @@ function Stat({ label, value, sub }: { label: string; value: string; sub?: strin
 
 export function AdherenceCard() {
   const a = useAdherence()
+  const schedule = useSchedule()
+  const index = useSessionIndex()
+  const trend = useMemo(
+    () => (schedule === null ? [] : adherenceTrend(schedule, index, todayISO())),
+    [schedule, index],
+  )
   if (a === null) return null
   const rate = a.adherenceRate === null ? '—' : `${Math.round(a.adherenceRate * 100)}%`
+  const trendTicks = [1, 29, 57, 85]
+    .filter((day) => day <= a.dayReached)
+    .map((day) => ({ x: day, label: `W${(day - 1) / 7 + 1}` }))
 
   return (
     <Card>
@@ -74,6 +88,24 @@ export function AdherenceCard() {
           ))}
         </div>
       </div>
+
+      {trend.filter((p) => p.y !== null).length >= 2 ? (
+        <div className="mt-4">
+          <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
+            Adherence trend (cumulative % of scheduled days done)
+          </p>
+          <div className="mt-2 max-w-lg">
+            <LineChart
+              series={[{ id: 'adherence', label: 'Adherence', color: '#ef4444', points: trend }]}
+              xTicks={trendTicks}
+              yFormat={(v) => `${Math.round(v)}%`}
+              xLabel={(x) => `Day ${x}`}
+              includeZero
+              ariaLabel="Cumulative adherence rate across the program days"
+            />
+          </div>
+        </div>
+      ) : null}
     </Card>
   )
 }

@@ -15,6 +15,19 @@ didn't bump the package version — they're numbered B01/B02 here for a
 continuous record; #33's package column is left at the un-suffixed version
 that was actually shipped.
 
+## 1.E21.U129.B00 (package 1.21.129) — 2026-07-12
+
+- **E21 — Charting upgrades.** The hand-rolled SVG charts get a crosshair
+  read-out (hover/tap snaps to the nearest logged point and prints each
+  series' value + date), point markers (which also make isolated entries
+  between gaps visible), program-phase shading, and a dashed moving-average
+  trend overlay. New charts: **Body composition** (lean mass vs fat mass —
+  recomp made visible) on Body trends, **Session total** (whole-workout net
+  score per session with a 3-session trend) on Strength progression, and a
+  cumulative **Adherence trend** line on the dashboard's Adherence & pace
+  card. All chart math stays in pure `src/lib` functions (`movingAverage`,
+  `nearestX`, `adherenceTrend`, `workoutTotalTrend`) with unit tests.
+
 ## 1.E20.U128.B03 (package 1.20.128-b3) — 2026-07-12
 
 - **Bug fix**: the grid view's round row (main reps field + secondary field,

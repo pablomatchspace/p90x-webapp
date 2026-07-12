@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest'
 import { migrateToCurrent } from '@/lib/migrations'
 import { materialize } from '@/lib/schedule/materialize'
 import { indexSessions } from '@/lib/schedule/status'
-import { computeAdherence } from './adherence'
+import { adherenceTrend, computeAdherence } from './adherence'
 
 /**
  * Golden adherence roll-up against the shipped sample dataset (the exact file
@@ -14,7 +14,7 @@ import { computeAdherence } from './adherence'
  * program day 15. Every expected number below is hand-derived from the sample
  * logs against the Classic template.
  */
-function sampleAdherence(today: string) {
+function sampleFixture() {
   const raw: unknown = JSON.parse(
     readFileSync(path.resolve(process.cwd(), 'public', 'sample-data.json'), 'utf-8'),
   )
@@ -22,7 +22,12 @@ function sampleAdherence(today: string) {
   if (!result.ok) throw new Error(result.error)
   const { settings, scheduleOps, workoutLogs } = result.state
   const schedule = materialize(settings.program, settings.startDate!, scheduleOps)
-  return computeAdherence(schedule, indexSessions(workoutLogs), scheduleOps, today)
+  return { schedule, index: indexSessions(workoutLogs), scheduleOps }
+}
+
+function sampleAdherence(today: string) {
+  const { schedule, index, scheduleOps } = sampleFixture()
+  return computeAdherence(schedule, index, scheduleOps, today)
 }
 
 describe('computeAdherence (sample dataset @ 2026-01-20)', () => {
@@ -69,5 +74,27 @@ describe('computeAdherence (sample dataset @ 2026-01-20)', () => {
     expect(before.scheduled).toBe(0)
     expect(before.adherenceRate).toBeNull()
     expect(before.currentStreak).toBe(0)
+  })
+})
+
+describe('adherenceTrend (sample dataset @ 2026-01-20)', () => {
+  const { schedule, index } = sampleFixture()
+  const trend = adherenceTrend(schedule, index, '2026-01-20')
+
+  it('emits one point per elapsed program day', () => {
+    expect(trend).toHaveLength(15)
+    expect(trend[0]).toEqual({ x: 1, y: 100 }) // day 1 done ⇒ 1/1
+  })
+
+  it('carries the rate through rest days and ends at the headline rate', () => {
+    // day 7 is rest: same 6/6 = 100% as day 6
+    expect(trend[6]).toEqual({ x: 7, y: 100 })
+    // final point matches computeAdherence's 10/13 (pending today included)
+    expect(trend[14].x).toBe(15)
+    expect(trend[14].y).toBeCloseTo((10 / 13) * 100, 10)
+  })
+
+  it('is empty before the program starts', () => {
+    expect(adherenceTrend(schedule, index, '2026-01-01')).toEqual([])
   })
 })

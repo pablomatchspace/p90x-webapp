@@ -42,4 +42,9 @@ test('dashboard assembles status, next-up, KPIs, adherence, quote and chart link
 
   await expect(page.getByRole('link', { name: 'Trends →' })).toBeVisible()
   await expect(page.getByRole('link', { name: 'Strength →' })).toBeVisible()
+
+  // E21: cumulative adherence trend line under the weekly bars
+  await expect(
+    page.getByRole('img', { name: 'Cumulative adherence rate across the program days' }),
+  ).toBeVisible()
 })

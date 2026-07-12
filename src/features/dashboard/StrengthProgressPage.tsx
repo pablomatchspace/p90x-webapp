@@ -2,16 +2,20 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Card, Page } from '@/components/Page'
 import { LineChart, type ChartSeries } from '@/components/LineChart'
+import { movingAverage } from '@/lib/chart'
+import { formatShort } from '@/lib/dates'
 import { loggableWorkouts } from '@/lib/programData'
-import { workoutProgression } from '@/lib/progression'
+import { workoutProgression, workoutTotalTrend } from '@/lib/progression'
 import { formatScore } from '@/lib/scoring'
 import { useSchedule, useScoringSettings, useWorkoutSessions } from '@/state/selectors'
 
 /**
- * Strength progression charts (US-063): per-exercise net-score lines across a
- * workout's occurrences, with per-series toggles + check/uncheck-all (the Excel
- * DATA-sheet CheckAll parity) and a first-vs-latest "top movers" table. All
- * numbers come from the US-063 progression helper over the US-040 engine.
+ * Strength progression charts (US-063, upgraded in E21): per-exercise net-score
+ * lines across a workout's occurrences, with per-series toggles +
+ * check/uncheck-all (the Excel DATA-sheet CheckAll parity), a whole-session
+ * total chart with a 3-occurrence trend, a crosshair read-out, and a
+ * first-vs-latest "top movers" table. All numbers come from the US-063
+ * progression helpers over the US-040 engine.
  */
 
 const PALETTE = [
@@ -45,6 +49,11 @@ export function StrengthProgressPage() {
 
   const progression = useMemo(
     () => (schedule === null ? null : workoutProgression(schedule, workout, sessions, scoring)),
+    [schedule, workout, sessions, scoring],
+  )
+
+  const totalTrend = useMemo(
+    () => (schedule === null ? null : workoutTotalTrend(schedule, workout, sessions, scoring)),
     [schedule, workout, sessions, scoring],
   )
 
@@ -89,6 +98,29 @@ export function StrengthProgressPage() {
     }))
     .filter((s) => !hidden.has(s.id))
   const xTicks = (progression?.occurrences ?? []).map((occ, i) => ({ x: i, label: `W${occ.week}` }))
+  const occLabel = (x: number) => {
+    const occ = progression?.occurrences[x]
+    return occ === undefined ? '' : `W${occ.week} · ${formatShort(occ.date)}`
+  }
+
+  const totalPoints = (totalTrend?.totals ?? []).map((y, x) => ({ x, y }))
+  const totalSeries: ChartSeries[] = [
+    { id: 'total', label: 'Session net', color: '#ef4444', points: totalPoints },
+    ...(movingAverage(totalPoints, 3).length >= 2
+      ? [
+          {
+            id: 'total-trend',
+            label: 'Trend',
+            color: '#ef4444',
+            points: movingAverage(totalPoints, 3),
+            dashed: true,
+            width: 1.25,
+            noReadout: true,
+          },
+        ]
+      : []),
+  ]
+  const hasTotals = totalPoints.some((p) => p.y !== null)
 
   return (
     <Page title="Strength progression" subtitle="Net score (score − penalty) across the weeks">
@@ -114,6 +146,8 @@ export function StrengthProgressPage() {
             series={series}
             xTicks={xTicks}
             yFormat={(v) => formatScore(v)}
+            xLabel={occLabel}
+            showDots
             ariaLabel={`${workout.name} net score progression`}
           />
         </div>
@@ -155,6 +189,26 @@ export function StrengthProgressPage() {
           ))}
         </div>
       </Card>
+
+      {hasTotals ? (
+        <Card>
+          <h2 className="font-semibold">Session total</h2>
+          <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
+            Whole-workout net score per session, with a 3-session trend
+          </p>
+          <div className="mt-3">
+            <LineChart
+              series={totalSeries}
+              xTicks={xTicks}
+              yFormat={(v) => formatScore(v)}
+              xLabel={occLabel}
+              showDots
+              includeZero
+              ariaLabel={`${workout.name} session total net score`}
+            />
+          </div>
+        </Card>
+      ) : null}
 
       <Card>
         <h2 className="font-semibold">Top movers</h2>
