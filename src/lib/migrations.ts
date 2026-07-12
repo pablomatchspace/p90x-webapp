@@ -45,6 +45,13 @@ const MIGRATIONS: Record<number, (doc: Record<string, unknown>) => void> = {
       settings.training = 'intermediate'
     }
   },
+  // v6 → v7 (E22): nutrition-plan overrides (the targets themselves stay derived).
+  6: (doc) => {
+    const settings = doc.settings as { nutrition?: unknown } | undefined
+    if (settings !== undefined && settings.nutrition === undefined) {
+      settings.nutrition = { phaseOverride: null, calorieOverride: null }
+    }
+  },
 }
 
 export function migrateToCurrent(raw: unknown): MigrationResult {

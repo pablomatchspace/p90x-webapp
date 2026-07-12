@@ -8,6 +8,7 @@ import { hasTimeline } from '@/lib/timelines'
 import type { ProgramDay } from '@/lib/schedule/materialize'
 import { dayStatus, workoutState } from '@/lib/schedule/status'
 import { BodyQuickAdd } from '@/features/body/BodyQuickAdd'
+import { NutritionCard } from '@/features/today/NutritionCard'
 import { Chip } from '@/features/schedule/Chip'
 import { ProgramStatusBar } from '@/features/schedule/ProgramStatusBar'
 import { RescheduleSection } from '@/features/schedule/RescheduleSection'
@@ -209,6 +210,14 @@ export function TodayPage() {
           ))}
         </>
       )}
+
+      {/* E22: the day's calorie/macro target follows the day's training phase.
+          Today-only (like the quick-add): the target-based layer's horizon is
+          anchored to today, and keeping the card off browsed days leaves the
+          reschedule controls clear of the fixed offline/update toast on mobile. */}
+      {isToday && day !== undefined && day.kind === 'program' ? (
+        <NutritionCard schedulePhase={day.phase} />
+      ) : null}
 
       {isToday ? <BodyQuickAdd /> : null}
 

@@ -289,6 +289,25 @@ export function updateTraining(level: Settings['training']): void {
 }
 
 /**
+ * E22: nutrition-plan overrides. Only the two raw override inputs are stored —
+ * calories, level and grams stay derived (rule 2). Mirrors updateScoring's guard
+ * style: live mutation bypasses Zod, so a non-positive calorie override is
+ * treated as clearing it.
+ */
+export function updateNutrition(patch: Partial<Settings['nutrition']>): void {
+  useStore.getState().mutate((draft) => {
+    if (patch.phaseOverride !== undefined) {
+      draft.settings.nutrition.phaseOverride = patch.phaseOverride
+    }
+    if (patch.calorieOverride !== undefined) {
+      const value = patch.calorieOverride
+      draft.settings.nutrition.calorieOverride =
+        value !== null && Number.isFinite(value) && value > 0 ? value : null
+    }
+  })
+}
+
+/**
  * E16 (Q21c): merge per-exercise done/skipped flags into a session's play log.
  * Raw user input (done/skipped taps), not derived — allowed under the
  * "never store derived" rule. Lazily creates the session like the other quick-log

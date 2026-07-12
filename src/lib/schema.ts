@@ -5,7 +5,7 @@ import { z } from 'zod'
  * (scores, penalties, BMI, adherence…) is recomputed by pure functions, mirroring
  * the Excel design where formulas derive everything from entered cells (PRD §8).
  */
-export const SCHEMA_VERSION = 6
+export const SCHEMA_VERSION = 7
 
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'expected YYYY-MM-DD')
 
@@ -51,6 +51,13 @@ export const settingsSchema = z.object({
   yoga: z.enum(['classic', 'x3']),
   /** E20: self-reported resistance-training experience — drives feasibility rate tiers */
   training: z.enum(['novice', 'intermediate', 'advanced']),
+  /** E22: P90X nutrition-plan overrides — targets themselves stay derived (rule 2) */
+  nutrition: z.object({
+    /** stay in a nutrition phase longer than the training blocks; null follows the schedule */
+    phaseOverride: z.union([z.literal(1), z.literal(2), z.literal(3)]).nullable(),
+    /** custom daily kcal replacing the guide's level plan; null uses the level */
+    calorieOverride: z.number().positive().nullable(),
+  }),
 })
 
 const opBase = {
@@ -157,6 +164,7 @@ export function emptyState(): AppState {
       player: { autoMarkDone: false },
       yoga: 'classic',
       training: 'intermediate',
+      nutrition: { phaseOverride: null, calorieOverride: null },
     },
     scheduleOps: [],
     workoutLogs: {},
