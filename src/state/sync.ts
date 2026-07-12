@@ -358,8 +358,19 @@ export async function resolveConflict(choice: ConflictChoice): Promise<void> {
   try {
     const secrets = await requireSecrets(gen)
     if (secrets === null) return
-    if (choice === 'keep-local') await forcePush(config, secrets, gen)
-    else await pull(config, secrets, gen, { acceptLocalEdits: true })
+    const ok =
+      choice === 'keep-local'
+        ? await forcePush(config, secrets, gen)
+        : await pull(config, secrets, gen, { acceptLocalEdits: true })
+    // A conflict can surface here even when it originated from resumeAfterReset's
+    // "upload empty device" path racing another writer (forcePush's 409). Whichever
+    // side the user just chose also answers the after-reset "which copy is real"
+    // question — leaving pausedReason stuck at 'after-reset' would silently block
+    // every future syncNow() cycle (its very first check refuses to run while paused),
+    // so a resolved conflict must clear it too, not just a resolved resumeAfterReset.
+    if (ok && !isStale(gen) && useSyncStore.getState().config?.pausedReason === 'after-reset') {
+      patchConfig({ pausedReason: null })
+    }
   } catch (error) {
     setError(unexpected(error), gen)
   } finally {

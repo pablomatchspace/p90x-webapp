@@ -738,6 +738,34 @@ describe('reset', () => {
     expect(useSyncStore.getState().status).toBe('offline')
   })
 
+  it('an "upload empty" that races another writer stays paused, but resolving the conflict clears it', async () => {
+    await enable({ lastRevision: 3, dirty: true, pausedReason: 'after-reset' })
+    let firstPut = true
+    route('GET /v1/meta', () => json({ revision: 3, updatedAt: 'now' }))
+    route('PUT /v1/state', () => {
+      if (firstPut) {
+        firstPut = false
+        // Another writer raced ahead of this device's stale baseRevision.
+        return json({ error: 'revision conflict', revision: 9, updatedAt: 'now' }, 409)
+      }
+      return json({ revision: 10, updatedAt: 'now' })
+    })
+
+    await resumeAfterReset('upload-empty')
+
+    // Nothing was actually resolved — the safety pause must survive the conflict.
+    expect(useSyncStore.getState().status).toBe('conflict')
+    expect(loadSyncConfig()?.pausedReason).toBe('after-reset')
+
+    // The user resolves through the normal conflict UI. Whichever side they choose
+    // also answers the after-reset question — the pause must not outlive it, or
+    // syncNow()'s very first check would silently refuse every future cycle.
+    await resolveConflict('keep-local')
+
+    expect(useSyncStore.getState().status).toBe('synced')
+    expect(loadSyncConfig()).toMatchObject({ pausedReason: null, lastRevision: 10 })
+  })
+
   it('resuming with "upload empty" force-pushes the cleared document', async () => {
     await enable({ lastRevision: 3, dirty: true, pausedReason: 'after-reset' })
     route('GET /v1/meta', () => json({ revision: 7, updatedAt: 'now' }))
