@@ -15,6 +15,35 @@ didn't bump the package version — they're numbered B01/B02 here for a
 continuous record; #33's package column is left at the un-suffixed version
 that was actually shipped.
 
+## 1.E22.U132 (package 1.22.132) — 2026-07-12
+
+- **E22 — Nutrition targets.** The app now tells you how many calories and
+  which macro split to aim for. A pure engine (`src/lib/nutrition.ts`) encodes
+  the published P90X Nutrition Plan guide verbatim — RMR = weight (lb) × 10,
+  - 20% daily activity, + 600 kcal workout → energy amount → level chart
+    (I/II/III = 1800/2400/3000 kcal), split into protein/carb/fat grams by the
+    day's nutrition phase (Fat Shredder 50/30/20, Energy Booster 40/40/20,
+    Endurance Maximizer 20/60/20). The workbook's nutrition tabs were excluded
+    from the port, so the guide — not the sheet — is the oracle here, sourced in
+    `docs/requirements/nutrition-targets.md`. Today/day pages get a **Nutrition**
+    card showing the day's kcal and macro grams, following the materialized day's
+    training phase so skips/remaps move the nutrition phase with the workouts.
+    Settings gains a **Nutrition** section: derived energy amount / level / daily
+    target (from the latest weigh-in, start weight as fallback), a phase override
+    (Auto follows the training blocks), a custom daily-calorie override, and the
+    three-phase split table. New `settings.nutrition` (schema v7, v6→v7
+    migration); every target number stays derived (rule 2).
+- **Evidence-based target layer.** Because the boxed guide is goal-blind,
+  each surface also shows a **target-based** recommendation next to the program
+  numbers: calories from an estimated TDEE (Katch–McArdle when lean mass is
+  known, else Mifflin–St Jeor; ×1.55) plus the surplus/deficit needed to reach
+  the stored target weight over the remaining program window (~7700 kcal/kg),
+  clamped to muscle-sparing rate bands (Helms ≤1%/wk loss, ~0.5%/wk usable
+  gain) and floored at BMR; protein 1.6–2.2 g/kg (raised in a deficit), fat
+  0.8 g/kg (0.5 floor), carbs as the remainder. Reuses E20's horizon; tier-
+  labelled and sourced in `docs/requirements/nutrition-targets.md`. Not medical
+  advice.
+
 ## 1.E21.U129.B00 (package 1.21.129) — 2026-07-12
 
 - **E21 — Charting upgrades.** The hand-rolled SVG charts get a crosshair
