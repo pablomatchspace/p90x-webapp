@@ -52,6 +52,13 @@ const MIGRATIONS: Record<number, (doc: Record<string, unknown>) => void> = {
       settings.nutrition = { phaseOverride: null, calorieOverride: null }
     }
   },
+  // v7 → v8 (E23): per-workout media deeplinks.
+  7: (doc) => {
+    const settings = doc.settings as { workoutLinks?: unknown } | undefined
+    if (settings !== undefined && settings.workoutLinks === undefined) {
+      settings.workoutLinks = {}
+    }
+  },
 }
 
 export function migrateToCurrent(raw: unknown): MigrationResult {

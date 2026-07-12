@@ -1,5 +1,6 @@
 import { compareISO, isISODate, type ISODate } from '@/lib/dates'
-import { getWorkout, type ProgramKey } from '@/lib/programData'
+import { isHttpUrl, type MediaKind } from '@/lib/links'
+import { getWorkout, hasWorkout, type ProgramKey } from '@/lib/programData'
 import type {
   AppState,
   BodyEntry,
@@ -303,6 +304,29 @@ export function updateNutrition(patch: Partial<Settings['nutrition']>): void {
       const value = patch.calorieOverride
       draft.settings.nutrition.calorieOverride =
         value !== null && Number.isFinite(value) && value > 0 ? value : null
+    }
+  })
+}
+
+/**
+ * E23: set or clear one workout's video/audio deeplink. Live mutation bypasses
+ * Zod (same reasoning as updateScoring), so the http(s)-only rule is enforced
+ * here too: anything else is ignored rather than stored. `null` clears the
+ * link; a workout whose links are all cleared drops out of the record.
+ */
+export function updateWorkoutLink(workoutKey: string, kind: MediaKind, url: string | null): void {
+  if (!hasWorkout(workoutKey)) return
+  const trimmed = url?.trim() ?? null
+  if (trimmed !== null && !isHttpUrl(trimmed)) return
+  useStore.getState().mutate((draft) => {
+    const links = draft.settings.workoutLinks
+    if (trimmed === null) {
+      const entry = links[workoutKey]
+      if (entry === undefined) return
+      delete entry[kind]
+      if (entry.video === undefined && entry.audio === undefined) delete links[workoutKey]
+    } else {
+      ;(links[workoutKey] ??= {})[kind] = trimmed
     }
   })
 }

@@ -20,6 +20,7 @@ const sample: Settings = {
   yoga: 'classic',
   training: 'intermediate',
   nutrition: { phaseOverride: null, calorieOverride: null },
+  workoutLinks: {},
 }
 
 describe('setupDerived (golden vs sample SETUP)', () => {
