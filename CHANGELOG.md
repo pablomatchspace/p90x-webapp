@@ -5,6 +5,41 @@ One entry per merged epic. From E16 onward, package semver maps to the
 The bump and its entry land inside the epic's own PR, so the deployed app
 (More → Help) always names the last merged epic.
 
+From the first post-1.E20.U128 hotfix onward, bug-fix-only releases (no new
+story) append a bug-release counter: package `-bN` prerelease suffix →
+display `1.E{epic}.U{story}.B{NN}` (zero-padded). A fresh story release
+carries no suffix and displays `B00` — nothing's been fixed against it yet.
+Each bug fix increments N from the last one merged against the _same_ story;
+a new story resets it to B00. PRs #33 and #34 predate this convention and
+didn't bump the package version — they're numbered B01/B02 here for a
+continuous record; #33's package column is left at the un-suffixed version
+that was actually shipped.
+
+## 1.E20.U128.B03 (package 1.20.128-b3) — 2026-07-12
+
+- **Bug fix**: the grid view's round row (main reps field + secondary field,
+  e.g. knee reps) didn't wrap on narrower phones, so the secondary field's
+  +/− buttons rendered outside the card frame instead of stacking below the
+  main field. `RoundInputs` row now wraps.
+
+## 1.E20.U128.B02 (package 1.20.128) — 2026-07-12
+
+- **Bug fix** (PR #34): the rest timer's custom-seconds field couldn't take
+  multi-digit values (45, 100, 120, 300...); fixed three related races in the
+  cloud-sync engine (an after-reset safety pause cleared before its
+  restore/upload finished, an in-flight pull silently discarding a concurrent
+  local edit, a debounced push dropped mid-cycle), plus a follow-up for a
+  conflict the pause fix itself left behind.
+
+## 1.E20.U128.B01 (package 1.20.128) — 2026-07-12
+
+- **Bug fix** (PR #33): the Reality check panel paced fat-loss verdicts off
+  fat-mass lost instead of scale-weight lost, wrongly flagging sound recomp
+  plans as unrealistic — now paces against actual weight change and explains
+  recomp cases. Also fixed a hard-coded "kg" unit ignoring the units setting,
+  and Row crushing labels into an unreadable one-word-per-line column next to
+  wide controls on mobile.
+
 ## 1.E20.U128 (package 1.20.128) — 2026-07-11
 
 - **E20 — FFMI target feasibility** (PR #<N>): the estimator now rubs the target

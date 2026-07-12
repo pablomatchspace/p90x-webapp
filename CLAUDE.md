@@ -70,10 +70,19 @@ properties / namespaces).
   name `claude/epic-eN-<slug>`. Story-level Conventional Commits within the branch.
 - **Version from E16 onward (Q20):** package.json stays semver, mapped as
   `1.{epicNumber}.{lastStoryNumber}` via `npm version <x.y.z> --no-git-tag-version`.
-  More → Help displays `1.E{epic}.U{story}` through `formatAppVersion`; historical
-  versions before E16 keep their plain semver display. CHANGELOG headings use
-  `## 1.E{epic}.U{story} (package 1.{epic}.{story}) — YYYY-MM-DD`. This
+  More → Help displays `1.E{epic}.U{story}.B{NN}` through `formatAppVersion` (zero-padded
+  bug-release counter, see below); historical versions before E16 keep their plain semver
+  display. CHANGELOG headings use
+  `## 1.E{epic}.U{story}.B{NN} (package 1.{epic}.{story}[-bN]) — YYYY-MM-DD`. This
   supersedes E13's minor/patch version rule.
+  - **Bug-release counter (post-1.E20.U128):** a story release bumps package.json to
+    `1.{epic}.{story}` (no suffix) and displays `B00` — nothing's been fixed against it
+    yet. Each subsequent bug-fix-only PR against that _same_ story appends/increments a
+    `-bN` prerelease suffix (`npm version 1.{epic}.{story}-bN --no-git-tag-version`),
+    displaying `B{NN}`. Before bumping, check package.json's current version _and_ the
+    latest CHANGELOG heading to find the last N used for this story — increment it for
+    another bug fix; a new story drops the suffix entirely (reset to B00, next epic/story
+    numbers). Never guess N from memory — always re-derive it from those two sources.
 - **Validate before every commit:** `npm run format` then
   `npm run lint && npm run typecheck && npm run test && npm run build`
   (+ `npm run e2e` if a journey changed, + `npm run lhci` if UI/perf changed).
