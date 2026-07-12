@@ -69,7 +69,7 @@ export function RoundInputs({
                   Round {round + 1}
                 </p>
               ) : null}
-              <div className="flex items-start gap-3">
+              <div className="flex flex-wrap items-start gap-3">
                 {field(round, 'main')}
                 {kind !== undefined ? field(round, 'secondary') : null}
               </div>
