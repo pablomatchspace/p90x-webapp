@@ -183,3 +183,23 @@ Post-v1.0.0. Full write-up: [`docs/epics/E19-yoga-play-variants.md`](../epics/E1
 - ✅ US-128 · Docs, oracle & release (S, P1)
 
 Post-v1.0.0. Full write-up: [`docs/epics/E20-ffmi-feasibility.md`](../epics/E20-ffmi-feasibility.md).
+
+## E21 — Sophisticated charting
+
+- ✅ US-129 · Crosshair, trend lines, phase bands and new charts (L, P1)
+
+Post-v1.0.0. Released as 1.E21.U129 (PR #36) — see the CHANGELOG entry; no epic doc was checked in.
+
+## E22 — Nutrition targets
+
+- ✅ US-130 → US-132 · Nutrition-plan engine, Today/Settings surfaces, evidence-based target layer, docs & release
+
+Post-v1.0.0. Released as 1.E22.U132 (schema v7, `settings.nutrition`) — see the CHANGELOG entry and `docs/requirements/nutrition-targets.md`; no epic doc was checked in.
+
+## E23 — Workout media deeplinks
+
+- ✅ US-133 · Schema v8 `settings.workoutLinks`, pure link helpers and store action (M, P0)
+- ✅ US-134 · Settings Workout-links card, new-tab launch buttons and e2e (M, P0)
+- ✅ US-135 · Docs and release (S, P1)
+
+Post-v1.0.0. Full write-up: [`docs/epics/E23-workout-deeplinks.md`](../epics/E23-workout-deeplinks.md).
