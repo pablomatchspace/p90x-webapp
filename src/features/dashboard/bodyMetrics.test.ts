@@ -24,6 +24,7 @@ const sample: Settings = {
   player: { autoMarkDone: false },
   yoga: 'classic',
   training: 'intermediate',
+  nutrition: { phaseOverride: null, calorieOverride: null },
 }
 
 function metric(overrides: Partial<BodyMetric>): BodyMetric {
