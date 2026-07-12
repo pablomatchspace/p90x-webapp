@@ -17,6 +17,8 @@ export function TimerCard() {
   const [remaining, setRemaining] = useState<number | null>(null) // null = idle at `duration`
   const [running, setRunning] = useState(false)
   const [done, setDone] = useState(false)
+  // free-typing buffer so intermediate keystrokes like "4" (of "45") survive until blur
+  const [customDraft, setCustomDraft] = useState<string | null>(null)
   const endRef = useRef(0)
 
   useEffect(() => {
@@ -64,6 +66,7 @@ export function TimerCard() {
   const pick = (seconds: number) => {
     updateTimerSettings({ restSeconds: seconds })
     setDuration(seconds)
+    setCustomDraft(null)
     setRunning(false)
     setRemaining(null)
     setDone(false)
@@ -112,11 +115,17 @@ export function TimerCard() {
             type="text"
             inputMode="numeric"
             aria-label="Custom seconds"
-            value={PRESETS.includes(duration) ? '' : String(duration)}
+            value={customDraft ?? (PRESETS.includes(duration) ? '' : String(duration))}
             placeholder="s"
-            onChange={(e) => {
-              const n = Number(e.target.value)
+            onChange={(e) => setCustomDraft(e.target.value)}
+            onBlur={() => {
+              if (customDraft === null) return
+              const n = Number(customDraft)
+              setCustomDraft(null)
               if (Number.isInteger(n) && n >= 5 && n <= 3600) pick(n)
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') e.currentTarget.blur()
             }}
             className="h-10 w-16 rounded-lg border border-zinc-300 bg-white px-2 text-center text-sm tabular-nums dark:border-zinc-700 dark:bg-zinc-900"
           />
