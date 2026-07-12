@@ -1,13 +1,20 @@
 import { describe, expect, it } from 'vitest'
 import { KG_PER_LB } from './body'
 import {
+  ACTIVITY_FACTOR,
+  currentLeanKg,
   currentWeightKg,
   energyAmount,
+  katchMcArdle,
+  KCAL_PER_KG,
   LEVEL_CALORIES,
   macroGrams,
+  mifflinStJeor,
   nutritionLevel,
   nutritionTargets,
   PHASE_SPLITS,
+  remainingProgramDays,
+  targetNutrition,
 } from './nutrition'
 import { emptyState, type BodyEntry, type Settings } from './schema'
 
@@ -130,5 +137,106 @@ describe('nutritionTargets', () => {
 
   it('returns null when neither a weight nor an override exists', () => {
     expect(nutritionTargets(settingsWith(), [], 1)).toBeNull()
+  })
+})
+
+describe('BMR equations', () => {
+  it('Mifflin–St Jeor for a 80 kg / 1.8 m / 40 yo male', () => {
+    // 10*80 + 6.25*180 - 5*40 + 5 = 800 + 1125 - 200 + 5
+    expect(mifflinStJeor(80, 1.8, 40, 'male')).toBeCloseTo(1730, 6)
+  })
+
+  it('Mifflin–St Jeor applies the female offset and needs every input', () => {
+    expect(mifflinStJeor(80, 1.8, 40, 'female')).toBeCloseTo(1730 - 166, 6)
+    expect(mifflinStJeor(80, null, 40, 'male')).toBeNull()
+    expect(mifflinStJeor(80, 1.8, null, 'male')).toBeNull()
+  })
+
+  it('Katch–McArdle from lean mass', () => {
+    // 370 + 21.6*62.4
+    expect(katchMcArdle(62.4)).toBeCloseTo(370 + 21.6 * 62.4, 6)
+    expect(katchMcArdle(null)).toBeNull()
+  })
+})
+
+describe('currentLeanKg', () => {
+  it('uses the latest complete weigh-in, then start stats, then null', () => {
+    const settings = settingsWith({ startWeight: 82, startBodyFat: 0.25 })
+    const log = [
+      { date: '2026-01-01', weight: 80, bodyFat: 0.2, water: null, bone: null, zoneMinutes: null },
+    ]
+    expect(currentLeanKg(settings, log)).toBeCloseTo(64, 6) // 80 * 0.8
+    expect(currentLeanKg(settings, [])).toBeCloseTo(61.5, 6) // 82 * 0.75
+    expect(currentLeanKg(settingsWith(), [])).toBeNull()
+  })
+})
+
+describe('remainingProgramDays', () => {
+  it('plans a full 90 for no/future start and a fresh 90 for a finished program', () => {
+    expect(remainingProgramDays(null, '2026-01-20')).toBe(90)
+    expect(remainingProgramDays('2026-02-01', '2026-01-20')).toBe(90) // future start
+    expect(remainingProgramDays('2026-01-01', '2026-05-01')).toBe(90) // long finished → fresh
+  })
+
+  it('returns the days left mid-program', () => {
+    // day 15 of the program → 90 - 14 = 76 left
+    expect(remainingProgramDays('2026-01-01', '2026-01-15')).toBe(76)
+  })
+})
+
+describe('targetNutrition', () => {
+  const base = {
+    currentWeightKg: 80,
+    leanKg: 62.4,
+    heightM: 1.8,
+    age: 40,
+    gender: 'male' as const,
+    targetWeightKg: 76,
+    horizonWeeks: 12,
+  }
+
+  it('derives a deficit plan from Katch–McArdle TDEE and the target pace', () => {
+    const t = targetNutrition(base)
+    expect(t).not.toBeNull()
+    if (t === null) return
+    expect(t.bmrMethod).toBe('katch')
+    expect(t.bmr).toBeCloseTo(370 + 21.6 * 62.4, 4) // 1717.84
+    expect(t.tdee).toBeCloseTo((370 + 21.6 * 62.4) * ACTIVITY_FACTOR, 4)
+    expect(t.goal).toBe('deficit')
+    expect(t.rateClamped).toBe(false)
+    // (76-80)/12/80 = -0.004166.. /wk → daily offset (rate*80)*7700/7
+    const dailyOffset = ((-4 / 12 / 80) * 80 * KCAL_PER_KG) / 7
+    expect(t.calories).toBe(Math.round((370 + 21.6 * 62.4) * ACTIVITY_FACTOR + dailyOffset))
+    expect(t.proteinPerKg).toBe(2.2)
+    expect(t.protein).toBeCloseTo(176, 6) // 2.2 * 80
+    expect(t.fat).toBeCloseTo(64, 6) // 0.8 * 80
+    // carbs are the remainder of calories after protein & fat
+    expect(t.carbs).toBeCloseTo((t.calories - 176 * 4 - 64 * 9) / 4, 6)
+  })
+
+  it('caps an over-aggressive target at the safe fat-loss rate', () => {
+    const t = targetNutrition({ ...base, targetWeightKg: 60 }) // 20 kg in 12 wk ≫ 1%/wk
+    expect(t?.rateClamped).toBe(true)
+    expect(t?.weeklyRatePctBw).toBeCloseTo(-0.01, 9) // clamped to -1%/wk
+    expect(t?.weeklyRateKg).toBeCloseTo(-0.8, 9) // -1% of 80 kg
+  })
+
+  it('falls back to Mifflin–St Jeor when lean mass is unknown', () => {
+    const t = targetNutrition({ ...base, leanKg: null })
+    expect(t?.bmrMethod).toBe('mifflin')
+    expect(t?.bmr).toBeCloseTo(1730, 6)
+  })
+
+  it('treats a lean-gain target as a surplus and holds protein at 1.8 g/kg', () => {
+    const t = targetNutrition({ ...base, targetWeightKg: 82 })
+    expect(t?.goal).toBe('surplus')
+    expect(t?.proteinPerKg).toBe(1.8)
+    expect((t?.weeklyRateKg ?? 0) > 0).toBe(true)
+  })
+
+  it('returns null without a current weight, a BMR basis, or a target weight', () => {
+    expect(targetNutrition({ ...base, currentWeightKg: null })).toBeNull()
+    expect(targetNutrition({ ...base, targetWeightKg: null })).toBeNull()
+    expect(targetNutrition({ ...base, leanKg: null, heightM: null, age: null })).toBeNull()
   })
 })
