@@ -435,6 +435,38 @@ describe('mid-flight edits (the lost-update race)', () => {
     expect(loadSyncConfig()).toMatchObject({ dirty: false, lastRevision: 2 })
     detach()
   })
+
+  it('an edit made while a pull is in flight raises a conflict instead of being discarded', async () => {
+    const detach = attachSync()
+    await enable({ lastRevision: 1, dirty: false })
+    const remote = emptyState()
+    remote.notes = 'from the phone'
+    const envelope = await remoteEnvelope(remote)
+
+    let resolveState: ((response: Response) => void) | null = null
+    route('GET /v1/meta', () => json({ revision: 2, updatedAt: 'now' }))
+    route(
+      'GET /v1/state',
+      () =>
+        new Promise<Response>((res) => {
+          resolveState = res
+        }),
+    )
+
+    const cycle = syncNow()
+    await vi.waitFor(() => expect(resolveState).not.toBeNull())
+    useStore.getState().mutate((d) => {
+      d.notes = 'typed during the download'
+    })
+    resolveState!(json({ revision: 2, envelope }))
+    await cycle
+
+    expect(useStore.getState().data.notes).toBe('typed during the download')
+    expect(useSyncStore.getState().status).toBe('conflict')
+    expect(useSyncStore.getState().conflictRemote?.revision).toBe(2)
+    expect(loadSyncConfig()?.dirty).toBe(true)
+    detach()
+  })
 })
 
 describe('stale cycles (the generation fence)', () => {
@@ -609,6 +641,40 @@ describe('debounced push', () => {
     detach() // tab closed
     expect(loadSyncConfig()?.dirty).toBe(true)
   })
+
+  it('a debounced push firing during a running cycle is re-armed, not dropped', async () => {
+    vi.useFakeTimers()
+    const detach = attachSync()
+    await enable({ lastRevision: 1, dirty: false })
+
+    let resolveMeta: ((response: Response) => void) | null = null
+    let held = true
+    route('GET /v1/meta', () => {
+      if (held) {
+        held = false
+        return new Promise<Response>((res) => {
+          resolveMeta = res
+        })
+      }
+      return json({ revision: 1, updatedAt: 'x' })
+    })
+    route('PUT /v1/state', () => json({ revision: 2, updatedAt: 'x' }))
+
+    const cycle = syncNow() // slow cycle — its meta probe is held open
+    await vi.waitFor(() => expect(resolveMeta).not.toBeNull())
+    useStore.getState().mutate((d) => {
+      d.notes = 'edited mid-cycle'
+    })
+
+    await vi.advanceTimersByTimeAsync(3000) // debounce fires while the cycle is running
+    resolveMeta!(json({ revision: 1, updatedAt: 'x' }))
+    await cycle
+
+    await vi.advanceTimersByTimeAsync(3000) // the re-armed debounce
+    await vi.waitFor(() => expect(putBodies).toHaveLength(1))
+    expect(loadSyncConfig()).toMatchObject({ dirty: false, lastRevision: 2 })
+    detach()
+  })
 })
 
 describe('reset', () => {
@@ -660,6 +726,44 @@ describe('reset', () => {
 
     expect(loadSyncConfig()?.pausedReason).toBe('after-reset')
     expect(useSyncStore.getState().message).toContain('re-enter your passphrase')
+  })
+
+  it('a restore that fails offline keeps the after-reset safety pause up', async () => {
+    await enable({ lastRevision: 3, dirty: true, pausedReason: 'after-reset' })
+    // No routes registered: the endpoint is unreachable and the pull fails.
+
+    await resumeAfterReset('restore-cloud')
+
+    expect(loadSyncConfig()?.pausedReason).toBe('after-reset')
+    expect(useSyncStore.getState().status).toBe('offline')
+  })
+
+  it('an "upload empty" that races another writer stays paused, but resolving the conflict clears it', async () => {
+    await enable({ lastRevision: 3, dirty: true, pausedReason: 'after-reset' })
+    let firstPut = true
+    route('GET /v1/meta', () => json({ revision: 3, updatedAt: 'now' }))
+    route('PUT /v1/state', () => {
+      if (firstPut) {
+        firstPut = false
+        // Another writer raced ahead of this device's stale baseRevision.
+        return json({ error: 'revision conflict', revision: 9, updatedAt: 'now' }, 409)
+      }
+      return json({ revision: 10, updatedAt: 'now' })
+    })
+
+    await resumeAfterReset('upload-empty')
+
+    // Nothing was actually resolved — the safety pause must survive the conflict.
+    expect(useSyncStore.getState().status).toBe('conflict')
+    expect(loadSyncConfig()?.pausedReason).toBe('after-reset')
+
+    // The user resolves through the normal conflict UI. Whichever side they choose
+    // also answers the after-reset question — the pause must not outlive it, or
+    // syncNow()'s very first check would silently refuse every future cycle.
+    await resolveConflict('keep-local')
+
+    expect(useSyncStore.getState().status).toBe('synced')
+    expect(loadSyncConfig()).toMatchObject({ pausedReason: null, lastRevision: 10 })
   })
 
   it('resuming with "upload empty" force-pushes the cleared document', async () => {

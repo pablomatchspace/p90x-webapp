@@ -158,7 +158,7 @@ async function push(
   secrets: SyncSecrets,
   baseRevision: number,
   gen: number,
-): Promise<void> {
+): Promise<boolean> {
   // The snapshot is what actually gets uploaded. Comparing against it afterwards is
   // what keeps an edit made *during* the network flight dirty — blindly clearing the
   // flag here would mark that edit clean, and a later pull would clobber it.
@@ -175,13 +175,13 @@ async function push(
     cipher,
   }
   const result = await putState(config.endpoint, secrets.authToken, baseRevision, envelope)
-  if (isStale(gen)) return
+  if (isStale(gen)) return false
   if (result.ok) {
     const stillDirty = useStore.getState().data !== snapshot
     patchConfig({ dirty: stillDirty, lastRevision: result.value.revision })
     succeed(`Uploaded — revision ${result.value.revision}.`)
     if (stillDirty) schedulePush()
-    return
+    return true
   }
   if (result.kind === 'conflict') {
     useSyncStore.setState({
@@ -189,9 +189,10 @@ async function push(
       conflictRemote: result.remote,
       message: 'Another device changed the cloud copy while this one had unsaved changes.',
     })
-    return
+    return false
   }
   fail(result, gen)
+  return false
 }
 
 /** The stored key only opens envelopes made with the same salt and cost. */
@@ -199,29 +200,68 @@ function keyFits(cipher: Cipher, config: SyncConfig): boolean {
   return cipher.salt === config.salt && cipher.iterations === config.iterations
 }
 
-async function pull(config: SyncConfig, secrets: SyncSecrets, gen: number): Promise<void> {
+interface PullOptions {
+  /** The user already chose the cloud copy (conflict resolution, restore after
+   *  a reset) — apply it even though this device has unpushed edits. */
+  acceptLocalEdits?: boolean
+}
+
+async function pull(
+  config: SyncConfig,
+  secrets: SyncSecrets,
+  gen: number,
+  opts: PullOptions = {},
+): Promise<boolean> {
   const result = await getState(config.endpoint, secrets.authToken)
-  if (!result.ok) return fail(result, gen)
+  if (!result.ok) {
+    fail(result, gen)
+    return false
+  }
 
   const { cipher } = result.value.envelope
   // Distinguish "a different setup wrote this" from "wrong passphrase": both would
   // otherwise surface as an opaque decrypt failure.
-  if (!keyFits(cipher, config)) return setError(SALT_MISMATCH, gen)
+  if (!keyFits(cipher, config)) {
+    setError(SALT_MISMATCH, gen)
+    return false
+  }
 
   let plain: unknown
   try {
     plain = await decryptJson(secrets.key, cipher)
   } catch {
-    return setError(WRONG_PASSPHRASE, gen)
+    setError(WRONG_PASSPHRASE, gen)
+    return false
   }
 
   // The cloud copy is untrusted input, exactly like an imported file: a document
   // from a newer schema is refused (never downgraded), and a malformed one never lands.
   const migrated = migrateToCurrent(plain)
-  if (!migrated.ok) return setError(migrated.error, gen)
+  if (!migrated.ok) {
+    setError(migrated.error, gen)
+    return false
+  }
 
   // Never apply a download the user has since disabled or reconfigured out of.
-  if (isStale(gen)) return
+  if (isStale(gen)) return false
+
+  // An edit that landed while the download was in flight set `dirty` (the store
+  // subscription writes it synchronously). Applying the remote copy would silently
+  // discard that edit and then mark it clean — the same lost-update race push()
+  // guards with its snapshot. Surface it as the conflict it is; callers acting on
+  // an explicit user decision pass `acceptLocalEdits`.
+  if (opts.acceptLocalEdits !== true && useSyncStore.getState().config?.dirty === true) {
+    useSyncStore.setState({
+      status: 'conflict',
+      conflictRemote: {
+        revision: result.value.revision,
+        updatedAt: result.value.envelope.updatedAt,
+        deviceName: result.value.envelope.deviceName,
+      },
+      message: 'This device changed while the cloud copy was downloading.',
+    })
+    return false
+  }
 
   applyingRemote = true
   try {
@@ -232,22 +272,33 @@ async function pull(config: SyncConfig, secrets: SyncSecrets, gen: number): Prom
   }
   patchConfig({ dirty: false, lastRevision: result.value.revision })
   succeed(`Downloaded — revision ${result.value.revision}.`)
+  return true
 }
 
 /**
  * Fetch the current revision, then write over it. This is the deliberate
  * "my copy wins" path: conflict resolution and resuming after a reset.
  */
-async function forcePush(config: SyncConfig, secrets: SyncSecrets, gen: number): Promise<void> {
+async function forcePush(config: SyncConfig, secrets: SyncSecrets, gen: number): Promise<boolean> {
   const meta = await getMeta(config.endpoint, secrets.authToken)
-  if (!meta.ok && meta.kind !== 'notfound') return fail(meta, gen)
-  await push(config, secrets, meta.ok ? meta.value.revision : 0, gen)
+  if (!meta.ok && meta.kind !== 'notfound') {
+    fail(meta, gen)
+    return false
+  }
+  return push(config, secrets, meta.ok ? meta.value.revision : 0, gen)
 }
 
 /** Run one full sync cycle. Safe to call at any time; overlapping calls collapse. */
 export async function syncNow(): Promise<void> {
   const config = useSyncStore.getState().config
-  if (config === null || config.pausedReason !== null || running) return
+  if (config === null || config.pausedReason !== null) return
+  if (running) {
+    // A cycle is already in flight. Swallowing this call would drop a debounced
+    // push fired mid-cycle — the edit would sit dirty-but-unpushed behind a
+    // "Synced" status until the next edit or app open. Re-arm instead.
+    schedulePush()
+    return
+  }
   running = true
   const gen = generation
   useSyncStore.setState({ status: 'syncing', message: null })
@@ -270,11 +321,14 @@ export async function syncNow(): Promise<void> {
         })
         return
       case 'first-push':
-        return await push(config, secrets, 0, gen)
+        await push(config, secrets, 0, gen)
+        return
       case 'push':
-        return await push(config, secrets, config.lastRevision, gen)
+        await push(config, secrets, config.lastRevision, gen)
+        return
       case 'pull':
-        return await pull(config, secrets, gen)
+        await pull(config, secrets, gen)
+        return
       case 'conflict':
         if (isStale(gen)) return
         useSyncStore.setState({
@@ -304,8 +358,19 @@ export async function resolveConflict(choice: ConflictChoice): Promise<void> {
   try {
     const secrets = await requireSecrets(gen)
     if (secrets === null) return
-    if (choice === 'keep-local') await forcePush(config, secrets, gen)
-    else await pull(config, secrets, gen)
+    const ok =
+      choice === 'keep-local'
+        ? await forcePush(config, secrets, gen)
+        : await pull(config, secrets, gen, { acceptLocalEdits: true })
+    // A conflict can surface here even when it originated from resumeAfterReset's
+    // "upload empty device" path racing another writer (forcePush's 409). Whichever
+    // side the user just chose also answers the after-reset "which copy is real"
+    // question — leaving pausedReason stuck at 'after-reset' would silently block
+    // every future syncNow() cycle (its very first check refuses to run while paused),
+    // so a resolved conflict must clear it too, not just a resolved resumeAfterReset.
+    if (ok && !isStale(gen) && useSyncStore.getState().config?.pausedReason === 'after-reset') {
+      patchConfig({ pausedReason: null })
+    }
   } catch (error) {
     setError(unexpected(error), gen)
   } finally {
@@ -450,18 +515,25 @@ export async function resumeAfterReset(choice: 'upload-empty' | 'restore-cloud')
   const gen = generation
   useSyncStore.setState({ status: 'syncing', message: null })
   try {
-    // Secrets are checked *before* the pause is lifted: if the key is gone, the
+    // Secrets are checked *before* anything else: if the key is gone, the
     // after-reset safety net must stay up, not be quietly discarded.
     const secrets = await requireSecrets(gen)
     if (secrets === null) return
-    const resumed = patchConfig({ pausedReason: null, dirty: choice === 'upload-empty' })
-    if (resumed === null) return
     // Both branches bypass `decideSync` deliberately. After a reset this device is
     // still *in step* with the cloud (`lastRevision` never moved), so the decision
     // core would answer `idle` and neither restoring nor uploading would happen.
     // The user has already told us which copy wins.
-    if (choice === 'restore-cloud') await pull(resumed, secrets, gen)
-    else await forcePush(resumed, secrets, gen)
+    //
+    // The pause is lifted only AFTER the chosen operation succeeds. Clearing it
+    // before a pull that then fails (offline, 401) would leave lastRevision in
+    // step and dirty false — the next cycle would decide `idle`, report "Synced"
+    // over the empty post-reset document, and a later edit would push that empty
+    // document over the cloud copy.
+    const ok =
+      choice === 'restore-cloud'
+        ? await pull(config, secrets, gen, { acceptLocalEdits: true })
+        : await forcePush(config, secrets, gen)
+    if (ok && !isStale(gen)) patchConfig({ pausedReason: null })
   } catch (error) {
     setError(unexpected(error), gen)
   } finally {
