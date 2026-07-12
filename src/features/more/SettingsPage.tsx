@@ -25,18 +25,29 @@ import {
   suggestedTarget,
 } from '@/lib/feasibility'
 import { normalizedFfmi, planFromFfmi } from '@/lib/ffmi'
+import {
+  currentWeightKg,
+  energyAmount,
+  LEVEL_CALORIES,
+  macroGrams,
+  nutritionLevel,
+  PHASE_NAMES,
+  PHASE_SPLITS,
+  type NutritionPhase,
+} from '@/lib/nutrition'
 import { getTemplate, getWorkout, type ProgramKey } from '@/lib/programData'
 import { setupDerived, settingsWarnings } from '@/lib/setup'
 import {
   setStartDate,
   updateLimits,
+  updateNutrition,
   updateScoring,
   updateSettings,
   updateTargets,
   updateTraining,
   updateYogaVariant,
 } from '@/state/actions'
-import { useBodyLog, useSettings } from '@/state/selectors'
+import { useBodyLog, useSchedule, useSettings } from '@/state/selectors'
 import { useStore } from '@/state/store'
 
 /**
@@ -168,9 +179,12 @@ function GainModelBar({
     </div>
   )
 }
+const NUTRITION_PHASES: NutritionPhase[] = [1, 2, 3]
+
 export function SettingsPage() {
   const settings = useSettings()
   const bodyLog = useBodyLog()
+  const schedule = useSchedule()
   const hasData = useStore(
     (s) =>
       s.data.bodyLog.length > 0 ||
@@ -305,6 +319,19 @@ export function SettingsPage() {
     })
     setPendingFfmi(false)
   }
+
+  // E22: nutrition-plan read-outs — derived live, only the two overrides are stored.
+  const nutritionWeight = currentWeightKg(settings, bodyLog)
+  const energy = nutritionWeight !== null ? energyAmount(nutritionWeight) : null
+  const level = energy !== null ? nutritionLevel(energy) : null
+  const dailyCalories =
+    settings.nutrition.calorieOverride ?? (level !== null ? LEVEL_CALORIES[level] : null)
+  const todayDay = schedule?.byDate.get(todayISO())
+  const todayPhase: NutritionPhase | null =
+    todayDay !== undefined && todayDay.kind === 'program' ? todayDay.phase : null
+  const activePhase = settings.nutrition.phaseOverride ?? todayPhase
+  const showKcal = (value: number | null) =>
+    value === null ? '—' : Math.round(value).toLocaleString('en-US')
 
   const showWeight = (kg: number | null) =>
     kg === null ? '—' : formatFixed(kgToUnit(kg, units), 1)
@@ -776,6 +803,94 @@ export function SettingsPage() {
               </li>
             ))}
           </ul>
+        )}
+      </Card>
+
+      {/* E22: P90X nutrition plan — level, daily calories, per-phase macro split */}
+      <Card>
+        <h2 className="text-base font-semibold">Nutrition</h2>
+        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+          The P90X nutrition plan&rsquo;s daily calorie target, from your latest weigh-in (start
+          weight until you log one): weight (lb) × 10 resting burn, plus 20% daily activity, plus
+          600 kcal for the workout — then the level chart picks the plan. Today&rsquo;s card shows
+          the phase&rsquo;s macro grams.
+        </p>
+        <div className="mt-2 divide-y divide-zinc-100 dark:divide-zinc-800">
+          <Row
+            label="Nutrition phase"
+            hint="Auto follows the training blocks (weeks 1–4 / 5–8 / 9–13); pin a phase to stay in it longer, as the guide allows"
+          >
+            <Segmented
+              label="Nutrition phase"
+              value={
+                settings.nutrition.phaseOverride === null
+                  ? 'auto'
+                  : String(settings.nutrition.phaseOverride)
+              }
+              options={[
+                { value: 'auto', label: 'Auto' },
+                { value: '1', label: '1' },
+                { value: '2', label: '2' },
+                { value: '3', label: '3' },
+              ]}
+              onChange={(value) =>
+                updateNutrition({
+                  phaseOverride: value === 'auto' ? null : (Number(value) as NutritionPhase),
+                })
+              }
+            />
+          </Row>
+          <Row
+            label="Custom daily calories (kcal)"
+            hint="Replaces the level plan — leave empty to follow the level chart"
+          >
+            <NumberField
+              label="Custom daily calories (kcal)"
+              value={settings.nutrition.calorieOverride ?? null}
+              step={50}
+              onChange={(value) => updateNutrition({ calorieOverride: value })}
+            />
+          </Row>
+        </div>
+        <dl className="mt-3 grid grid-cols-3 gap-3 border-t border-zinc-100 pt-3 dark:border-zinc-800">
+          <Derived label="Energy amount" value={showKcal(energy)} unit="kcal" />
+          <Derived label="Level" value={level ?? '—'} />
+          <Derived
+            label="Daily target"
+            value={showKcal(dailyCalories)}
+            unit={settings.nutrition.calorieOverride !== null ? 'kcal · custom' : 'kcal'}
+          />
+        </dl>
+        {dailyCalories !== null ? (
+          <ul className="mt-3 space-y-2 border-t border-zinc-100 pt-3 dark:border-zinc-800">
+            {NUTRITION_PHASES.map((phase) => {
+              const split = PHASE_SPLITS[phase]
+              const grams = macroGrams(dailyCalories, phase)
+              return (
+                <li
+                  key={phase}
+                  className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-sm"
+                >
+                  <span className="flex items-center gap-2">
+                    <span className="font-medium">
+                      Phase {phase} · {PHASE_NAMES[phase]}
+                    </span>
+                    {activePhase === phase ? <Chip tone="green">current</Chip> : null}
+                  </span>
+                  <span className="tabular-nums text-xs text-zinc-500 dark:text-zinc-400">
+                    {Math.round(split.protein * 100)}/{Math.round(split.carbs * 100)}/
+                    {Math.round(split.fat * 100)} · {Math.round(grams.protein)} g protein ·{' '}
+                    {Math.round(grams.carbs)} g carbs · {Math.round(grams.fat)} g fat
+                  </span>
+                </li>
+              )
+            })}
+          </ul>
+        ) : (
+          <p className="mt-3 text-xs text-zinc-500 dark:text-zinc-400">
+            Set your start weight (or log a weigh-in) to derive the calorie level, or enter custom
+            daily calories.
+          </p>
         )}
       </Card>
 
