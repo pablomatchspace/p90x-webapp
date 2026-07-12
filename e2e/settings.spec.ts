@@ -55,6 +55,54 @@ test('recomputes derived stats live as inputs change', async ({ page }) => {
   await expect(page.getByText('62.4')).toBeVisible()
 })
 
+test('stores workout deeplinks and offers them as new-tab launch buttons (E23)', async ({
+  page,
+}) => {
+  await openSettings(page)
+
+  // paste a video link for Chest & Back; commit happens on blur
+  const video = page.getByRole('textbox', { name: 'Chest & Back video link' })
+  await video.fill('https://media.example/chest-back.mp4')
+  await video.blur()
+
+  // an invalid audio link is flagged inline and never stored
+  const audio = page.getByRole('textbox', { name: 'Chest & Back audio link' })
+  await audio.fill('not-a-url')
+  await audio.blur()
+  await expect(page.getByText('Enter a full http(s) link')).toBeVisible()
+
+  // hash navigation keeps the in-memory store — no persistence flush needed.
+  // 2026-01-05 is day 1 of the sample program: Chest & Back + Ab Ripper X.
+  await page.goto('#/day/2026-01-05')
+  const launch = page.getByRole('link', { name: 'Open Chest & Back video in a new tab' })
+  await expect(launch).toBeVisible()
+  await expect(launch).toHaveAttribute('href', 'https://media.example/chest-back.mp4')
+  await expect(launch).toHaveAttribute('target', '_blank')
+  await expect(launch).toHaveAttribute('rel', 'noopener noreferrer')
+  // the rejected audio link produced no button
+  await expect(
+    page.getByRole('link', { name: 'Open Chest & Back audio in a new tab' }),
+  ).toHaveCount(0)
+
+  // the workout detail screen offers the same launch button
+  await page.goto('#/workouts/chest-back')
+  await expect(
+    page.getByRole('link', { name: 'Open Chest & Back video in a new tab' }),
+  ).toBeVisible()
+
+  // blanking the field removes the link and its button. openSettings reloads,
+  // so flush the debounced persist first (frozen clock never ticks by itself).
+  await page.clock.fastForward(500)
+  await openSettings(page)
+  const videoAgain = page.getByRole('textbox', { name: 'Chest & Back video link' })
+  await videoAgain.fill('')
+  await videoAgain.blur()
+  await page.goto('#/day/2026-01-05')
+  await expect(
+    page.getByRole('link', { name: 'Open Chest & Back video in a new tab' }),
+  ).toHaveCount(0)
+})
+
 test('confirms a start-date change on a program that already has data', async ({ page }) => {
   await openSettings(page)
 

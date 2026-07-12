@@ -232,6 +232,10 @@ test('visual verification of all app hierarchical levels, click depths and inter
   // Settings Estimator Modal
   await test.step('24 settings ffmi modal open', async () => {
     await page.getByRole('button', { name: 'Apply as targets', exact: true }).click()
+    // The confirm overlay is position:fixed, so a fullPage capture stitches it at
+    // the current scroll offset — pin the scroll to keep the shot deterministic
+    // (the E23 Workout links card made the page long enough for this to vary).
+    await page.evaluate(() => window.scrollTo(0, 0))
     await page.waitForTimeout(300)
     await expect.soft(page).toHaveScreenshot('24-settings-ffmi-modal-open.png', { fullPage: true })
     await page.getByRole('button', { name: 'Cancel', exact: true }).click()

@@ -31,7 +31,10 @@ test('switching Classic to Lean is confirmed, applied and persisted', async ({ p
   await page.getByRole('button', { name: /Switch to lean/i }).click()
   await expect(page.getByRole('heading', { name: /Switch to lean\?/i })).toBeVisible()
   await expect(page.getByText(/day 1 becomes/i)).toBeVisible()
-  await expect(page.getByText(/Core Synergistics/)).toBeVisible()
+  // scope to the confirm dialog — the E23 Workout links card also names the routine
+  await expect(
+    page.getByRole('dialog', { name: 'Confirm program variant' }).getByText(/Core Synergistics/),
+  ).toBeVisible()
 
   // cancelling leaves Classic in place
   await page.getByRole('button', { name: 'Cancel' }).click()
