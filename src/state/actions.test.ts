@@ -19,6 +19,7 @@ import {
   updateScoring,
   updateSettings,
   updateTargets,
+  updateWorkoutLink,
   upsertBodyEntry,
 } from '@/state/actions'
 import { useStore } from '@/state/store'
@@ -237,5 +238,45 @@ describe('startProgram (US-084)', () => {
   it('ignores a malformed start date', () => {
     startProgram('05/01/2026', 'classic')
     expect(useStore.getState().data.settings.startDate).toBeNull()
+  })
+})
+
+describe('updateWorkoutLink (E23)', () => {
+  const links = () => useStore.getState().data.settings.workoutLinks
+
+  it('stores trimmed video and audio links per workout', () => {
+    updateWorkoutLink('plyometrics', 'video', '  https://example.com/plyo.mp4 ')
+    updateWorkoutLink('plyometrics', 'audio', 'https://example.com/plyo.mp3')
+    expect(links()['plyometrics']).toEqual({
+      video: 'https://example.com/plyo.mp4',
+      audio: 'https://example.com/plyo.mp3',
+    })
+  })
+
+  it('replaces an existing link in place', () => {
+    updateWorkoutLink('yoga-x', 'video', 'https://a.example/1')
+    updateWorkoutLink('yoga-x', 'video', 'https://a.example/2')
+    expect(links()['yoga-x']).toEqual({ video: 'https://a.example/2' })
+  })
+
+  it('clears one kind and drops the workout once both are gone', () => {
+    updateWorkoutLink('kenpo-x', 'video', 'https://a.example/v')
+    updateWorkoutLink('kenpo-x', 'audio', 'https://a.example/a')
+    updateWorkoutLink('kenpo-x', 'video', null)
+    expect(links()['kenpo-x']).toEqual({ audio: 'https://a.example/a' })
+    updateWorkoutLink('kenpo-x', 'audio', null)
+    expect(links()['kenpo-x']).toBeUndefined()
+  })
+
+  it('never stores a non-http(s) or malformed URL', () => {
+    updateWorkoutLink('plyometrics', 'video', 'javascript:alert(1)')
+    updateWorkoutLink('plyometrics', 'video', 'data:text/html,x')
+    updateWorkoutLink('plyometrics', 'video', 'example.com/no-scheme')
+    expect(links()).toEqual({})
+  })
+
+  it('ignores unknown workout keys', () => {
+    updateWorkoutLink('nope', 'video', 'https://a.example/v')
+    expect(links()).toEqual({})
   })
 })

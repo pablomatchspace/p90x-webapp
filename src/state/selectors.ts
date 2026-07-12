@@ -37,6 +37,11 @@ export function useSettings(): Settings {
   return useStore((s) => s.data.settings)
 }
 
+/** E23: one workout's media deeplinks, or undefined when none are configured. */
+export function useWorkoutLinks(workoutKey: string): Settings['workoutLinks'][string] | undefined {
+  return useStore((s) => s.data.settings.workoutLinks[workoutKey])
+}
+
 /** Scale entries, sorted ascending by date (the upsert action keeps the order). */
 export function useBodyLog(): AppState['bodyLog'] {
   return useStore((s) => s.data.bodyLog)

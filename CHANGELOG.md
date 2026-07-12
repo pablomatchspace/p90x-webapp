@@ -15,6 +15,19 @@ didn't bump the package version — they're numbered B01/B02 here for a
 continuous record; #33's package column is left at the un-suffixed version
 that was actually shipped.
 
+## 1.E23.U135.B00 (package 1.23.135) — 2026-07-12
+
+- **E23 — Workout media deeplinks**: each routine can carry a personal video
+  and/or audio link, entered in the new **Workout links** card in Settings
+  (`settings.workoutLinks`, schema v8, v7→v8 migration). Configured links
+  surface as Video/Audio launch buttons on the Today/day workout cards and the
+  workout detail header, opening the session media in a new tab
+  (`noopener noreferrer`). Only absolute http(s) URLs are accepted — the
+  schema, the input parser and the store action all reject
+  `javascript:`/`data:`/relative input, so a pasted link can never inject
+  script; invalid input is flagged inline and never stored, and blanking a
+  field removes the link and its buttons.
+
 ## 1.E22.U132 (package 1.22.132) — 2026-07-12
 
 - **E22 — Nutrition targets.** The app now tells you how many calories and

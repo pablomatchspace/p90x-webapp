@@ -1,11 +1,12 @@
 import { z } from 'zod'
+import { isHttpUrl } from '@/lib/links'
 
 /**
  * The single persisted document. Raw user inputs only — every derived number
  * (scores, penalties, BMI, adherence…) is recomputed by pure functions, mirroring
  * the Excel design where formulas derive everything from entered cells (PRD §8).
  */
-export const SCHEMA_VERSION = 7
+export const SCHEMA_VERSION = 8
 
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'expected YYYY-MM-DD')
 
@@ -20,6 +21,15 @@ export const scoringSettingsSchema = z.object({
   chairFactor: z.number().positive(),
   /** SETUP!C49 — cosmetic divisor for reps×weight chart values */
   rwDivisor: z.number().positive(),
+})
+
+/** Absolute http(s) URL — javascript:/data:/relative inputs never enter state. */
+const httpUrl = z.string().refine(isHttpUrl, 'expected an absolute http(s) URL')
+
+/** E23: per-workout media deeplinks, keyed by catalog workout key. */
+export const workoutLinkSchema = z.object({
+  video: httpUrl.optional(),
+  audio: httpUrl.optional(),
 })
 
 export const settingsSchema = z.object({
@@ -58,6 +68,8 @@ export const settingsSchema = z.object({
     /** custom daily kcal replacing the guide's level plan; null uses the level */
     calorieOverride: z.number().positive().nullable(),
   }),
+  /** E23: video/audio deeplinks per workout, opened in a new tab from the day card */
+  workoutLinks: z.record(z.string(), workoutLinkSchema),
 })
 
 const opBase = {
@@ -133,6 +145,7 @@ export const appStateSchema = z.object({
 })
 
 export type ScoringSettings = z.infer<typeof scoringSettingsSchema>
+export type WorkoutLink = z.infer<typeof workoutLinkSchema>
 export type Settings = z.infer<typeof settingsSchema>
 export type ScheduleOp = z.infer<typeof scheduleOpSchema>
 export type SkipOp = Extract<ScheduleOp, { kind: 'skip' }>
@@ -165,6 +178,7 @@ export function emptyState(): AppState {
       yoga: 'classic',
       training: 'intermediate',
       nutrition: { phaseOverride: null, calorieOverride: null },
+      workoutLinks: {},
     },
     scheduleOps: [],
     workoutLogs: {},

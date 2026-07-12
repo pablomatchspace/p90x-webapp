@@ -25,6 +25,7 @@ const sample: Settings = {
   yoga: 'classic',
   training: 'intermediate',
   nutrition: { phaseOverride: null, calorieOverride: null },
+  workoutLinks: {},
 }
 
 function metric(overrides: Partial<BodyMetric>): BodyMetric {

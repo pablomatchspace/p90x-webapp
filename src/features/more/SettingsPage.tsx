@@ -51,6 +51,7 @@ import {
 } from '@/state/actions'
 import { useBodyLog, useSchedule, useSettings } from '@/state/selectors'
 import { useStore } from '@/state/store'
+import { WorkoutLinksCard } from './WorkoutLinksCard'
 
 /**
  * A labelled settings row: text on top, control below on narrow (mobile)
@@ -1045,6 +1046,9 @@ export function SettingsPage() {
           </Row>
         </div>
       </Card>
+
+      {/* E23: per-workout video/audio deeplinks */}
+      <WorkoutLinksCard />
 
       {/* Start-date re-anchor confirm */}
       {pendingStart && (

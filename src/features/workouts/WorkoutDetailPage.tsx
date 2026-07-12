@@ -4,6 +4,7 @@ import { getWorkout, hasWorkout } from '@/lib/programData'
 import { workoutOccurrences } from '@/lib/schedule/occurrences'
 import { useSchedule } from '@/state/selectors'
 import { CompletionLog } from './CompletionLog'
+import { MediaLinks } from './MediaLinks'
 import { StrengthGrid } from './StrengthGrid'
 
 const STYLE_LABELS = {
@@ -21,12 +22,16 @@ export function WorkoutDetailPage() {
   const def = getWorkout(key)
 
   const backLink = (
-    <Link
-      to="/workouts"
-      className="flex h-9 items-center rounded-lg border border-zinc-300 px-3 text-sm font-medium text-zinc-600 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
-    >
-      All workouts
-    </Link>
+    <>
+      {/* E23: open the session video/audio deeplink in a new tab */}
+      <MediaLinks workoutKey={key} workoutName={def.name} />
+      <Link
+        to="/workouts"
+        className="flex h-9 items-center rounded-lg border border-zinc-300 px-3 text-sm font-medium text-zinc-600 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+      >
+        All workouts
+      </Link>
+    </>
   )
 
   if (schedule === null) {

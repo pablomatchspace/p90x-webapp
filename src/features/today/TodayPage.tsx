@@ -13,6 +13,7 @@ import { Chip } from '@/features/schedule/Chip'
 import { ProgramStatusBar } from '@/features/schedule/ProgramStatusBar'
 import { RescheduleSection } from '@/features/schedule/RescheduleSection'
 import { CompletionButtons } from '@/features/workouts/CompletionButtons'
+import { MediaLinks } from '@/features/workouts/MediaLinks'
 import {
   DAY_STATUS_LABELS,
   DAY_STATUS_TONES,
@@ -58,15 +59,19 @@ function WorkoutCard({
             programDayId={day.programDayId}
             session={session}
           />
-          {/* E16: guided play for completion workouts with an authored timeline */}
-          {hasTimeline(workoutKey) ? (
-            <Link
-              to={`/workouts/${workoutKey}/play/${day.programDayId}`}
-              className="mt-2 inline-block rounded-lg bg-red-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-red-700"
-            >
-              Play workout
-            </Link>
-          ) : null}
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            {/* E16: guided play for completion workouts with an authored timeline */}
+            {hasTimeline(workoutKey) ? (
+              <Link
+                to={`/workouts/${workoutKey}/play/${day.programDayId}`}
+                className="inline-block rounded-lg bg-red-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-red-700"
+              >
+                Play workout
+              </Link>
+            ) : null}
+            {/* E23: open the session video/audio deeplink in a new tab */}
+            <MediaLinks workoutKey={workoutKey} workoutName={def.name} />
+          </div>
         </div>
       ) : (
         <div className="mt-3 flex flex-wrap items-center gap-3">
@@ -108,6 +113,8 @@ function WorkoutCard({
           >
             Open grid
           </Link>
+          {/* E23: open the session video/audio deeplink in a new tab */}
+          <MediaLinks workoutKey={workoutKey} workoutName={def.name} />
         </div>
       )}
     </Card>
