@@ -2,7 +2,7 @@ import type { WorkoutDef } from '@/lib/programData'
 import type { ScoringSettings, Session } from '@/lib/schema'
 import type { ProgramDay, Schedule } from '@/lib/schedule/materialize'
 import { workoutOccurrences } from '@/lib/schedule/occurrences'
-import { scoreExercise } from '@/lib/scoring'
+import { scoreExercise, sessionTotals } from '@/lib/scoring'
 
 /**
  * Strength progression (US-063): each exercise's net score (score − penalty,
@@ -34,6 +34,25 @@ export interface Progression {
   series: ProgressionSeries[]
   /** exercises ranked by net gain from first to latest logged occurrence */
   topMovers: TopMover[]
+}
+
+/**
+ * Whole-session net total at each occurrence (E21): the sum the focus-mode
+ * summary shows, charted across the weeks. Occurrences with nothing entered
+ * are null (a gap), matching the per-exercise convention above.
+ */
+export function workoutTotalTrend(
+  schedule: Schedule,
+  workout: WorkoutDef,
+  sessions: ReadonlyMap<string, Session>,
+  scoring: ScoringSettings,
+): { occurrences: ProgramDay[]; totals: (number | null)[] } {
+  const occurrences = workoutOccurrences(schedule, workout.key)
+  const totals = occurrences.map((occ) => {
+    const t = sessionTotals(sessions.get(occ.programDayId), workout, scoring)
+    return t.entered > 0 ? t.net : null
+  })
+  return { occurrences, totals }
 }
 
 export function workoutProgression(

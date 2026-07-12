@@ -65,6 +65,30 @@ function round(n: number): number {
 }
 
 /**
+ * Trailing moving average over the logged points (E21). For each point with a
+ * value, the average of every value whose x lies in the window (x−window, x].
+ * Null gaps are skipped entirely — the trend line flows THROUGH missing days
+ * (that is its job), so the result contains only non-null points.
+ */
+export function movingAverage(points: Pt[], window: number): Pt[] {
+  const logged = points.filter((p): p is { x: number; y: number } => p.y !== null)
+  return logged.map((p) => {
+    const inWindow = logged.filter((q) => q.x <= p.x && q.x > p.x - window)
+    const sum = inWindow.reduce((acc, q) => acc + q.y, 0)
+    return { x: p.x, y: sum / inWindow.length }
+  })
+}
+
+/** The x closest to `x` (ties go to the earlier value); null for an empty list. */
+export function nearestX(xs: number[], x: number): number | null {
+  let best: number | null = null
+  for (const candidate of xs) {
+    if (best === null || Math.abs(candidate - x) < Math.abs(best - x)) best = candidate
+  }
+  return best
+}
+
+/**
  * SVG path for a polyline through the points, breaking into separate subpaths
  * wherever y is null (a missing-day gap) so the line never interpolates across
  * absent data. `sx`/`sy` map data coordinates to pixels.

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { extent, linePath, niceTicks, scale } from './chart'
+import { extent, linePath, movingAverage, nearestX, niceTicks, scale } from './chart'
 
 describe('extent', () => {
   it('finds min/max over finite values', () => {
@@ -61,5 +61,52 @@ describe('linePath', () => {
       (y) => y,
     )
     expect(path).toBe('M0 1 M2 3 L3 4')
+  })
+})
+
+describe('movingAverage', () => {
+  it('averages the values inside the trailing x-window', () => {
+    const ma = movingAverage(
+      [
+        { x: 0, y: 10 },
+        { x: 1, y: 20 },
+        { x: 2, y: 30 },
+      ],
+      2,
+    )
+    expect(ma).toEqual([
+      { x: 0, y: 10 },
+      { x: 1, y: 15 },
+      { x: 2, y: 25 },
+    ])
+  })
+
+  it('flows through null gaps — the window is by x-distance, not index', () => {
+    const ma = movingAverage(
+      [
+        { x: 0, y: 10 },
+        { x: 1, y: null },
+        { x: 2, y: null },
+        { x: 3, y: 30 },
+      ],
+      7,
+    )
+    // the gap days are dropped, and x=0 is still inside x=3's 7-wide window
+    expect(ma).toEqual([
+      { x: 0, y: 10 },
+      { x: 3, y: 20 },
+    ])
+  })
+
+  it('returns empty for all-null input', () => {
+    expect(movingAverage([{ x: 0, y: null }], 7)).toEqual([])
+  })
+})
+
+describe('nearestX', () => {
+  it('snaps to the closest x, preferring the earlier value on ties', () => {
+    expect(nearestX([0, 3, 10], 4)).toBe(3)
+    expect(nearestX([0, 2, 4], 3)).toBe(2)
+    expect(nearestX([], 1)).toBeNull()
   })
 })

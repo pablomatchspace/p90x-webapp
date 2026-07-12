@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Card, Page } from '@/components/Page'
-import { LineChart, type ChartSeries, type RefLine } from '@/components/LineChart'
-import { deriveBody, formatFixed, threshold } from '@/lib/body'
-import type { Pt } from '@/lib/chart'
+import { LineChart, type Band, type ChartSeries, type RefLine } from '@/components/LineChart'
+import { deriveBody, formatFixed, kgToUnit, threshold, weightUnit } from '@/lib/body'
+import { movingAverage, type Pt } from '@/lib/chart'
 import { addDays, compareISO, diffDays, formatShort, todayISO, type ISODate } from '@/lib/dates'
 import type { Schedule } from '@/lib/schedule/materialize'
 import { useBodyLog, useSchedule, useSettings } from '@/state/selectors'
@@ -11,12 +11,31 @@ import { Chip } from '@/features/schedule/Chip'
 import { buildBodyMetrics, progressToTarget, TONE_CHIP, type MetricKey } from './bodyMetrics'
 
 /**
- * Body trend charts (US-061): each derived metric plotted against its SETUP
- * start / target / limit reference lines, with gaps for missing weigh-ins, a
- * phase/all range filter, and a progress-to-target read-out. Metric definitions
- * come from the shared bodyMetrics engine, so the charts and the dashboard KPI
- * cards can never disagree.
+ * Body trend charts (US-061, upgraded in E21): each derived metric plotted
+ * against its SETUP start / target / limit reference lines, with gaps for
+ * missing weigh-ins, a phase/all range filter, and a progress-to-target
+ * read-out. E21 adds weigh-in markers, a dashed 7-day trend overlay, phase
+ * shading, a crosshair read-out, and a lean-vs-fat composition chart. Metric
+ * definitions come from the shared bodyMetrics engine, so the charts and the
+ * dashboard KPI cards can never disagree.
  */
+
+/** x-axis spans of the program phases, in days relative to `first` (chart x). */
+function phaseBands(schedule: Schedule | null, first: ISODate): Band[] {
+  if (schedule === null) return []
+  const spans = new Map<1 | 2 | 3, { start: ISODate; end: ISODate }>()
+  for (const day of schedule.days) {
+    if (day.kind !== 'program') continue
+    const span = spans.get(day.phase)
+    if (span === undefined) spans.set(day.phase, { start: day.date, end: day.date })
+    else span.end = day.date
+  }
+  return [...spans.entries()].map(([phase, span]) => ({
+    x0: diffDays(first, span.start),
+    x1: diffDays(first, span.end),
+    label: `P${phase}`,
+  }))
+}
 
 /** The date span of the phase that contains (or most recently preceded) today. */
 function currentPhaseWindow(
@@ -67,10 +86,21 @@ export function BodyTrendsPage() {
     const last = entries[entries.length - 1].date
     const byDate = new Map(entries.map((e) => [e.date, e]))
     const points: Pt[] = []
+    const lean: Pt[] = []
+    const fat: Pt[] = []
     for (let day = first; compareISO(day, last) <= 0; day = addDays(day, 1)) {
       const e = byDate.get(day)
       const derived = e ? deriveBody(e, settings) : null
-      points.push({ x: diffDays(first, day), y: e && derived ? metric.value(e, derived) : null })
+      const x = diffDays(first, day)
+      points.push({ x, y: e && derived ? metric.value(e, derived) : null })
+      lean.push({
+        x,
+        y: derived?.leanMass != null ? kgToUnit(derived.leanMass, settings.units) : null,
+      })
+      fat.push({
+        x,
+        y: derived?.bodyFatKg != null ? kgToUnit(derived.bodyFatKg, settings.units) : null,
+      })
     }
     const total = diffDays(first, last)
     const xTicks = [...new Set([0, Math.round(total / 3), Math.round((2 * total) / 3), total])].map(
@@ -78,8 +108,14 @@ export function BodyTrendsPage() {
     )
     const latestEntry = entries[entries.length - 1]
     const latest = metric.value(latestEntry, deriveBody(latestEntry, settings))
-    return { points, xTicks, latest }
+    return { first, points, trend: movingAverage(points, 7), lean, fat, xTicks, latest }
   }, [entries, metric, settings])
+
+  const bands = useMemo(
+    () => (chart === null ? [] : phaseBands(schedule, chart.first)),
+    [schedule, chart],
+  )
+  const dateLabel = (x: number) => (chart === null ? '' : formatShort(addDays(chart.first, x)))
 
   const refLines: RefLine[] = [
     metric.start !== null ? { label: 'Start', y: metric.start, tone: 'start' as const } : null,
@@ -94,7 +130,31 @@ export function BodyTrendsPage() {
   const series: ChartSeries[] =
     chart === null
       ? []
-      : [{ id: metric.key, label: metric.label, color: metric.color, points: chart.points }]
+      : [
+          { id: metric.key, label: metric.label, color: metric.color, points: chart.points },
+          ...(chart.trend.length >= 2
+            ? [
+                {
+                  id: `${metric.key}-trend`,
+                  label: '7-day trend',
+                  color: metric.color,
+                  points: chart.trend,
+                  dashed: true,
+                  width: 1.25,
+                  noReadout: true,
+                },
+              ]
+            : []),
+        ]
+
+  const unit = weightUnit(settings.units)
+  const composition: ChartSeries[] =
+    chart === null || !chart.lean.some((p) => p.y !== null)
+      ? []
+      : [
+          { id: 'lean', label: 'Lean', color: '#10b981', points: chart.lean },
+          { id: 'fat', label: 'Fat', color: '#f59e0b', points: chart.fat },
+        ]
 
   return (
     <Page title="Body trends" subtitle="Progress against your SETUP targets">
@@ -170,8 +230,11 @@ export function BodyTrendsPage() {
             <LineChart
               series={series}
               refLines={refLines}
+              bands={bands}
               xTicks={chart?.xTicks ?? []}
               yFormat={(v) => formatFixed(v, metric.dp)}
+              xLabel={dateLabel}
+              showDots
               ariaLabel={`${metric.label} trend with start, target and limit reference lines`}
             />
           </div>
@@ -180,9 +243,38 @@ export function BodyTrendsPage() {
             <span>— — Start</span>
             <span className="text-emerald-600 dark:text-emerald-400">— — Target</span>
             <span className="text-rose-500 dark:text-rose-400">— — Limit</span>
+            {series.length > 1 ? <span>┄ 7-day trend</span> : null}
           </p>
         </Card>
       )}
+
+      {composition.length > 0 ? (
+        <Card>
+          <h2 className="font-semibold">Body composition</h2>
+          <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
+            Lean mass vs fat mass ({unit}) — recomp shows as the lines pulling apart
+          </p>
+          <div className="mt-3">
+            <LineChart
+              series={composition}
+              bands={bands}
+              xTicks={chart?.xTicks ?? []}
+              yFormat={(v) => formatFixed(v, 1)}
+              xLabel={dateLabel}
+              showDots
+              ariaLabel={`Lean mass vs fat mass in ${unit}`}
+            />
+          </div>
+          <p className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-zinc-500 dark:text-zinc-400">
+            <span className="inline-flex items-center gap-1">
+              <span className="h-2 w-2 rounded-full bg-emerald-500" aria-hidden /> Lean mass
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <span className="h-2 w-2 rounded-full bg-amber-500" aria-hidden /> Fat mass
+            </span>
+          </p>
+        </Card>
+      ) : null}
     </Page>
   )
 }

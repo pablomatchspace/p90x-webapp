@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest'
 import { migrateToCurrent } from '@/lib/migrations'
 import { getWorkout } from '@/lib/programData'
 import { materialize } from '@/lib/schedule/materialize'
-import { workoutProgression } from './progression'
+import { workoutProgression, workoutTotalTrend } from './progression'
 import type { Session } from '@/lib/schema'
 
 /**
@@ -16,7 +16,7 @@ import type { Session } from '@/lib/schema'
  * (R×W) 10.8. side-tri-rises is the single biggest jump (+2), so it tops the
  * movers ranking.
  */
-function sampleProgression(workoutKey: string) {
+function sampleFixture(workoutKey: string) {
   const raw: unknown = JSON.parse(
     readFileSync(path.resolve(process.cwd(), 'public', 'sample-data.json'), 'utf-8'),
   )
@@ -27,7 +27,12 @@ function sampleProgression(workoutKey: string) {
   const sessions = new Map<string, Session>(
     (workoutLogs[workoutKey]?.sessions ?? []).map((s) => [s.programDayId, s]),
   )
-  return workoutProgression(schedule, getWorkout(workoutKey), sessions, settings.scoring)
+  return { schedule, workout: getWorkout(workoutKey), sessions, scoring: settings.scoring }
+}
+
+function sampleProgression(workoutKey: string) {
+  const { schedule, workout, sessions, scoring } = sampleFixture(workoutKey)
+  return workoutProgression(schedule, workout, sessions, scoring)
 }
 
 describe('workoutProgression (Shoulders & Arms, sample)', () => {
@@ -58,5 +63,21 @@ describe('workoutProgression (Shoulders & Arms, sample)', () => {
     expect(top.first).toBeCloseTo(18, 10)
     expect(top.latest).toBeCloseTo(20, 10)
     expect(top.delta).toBeCloseTo(2, 10)
+  })
+})
+
+describe('workoutTotalTrend (Shoulders & Arms, sample)', () => {
+  const { schedule, workout, sessions, scoring } = sampleFixture('shoulders-arms')
+  const trend = workoutTotalTrend(schedule, workout, sessions, scoring)
+
+  it('sums each logged session and leaves gaps elsewhere', () => {
+    // week-1 and week-2 totals are the sums of the per-exercise nets asserted
+    // above; every exercise in the sample sessions is logged
+    const prog = workoutProgression(schedule, workout, sessions, scoring)
+    const sum = (i: number) => prog.series.reduce((acc, s) => acc + (s.points[i] ?? 0), 0)
+    expect(trend.totals[0]).toBeCloseTo(sum(0), 10)
+    expect(trend.totals[1]).toBeCloseTo(sum(1), 10)
+    expect(trend.totals.slice(2).every((t) => t === null)).toBe(true)
+    expect(trend.occurrences).toHaveLength(trend.totals.length)
   })
 })

@@ -41,3 +41,21 @@ test('strength progression charts net per exercise with toggles and top movers',
   await page.getByRole('button', { name: 'Check all', exact: true }).click()
   await expect(page.getByRole('img', { name: /net score progression/ })).toBeVisible()
 })
+
+test('session-total chart plots the whole-workout net with a crosshair read-out', async ({
+  page,
+}) => {
+  await page.goto('#/progress')
+  await page.getByLabel('Workout').selectOption('shoulders-arms')
+
+  const totalChart = page.getByRole('img', { name: /session total net score/ })
+  await expect(totalChart).toBeVisible()
+
+  // hovering/tapping the plot snaps the crosshair to the nearest logged session
+  // (default hover position is the element center, well inside the plot area)
+  await totalChart.hover()
+  await expect(totalChart.locator('[data-testid="crosshair"]')).toBeVisible()
+  // the read-out names the snapped session's week + date (sample logs W1/W2;
+  // a center hover snaps to the nearest of the two)
+  await expect(page.getByText(/W[12] · /).first()).toBeVisible()
+})

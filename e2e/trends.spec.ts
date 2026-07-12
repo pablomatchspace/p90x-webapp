@@ -40,3 +40,24 @@ test('body trends plot each metric against its SETUP reference lines', async ({ 
   // mid-program the phase/all range filter is available
   await expect(page.getByRole('button', { name: 'This phase' })).toBeVisible()
 })
+
+test('E21 chart upgrades: trend overlay, phase shading, crosshair and composition', async ({
+  page,
+}) => {
+  await page.goto('#/trends')
+
+  const chart = page.getByRole('img', { name: /Weight trend/ })
+  await expect(chart).toBeVisible()
+  // dashed 7-day trend overlay is drawn and named in the legend
+  await expect(page.getByText('┄ 7-day trend')).toBeVisible()
+  // phase band labels shade the program phases behind the line
+  await expect(chart.locator('text', { hasText: 'P1' })).toHaveCount(1)
+
+  // the crosshair snaps to the nearest weigh-in and prints its value
+  await chart.hover({ position: { x: 100, y: 100 } })
+  await expect(chart.locator('[data-testid="crosshair"]')).toBeVisible()
+
+  // the lean-vs-fat composition chart renders from the same weigh-ins
+  await expect(page.getByText('Body composition')).toBeVisible()
+  await expect(page.getByRole('img', { name: /Lean mass vs fat mass/ })).toBeVisible()
+})
