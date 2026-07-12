@@ -211,8 +211,11 @@ export function TodayPage() {
         </>
       )}
 
-      {/* E22: the day's calorie/macro target follows the day's training phase */}
-      {day !== undefined && day.kind === 'program' ? (
+      {/* E22: the day's calorie/macro target follows the day's training phase.
+          Today-only (like the quick-add): the target-based layer's horizon is
+          anchored to today, and keeping the card off browsed days leaves the
+          reschedule controls clear of the fixed offline/update toast on mobile. */}
+      {isToday && day !== undefined && day.kind === 'program' ? (
         <NutritionCard schedulePhase={day.phase} />
       ) : null}
 

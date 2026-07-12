@@ -71,24 +71,110 @@ pure functions in `src/lib/nutrition.ts`, pinned by unit tests on the guide's
 worked numbers (180 lb → EA 2760 → Level II → 2400 kcal; Fat Shredder at
 2400 kcal → 300 g protein / 180 g carbs / ~53 g fat).
 
+## Target-based recommendation (evidence-based layer)
+
+The P90X guide numbers above are **goal-blind** — they state what the boxed
+program prescribes, not what it takes to reach _this_ athlete's stored target.
+A second engine (`targetNutrition` in `src/lib/nutrition.ts`) derives calories
+and macros from the user's current stats, their target weight, and the
+remaining program window, using current sports-nutrition consensus. Both layers
+are shown side by side and clearly labelled; the program numbers are never
+silently overwritten.
+
+### Energy
+
+1. **BMR**:
+   - **Katch–McArdle** `370 + 21.6 × lean mass (kg)` when lean mass is known
+     (latest complete weigh-in, else start stats) — preferred because it keys
+     off body composition, which the app already tracks.
+   - **Mifflin–St Jeor** `10 × kg + 6.25 × cm − 5 × age + s` (`s = +5` male,
+     `−161` female) otherwise — the best population-validated equation
+     (within 10% of measured RMR for ~71–82% of adults).
+2. **TDEE** = BMR × **1.55** (moderately active — P90X is ~1 h of demanding work
+   ~6 days/week).
+3. **Goal calories** = TDEE + the daily surplus/deficit implied by moving from
+   the current weight to the target weight over the remaining weeks
+   (~**7700 kcal per kg** of body-weight change), then:
+   - clamped to muscle-sparing rate ceilings — fat loss ≤ **1%/week** (Helms;
+     the same Tier-A band E20's Reality check already uses) and usable lean gain
+     ≤ ~**0.5%/week** (larger surpluses mostly add fat);
+   - floored at BMR so a deficit never prescribes a crash intake.
+
+### Macros
+
+- **Protein**: `1.8 g/kg` body weight at maintenance/surplus, raised to
+  `2.2 g/kg` in a deficit — within the 1.6–2.2 g/kg hypertrophy band (Morton
+  meta-analysis plateau ≈ 1.62 g/kg; ISSN 1.4–2.0) and higher when dieting, per
+  Helms' case for higher intakes in lean, energy-restricted athletes. This is
+  the key correction over the guide's percentage split, which swings protein
+  wildly with calorie level (e.g. Phase 3's 20% at 1800 kcal is only 90 g).
+- **Fat**: `0.8 g/kg`, with a `0.5 g/kg` floor for hormonal health.
+- **Carbs**: the remainder of the calorie budget — which recreates the guide's
+  "more carbs in the endurance phase" direction without hard-coding a
+  percentage.
+
+The remaining window matches E20's Reality-check horizon: a not-yet-started or
+absent program plans a full 90 days; a finished program plans a fresh 90-day
+block; otherwise it's the days left (0–90). Nothing here is stored (rule 2).
+
+### Evidence tiers (as in `ffmi-feasibility.md`)
+
+- Protein 1.6–2.2 g/kg for hypertrophy — **Tier A** (Morton 2018 meta-analysis;
+  ISSN 2017 position stand).
+- Higher protein in a deficit for lean athletes — **Tier A−/B** (Helms 2014
+  systematic review).
+- Fat-loss rate 0.5–1%/week muscle-sparing — **Tier A** (Helms 2014; already
+  cited by E20).
+- Mifflin–St Jeor / Katch–McArdle BMR — **Tier A** (validated predictive
+  equations), with the caveat that ~26% of RMR variance is unexplained by any
+  formula, so the estimate is a starting point to adjust from the actual weight
+  trend (which the app charts, E21).
+- Activity factor 1.55 and the ~0.5%/week usable-gain ceiling — **Tier B**
+  (practitioner heuristics).
+
+Not medical or dietetic advice.
+
 ## Surfaces
 
-- **Today / day page** (`NutritionCard`): daily kcal + per-macro grams and
-  shares for that day's phase, with the phase name and override indicators.
-  Shown on every program day (rest days included — the plan prescribes eating
-  for the week, not just workout days); hidden on gap days and outside the
-  program, where no phase exists.
-- **Settings → Nutrition**: the derived read-outs (energy amount, level, daily
-  target), the two overrides, and the three-phase split table with gram targets
-  at the effective daily calories.
+Both layers appear together, clearly labelled, on each surface:
 
-Not medical or dietetic advice — the numbers are the program guide's, shown for
-parity with the boxed product.
+- **Today / day page** (`NutritionCard`): a **P90X plan** section (daily kcal +
+  per-macro grams and shares for that day's phase, phase name and override
+  indicators) and a **Your target** section (goal chip, evidence-based kcal, and
+  protein/fat/carb grams with their g/kg basis). Shown on every program day
+  (rest days included — the plan prescribes eating for the week, not just
+  workout days); hidden on gap days and outside the program, where no phase
+  exists.
+- **Settings → Nutrition**: the P90X derived read-outs (energy amount, level,
+  daily target), the two overrides, the three-phase split table, and a
+  **Target-based recommendation** panel (BMR method + TDEE + goal calories, the
+  weekly pace to reach the target, and the g/kg macro targets with tier labels).
+
+Not medical or dietetic advice.
 
 ## Sources
+
+P90X guide numbers:
 
 - P90X Nutrition Plan (official guide PDF, "nutrition plan EATING FOR POWER
   PERFORMANCE"), Beachbody — level chart p. 5, phase splits pp. 6–7.
 - Secondary confirmations of the same tables:
   [90dayworkoutplan.com/about/p90x-nutrition-plan](https://www.90dayworkoutplan.com/about/p90x-nutrition-plan/),
   [travelingworkout.wordpress.com/p90x-nutrition-guide](https://travelingworkout.wordpress.com/p90x-nutrition-guide/).
+
+Evidence-based layer:
+
+- Morton RW et al. (2018), _A systematic review, meta-analysis and
+  meta-regression of the effect of protein supplementation on resistance
+  training-induced gains in muscle mass and strength in healthy adults_, Br J
+  Sports Med — protein plateau ≈ 1.62 g/kg/day.
+- Jäger R et al. (2017), _ISSN Position Stand: protein and exercise_, JISSN —
+  1.4–2.0 g/kg/day for exercising individuals.
+- Helms ER, Zinn C, Rowlands DS, Brown SR (2014), _A systematic review of
+  dietary protein during caloric restriction in resistance trained lean
+  athletes: a case for higher intakes_, IJSNEM — higher protein in a deficit;
+  and Helms et al. (2014) natural-bodybuilding contest-prep recommendations —
+  0.5–1%/week muscle-sparing weight loss.
+- Mifflin MD, St Jeor ST et al. (1990) predictive RMR equation; Katch & McArdle
+  lean-mass RMR equation — validated BMR estimators (Mifflin–St Jeor within 10%
+  for ~71–82% of adults; ~26% RMR variance is unexplained by any equation).

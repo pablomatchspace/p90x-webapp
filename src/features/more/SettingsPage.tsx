@@ -33,6 +33,8 @@ import {
   nutritionLevel,
   PHASE_NAMES,
   PHASE_SPLITS,
+  targetNutritionFromState,
+  type NutritionGoal,
   type NutritionPhase,
 } from '@/lib/nutrition'
 import { getTemplate, getWorkout, type ProgramKey } from '@/lib/programData'
@@ -180,6 +182,17 @@ function GainModelBar({
   )
 }
 const NUTRITION_PHASES: NutritionPhase[] = [1, 2, 3]
+
+const NUTRITION_GOAL_LABEL: Record<NutritionGoal, string> = {
+  deficit: 'Fat loss',
+  surplus: 'Muscle gain',
+  maintenance: 'Maintain',
+}
+const NUTRITION_GOAL_TONE = {
+  deficit: 'amber',
+  surplus: 'green',
+  maintenance: 'zinc',
+} as const
 
 export function SettingsPage() {
   const settings = useSettings()
@@ -332,6 +345,8 @@ export function SettingsPage() {
   const activePhase = settings.nutrition.phaseOverride ?? todayPhase
   const showKcal = (value: number | null) =>
     value === null ? '—' : Math.round(value).toLocaleString('en-US')
+  // E22 evidence-based layer: calories & macros tuned to the stored target.
+  const targetNut = targetNutritionFromState(settings, bodyLog, todayISO())
 
   const showWeight = (kg: number | null) =>
     kg === null ? '—' : formatFixed(kgToUnit(kg, units), 1)
@@ -861,37 +876,129 @@ export function SettingsPage() {
             unit={settings.nutrition.calorieOverride !== null ? 'kcal · custom' : 'kcal'}
           />
         </dl>
-        {dailyCalories !== null ? (
-          <ul className="mt-3 space-y-2 border-t border-zinc-100 pt-3 dark:border-zinc-800">
-            {NUTRITION_PHASES.map((phase) => {
-              const split = PHASE_SPLITS[phase]
-              const grams = macroGrams(dailyCalories, phase)
-              return (
-                <li
-                  key={phase}
-                  className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-sm"
-                >
-                  <span className="flex items-center gap-2">
-                    <span className="font-medium">
-                      Phase {phase} · {PHASE_NAMES[phase]}
+        <details className="mt-3 border-t border-zinc-100 pt-3 dark:border-zinc-800">
+          <summary className="cursor-pointer text-sm font-medium text-zinc-600 dark:text-zinc-300">
+            Macro breakdown & target-based plan
+          </summary>
+          {dailyCalories !== null ? (
+            <ul className="mt-3 space-y-2">
+              {NUTRITION_PHASES.map((phase) => {
+                const split = PHASE_SPLITS[phase]
+                const grams = macroGrams(dailyCalories, phase)
+                return (
+                  <li
+                    key={phase}
+                    className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-sm"
+                  >
+                    <span className="flex items-center gap-2">
+                      <span className="font-medium">
+                        Phase {phase} · {PHASE_NAMES[phase]}
+                      </span>
+                      {activePhase === phase ? <Chip tone="green">current</Chip> : null}
                     </span>
-                    {activePhase === phase ? <Chip tone="green">current</Chip> : null}
-                  </span>
-                  <span className="tabular-nums text-xs text-zinc-500 dark:text-zinc-400">
-                    {Math.round(split.protein * 100)}/{Math.round(split.carbs * 100)}/
-                    {Math.round(split.fat * 100)} · {Math.round(grams.protein)} g protein ·{' '}
-                    {Math.round(grams.carbs)} g carbs · {Math.round(grams.fat)} g fat
-                  </span>
-                </li>
-              )
-            })}
-          </ul>
-        ) : (
-          <p className="mt-3 text-xs text-zinc-500 dark:text-zinc-400">
-            Set your start weight (or log a weigh-in) to derive the calorie level, or enter custom
-            daily calories.
-          </p>
-        )}
+                    <span className="tabular-nums text-xs text-zinc-500 dark:text-zinc-400">
+                      {Math.round(split.protein * 100)}/{Math.round(split.carbs * 100)}/
+                      {Math.round(split.fat * 100)} · {Math.round(grams.protein)} g protein ·{' '}
+                      {Math.round(grams.carbs)} g carbs · {Math.round(grams.fat)} g fat
+                    </span>
+                  </li>
+                )
+              })}
+            </ul>
+          ) : (
+            <p className="mt-3 text-xs text-zinc-500 dark:text-zinc-400">
+              Set your start weight (or log a weigh-in) to derive the calorie level, or enter custom
+              daily calories.
+            </p>
+          )}
+
+          {/* E22 evidence-based layer: calories & macros tuned to the stored target */}
+          <section
+            aria-label="Target-based nutrition"
+            className="mt-4 rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-900/60"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h3 className="text-sm font-semibold">Target-based recommendation</h3>
+              {targetNut !== null ? (
+                <span className="flex flex-wrap items-center gap-1.5">
+                  <Chip tone={NUTRITION_GOAL_TONE[targetNut.goal]}>
+                    {NUTRITION_GOAL_LABEL[targetNut.goal]}
+                  </Chip>
+                  {targetNut.rateClamped ? <Chip tone="amber">pace capped</Chip> : null}
+                </span>
+              ) : null}
+            </div>
+            <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+              What current sports-nutrition consensus suggests you eat to reach your target weight
+              over the remaining program window — distinct from the boxed P90X plan above. Calories
+              from your estimated TDEE plus a muscle-sparing surplus/deficit; protein and fat by
+              body weight, carbs as the remainder. Not medical or dietetic advice.
+            </p>
+            {targetNut === null ? (
+              <p className="mt-3 text-xs text-zinc-500 dark:text-zinc-400">
+                Needs your height, age and body-fat (for the metabolic estimate) plus a target
+                weight — set a lean-mass increase and target body-fat above, or your start stats.
+              </p>
+            ) : (
+              <>
+                <dl className="mt-3 grid grid-cols-3 gap-3">
+                  <Derived
+                    label={`BMR (${targetNut.bmrMethod === 'katch' ? 'Katch–McArdle' : 'Mifflin'})`}
+                    value={showKcal(targetNut.bmr)}
+                    unit="kcal"
+                  />
+                  <Derived label="TDEE (×1.55)" value={showKcal(targetNut.tdee)} unit="kcal" />
+                  <Derived
+                    label="Goal calories"
+                    value={showKcal(targetNut.calories)}
+                    unit={targetNut.caloriesFloored ? 'kcal · at BMR' : 'kcal'}
+                  />
+                </dl>
+                <p className="mt-2 text-xs text-zinc-600 dark:text-zinc-300">
+                  {targetNut.goal === 'maintenance'
+                    ? 'Already at your target weight — maintenance calories.'
+                    : `${targetNut.weeklyRateKg < 0 ? 'Lose' : 'Gain'} ${formatFixed(
+                        Math.abs(kgToUnit(targetNut.weeklyRateKg, units)),
+                        2,
+                      )} ${wUnit}/week to reach your target weight over ${formatFixed(
+                        targetNut.horizonWeeks,
+                        0,
+                      )} weeks`}
+                  {targetNut.rateClamped
+                    ? ' — capped to a muscle-sparing pace (Helms ≤1%/wk loss, ~0.5%/wk usable gain).'
+                    : '.'}
+                </p>
+                <ul className="mt-3 space-y-2 border-t border-zinc-200 pt-3 dark:border-zinc-700">
+                  <li className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-sm">
+                    <span className="font-medium">
+                      Protein <Chip tone="zinc">Tier A</Chip>
+                    </span>
+                    <span className="tabular-nums text-xs text-zinc-500 dark:text-zinc-400">
+                      {Math.round(targetNut.protein)} g · {targetNut.proteinPerKg} g/kg
+                      {targetNut.goal === 'deficit' ? ' (raised for the deficit)' : ''}
+                    </span>
+                  </li>
+                  <li className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-sm">
+                    <span className="font-medium">Fat</span>
+                    <span className="tabular-nums text-xs text-zinc-500 dark:text-zinc-400">
+                      {Math.round(targetNut.fat)} g · {targetNut.fatPerKg} g/kg
+                    </span>
+                  </li>
+                  <li className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-sm">
+                    <span className="font-medium">Carbs</span>
+                    <span className="tabular-nums text-xs text-zinc-500 dark:text-zinc-400">
+                      {Math.round(targetNut.carbs)} g · remainder
+                    </span>
+                  </li>
+                </ul>
+                <p className="mt-2 text-[11px] text-zinc-500 dark:text-zinc-400">
+                  Protein 1.6–2.2 g/kg (Morton meta-analysis; ISSN) · fat ≥0.5 g/kg for hormonal
+                  health · ~7700 kcal per kg of body-weight change.
+                </p>
+              </>
+            )}
+          </section>
+        </details>
       </Card>
 
       {/* Scoring engine */}

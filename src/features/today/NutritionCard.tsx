@@ -1,12 +1,29 @@
 import { Link } from 'react-router-dom'
 import { Card } from '@/components/Page'
-import { Chip } from '@/features/schedule/Chip'
-import { nutritionTargets, type NutritionPhase } from '@/lib/nutrition'
+import { todayISO } from '@/lib/dates'
+import {
+  nutritionTargets,
+  targetNutritionFromState,
+  type NutritionGoal,
+  type NutritionPhase,
+} from '@/lib/nutrition'
 import { useBodyLog, useSettings } from '@/state/selectors'
+import { Chip, type ChipTone } from '@/features/schedule/Chip'
 
 const kcal = (value: number) => Math.round(value).toLocaleString('en-US')
 
-function Macro({ label, grams, share }: { label: string; grams: number; share: number }) {
+const GOAL_LABEL: Record<NutritionGoal, string> = {
+  deficit: 'Fat loss',
+  surplus: 'Muscle gain',
+  maintenance: 'Maintain',
+}
+const GOAL_TONE: Record<NutritionGoal, ChipTone> = {
+  deficit: 'amber',
+  surplus: 'green',
+  maintenance: 'zinc',
+}
+
+function Macro({ label, grams, detail }: { label: string; grams: number; detail: string }) {
   return (
     <div>
       <dt className="text-xs text-zinc-500 dark:text-zinc-400">{label}</dt>
@@ -14,7 +31,7 @@ function Macro({ label, grams, share }: { label: string; grams: number; share: n
         {Math.round(grams)}
         <span className="ml-0.5 text-xs font-normal text-zinc-500 dark:text-zinc-400">g</span>
         <span className="ml-1.5 text-xs font-normal text-zinc-500 dark:text-zinc-400">
-          {Math.round(share * 100)}%
+          {detail}
         </span>
       </dd>
     </div>
@@ -22,64 +39,141 @@ function Macro({ label, grams, share }: { label: string; grams: number; share: n
 }
 
 /**
- * E22: the day's P90X nutrition-plan target — daily calories from the guide's
- * level chart (or the custom override) split into macro grams by the day's
- * nutrition phase. Rendered on every program day, rest days included: the plan
- * prescribes eating targets for the whole week, not just workout days.
+ * E22: the day's nutrition targets. Two clearly-labelled layers:
+ *  · P90X plan — the boxed program's level calories + phase macro split.
+ *  · Your target — an evidence-based recommendation (TDEE + goal-adjusted
+ *    calories, g/kg macros) derived from your target weight and the remaining
+ *    program window. Shown on every program day; rest days included.
  */
 export function NutritionCard({ schedulePhase }: { schedulePhase: NutritionPhase }) {
   const settings = useSettings()
   const bodyLog = useBodyLog()
-  const targets = nutritionTargets(settings, bodyLog, schedulePhase)
+  const plan = nutritionTargets(settings, bodyLog, schedulePhase)
+  const target = targetNutritionFromState(settings, bodyLog, todayISO())
+  const usedLatestWeigh = bodyLog.some((e) => e.weight != null)
 
   return (
     <Card>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="font-semibold">Nutrition</h2>
-        {targets !== null ? (
-          <span className="flex flex-wrap items-center gap-1.5">
-            <Chip tone="zinc">
-              Phase {targets.phase} · {targets.phaseName}
-            </Chip>
-            {targets.phaseOverridden ? <Chip tone="amber">phase override</Chip> : null}
-          </span>
-        ) : null}
       </div>
 
-      {targets === null ? (
-        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-          Log a weigh-in or set your start weight in{' '}
-          <Link to="/more/settings" className="font-medium text-red-600 hover:underline">
-            Settings
-          </Link>{' '}
-          to get your daily calorie and macro targets.
-        </p>
-      ) : (
-        <>
-          <p className="mt-2 text-2xl font-bold tabular-nums">
-            {kcal(targets.calories)}
-            <span className="ml-1 text-sm font-normal text-zinc-500 dark:text-zinc-400">
-              kcal/day{targets.calorieOverridden ? ' · custom' : ''}
-            </span>
-          </p>
-          <dl className="mt-3 grid grid-cols-3 gap-3 border-t border-zinc-100 pt-3 dark:border-zinc-800">
-            <Macro label="Protein" grams={targets.grams.protein} share={targets.split.protein} />
-            <Macro label="Carbs" grams={targets.grams.carbs} share={targets.split.carbs} />
-            <Macro label="Fat" grams={targets.grams.fat} share={targets.split.fat} />
-          </dl>
-          <p className="mt-2 text-[11px] text-zinc-500 dark:text-zinc-400">
-            {targets.calorieOverridden
-              ? 'Custom daily calories from Settings'
-              : targets.energy !== null && targets.level !== null
-                ? `P90X nutrition plan · Level ${targets.level} (energy amount ≈ ${kcal(targets.energy)} kcal from your ${bodyLog.some((e) => e.weight != null) ? 'latest weigh-in' : 'start weight'})`
-                : 'P90X nutrition plan'}
-            {' · adjust in '}
-            <Link to="/more/settings" className="font-medium hover:underline">
+      {/* P90X program plan */}
+      <section aria-label="P90X plan" className="mt-2">
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+            P90X plan
+          </span>
+          {plan !== null ? (
+            <>
+              <Chip tone="zinc">
+                Phase {plan.phase} · {plan.phaseName}
+              </Chip>
+              {plan.phaseOverridden ? <Chip tone="amber">phase override</Chip> : null}
+            </>
+          ) : null}
+        </div>
+        {plan === null ? (
+          <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+            Log a weigh-in or set your start weight in{' '}
+            <Link to="/more/settings" className="font-medium text-red-600 hover:underline">
               Settings
-            </Link>
+            </Link>{' '}
+            to get your daily calorie and macro targets.
           </p>
-        </>
-      )}
+        ) : (
+          <>
+            <p className="mt-2 text-2xl font-bold tabular-nums">
+              {kcal(plan.calories)}
+              <span className="ml-1 text-sm font-normal text-zinc-500 dark:text-zinc-400">
+                kcal/day{plan.calorieOverridden ? ' · custom' : ''}
+              </span>
+            </p>
+            <dl className="mt-3 grid grid-cols-3 gap-3 border-t border-zinc-100 pt-3 dark:border-zinc-800">
+              <Macro
+                label="Protein"
+                grams={plan.grams.protein}
+                detail={`${Math.round(plan.split.protein * 100)}%`}
+              />
+              <Macro
+                label="Carbs"
+                grams={plan.grams.carbs}
+                detail={`${Math.round(plan.split.carbs * 100)}%`}
+              />
+              <Macro
+                label="Fat"
+                grams={plan.grams.fat}
+                detail={`${Math.round(plan.split.fat * 100)}%`}
+              />
+            </dl>
+            <p className="mt-2 text-[11px] text-zinc-500 dark:text-zinc-400">
+              {plan.calorieOverridden
+                ? 'Custom daily calories from Settings'
+                : plan.energy !== null && plan.level !== null
+                  ? `P90X nutrition plan · Level ${plan.level} (energy amount ≈ ${kcal(plan.energy)} kcal from your ${usedLatestWeigh ? 'latest weigh-in' : 'start weight'})`
+                  : 'P90X nutrition plan'}
+            </p>
+          </>
+        )}
+      </section>
+
+      {/* Evidence-based, target-driven recommendation */}
+      <section
+        aria-label="Your target"
+        className="mt-4 border-t border-zinc-100 pt-3 dark:border-zinc-800"
+      >
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+            Your target
+          </span>
+          {target !== null ? (
+            <>
+              <Chip tone={GOAL_TONE[target.goal]}>{GOAL_LABEL[target.goal]}</Chip>
+              {target.rateClamped ? <Chip tone="amber">pace capped</Chip> : null}
+            </>
+          ) : null}
+        </div>
+        {target === null ? (
+          <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+            Set a target weight (or a lean-mass / body-fat target) and your height, age and body-fat
+            in{' '}
+            <Link to="/more/settings" className="font-medium text-red-600 hover:underline">
+              Settings
+            </Link>{' '}
+            to see calories & macros tuned to your goal.
+          </p>
+        ) : (
+          <>
+            <p className="mt-2 text-2xl font-bold tabular-nums">
+              {kcal(target.calories)}
+              <span className="ml-1 text-sm font-normal text-zinc-500 dark:text-zinc-400">
+                kcal/day
+              </span>
+            </p>
+            <dl className="mt-3 grid grid-cols-3 gap-3 border-t border-zinc-100 pt-3 dark:border-zinc-800">
+              <Macro
+                label="Protein"
+                grams={target.protein}
+                detail={`${target.proteinPerKg} g/kg`}
+              />
+              <Macro label="Carbs" grams={target.carbs} detail="fill" />
+              <Macro label="Fat" grams={target.fat} detail={`${target.fatPerKg} g/kg`} />
+            </dl>
+            <p className="mt-2 text-[11px] text-zinc-500 dark:text-zinc-400">
+              Evidence-based · {target.bmrMethod === 'katch' ? 'Katch–McArdle' : 'Mifflin–St Jeor'}{' '}
+              TDEE ≈ {kcal(target.tdee)} kcal
+              {target.goal === 'maintenance'
+                ? ' · already at target weight'
+                : `, ${target.weeklyRateKg < 0 ? '−' : '+'}${Math.abs(target.weeklyRateKg).toFixed(2)} kg/wk to reach target`}
+              {target.rateClamped ? ' (capped to a muscle-sparing pace)' : ''}
+              {target.caloriesFloored ? ' · floored at BMR' : ''} · not medical advice ·{' '}
+              <Link to="/more/settings" className="font-medium hover:underline">
+                details
+              </Link>
+            </p>
+          </>
+        )}
+      </section>
     </Card>
   )
 }
