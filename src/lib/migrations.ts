@@ -59,6 +59,13 @@ const MIGRATIONS: Record<number, (doc: Record<string, unknown>) => void> = {
       settings.workoutLinks = {}
     }
   },
+  // v8 → v9 (E24 U136): diet-style preference for the target-based layer.
+  8: (doc) => {
+    const settings = doc.settings as { nutrition?: Record<string, unknown> } | undefined
+    if (settings?.nutrition !== undefined && settings.nutrition.dietStyle === undefined) {
+      settings.nutrition.dietStyle = 'balanced'
+    }
+  },
 }
 
 export function migrateToCurrent(raw: unknown): MigrationResult {

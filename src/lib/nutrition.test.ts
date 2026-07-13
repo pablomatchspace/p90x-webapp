@@ -7,13 +7,16 @@ import {
   energyAmount,
   katchMcArdle,
   KCAL_PER_KG,
+  LEAN_KCAL_PER_KG,
   LEVEL_CALORIES,
+  LOW_CARB_CAP_G,
   macroGrams,
   mifflinStJeor,
   nutritionLevel,
   nutritionTargets,
   PHASE_SPLITS,
   remainingProgramDays,
+  targetComposition,
   targetNutrition,
 } from './nutrition'
 import { emptyState, type BodyEntry, type Settings } from './schema'
@@ -117,7 +120,7 @@ describe('nutritionTargets', () => {
     expect(nutritionTargets(base, [], 3)?.phase).toBe(3)
     const overridden = settingsWith({
       startWeight: lb(180),
-      nutrition: { phaseOverride: 1, calorieOverride: null },
+      nutrition: { phaseOverride: 1, calorieOverride: null, dietStyle: 'balanced' },
     })
     const targets = nutritionTargets(overridden, [], 3)
     expect(targets?.phase).toBe(1)
@@ -125,7 +128,9 @@ describe('nutritionTargets', () => {
   })
 
   it('a calorie override replaces the level plan and works without any weight', () => {
-    const settings = settingsWith({ nutrition: { phaseOverride: null, calorieOverride: 2200 } })
+    const settings = settingsWith({
+      nutrition: { phaseOverride: null, calorieOverride: 2200, dietStyle: 'balanced' },
+    })
     const targets = nutritionTargets(settings, [], 2)
     expect(targets?.calories).toBe(2200)
     expect(targets?.calorieOverridden).toBe(true)
@@ -184,6 +189,46 @@ describe('remainingProgramDays', () => {
   })
 })
 
+describe('targetComposition', () => {
+  const withTargets = (targets: Partial<Settings['targets']>, patch: Partial<Settings> = {}) =>
+    settingsWith({
+      startWeight: 82,
+      startBodyFat: 0.22,
+      height: 1.8,
+      targets: { leanMassIncrease: null, bodyFat: null, ffmi: null, ...targets },
+      ...patch,
+    })
+  const log: BodyEntry[] = [
+    { date: '2026-01-19', weight: 80, bodyFat: 0.2, water: null, bone: null, zoneMinutes: null },
+  ]
+
+  it('composes lean-mass increase (from start lean) with the target body-fat %', () => {
+    const comp = targetComposition(withTargets({ leanMassIncrease: 4, bodyFat: 0.15 }), log)
+    expect(comp?.targetLeanKg).toBeCloseTo(82 * 0.78 + 4, 9) // 67.96
+    expect(comp?.targetFatKg).toBeCloseTo(((82 * 0.78 + 4) * 0.15) / 0.85, 9)
+  })
+
+  it('a body-fat-only target keeps current lean; a lean-only target keeps current fat', () => {
+    const bfOnly = targetComposition(withTargets({ bodyFat: 0.15 }), log)
+    expect(bfOnly?.targetLeanKg).toBeCloseTo(64, 9) // latest weigh-in lean
+    expect(bfOnly?.targetFatKg).toBeCloseTo((64 * 0.15) / 0.85, 9)
+    const leanOnly = targetComposition(withTargets({ leanMassIncrease: 4 }), log)
+    expect(leanOnly?.targetLeanKg).toBeCloseTo(67.96, 9)
+    expect(leanOnly?.targetFatKg).toBeCloseTo(16, 9) // 80 − 64
+  })
+
+  it('falls back to the FFMI target for lean when no lean-mass increase is set', () => {
+    const comp = targetComposition(withTargets({ ffmi: 21 }), log)
+    expect(comp?.targetLeanKg).toBeCloseTo(21 * 1.8 * 1.8, 9) // 68.04 at the 1.8 m reference
+    expect(comp?.targetFatKg).toBeCloseTo(16, 9)
+  })
+
+  it('is null without any target set, or without body-fat data to aim from', () => {
+    expect(targetComposition(withTargets({}), log)).toBeNull()
+    expect(targetComposition(withTargets({ bodyFat: 0.15 }, { startBodyFat: null }), [])).toBeNull()
+  })
+})
+
 describe('targetNutrition', () => {
   const base = {
     currentWeightKg: 80,
@@ -191,34 +236,55 @@ describe('targetNutrition', () => {
     heightM: 1.8,
     age: 40,
     gender: 'male' as const,
-    targetWeightKg: 76,
+    fatDeltaKg: -4,
+    leanDeltaKg: 0,
     horizonWeeks: 12,
+    dietStyle: 'balanced' as const,
   }
+  const katchTdee = (370 + 21.6 * 62.4) * ACTIVITY_FACTOR
 
-  it('derives a deficit plan from Katch–McArdle TDEE and the target pace', () => {
+  it('derives a deficit plan from Katch–McArdle TDEE and the fat-loss pace', () => {
     const t = targetNutrition(base)
     expect(t).not.toBeNull()
     if (t === null) return
     expect(t.bmrMethod).toBe('katch')
     expect(t.bmr).toBeCloseTo(370 + 21.6 * 62.4, 4) // 1717.84
-    expect(t.tdee).toBeCloseTo((370 + 21.6 * 62.4) * ACTIVITY_FACTOR, 4)
+    expect(t.tdee).toBeCloseTo(katchTdee, 4)
     expect(t.goal).toBe('deficit')
     expect(t.rateClamped).toBe(false)
-    // (76-80)/12/80 = -0.004166.. /wk → daily offset (rate*80)*7700/7
-    const dailyOffset = ((-4 / 12 / 80) * 80 * KCAL_PER_KG) / 7
-    expect(t.calories).toBe(Math.round((370 + 21.6 * 62.4) * ACTIVITY_FACTOR + dailyOffset))
+    expect(t.targetWeightKg).toBeCloseTo(76, 9)
+    // 4 kg of fat over 12 wk → daily offset (−4/12) × 7700 / 7
+    const dailyOffset = ((-4 / 12) * KCAL_PER_KG) / 7
+    expect(t.calories).toBe(Math.round(katchTdee + dailyOffset))
     expect(t.proteinPerKg).toBe(2.2)
     expect(t.protein).toBeCloseTo(176, 6) // 2.2 * 80
     expect(t.fat).toBeCloseTo(64, 6) // 0.8 * 80
     // carbs are the remainder of calories after protein & fat
     expect(t.carbs).toBeCloseTo((t.calories - 176 * 4 - 64 * 9) / 4, 6)
+    expect(t.carbsCapped).toBe(false)
   })
 
-  it('caps an over-aggressive target at the safe fat-loss rate', () => {
-    const t = targetNutrition({ ...base, targetWeightKg: 60 }) // 20 kg in 12 wk ≫ 1%/wk
-    expect(t?.rateClamped).toBe(true)
-    expect(t?.weeklyRatePctBw).toBeCloseTo(-0.01, 9) // clamped to -1%/wk
-    expect(t?.weeklyRateKg).toBeCloseTo(-0.8, 9) // -1% of 80 kg
+  it('prices fat and lean deltas at their own energy densities (recomp)', () => {
+    const t = targetNutrition({ ...base, fatDeltaKg: -4, leanDeltaKg: 2 })
+    expect(t).not.toBeNull()
+    if (t === null) return
+    expect(t.goal).toBe('recomp')
+    expect(t.proteinPerKg).toBe(2.2) // fat loss is intended → protein stays high
+    const dailyOffset = ((-4 / 12) * KCAL_PER_KG + (2 / 12) * LEAN_KCAL_PER_KG) / 7
+    expect(t.calories).toBe(Math.round(katchTdee + dailyOffset))
+    // net scale pace is small even though a real deficit is running
+    expect(t.weeklyRateKg).toBeCloseTo(-2 / 12, 9)
+    expect(t.weeklyFatKg).toBeCloseTo(-4 / 12, 9)
+    expect(t.weeklyLeanKg).toBeCloseTo(2 / 12, 9)
+  })
+
+  it('caps each pace at its own safe band', () => {
+    const fat = targetNutrition({ ...base, fatDeltaKg: -20 }) // ≫ 1%/wk
+    expect(fat?.rateClamped).toBe(true)
+    expect(fat?.weeklyFatKg).toBeCloseTo(-0.8, 9) // −1% of 80 kg
+    const lean = targetNutrition({ ...base, fatDeltaKg: 0, leanDeltaKg: 10 }) // ≫ 0.5%/wk
+    expect(lean?.rateClamped).toBe(true)
+    expect(lean?.weeklyLeanKg).toBeCloseTo(0.4, 9) // +0.5% of 80 kg
   })
 
   it('falls back to Mifflin–St Jeor when lean mass is unknown', () => {
@@ -227,16 +293,43 @@ describe('targetNutrition', () => {
     expect(t?.bmr).toBeCloseTo(1730, 6)
   })
 
-  it('treats a lean-gain target as a surplus and holds protein at 1.8 g/kg', () => {
-    const t = targetNutrition({ ...base, targetWeightKg: 82 })
+  it('treats a lean-gain-only target as a surplus and holds protein at 1.8 g/kg', () => {
+    const t = targetNutrition({ ...base, fatDeltaKg: 0, leanDeltaKg: 2 })
     expect(t?.goal).toBe('surplus')
     expect(t?.proteinPerKg).toBe(1.8)
     expect((t?.weeklyRateKg ?? 0) > 0).toBe(true)
+    // lean tissue is priced at ~1800 kcal/kg, not the fat density
+    const dailyOffset = ((2 / 12) * LEAN_KCAL_PER_KG) / 7
+    expect(t?.calories).toBe(Math.round(katchTdee + dailyOffset))
   })
 
-  it('returns null without a current weight, a BMR basis, or a target weight', () => {
+  it('the low-carb style caps carbs at 130 g and shifts the spare calories into fat', () => {
+    const t = targetNutrition({ ...base, dietStyle: 'lowCarb' })
+    expect(t).not.toBeNull()
+    if (t === null) return
+    expect(t.carbsCapped).toBe(true)
+    expect(t.carbs).toBe(LOW_CARB_CAP_G)
+    // energy is conserved: protein + carbs + fat exactly fill the calories
+    expect(t.protein * 4 + t.carbs * 4 + t.fat * 9).toBeCloseTo(t.calories, 6)
+    expect(t.fat).toBeGreaterThan(0.8 * 80)
+    // balanced and low-carb agree on calories — only the split moves
+    expect(t.calories).toBe(targetNutrition(base)?.calories)
+  })
+
+  it('low-carb leaves an already-low fill uncapped', () => {
+    // max-pace deficit → calories low enough that the fill lands under 130 g
+    const t = targetNutrition({ ...base, fatDeltaKg: -20, dietStyle: 'lowCarb' })
+    expect(t).not.toBeNull()
+    if (t === null) return
+    expect(t.carbs).toBeLessThan(LOW_CARB_CAP_G)
+    expect(t.carbsCapped).toBe(false)
+    expect(t.fat).toBeCloseTo(64, 6) // fat stays at the 0.8 g/kg baseline
+  })
+
+  it('returns null without a current weight, a BMR basis, or composition deltas', () => {
     expect(targetNutrition({ ...base, currentWeightKg: null })).toBeNull()
-    expect(targetNutrition({ ...base, targetWeightKg: null })).toBeNull()
+    expect(targetNutrition({ ...base, fatDeltaKg: null })).toBeNull()
+    expect(targetNutrition({ ...base, leanDeltaKg: null })).toBeNull()
     expect(targetNutrition({ ...base, leanKg: null, heightM: null, age: null })).toBeNull()
   })
 })

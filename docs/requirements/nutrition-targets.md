@@ -57,12 +57,14 @@ working, stay with it"), so `settings.nutrition.phaseOverride` pins a phase;
 
 ## Storage (rule 2 — never store derived values)
 
-Only the two raw overrides persist, in `settings.nutrition` (schema v7):
+Only the raw overrides and the diet-style preference persist, in
+`settings.nutrition` (schema v9):
 
 ```ts
 nutrition: {
-  phaseOverride: 1 | 2 | 3 | null   // null = follow the training phase
-  calorieOverride: number | null    // kcal; null = follow the level chart
+  phaseOverride: 1 | 2 | 3 | null      // null = follow the training phase
+  calorieOverride: number | null       // kcal; null = follow the level chart
+  dietStyle: 'balanced' | 'lowCarb'    // target-based macro style (E24 U136)
 }
 ```
 
@@ -74,12 +76,32 @@ worked numbers (180 lb → EA 2760 → Level II → 2400 kcal; Fat Shredder at
 ## Target-based recommendation (evidence-based layer)
 
 The P90X guide numbers above are **goal-blind** — they state what the boxed
-program prescribes, not what it takes to reach _this_ athlete's stored target.
+program prescribes, not what it takes to reach _this_ athlete's stored targets.
 A second engine (`targetNutrition` in `src/lib/nutrition.ts`) derives calories
-and macros from the user's current stats, their target weight, and the
-remaining program window, using current sports-nutrition consensus. Both layers
-are shown side by side and clearly labelled; the program numbers are never
-silently overwritten.
+and macros from the user's current stats, their **body-composition targets**,
+and the remaining program window, using current sports-nutrition consensus.
+Both layers are shown side by side and clearly labelled; the program numbers
+are never silently overwritten.
+
+### Composition targets (E24 U136 — recomposition-aware)
+
+The stored targets are composition targets, so the engine resolves them into a
+**target lean / target fat pair** instead of one net scale weight
+(`targetComposition`):
+
+- **Target lean** = start lean + `targets.leanMassIncrease` when that target is
+  set (the increase is defined against day 1; current lean is the fallback when
+  start stats are missing); else the lean mass the `targets.ffmi` value implies
+  (`leanMassForFfmi`); else current lean (no change intended).
+- **Target fat** = the fat mass carrying target lean at `targets.bodyFat`
+  (`lean × bf / (1 − bf)`); else current fat (no change intended).
+- **Current** lean/fat come from the **latest complete weigh-in** (else start
+  stats) — deliberately _not_ `body.ts targetWeight`, whose dimensionally
+  quirky workbook formula (`inc + startLean + startLean × bf`) is kept verbatim
+  only for chart-parity (rule 1) and stays anchored to day-1 stats.
+
+Any single target is enough; with no target set (or no body-fat reading
+anywhere) the layer prompts instead of guessing.
 
 ### Energy
 
@@ -92,18 +114,28 @@ silently overwritten.
      (within 10% of measured RMR for ~71–82% of adults).
 2. **TDEE** = BMR × **1.55** (moderately active — P90X is ~1 h of demanding work
    ~6 days/week).
-3. **Goal calories** = TDEE + the daily surplus/deficit implied by moving from
-   the current weight to the target weight over the remaining weeks
-   (~**7700 kcal per kg** of body-weight change), then:
-   - clamped to muscle-sparing rate ceilings — fat loss ≤ **1%/week** (Helms;
-     the same Tier-A band E20's Reality check already uses) and usable lean gain
-     ≤ ~**0.5%/week** (larger surpluses mostly add fat);
-   - floored at BMR so a deficit never prescribes a crash intake.
+3. **Goal calories** = TDEE + the daily offset implied by the two composition
+   deltas over the remaining weeks, **each priced at its own energy density**:
+   adipose ~**7700 kcal/kg**, lean (fat-free) tissue ~**1800 kcal/kg** (mostly
+   water — Hall's deficit-composition work). Netting both deltas at a single
+   7700 rate would understate a recomp's deficit by the planned lean gain —
+   the U132 defect this corrects. Then:
+   - each weekly pace is clamped to its muscle-sparing ceiling — fat loss ≤
+     **1%/week** of body weight (Helms; the same Tier-A band E20's Reality
+     check already uses) and usable lean gain ≤ ~**0.5%/week** (larger
+     surpluses mostly add fat);
+   - the total is floored at BMR so a deficit never prescribes a crash intake.
+
+The **goal** follows the deltas: fat loss + lean gain = _recomp_, fat loss
+alone = _deficit_, lean gain alone = _surplus_, neither = _maintenance_
+(deltas under 0.05 kg count as no change).
 
 ### Macros
 
 - **Protein**: `1.8 g/kg` body weight at maintenance/surplus, raised to
-  `2.2 g/kg` in a deficit — within the 1.6–2.2 g/kg hypertrophy band (Morton
+  `2.2 g/kg` whenever fat loss is intended — **a deficit or a recomp** (recomp
+  work in particular pairs high protein with roughly maintenance calories,
+  Barakat 2020) — within the 1.6–2.2 g/kg hypertrophy band (Morton
   meta-analysis plateau ≈ 1.62 g/kg; ISSN 1.4–2.0) and higher when dieting, per
   Helms' case for higher intakes in lean, energy-restricted athletes. This is
   the key correction over the guide's percentage split, which swings protein
@@ -112,6 +144,11 @@ silently overwritten.
 - **Carbs**: the remainder of the calorie budget — which recreates the guide's
   "more carbs in the endurance phase" direction without hard-coding a
   percentage.
+- **Diet style (E24 U136)**: `balanced` leaves carbs as the full remainder;
+  `lowCarb` caps them at **130 g/day** — the consensus low-carbohydrate
+  threshold (below the ADA/Feinman <130 g definition) — and shifts the spare
+  calories into fat (which is floored at 0.8 g/kg, never capped). Calories and
+  protein are unchanged; only the carb/fat split moves.
 
 The remaining window matches E20's Reality-check horizon: a not-yet-started or
 absent program plans a full 90 days; a finished program plans a fresh 90-day
@@ -131,6 +168,13 @@ block; otherwise it's the days left (0–90). Nothing here is stored (rule 2).
   trend (which the app charts, E21).
 - Activity factor 1.55 and the ~0.5%/week usable-gain ceiling — **Tier B**
   (practitioner heuristics).
+- Tissue energy densities (adipose ~7700, lean ~1800 kcal/kg) — **Tier B**
+  (classical body-composition constants; Hall 2008 on the real per-kg cost
+  varying with the lean/fat mix of the change).
+- High protein at ~maintenance calories for recomposition — **Tier B**
+  (Barakat 2020 narrative review).
+- The <130 g/day low-carbohydrate threshold — definitional (ADA; Feinman
+  2015), not an efficacy claim.
 
 Not medical or dietetic advice.
 
@@ -146,9 +190,10 @@ Both layers appear together, clearly labelled, on each surface:
   workout days); hidden on gap days and outside the program, where no phase
   exists.
 - **Settings → Nutrition**: the P90X derived read-outs (energy amount, level,
-  daily target), the two overrides, the three-phase split table, and a
-  **Target-based recommendation** panel (BMR method + TDEE + goal calories, the
-  weekly pace to reach the target, and the g/kg macro targets with tier labels).
+  daily target), the two overrides plus the diet-style toggle, the three-phase
+  split table, and a **Target-based recommendation** panel (BMR method + TDEE +
+  goal calories, the weekly fat/lean paces, and the g/kg macro targets with
+  tier labels).
 
 Not medical or dietetic advice.
 
@@ -178,3 +223,13 @@ Evidence-based layer:
 - Mifflin MD, St Jeor ST et al. (1990) predictive RMR equation; Katch & McArdle
   lean-mass RMR equation — validated BMR estimators (Mifflin–St Jeor within 10%
   for ~71–82% of adults; ~26% RMR variance is unexplained by any equation).
+- Hall KD (2008), _What is the required energy deficit per unit weight loss?_,
+  Int J Obes — the energy content of weight change depends on its lean/fat
+  composition (adipose ~7700 kcal/kg vs. much lower for fat-free mass).
+- Barakat C, Pearson J, Escalante G, Campbell B, De Souza EO (2020), _Body
+  recomposition: can trained individuals build muscle and lose fat at the same
+  time?_, Strength Cond J — recomposition pairs high protein (~2.2+ g/kg) with
+  approximately maintenance calories.
+- Feinman RD et al. (2015), _Dietary carbohydrate restriction as the first
+  approach in diabetes management_, Nutrition — the <130 g/day low-carbohydrate
+  definition (also the ADA threshold).

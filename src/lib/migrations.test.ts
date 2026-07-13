@@ -3,7 +3,7 @@ import { migrateToCurrent } from './migrations'
 import { emptyState, SCHEMA_VERSION } from './schema'
 
 /** A faithful document at an older version: current empty state minus later fields. */
-function docAt(version: 1 | 2 | 3 | 4 | 5 | 6 | 7): Record<string, unknown> {
+function docAt(version: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8): Record<string, unknown> {
   const doc = JSON.parse(JSON.stringify(emptyState())) as {
     schemaVersion: number
     settings: {
@@ -12,11 +12,12 @@ function docAt(version: 1 | 2 | 3 | 4 | 5 | 6 | 7): Record<string, unknown> {
       player?: unknown
       yoga?: unknown
       training?: unknown
-      nutrition?: unknown
+      nutrition?: Record<string, unknown>
       workoutLinks?: unknown
     }
   }
   doc.schemaVersion = version
+  if (version < 9) delete doc.settings.nutrition?.dietStyle // v9 field
   if (version < 8) delete doc.settings.workoutLinks // v8 field
   if (version < 7) delete doc.settings.nutrition // v7 field
   if (version < 6) delete doc.settings.training // v6 field
@@ -42,6 +43,7 @@ describe('migration pipeline', () => {
       expect(result.state.settings.nutrition).toEqual({
         phaseOverride: null,
         calorieOverride: null,
+        dietStyle: 'balanced',
       })
       expect(result.state.settings.workoutLinks).toEqual({})
     }
@@ -110,7 +112,11 @@ describe('migration pipeline', () => {
     expect(result.ok).toBe(true)
     if (result.ok) {
       expect(result.migrated).toBe(true)
-      expect(result.state.settings.nutrition).toEqual({ phaseOverride: 2, calorieOverride: 2600 })
+      expect(result.state.settings.nutrition).toEqual({
+        phaseOverride: 2,
+        calorieOverride: 2600,
+        dietStyle: 'balanced',
+      })
       expect(result.state.settings.workoutLinks).toEqual({})
     }
   })
@@ -126,6 +132,31 @@ describe('migration pipeline', () => {
       expect(result.state.settings.nutrition).toEqual({
         phaseOverride: null,
         calorieOverride: null,
+        dietStyle: 'balanced',
+      })
+    }
+  })
+
+  it('upgrades a v8 document, keeping workout links and gaining the diet style', () => {
+    const doc = docAt(8)
+    ;(doc.settings as { nutrition?: unknown }).nutrition = {
+      phaseOverride: 2,
+      calorieOverride: 2100,
+    }
+    ;(doc.settings as { workoutLinks?: unknown }).workoutLinks = {
+      'chest-back': { video: 'https://example.com/v' },
+    }
+    const result = migrateToCurrent(doc)
+    expect(result.ok).toBe(true)
+    if (result.ok) {
+      expect(result.migrated).toBe(true)
+      expect(result.state.settings.nutrition).toEqual({
+        phaseOverride: 2,
+        calorieOverride: 2100,
+        dietStyle: 'balanced',
+      })
+      expect(result.state.settings.workoutLinks).toEqual({
+        'chest-back': { video: 'https://example.com/v' },
       })
     }
   })

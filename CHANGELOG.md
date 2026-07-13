@@ -15,6 +15,27 @@ didn't bump the package version — they're numbered B01/B02 here for a
 continuous record; #33's package column is left at the un-suffixed version
 that was actually shipped.
 
+## 1.E24.U136 (package 1.24.136) — 2026-07-13
+
+- **E24 — Recomposition-aware targets & low-carb diet style.** The target-based
+  layer now honors _all_ the stored body targets instead of collapsing them
+  into one scale-weight number. `targetComposition` resolves lean-mass
+  increase, body-fat % and FFMI targets (any one is enough — previously the
+  layer needed every input and ignored FFMI entirely) into a target lean/fat
+  pair anchored to the latest weigh-in, and the energy budget prices each
+  delta at its own tissue density (adipose ~7700, lean ~1800 kcal/kg — netting
+  both at 7700 understated a recomp's deficit by the planned lean gain). A
+  fat-loss-plus-lean-gain target now reads as a **Recomp** goal with protein
+  held at 2.2 g/kg and both weekly paces shown, each clamped to its own
+  muscle-sparing band. New **Diet style** setting
+  (`settings.nutrition.dietStyle`, schema v9 + migration): _Low-carb_ caps the
+  carb fill at the <130 g/day consensus threshold and moves the spare
+  calories into fat; calories and protein are unchanged. Sources added to
+  `docs/requirements/nutrition-targets.md` (Hall 2008, Barakat 2020, Feinman
+  2015). The workbook's own quirky `targetWeight` formula is untouched — it
+  still anchors the body-chart color scales (rule 1) but no longer leaks into
+  the evidence-based layer.
+
 ## 1.E23.U135.B00 (package 1.23.135) — 2026-07-12
 
 - **E23 — Workout media deeplinks**: each routine can carry a personal video

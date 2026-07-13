@@ -305,6 +305,9 @@ export function updateNutrition(patch: Partial<Settings['nutrition']>): void {
       draft.settings.nutrition.calorieOverride =
         value !== null && Number.isFinite(value) && value > 0 ? value : null
     }
+    if (patch.dietStyle !== undefined) {
+      draft.settings.nutrition.dietStyle = patch.dietStyle
+    }
   })
 }
 

@@ -24,7 +24,7 @@ const sample: Settings = {
   player: { autoMarkDone: false },
   yoga: 'classic',
   training: 'intermediate',
-  nutrition: { phaseOverride: null, calorieOverride: null },
+  nutrition: { phaseOverride: null, calorieOverride: null, dietStyle: 'balanced' },
   workoutLinks: {},
 }
 
