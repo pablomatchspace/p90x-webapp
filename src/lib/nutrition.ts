@@ -1,5 +1,6 @@
-import { KG_PER_LB, targetWeight } from '@/lib/body'
+import { KG_PER_LB } from '@/lib/body'
 import { diffDays, type ISODate } from '@/lib/dates'
+import { leanMassForFfmi } from '@/lib/ffmi'
 import type { BodyEntry, Settings } from '@/lib/schema'
 
 /**
@@ -145,41 +146,59 @@ export function nutritionTargets(
  * E22 — target-based recommendation (evidence-based layer)
  *
  * The P90X guide numbers above are goal-blind — they say what the boxed program
- * prescribes, not what it takes to reach *this* athlete's stored target. This
- * second engine derives calories and macros from current stats + the target
- * weight + the remaining program window, using current sports-nutrition
- * consensus (all sourced in docs/requirements/nutrition-targets.md):
+ * prescribes, not what it takes to reach *this* athlete's stored targets. This
+ * second engine is composition-aware: the stored targets are body-composition
+ * targets (lean-mass increase, body-fat %, FFMI), so it budgets the fat and
+ * lean deltas separately instead of netting them into one scale-weight number
+ * (all sourced in docs/requirements/nutrition-targets.md):
  *
  *   TDEE     = BMR × activity factor. BMR from Katch–McArdle (uses lean mass,
  *              the better choice when body-fat is known) when lean mass is
  *              available, else Mifflin–St Jeor (the best-validated equation
  *              from weight/height/age/sex).
- *   calories = TDEE + the surplus/deficit implied by reaching the target weight
- *              over the remaining weeks (~7700 kcal per kg of body-weight
- *              change), clamped to the muscle-sparing safe-rate bands (Helms
- *              fat-loss ≤1%/wk; usable lean-gain ≤~0.5%/wk) and floored at BMR.
- *   protein  = 1.6–2.2 g/kg (Morton/ISSN), the higher end in a deficit.
+ *   calories = TDEE + (fatΔ × 7700 + leanΔ × 1800) over the remaining days —
+ *              fat and lean tissue have very different energy densities, so a
+ *              recomp (lose fat, gain lean, scale barely moves) still gets a
+ *              real deficit. Each weekly rate is clamped to its muscle-sparing
+ *              band (Helms fat-loss ≤1%/wk; usable lean-gain ≤~0.5%/wk) and
+ *              the result is floored at BMR.
+ *   protein  = 1.6–2.2 g/kg (Morton/ISSN), the higher end whenever fat loss is
+ *              intended (deficit or recomp).
  *   fat      = 0.8 g/kg (floored at 0.5 for hormonal health).
- *   carbs    = the remainder — which recreates the guide's "more carbs later"
- *              direction without hard-coding a percentage.
+ *   carbs    = the remainder; the low-carb diet style caps them at the <130 g
+ *              consensus threshold and shifts the spare calories into fat.
  *
- * Nothing here is stored (rule 2); it is all recomputed from raw inputs.
+ * Nothing here is stored except the diet-style preference (rule 2); every
+ * number is recomputed from raw inputs.
  * ──────────────────────────────────────────────────────────────────────────── */
 
 /** Moderately active — P90X is ~1 h of demanding work ~6 days/week. */
 export const ACTIVITY_FACTOR = 1.55
-/** Energy equivalent of a kg of body-weight change (~3500 kcal/lb). */
+/** Energy density of adipose tissue (~3500 kcal/lb). */
 export const KCAL_PER_KG = 7700
+/** Energy density of lean (fat-free) tissue — mostly water, ~1800 kcal/kg (Hall). */
+export const LEAN_KCAL_PER_KG = 1800
 /** Muscle-sparing rate ceilings, fraction of body weight per week. */
 export const SAFE_DEFICIT_RATE = 0.01
 export const SAFE_SURPLUS_RATE = 0.005
-/** Protein g/kg body weight — higher in a deficit (Helms), within the 1.6–2.2 band. */
-export const PROTEIN_G_PER_KG = { deficit: 2.2, maintenance: 1.8, surplus: 1.8 } as const
+/** Protein g/kg body weight — higher whenever fat loss is intended (Helms/Barakat). */
+export const PROTEIN_G_PER_KG = {
+  deficit: 2.2,
+  recomp: 2.2,
+  maintenance: 1.8,
+  surplus: 1.8,
+} as const
 /** Fat g/kg body weight and the hormonal-health floor. */
 export const FAT_G_PER_KG = 0.8
 export const FAT_FLOOR_G_PER_KG = 0.5
+/** Low-carb consensus threshold: under 130 g/day (ADA / Feinman 2015). */
+export const LOW_CARB_CAP_G = 130
 
-export type NutritionGoal = 'deficit' | 'surplus' | 'maintenance'
+export type NutritionGoal = 'deficit' | 'surplus' | 'recomp' | 'maintenance'
+export type DietStyle = 'balanced' | 'lowCarb'
+
+/** Composition deltas below this are treated as "no change intended". */
+const DELTA_EPSILON_KG = 0.05
 
 /** Mifflin–St Jeor BMR (kcal/day); null if any input is missing. */
 export function mifflinStJeor(
@@ -222,6 +241,51 @@ export function remainingProgramDays(startDate: ISODate | null, today: ISODate):
   return Math.min(90, raw)
 }
 
+export interface TargetComposition {
+  targetLeanKg: number
+  targetFatKg: number
+}
+
+/**
+ * Resolve the stored body-composition targets into a target lean/fat pair,
+ * anchored to the *latest* weigh-in (not day-1 stats — that's the workbook's
+ * chart-parity quirk in body.ts targetWeight, deliberately not reused here):
+ *
+ *   target lean = start lean + leanMassIncrease when that target is set (the
+ *                 increase is defined against day 1, falling back to current
+ *                 lean when start stats are missing); else the lean mass the
+ *                 FFMI target implies; else current lean (no change intended).
+ *   target fat  = the fat mass carrying target lean at the target body-fat %
+ *                 (lean × bf/(1−bf)); else current fat (no change intended).
+ *
+ * Null when no target is set at all, or when body-fat was never logged (no
+ * composition to aim from).
+ */
+export function targetComposition(
+  settings: Settings,
+  bodyLog: BodyEntry[],
+): TargetComposition | null {
+  const { leanMassIncrease, bodyFat, ffmi } = settings.targets
+  if (leanMassIncrease == null && bodyFat == null && ffmi == null) return null
+  const weight = currentWeightKg(settings, bodyLog)
+  const lean = currentLeanKg(settings, bodyLog)
+  if (weight == null || lean == null) return null
+
+  const startLean =
+    settings.startWeight != null && settings.startBodyFat != null
+      ? settings.startWeight * (1 - settings.startBodyFat)
+      : null
+  const targetLeanKg =
+    leanMassIncrease != null
+      ? (startLean ?? lean) + leanMassIncrease
+      : ffmi != null && settings.height != null
+        ? (leanMassForFfmi(ffmi, settings.height) ?? lean)
+        : lean
+  const targetFatKg =
+    bodyFat != null && bodyFat < 1 ? (targetLeanKg * bodyFat) / (1 - bodyFat) : weight - lean
+  return { targetLeanKg, targetFatKg }
+}
+
 export interface TargetNutrition {
   bmr: number
   bmrMethod: 'katch' | 'mifflin'
@@ -230,10 +294,16 @@ export interface TargetNutrition {
   targetWeightKg: number
   horizonWeeks: number
   goal: NutritionGoal
-  /** signed, clamped to the safe-rate band */
+  dietStyle: DietStyle
+  /** signed planned composition change over the horizon */
+  fatDeltaKg: number
+  leanDeltaKg: number
+  /** signed weekly paces after the safe-band clamps; weeklyRateKg is their (net scale) sum */
+  weeklyFatKg: number
+  weeklyLeanKg: number
   weeklyRateKg: number
   weeklyRatePctBw: number
-  /** the target implied a faster pace than the safe band, so the rate was capped */
+  /** a delta implied a faster pace than its safe band, so that rate was capped */
   rateClamped: boolean
   calories: number
   /** the deficit would have dropped calories below BMR, so it was raised to BMR */
@@ -242,15 +312,17 @@ export interface TargetNutrition {
   fat: number
   carbs: number
   proteinPerKg: number
+  /** effective — rises above 0.8 when the low-carb cap shifts calories into fat */
   fatPerKg: number
+  /** the low-carb style capped carbs at LOW_CARB_CAP_G */
+  carbsCapped: boolean
 }
 
-const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v))
-
 /**
- * Evidence-based calories + macros to reach `targetWeightKg` over `horizonWeeks`.
- * Returns null when there isn't enough to compute a BMR and a current weight, or
- * when no target weight exists — the caller then prompts for the missing inputs.
+ * Evidence-based calories + macros to change composition by `fatDeltaKg` /
+ * `leanDeltaKg` over `horizonWeeks`. Returns null when there isn't enough to
+ * compute a BMR and a current weight, or when no composition target exists —
+ * the caller then prompts for the missing inputs.
  */
 export function targetNutrition(opts: {
   currentWeightKg: number | null
@@ -258,11 +330,13 @@ export function targetNutrition(opts: {
   heightM: number | null
   age: number | null
   gender: 'male' | 'female'
-  targetWeightKg: number | null
+  fatDeltaKg: number | null
+  leanDeltaKg: number | null
   horizonWeeks: number
+  dietStyle: DietStyle
 }): TargetNutrition | null {
-  const { currentWeightKg: weight, leanKg, heightM, age, gender, targetWeightKg } = opts
-  if (weight == null || weight <= 0 || targetWeightKg == null) return null
+  const { currentWeightKg: weight, leanKg, heightM, age, gender, fatDeltaKg, leanDeltaKg } = opts
+  if (weight == null || weight <= 0 || fatDeltaKg == null || leanDeltaKg == null) return null
 
   const katch = katchMcArdle(leanKg)
   const mifflin = mifflinStJeor(weight, heightM, age, gender)
@@ -272,34 +346,56 @@ export function targetNutrition(opts: {
   const tdee = bmr * ACTIVITY_FACTOR
 
   const weeks = opts.horizonWeeks > 0 ? opts.horizonWeeks : 1
-  const rawRate = (targetWeightKg - weight) / weeks / weight
-  const rate = clamp(rawRate, -SAFE_DEFICIT_RATE, SAFE_SURPLUS_RATE)
-  const rateClamped = Math.abs(rawRate - rate) > 1e-9
-  const weeklyRateKg = rate * weight
-  const dailyOffset = (weeklyRateKg * KCAL_PER_KG) / 7
+  // Each tissue gets its own muscle-sparing pace ceiling (only the directions
+  // the bands are about: fat loss and lean gain).
+  const rawFatWk = fatDeltaKg / weeks
+  const rawLeanWk = leanDeltaKg / weeks
+  const weeklyFatKg = Math.max(rawFatWk, -SAFE_DEFICIT_RATE * weight)
+  const weeklyLeanKg = Math.min(rawLeanWk, SAFE_SURPLUS_RATE * weight)
+  const rateClamped =
+    Math.abs(rawFatWk - weeklyFatKg) > 1e-9 || Math.abs(rawLeanWk - weeklyLeanKg) > 1e-9
+  const weeklyRateKg = weeklyFatKg + weeklyLeanKg
+  const dailyOffset = (weeklyFatKg * KCAL_PER_KG + weeklyLeanKg * LEAN_KCAL_PER_KG) / 7
 
   let calories = tdee + dailyOffset
   const caloriesFloored = calories < bmr
   if (caloriesFloored) calories = bmr
   calories = Math.round(calories)
 
-  const goal: NutritionGoal = rate < -1e-6 ? 'deficit' : rate > 1e-6 ? 'surplus' : 'maintenance'
+  const losingFat = fatDeltaKg < -DELTA_EPSILON_KG
+  const gainingLean = leanDeltaKg > DELTA_EPSILON_KG
+  const goal: NutritionGoal =
+    losingFat && gainingLean
+      ? 'recomp'
+      : losingFat
+        ? 'deficit'
+        : gainingLean
+          ? 'surplus'
+          : 'maintenance'
   const proteinPerKg = PROTEIN_G_PER_KG[goal]
   const protein = proteinPerKg * weight
-  const fatPerKg = FAT_G_PER_KG
-  const fat = fatPerKg * weight
-  const carbs = Math.max(0, (calories - protein * 4 - fat * 9) / 4)
+  let fat = FAT_G_PER_KG * weight
+  const carbsFill = (calories - protein * 4 - fat * 9) / 4
+  const carbsCapped = opts.dietStyle === 'lowCarb' && carbsFill > LOW_CARB_CAP_G
+  const carbs = carbsCapped ? LOW_CARB_CAP_G : Math.max(0, carbsFill)
+  if (carbsCapped) fat = (calories - protein * 4 - carbs * 4) / 9
+  const fatPerKg = Math.round((fat / weight) * 10) / 10
 
   return {
     bmr,
     bmrMethod,
     tdee,
     currentWeightKg: weight,
-    targetWeightKg,
+    targetWeightKg: weight + fatDeltaKg + leanDeltaKg,
     horizonWeeks: weeks,
     goal,
+    dietStyle: opts.dietStyle,
+    fatDeltaKg,
+    leanDeltaKg,
+    weeklyFatKg,
+    weeklyLeanKg,
     weeklyRateKg,
-    weeklyRatePctBw: rate,
+    weeklyRatePctBw: weeklyRateKg / weight,
     rateClamped,
     calories,
     caloriesFloored,
@@ -308,22 +404,29 @@ export function targetNutrition(opts: {
     carbs,
     proteinPerKg,
     fatPerKg,
+    carbsCapped,
   }
 }
 
-/** Convenience composer from app state — resolves current stats, target weight and horizon. */
+/** Convenience composer from app state — resolves current stats, composition targets and horizon. */
 export function targetNutritionFromState(
   settings: Settings,
   bodyLog: BodyEntry[],
   today: ISODate,
 ): TargetNutrition | null {
+  const weight = currentWeightKg(settings, bodyLog)
+  const lean = currentLeanKg(settings, bodyLog)
+  const comp = targetComposition(settings, bodyLog)
   return targetNutrition({
-    currentWeightKg: currentWeightKg(settings, bodyLog),
-    leanKg: currentLeanKg(settings, bodyLog),
+    currentWeightKg: weight,
+    leanKg: lean,
     heightM: settings.height ?? null,
     age: settings.age ?? null,
     gender: settings.gender,
-    targetWeightKg: targetWeight(settings),
+    fatDeltaKg:
+      comp !== null && weight !== null && lean !== null ? comp.targetFatKg - (weight - lean) : null,
+    leanDeltaKg: comp !== null && lean !== null ? comp.targetLeanKg - lean : null,
     horizonWeeks: remainingProgramDays(settings.startDate, today) / 7,
+    dietStyle: settings.nutrition.dietStyle,
   })
 }

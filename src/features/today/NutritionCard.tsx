@@ -15,13 +15,18 @@ const kcal = (value: number) => Math.round(value).toLocaleString('en-US')
 const GOAL_LABEL: Record<NutritionGoal, string> = {
   deficit: 'Fat loss',
   surplus: 'Muscle gain',
+  recomp: 'Recomp',
   maintenance: 'Maintain',
 }
 const GOAL_TONE: Record<NutritionGoal, ChipTone> = {
   deficit: 'amber',
   surplus: 'green',
+  recomp: 'green',
   maintenance: 'zinc',
 }
+
+/** Signed weekly pace, e.g. "−0.48" / "+0.40". */
+const pace = (kg: number) => `${kg < 0 ? '−' : '+'}${Math.abs(kg).toFixed(2)}`
 
 function Macro({ label, grams, detail }: { label: string; grams: number; detail: string }) {
   return (
@@ -129,14 +134,14 @@ export function NutritionCard({ schedulePhase }: { schedulePhase: NutritionPhase
           {target !== null ? (
             <>
               <Chip tone={GOAL_TONE[target.goal]}>{GOAL_LABEL[target.goal]}</Chip>
+              {target.dietStyle === 'lowCarb' ? <Chip tone="zinc">low-carb</Chip> : null}
               {target.rateClamped ? <Chip tone="amber">pace capped</Chip> : null}
             </>
           ) : null}
         </div>
         {target === null ? (
           <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-            Set a target weight (or a lean-mass / body-fat target) and your height, age and body-fat
-            in{' '}
+            Set a body target (lean-mass increase, body-fat % or FFMI) plus your start body-fat in{' '}
             <Link to="/more/settings" className="font-medium text-red-600 hover:underline">
               Settings
             </Link>{' '}
@@ -156,15 +161,21 @@ export function NutritionCard({ schedulePhase }: { schedulePhase: NutritionPhase
                 grams={target.protein}
                 detail={`${target.proteinPerKg} g/kg`}
               />
-              <Macro label="Carbs" grams={target.carbs} detail="fill" />
+              <Macro
+                label="Carbs"
+                grams={target.carbs}
+                detail={target.carbsCapped ? 'capped' : 'fill'}
+              />
               <Macro label="Fat" grams={target.fat} detail={`${target.fatPerKg} g/kg`} />
             </dl>
             <p className="mt-2 text-[11px] text-zinc-500 dark:text-zinc-400">
               Evidence-based · {target.bmrMethod === 'katch' ? 'Katch–McArdle' : 'Mifflin–St Jeor'}{' '}
               TDEE ≈ {kcal(target.tdee)} kcal
               {target.goal === 'maintenance'
-                ? ' · already at target weight'
-                : `, ${target.weeklyRateKg < 0 ? '−' : '+'}${Math.abs(target.weeklyRateKg).toFixed(2)} kg/wk to reach target`}
+                ? ' · already at your body target'
+                : target.goal === 'recomp'
+                  ? `, ${pace(target.weeklyFatKg)} kg/wk fat · ${pace(target.weeklyLeanKg)} kg/wk lean`
+                  : `, ${pace(target.weeklyRateKg)} kg/wk to reach target`}
               {target.rateClamped ? ' (capped to a muscle-sparing pace)' : ''}
               {target.caloriesFloored ? ' · floored at BMR' : ''} · not medical advice ·{' '}
               <Link to="/more/settings" className="font-medium hover:underline">

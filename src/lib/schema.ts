@@ -6,7 +6,7 @@ import { isHttpUrl } from '@/lib/links'
  * (scores, penalties, BMI, adherence…) is recomputed by pure functions, mirroring
  * the Excel design where formulas derive everything from entered cells (PRD §8).
  */
-export const SCHEMA_VERSION = 8
+export const SCHEMA_VERSION = 9
 
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'expected YYYY-MM-DD')
 
@@ -67,6 +67,8 @@ export const settingsSchema = z.object({
     phaseOverride: z.union([z.literal(1), z.literal(2), z.literal(3)]).nullable(),
     /** custom daily kcal replacing the guide's level plan; null uses the level */
     calorieOverride: z.number().positive().nullable(),
+    /** target-based layer's macro style — low-carb caps carbs and shifts calories into fat */
+    dietStyle: z.enum(['balanced', 'lowCarb']),
   }),
   /** E23: video/audio deeplinks per workout, opened in a new tab from the day card */
   workoutLinks: z.record(z.string(), workoutLinkSchema),
@@ -177,7 +179,7 @@ export function emptyState(): AppState {
       player: { autoMarkDone: false },
       yoga: 'classic',
       training: 'intermediate',
-      nutrition: { phaseOverride: null, calorieOverride: null },
+      nutrition: { phaseOverride: null, calorieOverride: null, dietStyle: 'balanced' },
       workoutLinks: {},
     },
     scheduleOps: [],

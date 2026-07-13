@@ -40,16 +40,40 @@ test('today shows the evidence-based target recommendation next to the P90X plan
   await page.goto('#/today')
   const target = page.locator('section[aria-label="Your target"]')
 
-  // Sample target weight 77.55 kg < current 80.8 kg → a fat-loss (deficit) plan.
-  await expect(target.getByText('Fat loss', { exact: true })).toBeVisible()
+  // Sample targets are a recomp: +4 kg lean AND body-fat 21.2% → 15%, so the
+  // composition-aware engine budgets a real deficit even though the scale
+  // barely moves (fatΔ ≈ −5.1 kg at 7700, leanΔ ≈ +4.3 kg at 1800 kcal/kg).
+  await expect(target.getByText('Recomp', { exact: true })).toBeVisible()
+  await expect(target.getByText('2,281')).toBeVisible()
   // Body-fat is logged, so lean mass is known → Katch–McArdle drives the TDEE.
   await expect(target.getByText(/Katch–McArdle TDEE/)).toBeVisible()
+  // The footnote shows both weekly paces, not the misleading net-scale rate.
+  await expect(target.getByText(/−0\.48 kg\/wk fat · \+0\.40 kg\/wk lean/)).toBeVisible()
 
   const macro = (label: string) => target.locator('dt', { hasText: label }).locator('..')
-  // Protein raised to 2.2 g/kg for the deficit; fat 0.8 g/kg; carbs as the fill.
+  // Protein raised to 2.2 g/kg while fat loss is intended; fat 0.8 g/kg; carbs as the fill.
   await expect(macro('Protein')).toContainText('2.2 g/kg')
   await expect(macro('Fat')).toContainText('0.8 g/kg')
   await expect(macro('Carbs')).toContainText('fill')
+})
+
+test('the low-carb diet style caps carbs and shifts the calories into fat', async ({ page }) => {
+  await page.goto('#/more/settings')
+  await page
+    .getByRole('group', { name: 'Diet style' })
+    .getByRole('button', { name: 'Low-carb' })
+    .click()
+
+  // Hash navigation keeps the in-memory store — today shows the capped split.
+  await page.goto('#/today')
+  const target = page.locator('section[aria-label="Your target"]')
+  await expect(target.getByText('low-carb', { exact: true })).toBeVisible()
+  const macro = (label: string) => target.locator('dt', { hasText: label }).locator('..')
+  // Calories are unchanged (2,281): carbs stop at 130 g, fat absorbs the rest.
+  await expect(target.getByText('2,281')).toBeVisible()
+  await expect(macro('Carbs')).toContainText('130')
+  await expect(macro('Carbs')).toContainText('capped')
+  await expect(macro('Fat')).toContainText('1.4 g/kg')
 })
 
 test('settings read-outs and overrides drive the P90X target', async ({ page }) => {
@@ -99,7 +123,7 @@ test('settings shows the target-based recommendation section', async ({ page }) 
   await page.getByText('Macro breakdown & target-based plan').click()
   const section = page.getByRole('region', { name: 'Target-based nutrition' })
   await expect(section).toBeVisible()
-  await expect(section.getByText('Fat loss', { exact: true })).toBeVisible()
+  await expect(section.getByText('Recomp', { exact: true })).toBeVisible()
 
   // Katch–McArdle BMR (lean mass known) feeds a ×1.55 TDEE and a deficit daily target.
   const derived = (label: string) => section.locator('dt', { hasText: label }).locator('..')

@@ -34,6 +34,7 @@ import {
   PHASE_NAMES,
   PHASE_SPLITS,
   targetNutritionFromState,
+  type DietStyle,
   type NutritionGoal,
   type NutritionPhase,
 } from '@/lib/nutrition'
@@ -187,11 +188,13 @@ const NUTRITION_PHASES: NutritionPhase[] = [1, 2, 3]
 const NUTRITION_GOAL_LABEL: Record<NutritionGoal, string> = {
   deficit: 'Fat loss',
   surplus: 'Muscle gain',
+  recomp: 'Recomp',
   maintenance: 'Maintain',
 }
 const NUTRITION_GOAL_TONE = {
   deficit: 'amber',
   surplus: 'green',
+  recomp: 'green',
   maintenance: 'zinc',
 } as const
 
@@ -867,6 +870,20 @@ export function SettingsPage() {
               onChange={(value) => updateNutrition({ calorieOverride: value })}
             />
           </Row>
+          <Row
+            label="Diet style"
+            hint="Target-based macros only: low-carb caps carbs at 130 g/day and moves the spare calories into fat"
+          >
+            <Segmented
+              label="Diet style"
+              value={settings.nutrition.dietStyle}
+              options={[
+                { value: 'balanced', label: 'Balanced' },
+                { value: 'lowCarb', label: 'Low-carb' },
+              ]}
+              onChange={(value) => updateNutrition({ dietStyle: value as DietStyle })}
+            />
+          </Row>
         </div>
         <dl className="mt-3 grid grid-cols-3 gap-3 border-t border-zinc-100 pt-3 dark:border-zinc-800">
           <Derived label="Energy amount" value={showKcal(energy)} unit="kcal" />
@@ -930,15 +947,16 @@ export function SettingsPage() {
               ) : null}
             </div>
             <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-              What current sports-nutrition consensus suggests you eat to reach your target weight
-              over the remaining program window — distinct from the boxed P90X plan above. Calories
-              from your estimated TDEE plus a muscle-sparing surplus/deficit; protein and fat by
-              body weight, carbs as the remainder. Not medical or dietetic advice.
+              What current sports-nutrition consensus suggests you eat to reach your
+              body-composition targets over the remaining program window — distinct from the boxed
+              P90X plan above. Fat and lean changes are budgeted separately (a recomp still gets a
+              real deficit even when the scale barely moves); protein and fat by body weight, carbs
+              as the remainder unless the low-carb style caps them. Not medical or dietetic advice.
             </p>
             {targetNut === null ? (
               <p className="mt-3 text-xs text-zinc-500 dark:text-zinc-400">
-                Needs your height, age and body-fat (for the metabolic estimate) plus a target
-                weight — set a lean-mass increase and target body-fat above, or your start stats.
+                Needs a body-fat reading (start stats or a weigh-in) for the metabolic estimate,
+                plus at least one body target above — lean-mass increase, body-fat % or FFMI.
               </p>
             ) : (
               <>
@@ -957,14 +975,19 @@ export function SettingsPage() {
                 </dl>
                 <p className="mt-2 text-xs text-zinc-600 dark:text-zinc-300">
                   {targetNut.goal === 'maintenance'
-                    ? 'Already at your target weight — maintenance calories.'
-                    : `${targetNut.weeklyRateKg < 0 ? 'Lose' : 'Gain'} ${formatFixed(
-                        Math.abs(kgToUnit(targetNut.weeklyRateKg, units)),
-                        2,
-                      )} ${wUnit}/week to reach your target weight over ${formatFixed(
-                        targetNut.horizonWeeks,
-                        0,
-                      )} weeks`}
+                    ? 'Already at your body target — maintenance calories.'
+                    : targetNut.goal === 'recomp'
+                      ? `Lose ${formatFixed(Math.abs(kgToUnit(targetNut.weeklyFatKg, units)), 2)} ${wUnit} fat and gain ${formatFixed(
+                          Math.abs(kgToUnit(targetNut.weeklyLeanKg, units)),
+                          2,
+                        )} ${wUnit} lean per week over ${formatFixed(targetNut.horizonWeeks, 0)} weeks`
+                      : `${targetNut.weeklyRateKg < 0 ? 'Lose' : 'Gain'} ${formatFixed(
+                          Math.abs(kgToUnit(targetNut.weeklyRateKg, units)),
+                          2,
+                        )} ${wUnit}/week to reach your body target over ${formatFixed(
+                          targetNut.horizonWeeks,
+                          0,
+                        )} weeks`}
                   {targetNut.rateClamped
                     ? ' — capped to a muscle-sparing pace (Helms ≤1%/wk loss, ~0.5%/wk usable gain).'
                     : '.'}
@@ -976,25 +999,30 @@ export function SettingsPage() {
                     </span>
                     <span className="tabular-nums text-xs text-zinc-500 dark:text-zinc-400">
                       {Math.round(targetNut.protein)} g · {targetNut.proteinPerKg} g/kg
-                      {targetNut.goal === 'deficit' ? ' (raised for the deficit)' : ''}
+                      {targetNut.goal === 'deficit' || targetNut.goal === 'recomp'
+                        ? ' (raised for the fat loss)'
+                        : ''}
                     </span>
                   </li>
                   <li className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-sm">
                     <span className="font-medium">Fat</span>
                     <span className="tabular-nums text-xs text-zinc-500 dark:text-zinc-400">
                       {Math.round(targetNut.fat)} g · {targetNut.fatPerKg} g/kg
+                      {targetNut.carbsCapped ? ' (raised by the carb cap)' : ''}
                     </span>
                   </li>
                   <li className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-sm">
                     <span className="font-medium">Carbs</span>
                     <span className="tabular-nums text-xs text-zinc-500 dark:text-zinc-400">
-                      {Math.round(targetNut.carbs)} g · remainder
+                      {Math.round(targetNut.carbs)} g ·{' '}
+                      {targetNut.carbsCapped ? 'low-carb cap' : 'remainder'}
                     </span>
                   </li>
                 </ul>
                 <p className="mt-2 text-[11px] text-zinc-500 dark:text-zinc-400">
                   Protein 1.6–2.2 g/kg (Morton meta-analysis; ISSN) · fat ≥0.5 g/kg for hormonal
-                  health · ~7700 kcal per kg of body-weight change.
+                  health · fat tissue ~7700, lean ~1800 kcal/kg (Hall) · low-carb caps carbs at the
+                  &lt;130 g/day consensus threshold.
                 </p>
               </>
             )}
