@@ -21,9 +21,10 @@ that was actually shipped.
   play mode now render the same E23 `MediaLinks` launch buttons as the Today
   card and workout detail screen (U142): a workout's configured video/audio
   deeplinks open in a new tab right next to the step/idle controls, so the
-  session video can be launched — or relaunched mid-session — without leaving
-  the play flow. Renders nothing until a link is configured in Settings,
-  exactly like the other surfaces.
+  session video can be launched — or relaunched mid-session, since play mode
+  keeps the buttons visible during playback too — without leaving the play
+  flow. Renders nothing until a link is configured in Settings, exactly like
+  the other surfaces.
 
 ## 1.E26.U141 (package 1.26.141) — 2026-07-14
 
@@ -38,8 +39,10 @@ that was actually shipped.
   in focus mode), the next exercise's name when its work slot starts,
   and a completion line at the end. Announcements are governed by a new
   persisted `player.voiceCues` preference (schema v10 + migration, default
-  **on**) toggled next to Auto-mark on the play screen; `speak()` no-ops
-  where speechSynthesis is unavailable, and beeps/vibration are unchanged.
+  **on**) toggled next to Auto-mark on the play screen and, for focus-only
+  strength workouts that never reach play mode, on the focus screen too;
+  `speak()` no-ops where speechSynthesis is unavailable, and beeps/vibration
+  are unchanged.
 
 ## 1.E25.U139 (package 1.25.139) — 2026-07-14
 

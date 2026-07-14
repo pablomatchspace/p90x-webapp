@@ -489,6 +489,14 @@ export function PlayPage() {
           )}
         </div>
 
+        {/* E27: launch/relaunch the session video/audio deeplink — kept visible
+            during playback too, so the athlete can reopen media mid-session. */}
+        {links !== undefined ? (
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <MediaLinks workoutKey={key} workoutName={def.name} />
+          </div>
+        ) : null}
+
         {playback === null ? (
           <div className="mt-3 flex flex-col gap-2">
             {timelinesFor(key).length > 1 ? (
@@ -515,12 +523,6 @@ export function PlayPage() {
                     </button>
                   ))}
                 </div>
-              </div>
-            ) : null}
-            {/* E27: launch the session video/audio deeplink without leaving play mode */}
-            {links !== undefined ? (
-              <div className="flex flex-wrap items-center gap-2">
-                <MediaLinks workoutKey={key} workoutName={def.name} />
               </div>
             ) : null}
             <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">

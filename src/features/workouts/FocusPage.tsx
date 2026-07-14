@@ -15,7 +15,7 @@ import {
 } from '@/lib/playback'
 import { workoutOccurrences } from '@/lib/schedule/occurrences'
 import { formatScore, scoreExercise, sessionTotals } from '@/lib/scoring'
-import { setWorkoutCompleted, updateTimerSettings } from '@/state/actions'
+import { setWorkoutCompleted, updatePlayerSettings, updateTimerSettings } from '@/state/actions'
 import { useSchedule, useScoringSettings, useSettings, useWorkoutSessions } from '@/state/selectors'
 import { QuoteCard } from '@/features/dashboard/QuoteCard'
 import { MediaLinks } from './MediaLinks'
@@ -372,6 +372,23 @@ export function FocusPage() {
                 · Rest between steps: {settings.timer.restSeconds} s — set it on the rest timer
                 below.
               </span>
+            </div>
+            {/* E26: spoken exercise announcements — reachable from focus-only
+                workouts (e.g. Chest & Back) that have no play-mode screen. */}
+            <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
+              <button
+                type="button"
+                onClick={() => updatePlayerSettings({ voiceCues: !settings.player.voiceCues })}
+                aria-pressed={settings.player.voiceCues}
+                className={`rounded-lg border px-2.5 py-1.5 font-medium ${
+                  settings.player.voiceCues
+                    ? 'border-emerald-600 bg-emerald-600 text-white'
+                    : 'border-zinc-300 text-zinc-600 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800'
+                }`}
+              >
+                Voice cues
+              </button>
+              <span>· When on, Play speaks each exercise aloud.</span>
             </div>
           </>
         ) : (

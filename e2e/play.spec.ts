@@ -158,6 +158,11 @@ test('E27: play mode surfaces the media launch button (E23 parity)', async ({ pa
   await expect(launch).toBeVisible()
   await expect(launch).toHaveAttribute('href', 'https://media.example/plyo.mp4')
   await expect(launch).toHaveAttribute('target', '_blank')
+
+  // stays reachable mid-session so the athlete can relaunch media after Start
+  await page.getByRole('button', { name: 'Start', exact: true }).click()
+  await expect(page.getByText('Work', { exact: true })).toBeVisible()
+  await expect(launch).toBeVisible()
 })
 
 /**
