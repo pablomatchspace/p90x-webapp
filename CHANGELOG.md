@@ -15,6 +15,19 @@ didn't bump the package version — they're numbered B01/B02 here for a
 continuous record; #33's package column is left at the un-suffixed version
 that was actually shipped.
 
+## 1.E25.U139 (package 1.25.139) — 2026-07-14
+
+- **E25 — Body-trend continuity, composition units & motivation-first dashboard.**
+  Trend lines no longer break on days without a weigh-in: `fillForward`
+  (U138) carries the last measurement across gaps as flagged `filled` points,
+  so the metric chart, its 7-day trend and the composition chart draw one
+  unbroken line while markers and the crosshair still snap only to real
+  logged days. The body-composition chart gains a unit toggle (U137) between
+  absolute mass (kg/lb) and percent of body weight — lean % derives as
+  100 − BF %, so it works even on weigh-ins without a weight reading. The
+  daily-motivation quote card moves to the top of the Dashboard (U139), the
+  first widget below the title.
+
 ## 1.E24.U136 (package 1.24.136) — 2026-07-13
 
 - **E24 — Recomposition-aware targets & low-carb diet style.** The target-based

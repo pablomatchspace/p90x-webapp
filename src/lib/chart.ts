@@ -10,6 +10,8 @@ export interface Pt {
   x: number
   /** null marks a gap: the line breaks here instead of interpolating across it */
   y: number | null
+  /** E25: carried forward from the last logged value — drawn as line, never as a marker */
+  filled?: boolean
 }
 
 /** Min/max over the finite values, or null when there are none. */
@@ -76,6 +78,23 @@ export function movingAverage(points: Pt[], window: number): Pt[] {
     const inWindow = logged.filter((q) => q.x <= p.x && q.x > p.x - window)
     const sum = inWindow.reduce((acc, q) => acc + q.y, 0)
     return { x: p.x, y: sum / inWindow.length }
+  })
+}
+
+/**
+ * Carry-forward gap fill (E25): every null after the first logged value becomes
+ * a copy of the last logged value, flagged `filled` so the chart draws one
+ * unbroken line without minting markers or crosshair stops for days that were
+ * never measured. Leading nulls (before the first log) stay gaps.
+ */
+export function fillForward(points: Pt[]): Pt[] {
+  let last: number | null = null
+  return points.map((p) => {
+    if (p.y !== null) {
+      last = p.y
+      return p
+    }
+    return last === null ? p : { x: p.x, y: last, filled: true }
   })
 }
 

@@ -118,11 +118,14 @@ export function LineChart({
   const sy = scale(yMin, yMax, PLOT_B, PLOT_T)
   const ticks = niceTicks(yMin, yMax, 4).filter((t) => t >= yMin && t <= yMax)
 
-  // xs that carry at least one logged value — the crosshair snap targets
+  // xs that carry at least one logged value — the crosshair snap targets.
+  // Carried-forward fill points (E25) are drawn but never snapped to.
   const loggedXs = [
     ...new Set(
       series.flatMap((s) =>
-        s.noReadout ? [] : s.points.filter((p) => p.y !== null).map((p) => p.x),
+        s.noReadout
+          ? []
+          : s.points.filter((p) => p.y !== null && p.filled !== true).map((p) => p.x),
       ),
     ),
   ]
@@ -264,7 +267,7 @@ export function LineChart({
             />
             {showDots
               ? s.points
-                  .filter((p): p is { x: number; y: number } => p.y !== null)
+                  .filter((p): p is { x: number; y: number } => p.y !== null && p.filled !== true)
                   .map((p) => (
                     <circle
                       key={`dot-${s.id}-${p.x}`}

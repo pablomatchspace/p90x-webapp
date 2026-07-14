@@ -59,5 +59,17 @@ test('E21 chart upgrades: trend overlay, phase shading, crosshair and compositio
 
   // the lean-vs-fat composition chart renders from the same weigh-ins
   await expect(page.getByText('Body composition')).toBeVisible()
-  await expect(page.getByRole('img', { name: /Lean mass vs fat mass/ })).toBeVisible()
+  await expect(page.getByRole('img', { name: /Lean mass vs fat mass in kg/ })).toBeVisible()
+
+  // E25: the composition chart toggles to percent of body weight and back
+  await page
+    .getByRole('group', { name: 'Composition unit' })
+    .getByRole('button', { name: '%' })
+    .click()
+  await expect(page.getByRole('img', { name: 'Lean mass vs fat mass in %' })).toBeVisible()
+  await page
+    .getByRole('group', { name: 'Composition unit' })
+    .getByRole('button', { name: 'kg' })
+    .click()
+  await expect(page.getByRole('img', { name: 'Lean mass vs fat mass in kg' })).toBeVisible()
 })

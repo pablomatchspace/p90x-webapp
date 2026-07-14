@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { extent, linePath, movingAverage, nearestX, niceTicks, scale } from './chart'
+import { extent, fillForward, linePath, movingAverage, nearestX, niceTicks, scale } from './chart'
 
 describe('extent', () => {
   it('finds min/max over finite values', () => {
@@ -100,6 +100,46 @@ describe('movingAverage', () => {
 
   it('returns empty for all-null input', () => {
     expect(movingAverage([{ x: 0, y: null }], 7)).toEqual([])
+  })
+})
+
+describe('fillForward', () => {
+  it('carries the last logged value across null gaps, flagged as filled', () => {
+    expect(
+      fillForward([
+        { x: 0, y: 10 },
+        { x: 1, y: null },
+        { x: 2, y: null },
+        { x: 3, y: 30 },
+      ]),
+    ).toEqual([
+      { x: 0, y: 10 },
+      { x: 1, y: 10, filled: true },
+      { x: 2, y: 10, filled: true },
+      { x: 3, y: 30 },
+    ])
+  })
+
+  it('leaves leading nulls (before the first log) as gaps', () => {
+    expect(
+      fillForward([
+        { x: 0, y: null },
+        { x: 1, y: 5 },
+        { x: 2, y: null },
+      ]),
+    ).toEqual([
+      { x: 0, y: null },
+      { x: 1, y: 5 },
+      { x: 2, y: 5, filled: true },
+    ])
+  })
+
+  it('is the identity for fully-logged input', () => {
+    const points = [
+      { x: 0, y: 1 },
+      { x: 1, y: 2 },
+    ]
+    expect(fillForward(points)).toEqual(points)
   })
 })
 

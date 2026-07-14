@@ -40,6 +40,14 @@ test('dashboard assembles status, next-up, KPIs, adherence, quote and chart link
     page.getByText('Motivation gets you dressed; discipline gets you done.'),
   ).toBeVisible()
 
+  // E25: daily motivation is the first widget below the title
+  await expect(
+    page
+      .getByRole('heading')
+      .filter({ hasText: /^(Daily motivation|Today)$/ })
+      .first(),
+  ).toHaveText('Daily motivation')
+
   await expect(page.getByRole('link', { name: 'Trends →' })).toBeVisible()
   await expect(page.getByRole('link', { name: 'Strength →' })).toBeVisible()
 
