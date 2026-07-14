@@ -15,6 +15,20 @@ didn't bump the package version — they're numbered B01/B02 here for a
 continuous record; #33's package column is left at the un-suffixed version
 that was actually shipped.
 
+## 1.E26.U141 (package 1.26.141) — 2026-07-14
+
+- **E26 — Audible play-mode coaching: distinct rest beep & spoken exercises.**
+  Rest phases now sound different from work phases (U140): a work/next-step
+  switch keeps the brisk double 880 Hz chirp, a rest start plays a lower
+  falling 660→440 Hz two-tone — `beep(kind)` in `timerUtils`. Play mode and
+  focus-mode playback also speak the workout aloud (U141) via the Web Speech
+  API: the opening exercise at Start, "Rest. Up next: <exercise>" when a
+  get-ready/rest begins, the next exercise's name when its work slot starts,
+  and a completion line at the end. Announcements are governed by a new
+  persisted `player.voiceCues` preference (schema v10 + migration, default
+  **on**) toggled next to Auto-mark on the play screen; `speak()` no-ops
+  where speechSynthesis is unavailable, and beeps/vibration are unchanged.
+
 ## 1.E25.U139 (package 1.25.139) — 2026-07-14
 
 - **E25 — Body-trend continuity, composition units & motivation-first dashboard.**

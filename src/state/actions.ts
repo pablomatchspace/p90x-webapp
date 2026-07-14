@@ -270,6 +270,9 @@ export function updatePlayerSettings(patch: Partial<Settings['player']>): void {
     if (patch.autoMarkDone !== undefined) {
       draft.settings.player.autoMarkDone = Boolean(patch.autoMarkDone)
     }
+    if (patch.voiceCues !== undefined) {
+      draft.settings.player.voiceCues = Boolean(patch.voiceCues)
+    }
   })
 }
 

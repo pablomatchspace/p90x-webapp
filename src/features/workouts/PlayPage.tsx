@@ -23,7 +23,7 @@ import {
   updatePlayerSettings,
 } from '@/state/actions'
 import { useSchedule, useSettings, useWorkoutSessions } from '@/state/selectors'
-import { beep, mmss } from './timerUtils'
+import { beep, mmss, speak } from './timerUtils'
 import { useWakeLock } from './playerHooks'
 
 const ghostBtn =
@@ -120,16 +120,29 @@ export function PlayPage() {
     [segments, loggedIds],
   )
 
+  // E26: a rest gets its own lower falling beep, and (when voice cues are on)
+  // the next/starting exercise is spoken so eyes can stay off the screen.
   const commitResult = useCallback(
     (result: { state: PlaybackState | null; event: string | null }) => {
       if (result.event !== null) {
-        beep()
+        beep(result.event === 'rest-started' ? 'rest' : 'work')
         if ('vibrate' in navigator) navigator.vibrate([200, 100, 200])
+        if (settings.player.voiceCues) {
+          if (result.event === 'rest-started' && result.state !== null) {
+            const next = segments[result.state.stepIndex + 1]
+            if (next !== undefined) speak(`Rest. Up next: ${next.name}`)
+          } else if (result.event === 'step-advanced' && result.state !== null) {
+            const seg = segments[result.state.stepIndex]
+            if (seg !== undefined) speak(seg.name)
+          } else if (result.event === 'sequence-finished') {
+            speak('Workout complete')
+          }
+        }
       }
       if (result.event === 'sequence-finished') setFinished(true)
       setPlayback(result.state)
     },
-    [],
+    [segments, settings.player.voiceCues],
   )
 
   // 200 ms tick interval mirrors FocusPage; the engine is wall-clock driven so
@@ -203,6 +216,8 @@ export function PlayPage() {
     setDoneMap(new Map())
     const now = Date.now()
     setNowTick(now)
+    // E26: announce the opening exercise at workout start.
+    if (settings.player.voiceCues) speak(segments[idx].name)
     // E17: pass null straight through for untimed rep drills → engine wait.
     setPlayback(startPlayback(idx, segments[idx].seconds, now))
   }
@@ -229,6 +244,7 @@ export function PlayPage() {
   }
 
   const toggleAutoMark = () => updatePlayerSettings({ autoMarkDone: !settings.player.autoMarkDone })
+  const toggleVoiceCues = () => updatePlayerSettings({ voiceCues: !settings.player.voiceCues })
 
   const toggleJump = (id: string) =>
     setDoneMap((m) => {
@@ -511,7 +527,22 @@ export function PlayPage() {
               >
                 Auto-mark done
               </button>
-              <span>· When on, reaching the end marks this workout YES automatically.</span>
+              {/* E26: spoken announcements of the next exercise at rest/work switches */}
+              <button
+                type="button"
+                onClick={toggleVoiceCues}
+                aria-pressed={settings.player.voiceCues}
+                className={`rounded-lg border px-2.5 py-1.5 font-medium ${
+                  settings.player.voiceCues
+                    ? 'border-emerald-600 bg-emerald-600 text-white'
+                    : 'border-zinc-300 text-zinc-600 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800'
+                }`}
+              >
+                Voice cues
+              </button>
+              <span>
+                · Auto-mark sets YES at the end; voice cues speak the next exercise aloud.
+              </span>
             </div>
           </div>
         ) : null}

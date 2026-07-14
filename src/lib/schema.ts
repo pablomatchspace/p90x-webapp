@@ -6,7 +6,7 @@ import { isHttpUrl } from '@/lib/links'
  * (scores, penalties, BMI, adherence…) is recomputed by pure functions, mirroring
  * the Excel design where formulas derive everything from entered cells (PRD §8).
  */
-export const SCHEMA_VERSION = 9
+export const SCHEMA_VERSION = 10
 
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'expected YYYY-MM-DD')
 
@@ -55,8 +55,8 @@ export const settingsSchema = z.object({
     workSeconds: z.number().int().min(5).max(3600),
     restSeconds: z.number().int().min(5).max(3600),
   }),
-  /** E16: play-mode preferences */
-  player: z.object({ autoMarkDone: z.boolean() }),
+  /** E16: play-mode preferences; E26 adds spoken exercise announcements */
+  player: z.object({ autoMarkDone: z.boolean(), voiceCues: z.boolean() }),
   /** E19: which Yoga timeline plays on Yoga X days */
   yoga: z.enum(['classic', 'x3']),
   /** E20: self-reported resistance-training experience — drives feasibility rate tiers */
@@ -176,7 +176,7 @@ export function emptyState(): AppState {
       targets: { leanMassIncrease: null, bodyFat: null, ffmi: null },
       scoring: { penaltyDivisor: 2, penaltyOn: true, chairFactor: 2, rwDivisor: 10 },
       timer: { workSeconds: 60, restSeconds: 60 },
-      player: { autoMarkDone: false },
+      player: { autoMarkDone: false, voiceCues: true },
       yoga: 'classic',
       training: 'intermediate',
       nutrition: { phaseOverride: null, calorieOverride: null, dietStyle: 'balanced' },
