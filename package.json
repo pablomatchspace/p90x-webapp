@@ -1,7 +1,7 @@
 {
   "name": "p90x-webapp",
   "private": true,
-  "version": "1.26.141",
+  "version": "1.27.142",
   "type": "module",
   "scripts": {
     "dev": "vite",

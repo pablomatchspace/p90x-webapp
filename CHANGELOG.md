@@ -15,6 +15,15 @@ didn't bump the package version — they're numbered B01/B02 here for a
 continuous record; #33's package column is left at the un-suffixed version
 that was actually shipped.
 
+## 1.E27.U142 (package 1.27.142) — 2026-07-14
+
+- **E27 — Workout media deeplinks in focus mode.** Focus mode now renders the
+  same E23 `MediaLinks` launch buttons as the Today card and workout detail
+  screen (U142): a workout's configured video/audio deeplinks open in a new
+  tab right next to the step controls, so the session video can be launched
+  without leaving the one-exercise-at-a-time flow. Renders nothing until a
+  link is configured in Settings, exactly like the other surfaces.
+
 ## 1.E26.U141 (package 1.26.141) — 2026-07-14
 
 - **E26 — Audible play-mode coaching: distinct rest beep & spoken exercises.**

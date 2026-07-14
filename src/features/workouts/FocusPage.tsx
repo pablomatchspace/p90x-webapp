@@ -18,6 +18,7 @@ import { formatScore, scoreExercise, sessionTotals } from '@/lib/scoring'
 import { setWorkoutCompleted, updateTimerSettings } from '@/state/actions'
 import { useSchedule, useScoringSettings, useSettings, useWorkoutSessions } from '@/state/selectors'
 import { QuoteCard } from '@/features/dashboard/QuoteCard'
+import { MediaLinks } from './MediaLinks'
 import { focusSteps, resumeIndex } from '@/lib/focusSteps'
 import { SECONDARY_LABELS } from './entryLabels'
 import { RoundInputs } from './entryUi'
@@ -347,6 +348,8 @@ export function FocusPage() {
               >
                 Play
               </button>
+              {/* E27: open the session video/audio deeplink in a new tab (parity with Today) */}
+              <MediaLinks workoutKey={key} workoutName={def?.name ?? ''} />
             </div>
             <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
               <span>Work slot:</span>
