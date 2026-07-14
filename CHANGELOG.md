@@ -17,12 +17,13 @@ that was actually shipped.
 
 ## 1.E27.U142 (package 1.27.142) — 2026-07-14
 
-- **E27 — Workout media deeplinks in focus mode.** Focus mode now renders the
-  same E23 `MediaLinks` launch buttons as the Today card and workout detail
-  screen (U142): a workout's configured video/audio deeplinks open in a new
-  tab right next to the step controls, so the session video can be launched
-  without leaving the one-exercise-at-a-time flow. Renders nothing until a
-  link is configured in Settings, exactly like the other surfaces.
+- **E27 — Workout media deeplinks in focus & play mode.** Focus mode and guided
+  play mode now render the same E23 `MediaLinks` launch buttons as the Today
+  card and workout detail screen (U142): a workout's configured video/audio
+  deeplinks open in a new tab right next to the step/idle controls, so the
+  session video can be launched — or relaunched mid-session — without leaving
+  the play flow. Renders nothing until a link is configured in Settings,
+  exactly like the other surfaces.
 
 ## 1.E26.U141 (package 1.26.141) — 2026-07-14
 
@@ -31,8 +32,10 @@ that was actually shipped.
   switch keeps the brisk double 880 Hz chirp, a rest start plays a lower
   falling 660→440 Hz two-tone — `beep(kind)` in `timerUtils`. Play mode and
   focus-mode playback also speak the workout aloud (U141) via the Web Speech
-  API: the opening exercise at Start, "Rest. Up next: <exercise>" when a
-  get-ready/rest begins, the next exercise's name when its work slot starts,
+  API: the opening exercise at Start, an up-next announcement when a
+  get-ready/rest begins (worded to match each screen's own heading —
+  "Get ready. Up next: <exercise>" in play mode, "Rest. Up next: <exercise>"
+  in focus mode), the next exercise's name when its work slot starts,
   and a completion line at the end. Announcements are governed by a new
   persisted `player.voiceCues` preference (schema v10 + migration, default
   **on**) toggled next to Auto-mark on the play screen; `speak()` no-ops
@@ -43,13 +46,17 @@ that was actually shipped.
 - **E25 — Body-trend continuity, composition units & motivation-first dashboard.**
   Trend lines no longer break on days without a weigh-in: `fillForward`
   (U138) carries the last measurement across gaps as flagged `filled` points,
-  so the metric chart, its 7-day trend and the composition chart draw one
-  unbroken line while markers and the crosshair still snap only to real
-  logged days. The body-composition chart gains a unit toggle (U137) between
-  absolute mass (kg/lb) and percent of body weight — lean % derives as
-  100 − BF %, so it works even on weigh-ins without a weight reading. The
-  daily-motivation quote card moves to the top of the Dashboard (U139), the
-  first widget below the title.
+  so the metric chart and the composition chart draw one unbroken line while
+  markers and the crosshair still snap only to real logged days. The
+  carried-forward (assumed) spans render **dashed and faded** so a flat
+  "same as last weigh-in" stretch never reads as observed data, with a
+  "┈ assumed (no weigh-in)" legend note; the 7-day trend is averaged from
+  the real samples only, so carried-forward copies never drag it. The
+  body-composition chart gains a unit toggle (U137) between absolute mass
+  (kg/lb) and percent of body weight — lean % derives as 100 − BF %, so it
+  works even on weigh-ins without a weight reading, and the chart defaults to
+  whichever mode actually has data. The daily-motivation quote card moves to
+  the top of the Dashboard (U139), the first widget below the title.
 
 ## 1.E24.U136 (package 1.24.136) — 2026-07-13
 

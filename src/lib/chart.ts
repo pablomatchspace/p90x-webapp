@@ -129,3 +129,30 @@ export function linePath(
   }
   return d.trim()
 }
+
+/**
+ * Split a gap-filled point list (E25) into two SVG subpath strings so the chart
+ * can draw measured spans solid and carried-forward spans dashed. A segment
+ * between adjacent points is "carried" (assumed, not measured) when either
+ * endpoint was filled forward; both-real segments are "solid". Null gaps break
+ * both. Each segment is emitted as its own `M…L…` so the two styles interleave
+ * cleanly along the same line. Series with no `filled` points yield an empty
+ * `carried` string, so the caller can fall back to a plain continuous line.
+ */
+export function fillSegments(
+  points: Pt[],
+  sx: (x: number) => number,
+  sy: (y: number) => number,
+): { solid: string; carried: string } {
+  let solid = ''
+  let carried = ''
+  for (let i = 0; i < points.length - 1; i++) {
+    const a = points[i]
+    const b = points[i + 1]
+    if (a.y === null || b.y === null) continue
+    const seg = `M${round(sx(a.x))} ${round(sy(a.y))} L${round(sx(b.x))} ${round(sy(b.y))} `
+    if (a.filled === true || b.filled === true) carried += seg
+    else solid += seg
+  }
+  return { solid: solid.trim(), carried: carried.trim() }
+}

@@ -70,7 +70,8 @@ export function BodyTrendsPage() {
   const schedule = useSchedule()
   const [metricKey, setMetricKey] = useState<MetricKey>('weight')
   const [range, setRange] = useState<'all' | 'phase'>('all')
-  const [compMode, setCompMode] = useState<'abs' | 'pct'>('abs')
+  // null = auto-pick whichever mode has data, until the athlete explicitly toggles
+  const [compMode, setCompMode] = useState<'abs' | 'pct' | null>(null)
 
   const metrics = useMemo(() => buildBodyMetrics(settings), [settings])
   const metric = metrics.find((m) => m.key === metricKey) ?? metrics[0]
@@ -128,7 +129,11 @@ export function BodyTrendsPage() {
     return {
       first,
       points,
-      trend: movingAverage(points, 7),
+      // Averaged from the true samples (raw), not the filled line: movingAverage
+      // already flows through null gaps correctly (chart.ts) — averaging the
+      // carried-forward copies instead would double-count the last real reading
+      // once per missing day and drag the trend toward it.
+      trend: movingAverage(raw, 7),
       lean: fillForward(leanRaw),
       fat: fillForward(fatRaw),
       leanPct: fillForward(leanPctRaw),
@@ -176,13 +181,18 @@ export function BodyTrendsPage() {
 
   const unit = weightUnit(settings.units)
   // E25: the composition chart shows absolute mass or percent of body weight.
-  const compAbs = compMode === 'abs'
+  // A log with body-fat % but no weight has percent data and no absolute data
+  // (deriveBody's leanMass/bodyFatKg need both) — default to whichever mode
+  // actually has points instead of always starting on 'abs' and showing a
+  // false "No data yet" until the athlete guesses to switch.
+  const hasAbsComposition = chart !== null && chart.lean.some((p) => p.y !== null)
+  const hasPctComposition = chart !== null && chart.leanPct.some((p) => p.y !== null)
+  const hasComposition = hasAbsComposition || hasPctComposition
+  const effectiveCompMode: 'abs' | 'pct' = compMode ?? (hasAbsComposition ? 'abs' : 'pct')
+  const compAbs = effectiveCompMode === 'abs'
   const compUnit = compAbs ? unit : '%'
   const compLean = compAbs ? chart?.lean : chart?.leanPct
   const compFat = compAbs ? chart?.fat : chart?.fatPct
-  const hasComposition =
-    chart !== null &&
-    (chart.lean.some((p) => p.y !== null) || chart.leanPct.some((p) => p.y !== null))
   const composition: ChartSeries[] =
     !hasComposition || compLean === undefined || compFat === undefined
       ? []
@@ -190,6 +200,10 @@ export function BodyTrendsPage() {
           { id: 'lean', label: 'Lean', color: '#10b981', points: compLean },
           { id: 'fat', label: 'Fat', color: '#f59e0b', points: compFat },
         ]
+  // Whether the drawn lines contain any carried-forward (assumed) spans — drives
+  // the dashed-legend note so the reader knows which stretches weren't measured.
+  const metricHasGaps = chart?.points.some((p) => p.filled === true) ?? false
+  const compHasGaps = compLean?.some((p) => p.filled === true) ?? false
 
   return (
     <Page title="Body trends" subtitle="Progress against your SETUP targets">
@@ -279,6 +293,7 @@ export function BodyTrendsPage() {
             <span className="text-emerald-600 dark:text-emerald-400">— — Target</span>
             <span className="text-rose-500 dark:text-rose-400">— — Limit</span>
             {series.length > 1 ? <span>┄ 7-day trend</span> : null}
+            {metricHasGaps ? <span>┈ assumed (no weigh-in)</span> : null}
           </p>
         </Card>
       )}
@@ -293,10 +308,10 @@ export function BodyTrendsPage() {
                 <button
                   key={mode}
                   type="button"
-                  aria-pressed={compMode === mode}
+                  aria-pressed={effectiveCompMode === mode}
                   onClick={() => setCompMode(mode)}
                   className={`rounded-md px-2 py-1 text-xs font-medium ${
-                    compMode === mode
+                    effectiveCompMode === mode
                       ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900'
                       : 'bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400'
                   }`}
@@ -327,6 +342,7 @@ export function BodyTrendsPage() {
             <span className="inline-flex items-center gap-1">
               <span className="h-2 w-2 rounded-full bg-amber-500" aria-hidden /> Fat mass
             </span>
+            {compHasGaps ? <span>┈ assumed (no weigh-in)</span> : null}
           </p>
         </Card>
       ) : null}

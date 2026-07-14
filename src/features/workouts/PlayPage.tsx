@@ -22,7 +22,8 @@ import {
   setSessionNotes,
   updatePlayerSettings,
 } from '@/state/actions'
-import { useSchedule, useSettings, useWorkoutSessions } from '@/state/selectors'
+import { useSchedule, useSettings, useWorkoutLinks, useWorkoutSessions } from '@/state/selectors'
+import { MediaLinks } from './MediaLinks'
 import { beep, mmss, speak } from './timerUtils'
 import { useWakeLock } from './playerHooks'
 
@@ -46,6 +47,7 @@ export function PlayPage() {
   const sessions = useWorkoutSessions(key)
   const settings = useSettings()
   const session = sessions.get(programDayId)
+  const links = useWorkoutLinks(key)
 
   // Local variant override (e.g. choice between classic vs x3 Yoga). One-off, not persisted.
   const [chosenVariant, setChosenVariant] = useState<string | undefined>(undefined)
@@ -130,7 +132,8 @@ export function PlayPage() {
         if (settings.player.voiceCues) {
           if (result.event === 'rest-started' && result.state !== null) {
             const next = segments[result.state.stepIndex + 1]
-            if (next !== undefined) speak(`Rest. Up next: ${next.name}`)
+            // Match the on-screen "Get ready — up next: X" heading (Q13b rest gap).
+            if (next !== undefined) speak(`Get ready. Up next: ${next.name}`)
           } else if (result.event === 'step-advanced' && result.state !== null) {
             const seg = segments[result.state.stepIndex]
             if (seg !== undefined) speak(seg.name)
@@ -512,6 +515,12 @@ export function PlayPage() {
                     </button>
                   ))}
                 </div>
+              </div>
+            ) : null}
+            {/* E27: launch the session video/audio deeplink without leaving play mode */}
+            {links !== undefined ? (
+              <div className="flex flex-wrap items-center gap-2">
+                <MediaLinks workoutKey={key} workoutName={def.name} />
               </div>
             ) : null}
             <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">

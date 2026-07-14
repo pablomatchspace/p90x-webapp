@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { extent, linePath, nearestX, niceTicks, scale, type Pt } from '@/lib/chart'
+import { extent, fillSegments, linePath, nearestX, niceTicks, scale, type Pt } from '@/lib/chart'
 
 /**
  * Presentational multi-series line chart (US-061 / US-063, upgraded in E21).
@@ -254,32 +254,64 @@ export function LineChart({
           </text>
         ))}
 
-        {series.map((s) => (
-          <g key={s.id}>
-            <path
-              d={linePath(s.points, sx, sy)}
-              fill="none"
-              stroke={s.color}
-              strokeWidth={s.width ?? 1.75}
-              strokeDasharray={s.dashed ? '5 3' : undefined}
-              strokeLinejoin="round"
-              strokeLinecap="round"
-            />
-            {showDots
-              ? s.points
-                  .filter((p): p is { x: number; y: number } => p.y !== null && p.filled !== true)
-                  .map((p) => (
-                    <circle
-                      key={`dot-${s.id}-${p.x}`}
-                      cx={sx(p.x)}
-                      cy={sy(p.y)}
-                      r={2}
-                      fill={s.color}
-                    />
-                  ))
-              : null}
-          </g>
-        ))}
+        {series.map((s) => {
+          // E25: a series carrying gap-filled points draws its measured spans
+          // solid and its carried-forward (assumed) spans dashed + faded, so a
+          // flat "same as last weigh-in" stretch never reads as observed data.
+          // Already-dashed series (e.g. the trend overlay) skip the split.
+          const carried =
+            s.dashed !== true && s.points.some((p) => p.filled === true)
+              ? fillSegments(s.points, sx, sy)
+              : null
+          return (
+            <g key={s.id}>
+              {carried !== null ? (
+                <>
+                  <path
+                    d={carried.solid}
+                    fill="none"
+                    stroke={s.color}
+                    strokeWidth={s.width ?? 1.75}
+                    strokeLinejoin="round"
+                    strokeLinecap="round"
+                  />
+                  <path
+                    d={carried.carried}
+                    fill="none"
+                    stroke={s.color}
+                    strokeWidth={s.width ?? 1.75}
+                    strokeDasharray="2 3"
+                    strokeOpacity={0.55}
+                    strokeLinecap="round"
+                  />
+                </>
+              ) : (
+                <path
+                  d={linePath(s.points, sx, sy)}
+                  fill="none"
+                  stroke={s.color}
+                  strokeWidth={s.width ?? 1.75}
+                  strokeDasharray={s.dashed ? '5 3' : undefined}
+                  strokeLinejoin="round"
+                  strokeLinecap="round"
+                />
+              )}
+              {showDots
+                ? s.points
+                    .filter((p): p is { x: number; y: number } => p.y !== null && p.filled !== true)
+                    .map((p) => (
+                      <circle
+                        key={`dot-${s.id}-${p.x}`}
+                        cx={sx(p.x)}
+                        cy={sy(p.y)}
+                        r={2}
+                        fill={s.color}
+                      />
+                    ))
+                : null}
+            </g>
+          )
+        })}
 
         {hoverX !== null ? (
           <g data-testid="crosshair">

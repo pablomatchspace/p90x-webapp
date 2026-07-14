@@ -132,7 +132,7 @@ test('E26: voice cues announce start and next exercise; rest beeps differ', asyn
   ).toBeVisible()
   const spoken = await page.evaluate(() => (window as unknown as { __spoken: string[] }).__spoken)
   expect(spoken).toContain('March in Place') // spoken at workout start
-  expect(spoken).toContain('Rest. Up next: Run in Place') // spoken at rest start
+  expect(spoken).toContain('Get ready. Up next: Run in Place') // spoken at rest start
 
   // Turning the toggle off silences further announcements.
   await page.getByRole('button', { name: 'Stop', exact: true }).click()
@@ -141,6 +141,23 @@ test('E26: voice cues announce start and next exercise; rest beeps differ', asyn
   await page.getByRole('button', { name: 'Start', exact: true }).click()
   const after = await page.evaluate(() => (window as unknown as { __spoken: string[] }).__spoken)
   expect(after.filter((t) => t === 'March in Place')).toHaveLength(1)
+})
+
+test('E27: play mode surfaces the media launch button (E23 parity)', async ({ page }) => {
+  // configure a Plyometrics video link in Settings; hash nav keeps the store.
+  await page.goto('#/more/settings')
+  const video = page.getByRole('textbox', { name: 'Plyometrics video link' })
+  await video.fill('https://media.example/plyo.mp4')
+  await video.blur()
+
+  // back into guided play — the launch button appears with the idle controls
+  await page.goto('#/today')
+  await page.getByRole('link', { name: 'Play workout', exact: true }).click()
+  await expect(page.getByText('Segment 1 of 76')).toBeVisible()
+  const launch = page.getByRole('link', { name: 'Open Plyometrics video in a new tab' })
+  await expect(launch).toBeVisible()
+  await expect(launch).toHaveAttribute('href', 'https://media.example/plyo.mp4')
+  await expect(launch).toHaveAttribute('target', '_blank')
 })
 
 /**
