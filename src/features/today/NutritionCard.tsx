@@ -65,11 +65,13 @@ export function NutritionCard({ schedulePhase }: { schedulePhase: NutritionPhase
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="font-semibold">Nutrition</h2>
       </div>
-      <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-        Aim for <strong className="font-medium text-zinc-700 dark:text-zinc-200">one</strong> daily
-        intake — your goal-tuned target below, not both numbers. The boxed P90X booklet suggests a
-        different figure; expand it to compare.
-      </p>
+      {target !== null ? (
+        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+          Aim for <strong className="font-medium text-zinc-700 dark:text-zinc-200">one</strong>{' '}
+          daily intake — your goal-tuned target below, not both numbers. The boxed P90X booklet
+          suggests a different figure; expand it to compare.
+        </p>
+      ) : null}
 
       {/* Primary: evidence-based, goal-tuned target */}
       <section aria-label="Your target" className="mt-3">
