@@ -15,6 +15,16 @@ didn't bump the package version — they're numbered B01/B02 here for a
 continuous record; #33's package column is left at the un-suffixed version
 that was actually shipped.
 
+## 1.E27.U142.B02 (package 1.27.142-b2) — 2026-07-15
+
+- **Bug fix**: the Today nutrition card showed the P90X booklet's daily calories
+  (1,800) and the evidence-based target (2,400) as two same-weight numbers with no
+  explanation, reading as contradictory instructions. `Your target` — the
+  goal-tuned, evidence-based recommendation — now leads the card with a one-line
+  explainer ("aim for one daily intake, not both"); the booklet's plan is tucked
+  behind a `P90X booklet plan` disclosure (auto-expanded only when no personal
+  target exists yet, so a number always shows).
+
 ## 1.E27.U142.B01 (package 1.27.142-b1) — 2026-07-15
 
 - **Body-trends chart legibility (bug fix).** Two follow-up fixes to the E25

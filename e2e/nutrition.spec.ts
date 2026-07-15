@@ -18,6 +18,8 @@ test.beforeEach(async ({ page }) => {
 
 test('today shows the P90X plan target from the latest weigh-in', async ({ page }) => {
   await page.goto('#/today')
+  // The booklet plan is secondary now — collapsed behind a disclosure.
+  await page.getByText('P90X booklet plan').click()
   const plan = page.locator('section[aria-label="P90X plan"]')
 
   // Week 3 → training phase 1; latest weigh-in 80.8 kg → EA ≈ 2738 → Level II → 2400 kcal.
@@ -107,6 +109,7 @@ test('settings read-outs and overrides drive the P90X target', async ({ page }) 
 
   // Hash navigation keeps the in-memory store — today now shows the overrides.
   await page.goto('#/today')
+  await page.getByText('P90X booklet plan').click()
   const plan = page.locator('section[aria-label="P90X plan"]')
   await expect(plan.getByText('Phase 3 · Endurance Maximizer')).toBeVisible()
   await expect(plan.getByText('phase override')).toBeVisible()
@@ -116,6 +119,34 @@ test('settings read-outs and overrides drive the P90X target', async ({ page }) 
   await expect(macro('Protein')).toContainText('100')
   await expect(macro('Carbs')).toContainText('300')
   await expect(macro('Fat')).toContainText('44')
+})
+
+test('with no personal target set, the explainer hides and the P90X plan auto-opens', async ({
+  page,
+}) => {
+  // Clear both target inputs (the fixture's only targets) so targetNutritionFromState
+  // has nothing to resolve — Your target degrades to a setup prompt, not a number.
+  await page.goto('#/more/settings')
+  const leanIncrease = page.getByRole('textbox', { name: 'Lean-mass increase (kg)' })
+  await leanIncrease.fill('')
+  await leanIncrease.blur()
+  const bodyFatTarget = page.getByRole('textbox', { name: 'Target body-fat (%)' })
+  await bodyFatTarget.fill('')
+  await bodyFatTarget.blur()
+
+  await page.goto('#/today')
+
+  // The "aim for one, not both" explainer only makes sense when there's a
+  // target number below it to point to — it must not show without one.
+  await expect(page.getByText(/Aim for one daily intake/)).toHaveCount(0)
+
+  const target = page.locator('section[aria-label="Your target"]')
+  await expect(target.getByText(/Set a body target/)).toBeVisible()
+
+  // With no target number to lead with, the booklet plan auto-opens so a
+  // calorie figure is still visible without an extra click.
+  const plan = page.locator('section[aria-label="P90X plan"]')
+  await expect(plan.getByText('2,400')).toBeVisible()
 })
 
 test('settings shows the target-based recommendation section', async ({ page }) => {
