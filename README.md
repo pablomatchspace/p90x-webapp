@@ -31,13 +31,27 @@ steppers, focus mode, rest timer), and a Classic⇄Lean toggle.
 - **Workout logging** — the workbook's scoring engine computed live (adjusted
   reps, penalties, R×W), a familiar week grid, and a one-exercise-at-a-time focus
   mode with per-exercise history.
+- **Guided play mode** — press Play and the workout runs itself: authored
+  video timelines for Plyometrics, Kenpo X, X Stretch, Cardio X and Yoga
+  (classic or P90X3 30-min), plus a per-step timer in focus mode for strength
+  days. Beeps distinguish rest from work, spoken announcements name each
+  exercise (toggleable), and your video/audio deeplinks stay one tap away
+  mid-session.
 - **Body log** — daily scale entries with derived BMI / lean mass / FFMI +
   category, colour-coded against your SETUP targets and limits.
-- **Dashboard** — body-vs-target KPIs, adherence & pace, strength progression
-  charts (hand-rolled SVG, no chart library), and a deterministic daily quote.
+- **Dashboard & charts** — body-vs-target KPIs with an FFMI feasibility
+  "reality check", adherence & pace with a cumulative trend, strength
+  progression and body-composition charts (hand-rolled SVG, no chart library)
+  with crosshair read-outs, phase bands and trend overlays, and a
+  deterministic daily quote.
+- **Nutrition targets** — an evidence-based, recomposition-aware calorie +
+  macro recommendation derived from your own targets (balanced/low-carb diet
+  styles), with the published P90X Nutrition Plan numbers (phase-aware
+  calories + macro split) one disclosure away. Recommendations only — no
+  food logging.
 - **Settings & extras** — every SETUP field editable with guardrails, unit
-  toggle, editable quote pack, free-form notes, Navy/3-site/7-site body-fat
-  calculators, and a Help/About page.
+  toggle, per-workout video/audio deeplinks, editable quote pack, free-form
+  notes, Navy/3-site/7-site body-fat calculators, and a Help/About page.
 - **Resilience** — a global error boundary, corrupted-storage quarantine +
   recovery, a one-slot backup written before every destructive action, and a
   storage-full warning.
@@ -117,7 +131,7 @@ npm run lint          # oxlint (zero warnings)
 npm run typecheck     # tsc -b
 npm run test          # Vitest unit/logic suites
 npm run test:coverage # + coverage on src/lib and src/state
-npm run e2e           # Playwright (build first) — realme 16 Pro+
+npm run e2e           # Playwright (build first) — desktop chromium + realme 16 Pro+
 npm run lhci          # Lighthouse CI budget (build first)
 npm run format        # Prettier
 ```
@@ -146,7 +160,8 @@ Every PR and push to `main` runs the **CI** workflow, whose three jobs go in
 parallel:
 
 - **validate** — lint, format check, typecheck, unit tests (+ coverage), build.
-- **e2e** — the full Playwright suite on the realme 16 Pro+ mobile profile.
+- **e2e** — the full Playwright suite on the desktop chromium and
+  realme 16 Pro+ mobile profiles.
 - **lighthouse** — Lighthouse CI asserting performance / accessibility /
   best-practices ≥ 90 on the built app.
 
@@ -166,6 +181,8 @@ affiliated with or endorsed by them.
 - [`docs/PRD.md`](docs/PRD.md) — the product requirements (sanitized).
 - [`docs/stories/`](docs/stories/) — the delivered user-story index.
 - [`docs/epics/`](docs/epics/) — per-epic write-ups for work after v1.0.0.
+- [`docs/requirements/`](docs/requirements/) — sourced requirement notes
+  (workout timelines, nutrition targets, FFMI feasibility) with evidence tiers.
 - [`worker/README.md`](worker/README.md) — deploy your own cloud-sync backend.
 - [`CLAUDE.md`](CLAUDE.md) — conventions and the story-execution protocol for
   contributors (human or AI agent).

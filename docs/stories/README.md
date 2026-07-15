@@ -188,13 +188,15 @@ Post-v1.0.0. Full write-up: [`docs/epics/E20-ffmi-feasibility.md`](../epics/E20-
 
 - ✅ US-129 · Crosshair, trend lines, phase bands and new charts (L, P1)
 
-Post-v1.0.0. Released as 1.E21.U129 (PR #36) — see the CHANGELOG entry; no epic doc was checked in.
+Post-v1.0.0. Full write-up: [`docs/epics/E21-charting.md`](../epics/E21-charting.md).
 
 ## E22 — Nutrition targets
 
-- ✅ US-130 → US-132 · Nutrition-plan engine, Today/Settings surfaces, evidence-based target layer, docs & release
+- ✅ US-130 · Pure nutrition engine + schema v7 `settings.nutrition` (M, P0)
+- ✅ US-131 · Today Nutrition card + Settings Nutrition section (M, P0)
+- ✅ US-132 · Evidence-based target layer, docs & release (M, P1)
 
-Post-v1.0.0. Released as 1.E22.U132 (schema v7, `settings.nutrition`) — see the CHANGELOG entry and `docs/requirements/nutrition-targets.md`; no epic doc was checked in.
+Post-v1.0.0. Full write-up: [`docs/epics/E22-nutrition-targets.md`](../epics/E22-nutrition-targets.md).
 
 ## E23 — Workout media deeplinks
 
@@ -203,3 +205,30 @@ Post-v1.0.0. Released as 1.E22.U132 (schema v7, `settings.nutrition`) — see th
 - ✅ US-135 · Docs and release (S, P1)
 
 Post-v1.0.0. Full write-up: [`docs/epics/E23-workout-deeplinks.md`](../epics/E23-workout-deeplinks.md).
+
+## E24 — Recomposition-aware targets & low-carb diet style
+
+- ✅ US-136 · `targetComposition` + per-tissue energy budget, schema v9 `dietStyle`, docs & release (L, P0)
+
+Post-v1.0.0. Full write-up: [`docs/epics/E24-recomp-nutrition.md`](../epics/E24-recomp-nutrition.md).
+
+## E25 — Body-trend continuity, composition units & motivation-first dashboard
+
+- ✅ US-137 · Composition chart kg/% unit toggle (M, P1)
+- ✅ US-138 · `fillForward` carry-forward continuity with dashed assumed spans (M, P0)
+- ✅ US-139 · Daily-quote card first on the Dashboard (S, P1)
+
+Post-v1.0.0. Full write-up: [`docs/epics/E25-body-trend-continuity.md`](../epics/E25-body-trend-continuity.md).
+
+## E26 — Audible play-mode coaching
+
+- ✅ US-140 · Distinct rest beep — `beep(kind)` (S, P0)
+- ✅ US-141 · Spoken exercise announcements + schema v10 `player.voiceCues` (M, P0)
+
+Post-v1.0.0. Full write-up: [`docs/epics/E26-audible-play-coaching.md`](../epics/E26-audible-play-coaching.md).
+
+## E27 — Workout media deeplinks in focus & play mode
+
+- ✅ US-142 · E23 `MediaLinks` on the focus and play screens, visible during playback (M, P0)
+
+Post-v1.0.0. Full write-up: [`docs/epics/E27-play-media-links.md`](../epics/E27-play-media-links.md).

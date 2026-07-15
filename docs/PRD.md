@@ -342,10 +342,35 @@ specification — problem, goals, non-goals, design, stories with ACs, scenario
 matrix, risks — under [`docs/epics/`](epics/), and inherits §11.2 and §11.3
 unchanged. The story index links both.
 
-| Epic                                                              | Stories         | Status       |
-| ----------------------------------------------------------------- | --------------- | ------------ |
-| [E9 — Fresh-start onboarding](epics/E9-fresh-start-onboarding.md) | US-084 → US-088 | ✅ delivered |
-| [E10 — Cloud sync](epics/E10-cloud-sync.md)                       | US-089 → US-095 | ✅ delivered |
+The table below is a snapshot; the **living record** is the story index
+([`docs/stories/README.md`](stories/README.md)) plus the CHANGELOG.
+
+| Epic                                                                                  | Stories         | Status       |
+| ------------------------------------------------------------------------------------- | --------------- | ------------ |
+| [E9 — Fresh-start onboarding](epics/E9-fresh-start-onboarding.md)                     | US-084 → US-088 | ✅ delivered |
+| [E10 — Cloud sync](epics/E10-cloud-sync.md)                                           | US-089 → US-095 | ✅ delivered |
+| [E13 — Per-epic versioning & changelog](epics/E13-versioning.md)                      | US-096          | ✅ delivered |
+| [E11 — Chest & Back focus sequence](epics/E11-chest-back-focus-sequence.md)           | US-097 → US-098 | ✅ delivered |
+| [E12 — Focus play timer](epics/E12-focus-play-timer.md)                               | US-100 → US-102 | ✅ delivered |
+| [E14 — FFMI target estimator](epics/E14-ffmi-target-estimator.md)                     | US-104 → US-106 | ✅ delivered |
+| [E15 — Playwright device replacement](epics/E15-playwright-device-replacement.md)     | US-108          | ✅ delivered |
+| [E16 — Plyometrics play](epics/E16-plyometrics-play.md)                               | US-108 → US-112 | ✅ delivered |
+| [E17 — Kenpo X play](epics/E17-kenpo-play.md)                                         | US-113 → US-115 | ✅ delivered |
+| [E18 — X Stretch + Cardio X play](epics/E18-stretch-cardio-play.md)                   | US-116 → US-118 | ✅ delivered |
+| [E19 — Yoga play variants](epics/E19-yoga-play-variants.md)                           | US-119 → US-121 | ✅ delivered |
+| [E20 — FFMI target feasibility](epics/E20-ffmi-feasibility.md)                        | US-122 → US-128 | ✅ delivered |
+| [E21 — Sophisticated charting](epics/E21-charting.md)                                 | US-129          | ✅ delivered |
+| [E22 — Nutrition targets](epics/E22-nutrition-targets.md)                             | US-130 → US-132 | ✅ delivered |
+| [E23 — Workout media deeplinks](epics/E23-workout-deeplinks.md)                       | US-133 → US-135 | ✅ delivered |
+| [E24 — Recomp-aware targets & low-carb diet style](epics/E24-recomp-nutrition.md)     | US-136          | ✅ delivered |
+| [E25 — Body-trend continuity & composition units](epics/E25-body-trend-continuity.md) | US-137 → US-139 | ✅ delivered |
+| [E26 — Audible play-mode coaching](epics/E26-audible-play-coaching.md)                | US-140 → US-141 | ✅ delivered |
+| [E27 — Media deeplinks in focus & play mode](epics/E27-play-media-links.md)           | US-142          | ✅ delivered |
+
+E22/E24 carve an exception out of the §3 "Nutrition" non-goal: the excluded
+workbook nutrition _sheets_ stay excluded, but the app now derives calorie and
+macro **targets** from the published Nutrition Plan guide plus an
+evidence-based layer (no food logging).
 
 E10 amends decision **D3** to _"personal data is local-only **by default**; cloud
 sync is strictly opt-in, end-to-end encrypted, and runs on a backend the user
@@ -388,7 +413,7 @@ All ACs demonstrably met · unit tests for new logic (lib code: required) · E2E
 | --------------- | ----------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- | ------------------------------ |
 | **V1 core**     | E0 → E1 → E2 → E3 (US-030/031/032/034) → E4 (minus US-046) → E5 → E6 → US-070, US-080, US-082, US-083 | Owner demo: import real file locally, use for a real workout day | ✅ shipped · ⏳ demo gate open |
 | **V1.1 extras** | US-033, US-046, US-071, US-072, US-073, US-074, US-081                                                | CI green + owner spot-check                                      | ✅ shipped                     |
-| **Post-v1.0.0** | E9 (US-084 → US-088), E10 (US-089 → US-095), and any later epic, each spec'd under `docs/epics/`      | CI green + per-epic merge                                        | ✅ E9, E10 shipped             |
+| **Post-v1.0.0** | E9 onwards — each later epic spec'd under `docs/epics/` and indexed in `docs/stories/README.md`       | CI green + per-epic merge                                        | ✅ E9 → E27 shipped            |
 | Ongoing         | Hardening, quote-pack curation, feedback fixes                                                        | —                                                                | —                              |
 
 E0–E8 shipped as **v1.0.0**; E9 followed on `main`. The one V1 gate still open is
