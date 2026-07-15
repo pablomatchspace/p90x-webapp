@@ -56,11 +56,12 @@ export function DashboardPage() {
 
   return (
     <Page title="Dashboard" subtitle="Your program at a glance">
+      {/* E25: daily motivation leads the page — first widget below the title */}
+      <QuoteCard seed={adherence?.dayReached ?? 0} />
       <ProgramStatusBar />
       <NextUp />
       <KpiCards />
       <AdherenceCard />
-      <QuoteCard seed={adherence?.dayReached ?? 0} />
       <BodyQuickAdd />
     </Page>
   )

@@ -2,8 +2,15 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Card, Page } from '@/components/Page'
 import { LineChart, type Band, type ChartSeries, type RefLine } from '@/components/LineChart'
-import { deriveBody, formatFixed, kgToUnit, threshold, weightUnit } from '@/lib/body'
-import { movingAverage, type Pt } from '@/lib/chart'
+import {
+  deriveBody,
+  formatFixed,
+  fractionToPercent,
+  kgToUnit,
+  threshold,
+  weightUnit,
+} from '@/lib/body'
+import { fillForward, movingAverage, type Pt } from '@/lib/chart'
 import { addDays, compareISO, diffDays, formatShort, todayISO, type ISODate } from '@/lib/dates'
 import type { Schedule } from '@/lib/schedule/materialize'
 import { useBodyLog, useSchedule, useSettings } from '@/state/selectors'
@@ -11,13 +18,15 @@ import { Chip } from '@/features/schedule/Chip'
 import { buildBodyMetrics, progressToTarget, TONE_CHIP, type MetricKey } from './bodyMetrics'
 
 /**
- * Body trend charts (US-061, upgraded in E21): each derived metric plotted
- * against its SETUP start / target / limit reference lines, with gaps for
- * missing weigh-ins, a phase/all range filter, and a progress-to-target
- * read-out. E21 adds weigh-in markers, a dashed 7-day trend overlay, phase
- * shading, a crosshair read-out, and a lean-vs-fat composition chart. Metric
- * definitions come from the shared bodyMetrics engine, so the charts and the
- * dashboard KPI cards can never disagree.
+ * Body trend charts (US-061, upgraded in E21/E25): each derived metric plotted
+ * against its SETUP start / target / limit reference lines, with a phase/all
+ * range filter and a progress-to-target read-out. E21 adds weigh-in markers, a
+ * dashed 7-day trend overlay, phase shading, a crosshair read-out, and a
+ * lean-vs-fat composition chart. E25 carries the last measurement forward
+ * across missing days (fillForward) so lines never break, and lets the
+ * composition chart toggle between absolute mass and percent of body weight.
+ * Metric definitions come from the shared bodyMetrics engine, so the charts
+ * and the dashboard KPI cards can never disagree.
  */
 
 /** x-axis spans of the program phases, in days relative to `first` (chart x). */
@@ -61,6 +70,8 @@ export function BodyTrendsPage() {
   const schedule = useSchedule()
   const [metricKey, setMetricKey] = useState<MetricKey>('weight')
   const [range, setRange] = useState<'all' | 'phase'>('all')
+  // null = auto-pick whichever mode has data, until the athlete explicitly toggles
+  const [compMode, setCompMode] = useState<'abs' | 'pct' | null>(null)
 
   const metrics = useMemo(() => buildBodyMetrics(settings), [settings])
   const metric = metrics.find((m) => m.key === metricKey) ?? metrics[0]
@@ -85,30 +96,51 @@ export function BodyTrendsPage() {
     const first = entries[0].date
     const last = entries[entries.length - 1].date
     const byDate = new Map(entries.map((e) => [e.date, e]))
-    const points: Pt[] = []
-    const lean: Pt[] = []
-    const fat: Pt[] = []
+    const raw: Pt[] = []
+    const leanRaw: Pt[] = []
+    const fatRaw: Pt[] = []
+    const leanPctRaw: Pt[] = []
+    const fatPctRaw: Pt[] = []
     for (let day = first; compareISO(day, last) <= 0; day = addDays(day, 1)) {
       const e = byDate.get(day)
       const derived = e ? deriveBody(e, settings) : null
       const x = diffDays(first, day)
-      points.push({ x, y: e && derived ? metric.value(e, derived) : null })
-      lean.push({
+      raw.push({ x, y: e && derived ? metric.value(e, derived) : null })
+      leanRaw.push({
         x,
         y: derived?.leanMass != null ? kgToUnit(derived.leanMass, settings.units) : null,
       })
-      fat.push({
+      fatRaw.push({
         x,
         y: derived?.bodyFatKg != null ? kgToUnit(derived.bodyFatKg, settings.units) : null,
       })
+      const fatPctVal = fractionToPercent(e?.bodyFat ?? null)
+      leanPctRaw.push({ x, y: fatPctVal === null ? null : 100 - fatPctVal })
+      fatPctRaw.push({ x, y: fatPctVal })
     }
+    // E25: carry the last measurement across missing days — unbroken lines.
+    const points = fillForward(raw)
     const total = diffDays(first, last)
     const xTicks = [...new Set([0, Math.round(total / 3), Math.round((2 * total) / 3), total])].map(
       (x) => ({ x, label: formatShort(addDays(first, x)) }),
     )
     const latestEntry = entries[entries.length - 1]
     const latest = metric.value(latestEntry, deriveBody(latestEntry, settings))
-    return { first, points, trend: movingAverage(points, 7), lean, fat, xTicks, latest }
+    return {
+      first,
+      points,
+      // Averaged from the true samples (raw), not the filled line: movingAverage
+      // already flows through null gaps correctly (chart.ts) — averaging the
+      // carried-forward copies instead would double-count the last real reading
+      // once per missing day and drag the trend toward it.
+      trend: movingAverage(raw, 7),
+      lean: fillForward(leanRaw),
+      fat: fillForward(fatRaw),
+      leanPct: fillForward(leanPctRaw),
+      fatPct: fillForward(fatPctRaw),
+      xTicks,
+      latest,
+    }
   }, [entries, metric, settings])
 
   const bands = useMemo(
@@ -148,13 +180,30 @@ export function BodyTrendsPage() {
         ]
 
   const unit = weightUnit(settings.units)
+  // E25: the composition chart shows absolute mass or percent of body weight.
+  // A log with body-fat % but no weight has percent data and no absolute data
+  // (deriveBody's leanMass/bodyFatKg need both) — default to whichever mode
+  // actually has points instead of always starting on 'abs' and showing a
+  // false "No data yet" until the athlete guesses to switch.
+  const hasAbsComposition = chart !== null && chart.lean.some((p) => p.y !== null)
+  const hasPctComposition = chart !== null && chart.leanPct.some((p) => p.y !== null)
+  const hasComposition = hasAbsComposition || hasPctComposition
+  const effectiveCompMode: 'abs' | 'pct' = compMode ?? (hasAbsComposition ? 'abs' : 'pct')
+  const compAbs = effectiveCompMode === 'abs'
+  const compUnit = compAbs ? unit : '%'
+  const compLean = compAbs ? chart?.lean : chart?.leanPct
+  const compFat = compAbs ? chart?.fat : chart?.fatPct
   const composition: ChartSeries[] =
-    chart === null || !chart.lean.some((p) => p.y !== null)
+    !hasComposition || compLean === undefined || compFat === undefined
       ? []
       : [
-          { id: 'lean', label: 'Lean', color: '#10b981', points: chart.lean },
-          { id: 'fat', label: 'Fat', color: '#f59e0b', points: chart.fat },
+          { id: 'lean', label: 'Lean', color: '#10b981', points: compLean },
+          { id: 'fat', label: 'Fat', color: '#f59e0b', points: compFat },
         ]
+  // Whether the drawn lines contain any carried-forward (assumed) spans — drives
+  // the dashed-legend note so the reader knows which stretches weren't measured.
+  const metricHasGaps = chart?.points.some((p) => p.filled === true) ?? false
+  const compHasGaps = compLean?.some((p) => p.filled === true) ?? false
 
   return (
     <Page title="Body trends" subtitle="Progress against your SETUP targets">
@@ -244,15 +293,36 @@ export function BodyTrendsPage() {
             <span className="text-emerald-600 dark:text-emerald-400">— — Target</span>
             <span className="text-rose-500 dark:text-rose-400">— — Limit</span>
             {series.length > 1 ? <span>┄ 7-day trend</span> : null}
+            {metricHasGaps ? <span>┈ assumed (no weigh-in)</span> : null}
           </p>
         </Card>
       )}
 
-      {composition.length > 0 ? (
+      {hasComposition ? (
         <Card>
-          <h2 className="font-semibold">Body composition</h2>
+          <div className="flex items-start justify-between gap-2">
+            <h2 className="font-semibold">Body composition</h2>
+            {/* E25: display toggle — absolute mass vs percent of body weight */}
+            <div className="flex gap-1" role="group" aria-label="Composition unit">
+              {(['abs', 'pct'] as const).map((mode) => (
+                <button
+                  key={mode}
+                  type="button"
+                  aria-pressed={effectiveCompMode === mode}
+                  onClick={() => setCompMode(mode)}
+                  className={`rounded-md px-2 py-1 text-xs font-medium ${
+                    effectiveCompMode === mode
+                      ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900'
+                      : 'bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400'
+                  }`}
+                >
+                  {mode === 'abs' ? unit : '%'}
+                </button>
+              ))}
+            </div>
+          </div>
           <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
-            Lean mass vs fat mass ({unit}) — recomp shows as the lines pulling apart
+            Lean mass vs fat mass ({compUnit}) — recomp shows as the lines pulling apart
           </p>
           <div className="mt-3">
             <LineChart
@@ -262,7 +332,7 @@ export function BodyTrendsPage() {
               yFormat={(v) => formatFixed(v, 1)}
               xLabel={dateLabel}
               showDots
-              ariaLabel={`Lean mass vs fat mass in ${unit}`}
+              ariaLabel={`Lean mass vs fat mass in ${compUnit}`}
             />
           </div>
           <p className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-zinc-500 dark:text-zinc-400">
@@ -272,6 +342,7 @@ export function BodyTrendsPage() {
             <span className="inline-flex items-center gap-1">
               <span className="h-2 w-2 rounded-full bg-amber-500" aria-hidden /> Fat mass
             </span>
+            {compHasGaps ? <span>┈ assumed (no weigh-in)</span> : null}
           </p>
         </Card>
       ) : null}

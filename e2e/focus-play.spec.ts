@@ -74,3 +74,19 @@ test('work and rest duration choices persist across a reload', async ({ page }) 
     'true',
   )
 })
+
+test('E26: focus-only workouts can silence voice cues from their own flow', async ({ page }) => {
+  // Chest & Back has no play timeline, so its only voice-cue control is here.
+  const toggle = page.getByRole('button', { name: 'Voice cues', exact: true })
+  await expect(toggle).toHaveAttribute('aria-pressed', 'true') // default on (schema v10)
+  await toggle.click()
+  await expect(toggle).toHaveAttribute('aria-pressed', 'false')
+
+  // the opt-out persists across a reload (raw player preference)
+  await page.clock.fastForward(500)
+  await page.reload()
+  await expect(page.getByRole('button', { name: 'Voice cues', exact: true })).toHaveAttribute(
+    'aria-pressed',
+    'false',
+  )
+})

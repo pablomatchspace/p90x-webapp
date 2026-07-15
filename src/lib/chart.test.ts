@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest'
-import { extent, linePath, movingAverage, nearestX, niceTicks, scale } from './chart'
+import {
+  extent,
+  fillForward,
+  fillSegments,
+  linePath,
+  movingAverage,
+  nearestX,
+  niceTicks,
+  scale,
+} from './chart'
 
 describe('extent', () => {
   it('finds min/max over finite values', () => {
@@ -100,6 +109,80 @@ describe('movingAverage', () => {
 
   it('returns empty for all-null input', () => {
     expect(movingAverage([{ x: 0, y: null }], 7)).toEqual([])
+  })
+})
+
+describe('fillForward', () => {
+  it('carries the last logged value across null gaps, flagged as filled', () => {
+    expect(
+      fillForward([
+        { x: 0, y: 10 },
+        { x: 1, y: null },
+        { x: 2, y: null },
+        { x: 3, y: 30 },
+      ]),
+    ).toEqual([
+      { x: 0, y: 10 },
+      { x: 1, y: 10, filled: true },
+      { x: 2, y: 10, filled: true },
+      { x: 3, y: 30 },
+    ])
+  })
+
+  it('leaves leading nulls (before the first log) as gaps', () => {
+    expect(
+      fillForward([
+        { x: 0, y: null },
+        { x: 1, y: 5 },
+        { x: 2, y: null },
+      ]),
+    ).toEqual([
+      { x: 0, y: null },
+      { x: 1, y: 5 },
+      { x: 2, y: 5, filled: true },
+    ])
+  })
+
+  it('is the identity for fully-logged input', () => {
+    const points = [
+      { x: 0, y: 1 },
+      { x: 1, y: 2 },
+    ]
+    expect(fillForward(points)).toEqual(points)
+  })
+})
+
+describe('fillSegments', () => {
+  const id = (n: number) => n
+
+  it('draws measured spans solid and carried-forward spans dashed', () => {
+    const { solid, carried } = fillSegments(
+      fillForward([
+        { x: 0, y: 10 },
+        { x: 1, y: null },
+        { x: 2, y: 30 },
+        { x: 3, y: 40 },
+      ]),
+      id,
+      id,
+    )
+    // 0→1 and 1→2 touch the filled x=1 point → carried; 2→3 is real→real → solid
+    expect(carried).toBe('M0 10 L1 10 M1 10 L2 30')
+    expect(solid).toBe('M2 30 L3 40')
+  })
+
+  it('breaks both paths across null gaps and yields no carried spans when nothing was filled', () => {
+    const { solid, carried } = fillSegments(
+      [
+        { x: 0, y: 10 },
+        { x: 1, y: null },
+        { x: 2, y: 30 },
+      ],
+      id,
+      id,
+    )
+    expect(carried).toBe('')
+    expect(solid).toBe('') // the only adjacent pair straddles the gap
   })
 })
 

@@ -15,14 +15,15 @@ import {
 } from '@/lib/playback'
 import { workoutOccurrences } from '@/lib/schedule/occurrences'
 import { formatScore, scoreExercise, sessionTotals } from '@/lib/scoring'
-import { setWorkoutCompleted, updateTimerSettings } from '@/state/actions'
+import { setWorkoutCompleted, updatePlayerSettings, updateTimerSettings } from '@/state/actions'
 import { useSchedule, useScoringSettings, useSettings, useWorkoutSessions } from '@/state/selectors'
 import { QuoteCard } from '@/features/dashboard/QuoteCard'
+import { MediaLinks } from './MediaLinks'
 import { focusSteps, resumeIndex } from '@/lib/focusSteps'
 import { SECONDARY_LABELS } from './entryLabels'
 import { RoundInputs } from './entryUi'
 import { TimerCard } from './TimerCard'
-import { beep, mmss } from './timerUtils'
+import { beep, mmss, speak } from './timerUtils'
 import { useWakeLock } from './playerHooks'
 
 function Sparkline({ points }: { points: number[] }) {
@@ -81,10 +82,22 @@ export function FocusPage() {
     restSeconds: settings.timer.restSeconds,
   }
 
+  // E26: rest gets its own lower beep; voice cues speak the upcoming exercise.
   const applyTick = (result: { state: PlaybackState | null; event: string | null }) => {
     if (result.event !== null) {
-      beep()
+      beep(result.event === 'rest-started' ? 'rest' : 'work')
       if ('vibrate' in navigator) navigator.vibrate([200, 100, 200])
+      if (settings.player.voiceCues) {
+        if (result.event === 'rest-started' && result.state !== null) {
+          const next = steps[result.state.stepIndex + 1]
+          if (next !== undefined) speak(`Rest. Up next: ${next.exercise.name}`)
+        } else if (result.event === 'step-advanced' && result.state !== null) {
+          const step = steps[result.state.stepIndex]
+          if (step !== undefined) speak(step.exercise.name)
+        } else if (result.event === 'sequence-finished') {
+          speak('Sequence complete')
+        }
+      }
     }
     if (result.event === 'step-advanced' && result.state !== null) setIdx(result.state.stepIndex)
     if (result.event === 'sequence-finished') setPlayDone(true)
@@ -146,6 +159,8 @@ export function FocusPage() {
     setPlayDone(false)
     const now = Date.now()
     setNowTick(now)
+    // E26: announce the exercise the sequence starts on.
+    if (settings.player.voiceCues) speak(steps[Math.min(idx, steps.length - 1)].exercise.name)
     setPlayback(startPlayback(idx, settings.timer.workSeconds, now))
   }
   const onPause = () => setPlayback((p) => (p === null ? p : pausePlayback(p, Date.now())))
@@ -333,6 +348,8 @@ export function FocusPage() {
               >
                 Play
               </button>
+              {/* E27: open the session video/audio deeplink in a new tab (parity with Today) */}
+              <MediaLinks workoutKey={key} workoutName={def?.name ?? ''} />
             </div>
             <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
               <span>Work slot:</span>
@@ -355,6 +372,23 @@ export function FocusPage() {
                 · Rest between steps: {settings.timer.restSeconds} s — set it on the rest timer
                 below.
               </span>
+            </div>
+            {/* E26: spoken exercise announcements — reachable from focus-only
+                workouts (e.g. Chest & Back) that have no play-mode screen. */}
+            <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
+              <button
+                type="button"
+                onClick={() => updatePlayerSettings({ voiceCues: !settings.player.voiceCues })}
+                aria-pressed={settings.player.voiceCues}
+                className={`rounded-lg border px-2.5 py-1.5 font-medium ${
+                  settings.player.voiceCues
+                    ? 'border-emerald-600 bg-emerald-600 text-white'
+                    : 'border-zinc-300 text-zinc-600 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800'
+                }`}
+              >
+                Voice cues
+              </button>
+              <span>· When on, Play speaks each exercise aloud.</span>
             </div>
           </>
         ) : (

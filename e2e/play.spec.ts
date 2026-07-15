@@ -106,6 +106,65 @@ test('auto-mark toggle persists and marks completion at sequence end', async ({ 
   await expect(page.getByText('Done', { exact: true }).first()).toBeVisible()
 })
 
+test('E26: voice cues announce start and next exercise; rest beeps differ', async ({ page }) => {
+  // Stub the Web Speech API so the utterances are recordable — headless audio
+  // is silent anyway, and this pins exactly what would be spoken.
+  await page.addInitScript(() => {
+    const spoken: string[] = []
+    ;(window as unknown as { __spoken: string[] }).__spoken = spoken
+    Object.defineProperty(window, 'speechSynthesis', {
+      value: { cancel: () => {}, speak: (u: SpeechSynthesisUtterance) => spoken.push(u.text) },
+    })
+  })
+  await page.clock.fastForward(500) // flush the debounced persister before reloading
+  await page.reload() // re-boot so the init script takes effect
+  await expect(page.getByText('Segment 1 of 76')).toBeVisible()
+
+  // Voice cues default ON (schema v10 migration) and toggle like auto-mark.
+  const toggle = page.getByRole('button', { name: 'Voice cues', exact: true })
+  await expect(toggle).toHaveAttribute('aria-pressed', 'true')
+
+  await page.getByRole('button', { name: 'Start', exact: true }).click()
+  // March in Place ends after its 30s → the get-ready rest announces Run in Place.
+  await page.clock.fastForward(30_300)
+  await expect(
+    page.getByRole('heading', { name: /Get ready — up next: Run in Place/ }),
+  ).toBeVisible()
+  const spoken = await page.evaluate(() => (window as unknown as { __spoken: string[] }).__spoken)
+  expect(spoken).toContain('March in Place') // spoken at workout start
+  expect(spoken).toContain('Get ready. Up next: Run in Place') // spoken at rest start
+
+  // Turning the toggle off silences further announcements.
+  await page.getByRole('button', { name: 'Stop', exact: true }).click()
+  await toggle.click()
+  await expect(toggle).toHaveAttribute('aria-pressed', 'false')
+  await page.getByRole('button', { name: 'Start', exact: true }).click()
+  const after = await page.evaluate(() => (window as unknown as { __spoken: string[] }).__spoken)
+  expect(after.filter((t) => t === 'March in Place')).toHaveLength(1)
+})
+
+test('E27: play mode surfaces the media launch button (E23 parity)', async ({ page }) => {
+  // configure a Plyometrics video link in Settings; hash nav keeps the store.
+  await page.goto('#/more/settings')
+  const video = page.getByRole('textbox', { name: 'Plyometrics video link' })
+  await video.fill('https://media.example/plyo.mp4')
+  await video.blur()
+
+  // back into guided play — the launch button appears with the idle controls
+  await page.goto('#/today')
+  await page.getByRole('link', { name: 'Play workout', exact: true }).click()
+  await expect(page.getByText('Segment 1 of 76')).toBeVisible()
+  const launch = page.getByRole('link', { name: 'Open Plyometrics video in a new tab' })
+  await expect(launch).toBeVisible()
+  await expect(launch).toHaveAttribute('href', 'https://media.example/plyo.mp4')
+  await expect(launch).toHaveAttribute('target', '_blank')
+
+  // stays reachable mid-session so the athlete can relaunch media after Start
+  await page.getByRole('button', { name: 'Start', exact: true }).click()
+  await expect(page.getByText('Work', { exact: true })).toBeVisible()
+  await expect(launch).toBeVisible()
+})
+
 /**
  * Kenpo X play mode (E17): registry-driven — the Play button auto-appears on a
  * Kenpo day. Timed warm-up stretches count down; rep drills wait for a Done tap.

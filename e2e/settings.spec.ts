@@ -90,6 +90,13 @@ test('stores workout deeplinks and offers them as new-tab launch buttons (E23)',
     page.getByRole('link', { name: 'Open Chest & Back video in a new tab' }),
   ).toBeVisible()
 
+  // E27: focus mode offers the same launch button next to its step controls
+  await page.goto('#/workouts/chest-back/focus/d001')
+  await expect(page.getByText(/Step \d+ of \d+/)).toBeVisible()
+  await expect(
+    page.getByRole('link', { name: 'Open Chest & Back video in a new tab' }),
+  ).toBeVisible()
+
   // blanking the field removes the link and its button. openSettings reloads,
   // so flush the debounced persist first (frozen clock never ticks by itself).
   await page.clock.fastForward(500)

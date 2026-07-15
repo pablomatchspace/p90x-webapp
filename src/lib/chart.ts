@@ -10,6 +10,8 @@ export interface Pt {
   x: number
   /** null marks a gap: the line breaks here instead of interpolating across it */
   y: number | null
+  /** E25: carried forward from the last logged value — drawn as line, never as a marker */
+  filled?: boolean
 }
 
 /** Min/max over the finite values, or null when there are none. */
@@ -79,6 +81,23 @@ export function movingAverage(points: Pt[], window: number): Pt[] {
   })
 }
 
+/**
+ * Carry-forward gap fill (E25): every null after the first logged value becomes
+ * a copy of the last logged value, flagged `filled` so the chart draws one
+ * unbroken line without minting markers or crosshair stops for days that were
+ * never measured. Leading nulls (before the first log) stay gaps.
+ */
+export function fillForward(points: Pt[]): Pt[] {
+  let last: number | null = null
+  return points.map((p) => {
+    if (p.y !== null) {
+      last = p.y
+      return p
+    }
+    return last === null ? p : { x: p.x, y: last, filled: true }
+  })
+}
+
 /** The x closest to `x` (ties go to the earlier value); null for an empty list. */
 export function nearestX(xs: number[], x: number): number | null {
   let best: number | null = null
@@ -109,4 +128,31 @@ export function linePath(
     penDown = true
   }
   return d.trim()
+}
+
+/**
+ * Split a gap-filled point list (E25) into two SVG subpath strings so the chart
+ * can draw measured spans solid and carried-forward spans dashed. A segment
+ * between adjacent points is "carried" (assumed, not measured) when either
+ * endpoint was filled forward; both-real segments are "solid". Null gaps break
+ * both. Each segment is emitted as its own `M…L…` so the two styles interleave
+ * cleanly along the same line. Series with no `filled` points yield an empty
+ * `carried` string, so the caller can fall back to a plain continuous line.
+ */
+export function fillSegments(
+  points: Pt[],
+  sx: (x: number) => number,
+  sy: (y: number) => number,
+): { solid: string; carried: string } {
+  let solid = ''
+  let carried = ''
+  for (let i = 0; i < points.length - 1; i++) {
+    const a = points[i]
+    const b = points[i + 1]
+    if (a.y === null || b.y === null) continue
+    const seg = `M${round(sx(a.x))} ${round(sy(a.y))} L${round(sx(b.x))} ${round(sy(b.y))} `
+    if (a.filled === true || b.filled === true) carried += seg
+    else solid += seg
+  }
+  return { solid: solid.trim(), carried: carried.trim() }
 }

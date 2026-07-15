@@ -66,6 +66,13 @@ const MIGRATIONS: Record<number, (doc: Record<string, unknown>) => void> = {
       settings.nutrition.dietStyle = 'balanced'
     }
   },
+  // v9 → v10 (E26): spoken play-mode announcements, on by default.
+  9: (doc) => {
+    const settings = doc.settings as { player?: Record<string, unknown> } | undefined
+    if (settings?.player !== undefined && settings.player.voiceCues === undefined) {
+      settings.player.voiceCues = true
+    }
+  },
 }
 
 export function migrateToCurrent(raw: unknown): MigrationResult {

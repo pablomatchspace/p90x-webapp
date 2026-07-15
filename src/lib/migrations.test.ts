@@ -3,13 +3,13 @@ import { migrateToCurrent } from './migrations'
 import { emptyState, SCHEMA_VERSION } from './schema'
 
 /** A faithful document at an older version: current empty state minus later fields. */
-function docAt(version: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8): Record<string, unknown> {
+function docAt(version: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9): Record<string, unknown> {
   const doc = JSON.parse(JSON.stringify(emptyState())) as {
     schemaVersion: number
     settings: {
       timer?: unknown
       targets: Record<string, unknown>
-      player?: unknown
+      player?: Record<string, unknown>
       yoga?: unknown
       training?: unknown
       nutrition?: Record<string, unknown>
@@ -17,6 +17,7 @@ function docAt(version: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8): Record<string, unknown> 
     }
   }
   doc.schemaVersion = version
+  if (version < 10) delete doc.settings.player?.voiceCues // v10 field
   if (version < 9) delete doc.settings.nutrition?.dietStyle // v9 field
   if (version < 8) delete doc.settings.workoutLinks // v8 field
   if (version < 7) delete doc.settings.nutrition // v7 field
@@ -37,7 +38,7 @@ describe('migration pipeline', () => {
       expect(result.state.schemaVersion).toBe(SCHEMA_VERSION)
       expect(result.state.settings.timer).toEqual({ workSeconds: 60, restSeconds: 60 })
       expect(result.state.settings.targets.ffmi).toBeNull()
-      expect(result.state.settings.player).toEqual({ autoMarkDone: false })
+      expect(result.state.settings.player).toEqual({ autoMarkDone: false, voiceCues: true })
       expect(result.state.settings.yoga).toBe('classic')
       expect(result.state.settings.training).toBe('intermediate')
       expect(result.state.settings.nutrition).toEqual({
@@ -58,7 +59,7 @@ describe('migration pipeline', () => {
       expect(result.migrated).toBe(true)
       expect(result.state.settings.timer).toEqual({ workSeconds: 45, restSeconds: 90 })
       expect(result.state.settings.targets.ffmi).toBeNull()
-      expect(result.state.settings.player).toEqual({ autoMarkDone: false })
+      expect(result.state.settings.player).toEqual({ autoMarkDone: false, voiceCues: true })
       expect(result.state.settings.yoga).toBe('classic')
     }
   })
@@ -72,7 +73,7 @@ describe('migration pipeline', () => {
       expect(result.migrated).toBe(true)
       expect(result.state.settings.timer).toEqual({ workSeconds: 45, restSeconds: 90 })
       expect(result.state.settings.targets.ffmi).toBeNull()
-      expect(result.state.settings.player).toEqual({ autoMarkDone: false })
+      expect(result.state.settings.player).toEqual({ autoMarkDone: false, voiceCues: true })
       expect(result.state.settings.yoga).toBe('classic')
     }
   })
@@ -84,7 +85,7 @@ describe('migration pipeline', () => {
     expect(result.ok).toBe(true)
     if (result.ok) {
       expect(result.migrated).toBe(true)
-      expect(result.state.settings.player).toEqual({ autoMarkDone: true })
+      expect(result.state.settings.player).toEqual({ autoMarkDone: true, voiceCues: true })
       expect(result.state.settings.yoga).toBe('classic')
     }
   })
@@ -158,6 +159,17 @@ describe('migration pipeline', () => {
       expect(result.state.settings.workoutLinks).toEqual({
         'chest-back': { video: 'https://example.com/v' },
       })
+    }
+  })
+
+  it('upgrades a v9 document, keeping player prefs and gaining voice cues on', () => {
+    const doc = docAt(9)
+    ;(doc.settings as { player?: unknown }).player = { autoMarkDone: true }
+    const result = migrateToCurrent(doc)
+    expect(result.ok).toBe(true)
+    if (result.ok) {
+      expect(result.migrated).toBe(true)
+      expect(result.state.settings.player).toEqual({ autoMarkDone: true, voiceCues: true })
     }
   })
 
