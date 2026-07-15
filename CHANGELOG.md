@@ -15,6 +15,27 @@ didn't bump the package version — they're numbered B01/B02 here for a
 continuous record; #33's package column is left at the un-suffixed version
 that was actually shipped.
 
+## 1.E28.U146 (package 1.28.146) — 2026-07-15
+
+- **E28 — Round lifecycle: archive, end-of-round report & round-over-round
+  comparison.** A 90-day round can now end without export-and-reset. Schema
+  v11 adds a top-level `rounds` archive (U143): **More → Rounds** completes
+  the running round with a guarded flow — label, an opt-in that seeds the
+  next round's SETUP start stats from the latest weigh-in, an export nudge —
+  moving its ops/logs/weigh-ins plus a frozen snapshot of the round-scoped
+  SETUP inputs (scoring params, height, start stats, targets, limits) inside
+  the document, then resetting the app for round 2; archives restore (while
+  no round runs), rename and delete (U145). The **round report** (U144,
+  `/rounds/live` + `/rounds/:id`) turns day 90 into a deliverable: adherence
+  headline, body first→last deltas against targets, per-workout net-score
+  first→last and cross-workout top movers — all recomputed by the existing
+  engines from the frozen raw inputs, so an archived report never shifts when
+  later rounds retune Settings; the Dashboard gains a round-complete card
+  once the last program day is reached. **Round-over-round** (U146) overlays
+  any other round on the report: body metrics aligned by day-of-round,
+  workout net totals by occurrence index (reschedule-tolerant), plus
+  adherence side by side — the other round always dashed grey.
+
 ## 1.E27.U142.B02 (package 1.27.142-b2) — 2026-07-15
 
 - **Bug fix**: the Today nutrition card showed the P90X booklet's daily calories

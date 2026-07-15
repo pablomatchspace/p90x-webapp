@@ -366,6 +366,7 @@ The table below is a snapshot; the **living record** is the story index
 | [E25 — Body-trend continuity & composition units](epics/E25-body-trend-continuity.md) | US-137 → US-139 | ✅ delivered |
 | [E26 — Audible play-mode coaching](epics/E26-audible-play-coaching.md)                | US-140 → US-141 | ✅ delivered |
 | [E27 — Media deeplinks in focus & play mode](epics/E27-play-media-links.md)           | US-142          | ✅ delivered |
+| [E28 — Round lifecycle](epics/E28-round-lifecycle.md)                                 | US-143 → US-146 | ✅ delivered |
 
 E22/E24 carve an exception out of the §3 "Nutrition" non-goal: the excluded
 workbook nutrition _sheets_ stay excluded, but the app now derives calorie and
