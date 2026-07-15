@@ -19,6 +19,7 @@ import {
   progressToTarget,
   type BodyMetric,
 } from '@/features/dashboard/bodyMetrics'
+import { RoundCompareSection, type CompareCandidate } from '@/features/rounds/RoundCompareSection'
 import { useSettings } from '@/state/selectors'
 import { useStore } from '@/state/store'
 
@@ -289,6 +290,23 @@ export function RoundReportPage() {
     [data, live],
   )
 
+  // US-146: every other round is a comparison candidate — the running round
+  // (when viewing an archive) plus all archives except the one on screen.
+  const compareCandidates = useMemo<CompareCandidate[]>(() => {
+    const candidates: CompareCandidate[] = []
+    if (!live) {
+      const liveData = liveRoundData(state)
+      if (liveData !== null) {
+        candidates.push({ id: 'live', label: 'Current round', data: liveData, live: true })
+      }
+    }
+    for (const round of [...rounds].reverse()) {
+      if (!live && round.id === id) continue
+      candidates.push({ id: round.id, label: round.label, data: archivedRoundData(round) })
+    }
+    return candidates
+  }, [live, id, state, rounds])
+
   if (data === null || report === null) {
     return (
       <Page title="Round report">
@@ -354,6 +372,15 @@ export function RoundReportPage() {
       <AdherenceOutcomeCard report={report} />
       <BodyOutcomeCard report={report} metrics={metrics} units={settings.units} />
       <StrengthOutcomeCard report={report} />
+      {compareCandidates.length > 0 ? (
+        <RoundCompareSection
+          currentLabel={live ? 'Current round' : (archived?.label ?? 'This round')}
+          current={data}
+          currentAdherence={report.adherence}
+          others={compareCandidates}
+          units={settings.units}
+        />
+      ) : null}
     </Page>
   )
 }

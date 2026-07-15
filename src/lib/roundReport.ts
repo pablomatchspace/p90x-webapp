@@ -116,8 +116,12 @@ export interface RoundReport {
   topMovers: RoundTopMover[]
 }
 
-/** Per-entry canonical value readers, all snapshot-driven. */
-function bodyValue(key: BodyOutcomeKey, entry: BodyEntry, snapshot: RoundSnapshot): number | null {
+/** Per-entry canonical value reader, snapshot-driven (shared with roundCompare). */
+export function bodyValue(
+  key: BodyOutcomeKey,
+  entry: BodyEntry,
+  snapshot: RoundSnapshot,
+): number | null {
   if (key === 'weight') return entry.weight ?? null
   if (key === 'bodyFat') return entry.bodyFat ?? null
   const derived = deriveBody(entry, {
