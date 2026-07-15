@@ -3,9 +3,10 @@ import { migrateToCurrent } from './migrations'
 import { emptyState, SCHEMA_VERSION } from './schema'
 
 /** A faithful document at an older version: current empty state minus later fields. */
-function docAt(version: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9): Record<string, unknown> {
+function docAt(version: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10): Record<string, unknown> {
   const doc = JSON.parse(JSON.stringify(emptyState())) as {
     schemaVersion: number
+    rounds?: unknown
     settings: {
       timer?: unknown
       targets: Record<string, unknown>
@@ -17,6 +18,7 @@ function docAt(version: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9): Record<string, unkno
     }
   }
   doc.schemaVersion = version
+  if (version < 11) delete doc.rounds // v11 field
   if (version < 10) delete doc.settings.player?.voiceCues // v10 field
   if (version < 9) delete doc.settings.nutrition?.dietStyle // v9 field
   if (version < 8) delete doc.settings.workoutLinks // v8 field
@@ -170,6 +172,16 @@ describe('migration pipeline', () => {
     if (result.ok) {
       expect(result.migrated).toBe(true)
       expect(result.state.settings.player).toEqual({ autoMarkDone: true, voiceCues: true })
+      expect(result.state.rounds).toEqual([])
+    }
+  })
+
+  it('upgrades a v10 document, gaining an empty archived-rounds list', () => {
+    const result = migrateToCurrent(docAt(10))
+    expect(result.ok).toBe(true)
+    if (result.ok) {
+      expect(result.migrated).toBe(true)
+      expect(result.state.rounds).toEqual([])
     }
   })
 

@@ -3,7 +3,11 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { emptyState } from '@/lib/schema'
 import {
   addScheduleOp,
+  completeRound,
   deleteBodyEntry,
+  deleteRound,
+  renameRound,
+  restoreRound,
   revertScheduleOp,
   setCompletionStatus,
   setNotes,
@@ -278,5 +282,102 @@ describe('updateWorkoutLink (E23)', () => {
   it('ignores unknown workout keys', () => {
     updateWorkoutLink('nope', 'video', 'https://a.example/v')
     expect(links()).toEqual({})
+  })
+})
+
+describe('round lifecycle (E28 US-143)', () => {
+  function liveRound() {
+    startProgram('2026-01-05', 'classic')
+    updateSettings({ age: 40, height: 1.8, startWeight: 82, startBodyFat: 0.22 })
+    updateTargets({ leanMassIncrease: 4, bodyFat: 0.15 })
+    addScheduleOp({ kind: 'skip', id: 'op1', createdAt: 't', date: '2026-01-14' })
+    setRoundValue('chest-back', 'd001', 'standard-push-ups', 0, 'main', 20)
+    setCompletionStatus('plyometrics', 'd002', 'yes')
+    upsertBodyEntry('2026-01-06', { weight: 82, bodyFat: 0.22 })
+    upsertBodyEntry('2026-03-30', { weight: 78.5, bodyFat: 0.18 })
+  }
+
+  it('archives the live round and resets the round-scoped state', () => {
+    liveRound()
+    completeRound()
+    const { settings, scheduleOps, workoutLogs, bodyLog, rounds } = useStore.getState().data
+    expect(settings.startDate).toBeNull()
+    expect(scheduleOps).toEqual([])
+    expect(workoutLogs).toEqual({})
+    expect(bodyLog).toEqual([])
+    expect(rounds).toHaveLength(1)
+    const round = rounds[0]
+    expect(round.label).toBe('Round 1')
+    expect(round.program).toBe('classic')
+    expect(round.startDate).toBe('2026-01-05')
+    expect(round.scheduleOps).toHaveLength(1)
+    expect(round.workoutLogs['chest-back'].sessions).toHaveLength(1)
+    expect(round.bodyLog).toHaveLength(2)
+    expect(round.snapshot).toMatchObject({ height: 1.8, startWeight: 82, startBodyFat: 0.22 })
+    // global preferences survive
+    expect(settings.units).toBe('metric')
+    expect(settings.scoring).toEqual(emptyState().settings.scoring)
+  })
+
+  it('keeps SETUP start stats unless asked to seed from the latest weigh-in', () => {
+    liveRound()
+    completeRound()
+    expect(useStore.getState().data.settings.startWeight).toBe(82)
+    expect(useStore.getState().data.settings.startBodyFat).toBe(0.22)
+  })
+
+  it('seeds the next round start stats from the latest weigh-in on request', () => {
+    liveRound()
+    upsertBodyEntry('2026-04-01', { bodyFat: 0.17 }) // BF-only weigh-in after the last weight
+    completeRound({ seedFromLatest: true })
+    const { settings } = useStore.getState().data
+    expect(settings.startWeight).toBe(78.5) // latest entry with a weight
+    expect(settings.startBodyFat).toBe(0.17) // latest entry with a BF reading
+  })
+
+  it('is a no-op without a live program, and labels default sequentially', () => {
+    completeRound()
+    expect(useStore.getState().data.rounds).toEqual([])
+    liveRound()
+    completeRound()
+    startProgram('2026-04-06', 'classic')
+    completeRound({ label: '  ' }) // blank label falls back to the default
+    const labels = useStore.getState().data.rounds.map((r) => r.label)
+    expect(labels).toEqual(['Round 1', 'Round 2'])
+  })
+
+  it('restore is archive⁻¹ for the round-scoped state', () => {
+    liveRound()
+    const before = JSON.parse(JSON.stringify(useStore.getState().data))
+    completeRound()
+    restoreRound(useStore.getState().data.rounds[0].id)
+    const after = JSON.parse(JSON.stringify(useStore.getState().data))
+    expect(after).toEqual(before)
+  })
+
+  it('refuses to restore while a program is running', () => {
+    liveRound()
+    completeRound()
+    const id = useStore.getState().data.rounds[0].id
+    startProgram('2026-04-06', 'lean')
+    restoreRound(id)
+    const { settings, rounds } = useStore.getState().data
+    expect(settings.startDate).toBe('2026-04-06')
+    expect(settings.program).toBe('lean')
+    expect(rounds).toHaveLength(1)
+  })
+
+  it('renames with a non-empty label and deletes by id', () => {
+    liveRound()
+    completeRound()
+    const id = useStore.getState().data.rounds[0].id
+    renameRound(id, '  Winter round  ')
+    expect(useStore.getState().data.rounds[0].label).toBe('Winter round')
+    renameRound(id, '   ')
+    expect(useStore.getState().data.rounds[0].label).toBe('Winter round')
+    deleteRound('nope')
+    expect(useStore.getState().data.rounds).toHaveLength(1)
+    deleteRound(id)
+    expect(useStore.getState().data.rounds).toEqual([])
   })
 })

@@ -6,7 +6,7 @@ import { isHttpUrl } from '@/lib/links'
  * (scores, penalties, BMI, adherence…) is recomputed by pure functions, mirroring
  * the Excel design where formulas derive everything from entered cells (PRD §8).
  */
-export const SCHEMA_VERSION = 10
+export const SCHEMA_VERSION = 11
 
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'expected YYYY-MM-DD')
 
@@ -136,12 +136,51 @@ export const customQuoteSchema = z.object({
   author: z.string().optional(),
 })
 
+const workoutLogsSchema = z.record(z.string(), z.object({ sessions: z.array(sessionSchema) }))
+
+/**
+ * E28: the round-scoped SETUP inputs frozen at archive time. Raw inputs only
+ * (rule 2 still holds) — an archived round's scores, body derivations and
+ * KPI reads are recomputed by the same pure functions, fed from this snapshot
+ * instead of the live settings, so later rounds can retune SETUP freely
+ * without rewriting history.
+ */
+export const roundSnapshotSchema = z.object({
+  age: nullableNumber,
+  height: nullableNumber,
+  startWeight: nullableNumber,
+  startBodyFat: nullableNumber,
+  limits: z.object({ weight: nullableNumber, bodyFat: nullableNumber, bmi: nullableNumber }),
+  targets: z.object({
+    leanMassIncrease: nullableNumber,
+    bodyFat: nullableNumber,
+    ffmi: nullableNumber,
+  }),
+  scoring: scoringSettingsSchema,
+})
+
+/** E28: a completed round, archived inside the same document. */
+export const archivedRoundSchema = z.object({
+  id: z.string().min(1),
+  archivedAt: z.string(),
+  /** user-editable list label, defaulted to "Round N" at archive time */
+  label: z.string().min(1),
+  program: z.enum(['classic', 'lean']),
+  startDate: isoDate,
+  scheduleOps: z.array(scheduleOpSchema),
+  workoutLogs: workoutLogsSchema,
+  bodyLog: z.array(bodyEntrySchema),
+  snapshot: roundSnapshotSchema,
+})
+
 export const appStateSchema = z.object({
   schemaVersion: z.literal(SCHEMA_VERSION),
   settings: settingsSchema,
   scheduleOps: z.array(scheduleOpSchema),
-  workoutLogs: z.record(z.string(), z.object({ sessions: z.array(sessionSchema) })),
+  workoutLogs: workoutLogsSchema,
   bodyLog: z.array(bodyEntrySchema),
+  /** E28: completed rounds, newest last — they travel with export/import/sync */
+  rounds: z.array(archivedRoundSchema),
   quotes: z.object({ disabledIds: z.array(z.string()), custom: z.array(customQuoteSchema) }),
   notes: z.string(),
 })
@@ -157,6 +196,8 @@ export type Round = z.infer<typeof roundSchema>
 export type ExerciseEntry = z.infer<typeof exerciseEntrySchema>
 export type Session = z.infer<typeof sessionSchema>
 export type BodyEntry = z.infer<typeof bodyEntrySchema>
+export type RoundSnapshot = z.infer<typeof roundSnapshotSchema>
+export type ArchivedRound = z.infer<typeof archivedRoundSchema>
 export type AppState = z.infer<typeof appStateSchema>
 
 /** Workbook defaults (SETUP sheet, PRD §6.3). */
@@ -185,6 +226,7 @@ export function emptyState(): AppState {
     scheduleOps: [],
     workoutLogs: {},
     bodyLog: [],
+    rounds: [],
     quotes: { disabledIds: [], custom: [] },
     notes: '',
   }

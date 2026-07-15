@@ -1,3 +1,4 @@
+import { current } from 'immer'
 import { compareISO, isISODate, type ISODate } from '@/lib/dates'
 import { isHttpUrl, type MediaKind } from '@/lib/links'
 import { getWorkout, hasWorkout, type ProgramKey } from '@/lib/programData'
@@ -394,5 +395,103 @@ export function setStartDate(date: ISODate | null): void {
 export function setNotes(notes: string): void {
   useStore.getState().mutate((draft) => {
     draft.notes = notes
+  })
+}
+
+/**
+ * E28 (US-143): archive the live round inside the document and reset for the
+ * next one. The archive is a raw-input snapshot — ops/logs move over as-is and
+ * the round-scoped SETUP inputs are frozen so reports recompute the round
+ * exactly as it was, whatever later rounds do to Settings. Global preferences
+ * (units, timers, quotes, links, notes…) survive untouched.
+ *
+ * `seedFromLatest` re-seeds the next round's SETUP start stats from the
+ * archived round's latest weigh-in — an explicit raw→raw copy the user opts
+ * into, mirroring the calculators' "use as starting BF%" precedent.
+ */
+export function completeRound(options: { label?: string; seedFromLatest?: boolean } = {}): void {
+  useStore.getState().mutate((draft) => {
+    const s = draft.settings
+    if (s.startDate === null) return
+    // `current` detaches plain copies, so moving the subtrees into the archive
+    // while resetting the live slots can never alias immer drafts.
+    const plain = current(draft)
+    const label = options.label?.trim() || `Round ${draft.rounds.length + 1}`
+    draft.rounds.push({
+      id: `r-${crypto.randomUUID()}`,
+      archivedAt: new Date().toISOString(),
+      label,
+      program: s.program,
+      startDate: s.startDate,
+      scheduleOps: plain.scheduleOps,
+      workoutLogs: plain.workoutLogs,
+      bodyLog: plain.bodyLog,
+      snapshot: {
+        age: s.age ?? null,
+        height: s.height ?? null,
+        startWeight: s.startWeight ?? null,
+        startBodyFat: s.startBodyFat ?? null,
+        limits: { ...plain.settings.limits },
+        targets: { ...plain.settings.targets },
+        scoring: { ...plain.settings.scoring },
+      },
+    })
+    if (options.seedFromLatest === true) {
+      const lastWeight = plain.bodyLog.findLast((e) => (e.weight ?? null) !== null)
+      const lastBf = plain.bodyLog.findLast((e) => (e.bodyFat ?? null) !== null)
+      if (lastWeight !== undefined) s.startWeight = lastWeight.weight ?? null
+      if (lastBf !== undefined) s.startBodyFat = lastBf.bodyFat ?? null
+    }
+    s.startDate = null
+    draft.scheduleOps = []
+    draft.workoutLogs = {}
+    draft.bodyLog = []
+  })
+}
+
+/**
+ * E28 (US-143): move an archived round back to live — the "archived too early"
+ * escape hatch. Refused while a program is running (same guard philosophy as
+ * `startProgram`); the snapshot is written back to Settings so the round
+ * returns exactly as archived.
+ */
+export function restoreRound(id: string): void {
+  useStore.getState().mutate((draft) => {
+    if (draft.settings.startDate !== null) return
+    const index = draft.rounds.findIndex((r) => r.id === id)
+    if (index === -1) return
+    const round = current(draft.rounds[index])
+    draft.rounds.splice(index, 1)
+    const s = draft.settings
+    s.program = round.program
+    s.startDate = round.startDate
+    s.age = round.snapshot.age ?? null
+    s.height = round.snapshot.height ?? null
+    s.startWeight = round.snapshot.startWeight ?? null
+    s.startBodyFat = round.snapshot.startBodyFat ?? null
+    s.limits = { ...round.snapshot.limits }
+    s.targets = { ...round.snapshot.targets }
+    s.scoring = { ...round.snapshot.scoring }
+    draft.scheduleOps = round.scheduleOps
+    draft.workoutLogs = round.workoutLogs
+    draft.bodyLog = round.bodyLog
+  })
+}
+
+/** E28: rename an archived round; an empty label is ignored rather than stored. */
+export function renameRound(id: string, label: string): void {
+  const trimmed = label.trim()
+  if (trimmed === '') return
+  useStore.getState().mutate((draft) => {
+    const round = draft.rounds.find((r) => r.id === id)
+    if (round !== undefined) round.label = trimmed
+  })
+}
+
+/** E28: permanently delete an archived round (the UI confirms first). */
+export function deleteRound(id: string): void {
+  useStore.getState().mutate((draft) => {
+    const index = draft.rounds.findIndex((r) => r.id === id)
+    if (index !== -1) draft.rounds.splice(index, 1)
   })
 }
