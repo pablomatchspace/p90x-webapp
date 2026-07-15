@@ -1,7 +1,7 @@
 # Epic E27 — Workout media deeplinks in focus & play mode
 
-> **Status:** delivered · **Stories:** US-142 · **PR:** #42 (shipped with E25 + E26); B01 bug-fix release in PR #43
-> **Ships as:** package **1.27.142**, displayed **`1.E27.U142`**; bug-fix package **1.27.142-b1**, displayed **`1.E27.U142.B01`** · **Schema:** unchanged (v10) · **Depends on:** E23 (`settings.workoutLinks` + `MediaLinks`)
+> **Status:** delivered · **Stories:** US-142 · **PR:** #42 (shipped with E25 + E26); bug-fix releases B01 (PR #43) and B02 (PR #44)
+> **Ships as:** package **1.27.142**, displayed **`1.E27.U142`**; bug-fix packages **1.27.142-b1/-b2**, displayed **`1.E27.U142.B01`/`.B02`** · **Schema:** unchanged (v10) · **Depends on:** E23 (`settings.workoutLinks` + `MediaLinks`)
 > **One-liner:** Focus mode and guided play mode render the same E23
 > `MediaLinks` launch buttons as the Today card and workout detail screen, so
 > the session video/audio can be launched — or **relaunched mid-session** —
@@ -33,7 +33,9 @@ CHANGELOG + version bump.
 remain available during playback · [x] nothing renders without a configured
 link · [x] E23's URL-safety guarantees unchanged.
 
-## 3. Bug-fix release B01 (package 1.27.142-b1, PR #43)
+## 3. Bug-fix releases
+
+### B01 (package 1.27.142-b1, PR #43)
 
 First release under the post-1.E20.U128 bug-release counter with a real
 package `-bN` suffix. Two chart-legibility fixes against U142 after
@@ -46,6 +48,14 @@ real-data feedback:
   axis auto-scaled and tinted to its series so the recomposition is actually
   visible. Single-axis charts render byte-identical (visual baselines
   unchanged).
+
+### B02 (package 1.27.142-b2, PR #44)
+
+The Today nutrition card led with two same-weight calorie numbers (booklet
+plan vs evidence-based target) that read as contradictory instructions.
+**Your target** now leads the card with a conditional one-line explainer
+(only when a target exists); the **P90X booklet plan** tucks behind a
+disclosure, auto-expanded only when no personal target exists yet.
 
 ## 4. Out of scope
 

@@ -13,7 +13,10 @@
 - **Two layers, clearly labelled.** The **P90X plan** layer encodes the
   published Nutrition Plan guide verbatim; the **Your target** layer is an
   evidence-based recommendation from current weight, target weight and body
-  composition. They render side by side and never blend.
+  composition. They render as separate labelled sections and never blend.
+  (As shipped they sat side by side; the E27 B02 bug-fix release — PR #44 —
+  leads the Today card with **Your target** and collapses the booklet plan
+  behind a disclosure.)
 - **The guide — not the workbook — is the oracle here.** The workbook's
   nutrition tabs were excluded from the port, so rule 1's golden-master
   discipline applies to the guide's published numbers instead, sourced and

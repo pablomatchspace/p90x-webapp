@@ -44,10 +44,11 @@ steppers, focus mode, rest timer), and a Classic⇄Lean toggle.
   progression and body-composition charts (hand-rolled SVG, no chart library)
   with crosshair read-outs, phase bands and trend overlays, and a
   deterministic daily quote.
-- **Nutrition targets** — the published P90X Nutrition Plan numbers
-  (phase-aware calories + macro split) side by side with an evidence-based,
-  recomposition-aware recommendation derived from your own targets, with
-  balanced/low-carb diet styles. Recommendations only — no food logging.
+- **Nutrition targets** — an evidence-based, recomposition-aware calorie +
+  macro recommendation derived from your own targets (balanced/low-carb diet
+  styles), with the published P90X Nutrition Plan numbers (phase-aware
+  calories + macro split) one disclosure away. Recommendations only — no
+  food logging.
 - **Settings & extras** — every SETUP field editable with guardrails, unit
   toggle, per-workout video/audio deeplinks, editable quote pack, free-form
   notes, Navy/3-site/7-site body-fat calculators, and a Help/About page.
