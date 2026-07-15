@@ -18,6 +18,8 @@ test.beforeEach(async ({ page }) => {
 
 test('today shows the P90X plan target from the latest weigh-in', async ({ page }) => {
   await page.goto('#/today')
+  // The booklet plan is secondary now — collapsed behind a disclosure.
+  await page.getByText('P90X booklet plan').click()
   const plan = page.locator('section[aria-label="P90X plan"]')
 
   // Week 3 → training phase 1; latest weigh-in 80.8 kg → EA ≈ 2738 → Level II → 2400 kcal.
@@ -107,6 +109,7 @@ test('settings read-outs and overrides drive the P90X target', async ({ page }) 
 
   // Hash navigation keeps the in-memory store — today now shows the overrides.
   await page.goto('#/today')
+  await page.getByText('P90X booklet plan').click()
   const plan = page.locator('section[aria-label="P90X plan"]')
   await expect(plan.getByText('Phase 3 · Endurance Maximizer')).toBeVisible()
   await expect(plan.getByText('phase override')).toBeVisible()

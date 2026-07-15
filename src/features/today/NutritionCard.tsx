@@ -44,11 +44,14 @@ function Macro({ label, grams, detail }: { label: string; grams: number; detail:
 }
 
 /**
- * E22: the day's nutrition targets. Two clearly-labelled layers:
- *  · P90X plan — the boxed program's level calories + phase macro split.
- *  · Your target — an evidence-based recommendation (TDEE + goal-adjusted
- *    calories, g/kg macros) derived from your target weight and the remaining
- *    program window. Shown on every program day; rest days included.
+ * E22: the day's nutrition targets. Two alternatives — you follow one, not both:
+ *  · Your target (primary) — an evidence-based recommendation (TDEE + goal-adjusted
+ *    calories, g/kg macros) derived from your body goal and the remaining program
+ *    window. Leads the card.
+ *  · P90X plan (secondary, collapsed) — the boxed program's level calories + phase
+ *    macro split. Tucked in a disclosure so the two numbers can't be misread as
+ *    additive. Auto-opens when there's no personal target yet, so a number still
+ *    shows. Shown on every program day; rest days included.
  */
 export function NutritionCard({ schedulePhase }: { schedulePhase: NutritionPhase }) {
   const settings = useSettings()
@@ -62,71 +65,14 @@ export function NutritionCard({ schedulePhase }: { schedulePhase: NutritionPhase
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="font-semibold">Nutrition</h2>
       </div>
+      <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+        Aim for <strong className="font-medium text-zinc-700 dark:text-zinc-200">one</strong> daily
+        intake — your goal-tuned target below, not both numbers. The boxed P90X booklet suggests a
+        different figure; expand it to compare.
+      </p>
 
-      {/* P90X program plan */}
-      <section aria-label="P90X plan" className="mt-2">
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-            P90X plan
-          </span>
-          {plan !== null ? (
-            <>
-              <Chip tone="zinc">
-                Phase {plan.phase} · {plan.phaseName}
-              </Chip>
-              {plan.phaseOverridden ? <Chip tone="amber">phase override</Chip> : null}
-            </>
-          ) : null}
-        </div>
-        {plan === null ? (
-          <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-            Log a weigh-in or set your start weight in{' '}
-            <Link to="/more/settings" className="font-medium text-red-600 hover:underline">
-              Settings
-            </Link>{' '}
-            to get your daily calorie and macro targets.
-          </p>
-        ) : (
-          <>
-            <p className="mt-2 text-2xl font-bold tabular-nums">
-              {kcal(plan.calories)}
-              <span className="ml-1 text-sm font-normal text-zinc-500 dark:text-zinc-400">
-                kcal/day{plan.calorieOverridden ? ' · custom' : ''}
-              </span>
-            </p>
-            <dl className="mt-3 grid grid-cols-3 gap-3 border-t border-zinc-100 pt-3 dark:border-zinc-800">
-              <Macro
-                label="Protein"
-                grams={plan.grams.protein}
-                detail={`${Math.round(plan.split.protein * 100)}%`}
-              />
-              <Macro
-                label="Carbs"
-                grams={plan.grams.carbs}
-                detail={`${Math.round(plan.split.carbs * 100)}%`}
-              />
-              <Macro
-                label="Fat"
-                grams={plan.grams.fat}
-                detail={`${Math.round(plan.split.fat * 100)}%`}
-              />
-            </dl>
-            <p className="mt-2 text-[11px] text-zinc-500 dark:text-zinc-400">
-              {plan.calorieOverridden
-                ? 'Custom daily calories from Settings'
-                : plan.energy !== null && plan.level !== null
-                  ? `P90X nutrition plan · Level ${plan.level} (energy amount ≈ ${kcal(plan.energy)} kcal from your ${usedLatestWeigh ? 'latest weigh-in' : 'start weight'})`
-                  : 'P90X nutrition plan'}
-            </p>
-          </>
-        )}
-      </section>
-
-      {/* Evidence-based, target-driven recommendation */}
-      <section
-        aria-label="Your target"
-        className="mt-4 border-t border-zinc-100 pt-3 dark:border-zinc-800"
-      >
+      {/* Primary: evidence-based, goal-tuned target */}
+      <section aria-label="Your target" className="mt-3">
         <div className="flex flex-wrap items-center gap-1.5">
           <span className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
             Your target
@@ -185,6 +131,68 @@ export function NutritionCard({ schedulePhase }: { schedulePhase: NutritionPhase
           </>
         )}
       </section>
+
+      {/* Secondary: the boxed P90X booklet plan, collapsed so it reads as an alternative */}
+      <details
+        {...(target === null && { open: true })}
+        className="mt-4 border-t border-zinc-100 pt-3 dark:border-zinc-800"
+      >
+        <summary className="cursor-pointer text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+          P90X booklet plan
+        </summary>
+        <section aria-label="P90X plan" className="mt-2">
+          {plan !== null ? (
+            <div className="flex flex-wrap items-center gap-1.5">
+              <Chip tone="zinc">
+                Phase {plan.phase} · {plan.phaseName}
+              </Chip>
+              {plan.phaseOverridden ? <Chip tone="amber">phase override</Chip> : null}
+            </div>
+          ) : null}
+          {plan === null ? (
+            <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+              Log a weigh-in or set your start weight in{' '}
+              <Link to="/more/settings" className="font-medium text-red-600 hover:underline">
+                Settings
+              </Link>{' '}
+              to get the booklet's daily calorie and macro plan.
+            </p>
+          ) : (
+            <>
+              <p className="mt-2 text-2xl font-bold tabular-nums">
+                {kcal(plan.calories)}
+                <span className="ml-1 text-sm font-normal text-zinc-500 dark:text-zinc-400">
+                  kcal/day{plan.calorieOverridden ? ' · custom' : ''}
+                </span>
+              </p>
+              <dl className="mt-3 grid grid-cols-3 gap-3 border-t border-zinc-100 pt-3 dark:border-zinc-800">
+                <Macro
+                  label="Protein"
+                  grams={plan.grams.protein}
+                  detail={`${Math.round(plan.split.protein * 100)}%`}
+                />
+                <Macro
+                  label="Carbs"
+                  grams={plan.grams.carbs}
+                  detail={`${Math.round(plan.split.carbs * 100)}%`}
+                />
+                <Macro
+                  label="Fat"
+                  grams={plan.grams.fat}
+                  detail={`${Math.round(plan.split.fat * 100)}%`}
+                />
+              </dl>
+              <p className="mt-2 text-[11px] text-zinc-500 dark:text-zinc-400">
+                {plan.calorieOverridden
+                  ? 'Custom daily calories from Settings'
+                  : plan.energy !== null && plan.level !== null
+                    ? `P90X nutrition plan · Level ${plan.level} (energy amount ≈ ${kcal(plan.energy)} kcal from your ${usedLatestWeigh ? 'latest weigh-in' : 'start weight'})`
+                    : 'P90X nutrition plan'}
+              </p>
+            </>
+          )}
+        </section>
+      </details>
     </Card>
   )
 }
