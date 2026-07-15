@@ -15,6 +15,21 @@ didn't bump the package version — they're numbered B01/B02 here for a
 continuous record; #33's package column is left at the un-suffixed version
 that was actually shipped.
 
+## 1.E27.U142.B01 (package 1.27.142-b1) — 2026-07-15
+
+- **Body-trends chart legibility (bug fix).** Two follow-up fixes to the E25
+  charts after real-data feedback:
+  - The 7-day trend overlay now draws in a neutral grey instead of the metric's
+    own colour. On a sparse chart the blue metric line, its dotted
+    carried-forward span, and the blue dashed trend were three near-identical
+    blue strokes; the grey trend now reads clearly as a separate, derived line.
+  - The body-composition chart plots fat on its own right-hand y-axis (`LineChart`
+    gains an opt-in `axis: 'left' | 'right'` per series). Lean (~57 kg) and fat
+    (~11 kg) no longer share one scale that flattened both lines against the
+    edges — each axis auto-scales to its series and is tinted to match it, so the
+    recomposition (lean up, fat down) is actually visible. Single-axis charts are
+    byte-identical (visual baselines unchanged).
+
 ## 1.E27.U142 (package 1.27.142) — 2026-07-14
 
 - **E27 — Workout media deeplinks in focus & play mode.** Focus mode and guided

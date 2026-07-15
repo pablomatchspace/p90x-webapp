@@ -29,6 +29,10 @@ import { buildBodyMetrics, progressToTarget, TONE_CHIP, type MetricKey } from '.
  * and the dashboard KPI cards can never disagree.
  */
 
+/** Neutral grey for the smoothed 7-day trend overlay — distinct from every
+ *  metric colour so it never reads as a second copy of the metric line. */
+const TREND_COLOR = '#94a3b8'
+
 /** x-axis spans of the program phases, in days relative to `first` (chart x). */
 function phaseBands(schedule: Schedule | null, first: ISODate): Band[] {
   if (schedule === null) return []
@@ -169,7 +173,10 @@ export function BodyTrendsPage() {
                 {
                   id: `${metric.key}-trend`,
                   label: '7-day trend',
-                  color: metric.color,
+                  // A neutral grey keeps the smoothed trend from competing
+                  // with the metric line (both were the same blue, so the trend
+                  // and the dotted carried-forward span read as one confusing pair).
+                  color: TREND_COLOR,
                   points: chart.trend,
                   dashed: true,
                   width: 1.25,
@@ -193,12 +200,15 @@ export function BodyTrendsPage() {
   const compUnit = compAbs ? unit : '%'
   const compLean = compAbs ? chart?.lean : chart?.leanPct
   const compFat = compAbs ? chart?.fat : chart?.fatPct
+  // Dual-axis: lean (~57 kg) and fat (~11 kg) differ too much to share one axis — on a
+  // common scale the fat line sits flat against the bottom. Fat plots on its own
+  // right-hand axis so each line fills the plot and its movement is legible.
   const composition: ChartSeries[] =
     !hasComposition || compLean === undefined || compFat === undefined
       ? []
       : [
-          { id: 'lean', label: 'Lean', color: '#10b981', points: compLean },
-          { id: 'fat', label: 'Fat', color: '#f59e0b', points: compFat },
+          { id: 'lean', label: 'Lean', color: '#10b981', points: compLean, axis: 'left' },
+          { id: 'fat', label: 'Fat', color: '#f59e0b', points: compFat, axis: 'right' },
         ]
   // Whether the drawn lines contain any carried-forward (assumed) spans — drives
   // the dashed-legend note so the reader knows which stretches weren't measured.
@@ -292,7 +302,7 @@ export function BodyTrendsPage() {
             <span>— — Start</span>
             <span className="text-emerald-600 dark:text-emerald-400">— — Target</span>
             <span className="text-rose-500 dark:text-rose-400">— — Limit</span>
-            {series.length > 1 ? <span>┄ 7-day trend</span> : null}
+            {series.length > 1 ? <span style={{ color: TREND_COLOR }}>┄ 7-day trend</span> : null}
             {metricHasGaps ? <span>┈ assumed (no weigh-in)</span> : null}
           </p>
         </Card>
@@ -322,7 +332,7 @@ export function BodyTrendsPage() {
             </div>
           </div>
           <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
-            Lean mass vs fat mass ({compUnit}) — recomp shows as the lines pulling apart
+            Lean (left) vs fat (right) — each on its own {compUnit} scale so small changes show
           </p>
           <div className="mt-3">
             <LineChart
@@ -337,10 +347,10 @@ export function BodyTrendsPage() {
           </div>
           <p className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-zinc-500 dark:text-zinc-400">
             <span className="inline-flex items-center gap-1">
-              <span className="h-2 w-2 rounded-full bg-emerald-500" aria-hidden /> Lean mass
+              <span className="h-2 w-2 rounded-full bg-emerald-500" aria-hidden /> Lean mass (left)
             </span>
             <span className="inline-flex items-center gap-1">
-              <span className="h-2 w-2 rounded-full bg-amber-500" aria-hidden /> Fat mass
+              <span className="h-2 w-2 rounded-full bg-amber-500" aria-hidden /> Fat mass (right)
             </span>
             {compHasGaps ? <span>┈ assumed (no weigh-in)</span> : null}
           </p>

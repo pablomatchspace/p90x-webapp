@@ -26,6 +26,8 @@ export interface ChartSeries {
   width?: number
   /** exclude from the crosshair read-out (e.g. a trend of another series) */
   noReadout?: boolean
+  /** Plot against the right-hand y-axis (its own scale) instead of the left */
+  axis?: 'left' | 'right'
 }
 
 export interface RefLine {
@@ -76,6 +78,19 @@ const REF_LABEL: Record<RefLine['tone'], string> = {
   limit: 'fill-rose-500 dark:fill-rose-400',
 }
 
+/** Padded y-domain → pixel scale + nice ticks for one axis; null when no values. */
+function axisDomain(values: number[]): { sy: (v: number) => number; ticks: number[] } | null {
+  const ex = extent(values)
+  if (ex === null) return null
+  const pad = (ex[1] - ex[0]) * 0.08 || Math.max(Math.abs(ex[0]) * 0.05, 1)
+  const min = ex[0] - pad
+  const max = ex[1] + pad
+  return {
+    sy: scale(min, max, PLOT_B, PLOT_T),
+    ticks: niceTicks(min, max, 4).filter((t) => t >= min && t <= max),
+  }
+}
+
 export function LineChart({
   series,
   refLines = [],
@@ -90,18 +105,28 @@ export function LineChart({
   const svgRef = useRef<SVGSVGElement>(null)
   const [hoverX, setHoverX] = useState<number | null>(null)
 
-  const ys = [
-    ...series.flatMap((s) =>
+  const seriesValues = (list: ChartSeries[]) =>
+    list.flatMap((s) =>
       s.points.filter((p): p is { x: number; y: number } => p.y !== null).map((p) => p.y),
-    ),
+    )
+  // Dual-axis: series can opt onto a second (right-hand) y-axis so two series of very
+  // different magnitude — e.g. lean (~57 kg) vs fat (~11 kg) mass — each get
+  // their own scale and fill the plot instead of one sitting flat against an edge.
+  const leftSeries = series.filter((s) => s.axis !== 'right')
+  const rightSeries = series.filter((s) => s.axis === 'right')
+  const hasRight = rightSeries.length > 0
+
+  const leftYs = [
+    ...seriesValues(leftSeries),
     ...refLines.map((r) => r.y),
     ...(includeZero ? [0] : []),
   ]
   const xs = series.flatMap((s) => s.points.map((p) => p.x))
-  const yEx = extent(ys)
+  const leftDom = axisDomain(leftYs)
+  const rightDom = hasRight ? axisDomain(seriesValues(rightSeries)) : null
   const xEx = extent(xs.length > 0 ? xs : xTicks.map((t) => t.x))
 
-  if (yEx === null || xEx === null) {
+  if (leftDom === null || xEx === null) {
     return (
       <div className="flex h-40 items-center justify-center text-sm text-zinc-500 dark:text-zinc-400">
         No data yet
@@ -109,14 +134,16 @@ export function LineChart({
     )
   }
 
-  const pad = (yEx[1] - yEx[0]) * 0.08 || Math.max(Math.abs(yEx[0]) * 0.05, 1)
-  const yMin = yEx[0] - pad
-  const yMax = yEx[1] + pad
   const [xMin, xMax] = xEx[0] === xEx[1] ? [xEx[0] - 1, xEx[1] + 1] : xEx
-
   const sx = scale(xMin, xMax, PLOT_L, PLOT_R)
-  const sy = scale(yMin, yMax, PLOT_B, PLOT_T)
-  const ticks = niceTicks(yMin, yMax, 4).filter((t) => t >= yMin && t <= yMax)
+  // Left axis is the default; a right-axis series maps through its own scale.
+  const sy = leftDom.sy
+  const syFor = (s: ChartSeries) => (s.axis === 'right' && rightDom !== null ? rightDom.sy : sy)
+  const ticks = leftDom.ticks
+  // In dual-axis mode, tint each axis' tick labels with its series' colour so
+  // the reader can tell which line each scale belongs to.
+  const leftLabelColor = hasRight ? leftSeries[0]?.color : undefined
+  const rightLabelColor = rightSeries[0]?.color
 
   // xs that carry at least one logged value — the crosshair snap targets.
   // Carried-forward fill points (E25) are drawn but never snapped to.
@@ -214,11 +241,29 @@ export function LineChart({
               dominantBaseline="middle"
               textAnchor="end"
               className="fill-zinc-400 text-[9px] dark:fill-zinc-500"
+              style={leftLabelColor !== undefined ? { fill: leftLabelColor } : undefined}
             >
               {yFormat(t)}
             </text>
           </g>
         ))}
+
+        {/* Dual-axis: right-hand axis labels (no gridlines — the left axis owns the grid) */}
+        {rightDom !== null
+          ? rightDom.ticks.map((t) => (
+              <text
+                key={`yr${t}`}
+                x={PLOT_R + 4}
+                y={rightDom.sy(t)}
+                dominantBaseline="middle"
+                textAnchor="start"
+                className="text-[9px]"
+                style={{ fill: rightLabelColor }}
+              >
+                {yFormat(t)}
+              </text>
+            ))
+          : null}
 
         {refLines.map((r) => (
           <g key={`ref-${r.tone}-${r.label}`}>
@@ -259,9 +304,10 @@ export function LineChart({
           // solid and its carried-forward (assumed) spans dashed + faded, so a
           // flat "same as last weigh-in" stretch never reads as observed data.
           // Already-dashed series (e.g. the trend overlay) skip the split.
+          const syS = syFor(s)
           const carried =
             s.dashed !== true && s.points.some((p) => p.filled === true)
-              ? fillSegments(s.points, sx, sy)
+              ? fillSegments(s.points, sx, syS)
               : null
           return (
             <g key={s.id}>
@@ -287,7 +333,7 @@ export function LineChart({
                 </>
               ) : (
                 <path
-                  d={linePath(s.points, sx, sy)}
+                  d={linePath(s.points, sx, syS)}
                   fill="none"
                   stroke={s.color}
                   strokeWidth={s.width ?? 1.75}
@@ -303,7 +349,7 @@ export function LineChart({
                       <circle
                         key={`dot-${s.id}-${p.x}`}
                         cx={sx(p.x)}
-                        cy={sy(p.y)}
+                        cy={syS(p.y)}
                         r={2}
                         fill={s.color}
                       />
@@ -331,7 +377,7 @@ export function LineChart({
                   <circle
                     key={`hover-${s.id}`}
                     cx={sx(hoverX)}
-                    cy={sy(y)}
+                    cy={syFor(s)(y)}
                     r={3.5}
                     fill={s.color}
                     className="stroke-white stroke-2 dark:stroke-zinc-900"
