@@ -1,3 +1,4 @@
+import { clock } from '@/state/ports'
 import { beginProgram } from '@/lib/schedule'
 import { isISODate, type ISODate, type ProgramKey, type ScheduleOp } from '@/lib/shared'
 import { useStore } from '@/state/store'
@@ -15,7 +16,7 @@ export function addScheduleOp(op: ScheduleOp): void {
 export function revertScheduleOp(opId: string): void {
   useStore.getState().mutate((draft) => {
     const op = draft.scheduleOps.find((o) => o.id === opId)
-    if (op !== undefined && op.revertedAt === undefined) op.revertedAt = new Date().toISOString()
+    if (op !== undefined && op.revertedAt === undefined) op.revertedAt = clock.nowISO()
   })
 }
 

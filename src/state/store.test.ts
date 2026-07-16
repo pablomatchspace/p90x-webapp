@@ -2,7 +2,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { emptyState } from '@/lib/shared'
 import { readBackup } from './persist'
-import { useStore } from './store'
+import { onStoreEvent, useStore } from './store'
 
 beforeEach(() => {
   localStorage.clear()
@@ -56,5 +56,37 @@ describe('store', () => {
 
   it('restoreBackup returns false when no backup exists', () => {
     expect(useStore.getState().restoreBackup()).toBe(false)
+  })
+})
+
+describe('store lifecycle events', () => {
+  it('emits reset when resetAll runs', () => {
+    let fired = 0
+    const off = onStoreEvent('reset', () => {
+      fired += 1
+    })
+    useStore.getState().resetAll()
+    expect(fired).toBe(1)
+    off()
+  })
+
+  it('emits documentReplaced when replaceData runs', () => {
+    let fired = 0
+    const off = onStoreEvent('documentReplaced', () => {
+      fired += 1
+    })
+    useStore.getState().replaceData(emptyState(), 'test')
+    expect(fired).toBe(1)
+    off()
+  })
+
+  it('unsubscribing stops delivery', () => {
+    let fired = 0
+    const off = onStoreEvent('reset', () => {
+      fired += 1
+    })
+    off()
+    useStore.getState().resetAll()
+    expect(fired).toBe(0)
   })
 })

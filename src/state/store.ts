@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
 import { emptyState, type AppState } from '@/lib/shared'
+import type { PersistencePort } from '@/state/ports'
 import {
   createDebouncedSaver,
   loadState,
@@ -28,14 +29,27 @@ export interface Store {
 const boot = loadState()
 
 /**
- * The sync engine registers here (E10). A reset must not look like an ordinary
- * edit: without this, the debounced push that follows would replace the cloud copy
- * with the empty document the user just created locally.
+ * Typed lifecycle events (E31 U158). Wholesale document changes must not look
+ * like ordinary edits — e.g. after a reset, the sync engine's debounced push
+ * would replace the cloud copy with the empty document the user just created
+ * locally — so the store announces them and consumers (sync, persistence)
+ * subscribe instead of registering bespoke listeners.
  */
-let resetListener: (() => void) | null = null
+export type StoreEvent = 'reset' | 'documentReplaced'
 
-export function setResetListener(listener: (() => void) | null): void {
-  resetListener = listener
+const eventListeners: Record<StoreEvent, Set<() => void>> = {
+  reset: new Set(),
+  documentReplaced: new Set(),
+}
+
+/** Subscribe to a lifecycle event; returns the unsubscribe. */
+export function onStoreEvent(event: StoreEvent, listener: () => void): () => void {
+  eventListeners[event].add(listener)
+  return () => eventListeners[event].delete(listener)
+}
+
+function emitStoreEvent(event: StoreEvent): void {
+  for (const listener of eventListeners[event]) listener()
 }
 
 export const useStore = create<Store>()(
@@ -52,6 +66,7 @@ export const useStore = create<Store>()(
       set((s) => {
         s.data = next
       })
+      emitStoreEvent('documentReplaced')
     },
     resetAll: () => {
       writeBackup(get().data, 'reset')
@@ -60,7 +75,7 @@ export const useStore = create<Store>()(
       })
       // After `set`, so the sync engine can cancel the push its own subscription
       // has just scheduled.
-      resetListener?.()
+      emitStoreEvent('reset')
     },
     restoreBackup: () => {
       const backup = readBackup()
@@ -106,3 +121,6 @@ export function attachPersistence(): () => void {
     document.removeEventListener('visibilitychange', onVisibility)
   }
 }
+
+/** The persistence wiring as a port — the seam main.tsx plugs in. */
+export const persistencePort: PersistencePort = { attach: attachPersistence }

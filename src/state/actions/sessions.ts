@@ -1,3 +1,4 @@
+import { clock } from '@/state/ports'
 import { upsertSession, writeRoundValue } from '@/lib/workouts'
 import { useStore } from '@/state/store'
 
@@ -15,7 +16,7 @@ export function setCompletionStatus(
   useStore.getState().mutate((draft) => {
     const session = upsertSession(draft.workoutLogs, workoutKey, programDayId)
     session.completion = completion
-    session.loggedAt = new Date().toISOString()
+    session.loggedAt = clock.nowISO()
   })
 }
 
@@ -37,7 +38,7 @@ export function setRoundValue(
       round,
       field,
       value,
-      new Date().toISOString(),
+      clock.nowISO(),
     )
   })
 }
@@ -71,7 +72,7 @@ export function setWorkoutCompleted(
   useStore.getState().mutate((draft) => {
     const session = upsertSession(draft.workoutLogs, workoutKey, programDayId)
     session.completed = completed
-    session.loggedAt = new Date().toISOString()
+    session.loggedAt = clock.nowISO()
   })
 }
 
@@ -88,6 +89,6 @@ export function setExerciseDone(
   useStore.getState().mutate((draft) => {
     const session = upsertSession(draft.workoutLogs, workoutKey, programDayId)
     session.exerciseDone = { ...(session.exerciseDone ?? {}), ...patch }
-    session.loggedAt = new Date().toISOString()
+    session.loggedAt = clock.nowISO()
   })
 }

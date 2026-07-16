@@ -74,7 +74,9 @@ src/lib/        pure domain logic in seven bounded contexts (docs/CONTEXT-MAP.md
                   sync/       sync, syncCrypto
                   shared/     schema, migrations, importExport, dates, programData, chart, links, quotes, version
                 Cross-context imports use the barrel (`@/lib/<context>`); vocabulary in docs/GLOSSARY.md
-src/state/      store.ts (Zustand+Immer), actions.ts (all mutations funnel through useStore.getState().mutate), persist.ts
+src/state/      store.ts (Zustand+Immer + lifecycle events), actions/* per-context use-cases
+                (barrel actions.ts; all mutations funnel through useStore.getState().mutate,
+                invariants live in src/lib), selectors.ts, ports.ts (clock + wiring contracts), persist.ts
 src/features/   screens by area: start, today, schedule, workouts, body, dashboard, more
 src/components/ Layout, Page, NoProgramCard, ErrorBoundary, SystemBanners, LineChart, UpdateToast
 src/data/       templates.json + catalog.json — generated from the workbook by tools/, never hand-edited

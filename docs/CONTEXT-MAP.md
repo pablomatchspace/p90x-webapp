@@ -17,8 +17,12 @@ directory with a public API barrel (`index.ts`). Terms are defined in
 | `sync`      | `src/lib/sync/`      | Cloud-sync document envelope and end-to-end crypto (E10).                                                                                                                                                |
 | `shared`    | `src/lib/shared/`    | Shared kernel: the persisted document schema, migrations, import/export, ISO dates, branded unit types (`units.ts`), workbook reference data (`programData`), chart helpers, links, quotes, app version. |
 
-`src/state` is the application layer (store wiring, actions as use-cases,
-selectors as the read model); `src/features` + `src/components` are the UI.
+`src/state` is the application layer: `store.ts` (wiring + typed lifecycle
+events), one thin use-case module per context under `state/actions/*`
+(re-exported by the `actions.ts` barrel; invariants live in `src/lib`),
+`selectors.ts` as the read model, and `ports.ts` for the impure dependencies
+(clock, persistence/sync wiring contracts). `src/features` + `src/components`
+are the UI — they never touch the store's `mutate`/`getState` (enforced).
 `worker/` is a separate deployable that shares no code with `src/lib`.
 
 ## Allowed dependencies

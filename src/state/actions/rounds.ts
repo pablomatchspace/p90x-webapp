@@ -1,3 +1,4 @@
+import { clock } from '@/state/ports'
 import { current } from 'immer'
 import {
   applySnapshot,
@@ -22,7 +23,7 @@ export function completeRound(options: { label?: string; seedFromLatest?: boolea
     draft.archivedRounds.push(
       buildArchivedRound(plain, {
         id: `r-${crypto.randomUUID()}`,
-        archivedAt: new Date().toISOString(),
+        archivedAt: clock.nowISO(),
         label: options.label?.trim() || defaultRoundLabel(draft.archivedRounds.length),
       }),
     )

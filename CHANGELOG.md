@@ -15,6 +15,19 @@ didn't bump the package version — they're numbered B01/B02 here for a
 continuous record; #33's package column is left at the un-suffixed version
 that was actually shipped.
 
+## 1.E31.U158 (package 1.31.158) — 2026-07-16
+
+- **E31 — Domain-driven design alignment, story U158: ports & typed store
+  events.** The application layer's impure dependencies now sit behind
+  `state/ports.ts`: actions stamp `loggedAt`/`createdAt`/`archivedAt` through
+  an injected `clock.nowISO()` (swappable in tests), and the persistence and
+  sync wirings are declared as `PersistencePort`/`SyncPort` contracts. The
+  store emits typed lifecycle events — `reset` and `documentReplaced` — and
+  the sync engine subscribes to `reset` like any other consumer, replacing
+  the bespoke mutable `setResetListener` hook. Behavior identical (reset
+  still pauses sync before the debounced push can clobber the cloud copy);
+  journeys + sync e2e green.
+
 ## 1.E31.U157 (package 1.31.157) — 2026-07-16
 
 - **E31 — Domain-driven design alignment, story U157: application layer &
