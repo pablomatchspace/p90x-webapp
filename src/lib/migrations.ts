@@ -77,6 +77,13 @@ const MIGRATIONS: Record<number, (doc: Record<string, unknown>) => void> = {
   10: (doc) => {
     if (doc.rounds === undefined) doc.rounds = []
   },
+  // v11 → v12 (E30): hands-free voice entry, off by default.
+  11: (doc) => {
+    const settings = doc.settings as { player?: Record<string, unknown> } | undefined
+    if (settings?.player !== undefined && settings.player.voiceHandsFree === undefined) {
+      settings.player.voiceHandsFree = false
+    }
+  },
 }
 
 export function migrateToCurrent(raw: unknown): MigrationResult {

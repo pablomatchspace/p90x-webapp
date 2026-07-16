@@ -274,6 +274,9 @@ export function updatePlayerSettings(patch: Partial<Settings['player']>): void {
     if (patch.voiceCues !== undefined) {
       draft.settings.player.voiceCues = Boolean(patch.voiceCues)
     }
+    if (patch.voiceHandsFree !== undefined) {
+      draft.settings.player.voiceHandsFree = Boolean(patch.voiceHandsFree)
+    }
   })
 }
 

@@ -3,7 +3,7 @@ import { migrateToCurrent } from './migrations'
 import { emptyState, SCHEMA_VERSION } from './schema'
 
 /** A faithful document at an older version: current empty state minus later fields. */
-function docAt(version: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10): Record<string, unknown> {
+function docAt(version: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11): Record<string, unknown> {
   const doc = JSON.parse(JSON.stringify(emptyState())) as {
     schemaVersion: number
     rounds?: unknown
@@ -18,6 +18,7 @@ function docAt(version: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10): Record<string, 
     }
   }
   doc.schemaVersion = version
+  if (version < 12) delete doc.settings.player?.voiceHandsFree // v12 field
   if (version < 11) delete doc.rounds // v11 field
   if (version < 10) delete doc.settings.player?.voiceCues // v10 field
   if (version < 9) delete doc.settings.nutrition?.dietStyle // v9 field
@@ -40,7 +41,11 @@ describe('migration pipeline', () => {
       expect(result.state.schemaVersion).toBe(SCHEMA_VERSION)
       expect(result.state.settings.timer).toEqual({ workSeconds: 60, restSeconds: 60 })
       expect(result.state.settings.targets.ffmi).toBeNull()
-      expect(result.state.settings.player).toEqual({ autoMarkDone: false, voiceCues: true })
+      expect(result.state.settings.player).toEqual({
+        autoMarkDone: false,
+        voiceCues: true,
+        voiceHandsFree: false,
+      })
       expect(result.state.settings.yoga).toBe('classic')
       expect(result.state.settings.training).toBe('intermediate')
       expect(result.state.settings.nutrition).toEqual({
@@ -61,7 +66,11 @@ describe('migration pipeline', () => {
       expect(result.migrated).toBe(true)
       expect(result.state.settings.timer).toEqual({ workSeconds: 45, restSeconds: 90 })
       expect(result.state.settings.targets.ffmi).toBeNull()
-      expect(result.state.settings.player).toEqual({ autoMarkDone: false, voiceCues: true })
+      expect(result.state.settings.player).toEqual({
+        autoMarkDone: false,
+        voiceCues: true,
+        voiceHandsFree: false,
+      })
       expect(result.state.settings.yoga).toBe('classic')
     }
   })
@@ -75,7 +84,11 @@ describe('migration pipeline', () => {
       expect(result.migrated).toBe(true)
       expect(result.state.settings.timer).toEqual({ workSeconds: 45, restSeconds: 90 })
       expect(result.state.settings.targets.ffmi).toBeNull()
-      expect(result.state.settings.player).toEqual({ autoMarkDone: false, voiceCues: true })
+      expect(result.state.settings.player).toEqual({
+        autoMarkDone: false,
+        voiceCues: true,
+        voiceHandsFree: false,
+      })
       expect(result.state.settings.yoga).toBe('classic')
     }
   })
@@ -87,7 +100,11 @@ describe('migration pipeline', () => {
     expect(result.ok).toBe(true)
     if (result.ok) {
       expect(result.migrated).toBe(true)
-      expect(result.state.settings.player).toEqual({ autoMarkDone: true, voiceCues: true })
+      expect(result.state.settings.player).toEqual({
+        autoMarkDone: true,
+        voiceCues: true,
+        voiceHandsFree: false,
+      })
       expect(result.state.settings.yoga).toBe('classic')
     }
   })
@@ -171,7 +188,11 @@ describe('migration pipeline', () => {
     expect(result.ok).toBe(true)
     if (result.ok) {
       expect(result.migrated).toBe(true)
-      expect(result.state.settings.player).toEqual({ autoMarkDone: true, voiceCues: true })
+      expect(result.state.settings.player).toEqual({
+        autoMarkDone: true,
+        voiceCues: true,
+        voiceHandsFree: false,
+      })
       expect(result.state.rounds).toEqual([])
     }
   })
@@ -182,6 +203,21 @@ describe('migration pipeline', () => {
     if (result.ok) {
       expect(result.migrated).toBe(true)
       expect(result.state.rounds).toEqual([])
+    }
+  })
+
+  it('upgrades a v11 document, keeping player prefs and gaining hands-free off', () => {
+    const doc = docAt(11)
+    ;(doc.settings as { player?: unknown }).player = { autoMarkDone: true, voiceCues: false }
+    const result = migrateToCurrent(doc)
+    expect(result.ok).toBe(true)
+    if (result.ok) {
+      expect(result.migrated).toBe(true)
+      expect(result.state.settings.player).toEqual({
+        autoMarkDone: true,
+        voiceCues: false,
+        voiceHandsFree: false,
+      })
     }
   })
 

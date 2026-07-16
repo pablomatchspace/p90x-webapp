@@ -16,7 +16,7 @@ const sample: Settings = {
   targets: { leanMassIncrease: 4, bodyFat: 0.15 },
   scoring: { penaltyDivisor: 2, penaltyOn: true, chairFactor: 2, rwDivisor: 10 },
   timer: { workSeconds: 60, restSeconds: 60 },
-  player: { autoMarkDone: false, voiceCues: true },
+  player: { autoMarkDone: false, voiceCues: true, voiceHandsFree: false },
   yoga: 'classic',
   training: 'intermediate',
   nutrition: { phaseOverride: null, calorieOverride: null, dietStyle: 'balanced' },
