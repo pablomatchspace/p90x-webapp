@@ -37,6 +37,16 @@ that was actually shipped.
   unsupported-browser case) and refreshed linux visual baselines for the
   focus cards and Help (U152).
 
+## 1.E30.U152.B01 (package 1.30.152-b1) — 2026-07-16
+
+- **Working agreement: TDD + decision gate (CLAUDE.md, no app code).** Agent
+  instructions now mandate test-driven development — red-green-refactor for
+  `src/lib`/`src/state`/`worker`, a failing reproduction test before any bug
+  fix, and behavior-focused test discipline — plus a new non-negotiable rule 6:
+  every product-scope, ambiguity, requirement, or trade-off decision (features
+  and bug fixes alike, however small) is batched and put to the user as options
+  with a recommendation before any code is written.
+
 ## 1.E29.U149 (package 1.29.149) — 2026-07-16
 
 - **E29 — Progressive-overload targets in focus mode.** Focus mode now states
