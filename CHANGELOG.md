@@ -15,6 +15,21 @@ didn't bump the package version — they're numbered B01/B02 here for a
 continuous record; #33's package column is left at the un-suffixed version
 that was actually shipped.
 
+## 1.E29.U149 (package 1.29.149) — 2026-07-16
+
+- **E29 — Progressive-overload targets in focus mode.** Focus mode now states
+  the goal before the set instead of only judging it afterwards. Each exercise
+  card shows **`Target: beat N`** — the latest earlier logged net score in
+  this round (U147, same walk-back as ghost prefill so skipped weeks don't
+  blank it), falling back per exercise to the **newest archived round that
+  logged it** (E28) with that round's frozen scoring snapshot, so day 1
+  of round 2 still has a number to chase. The line tints live as entries land
+  (U148): emerald when beaten, amber when matched/behind. The finish summary
+  adds **`Targets beaten: X of Y`** alongside the PR line — target = beat
+  _last time_, PR = beat _all_ history. Nothing stored (rule 2); new
+  `e2e/overload.spec.ts` journey and refreshed linux focus-mode visual
+  baselines (U149).
+
 ## 1.E28.U146 (package 1.28.146) — 2026-07-15
 
 - **E28 — Round lifecycle: archive, end-of-round report & round-over-round
