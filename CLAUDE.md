@@ -51,6 +51,15 @@ snapshot so later Settings changes never rewrite history.
    unless the attribution is verifiable.
 5. **Dates are local-calendar ISO strings** (`YYYY-MM-DD`). Never do `Date` UTC
    arithmetic — it drifts across DST/timezones.
+6. **No unilateral product decisions — reflect, propose, ask.** Before writing
+   any code (features and bug fixes alike), enumerate every product-scope,
+   ambiguity, requirement, and trade-off decision the task involves — no matter
+   how small — and put each to the user as concrete options with a
+   recommendation, batched into one question set up front. Wait for selections
+   before proceeding; a decision discovered mid-task pauses work and gets asked
+   immediately. Only purely mechanical changes with zero interpretation (e.g.
+   correcting a formula against the pinned workbook oracle) proceed directly —
+   when in doubt, it's a decision: ask.
 
 ## Layout
 
@@ -93,6 +102,15 @@ properties / namespaces).
     latest CHANGELOG heading to find the last N used for this story — increment it for
     another bug fix; a new story drops the suffix entirely (reset to B00, next epic/story
     numbers). Never guess N from memory — always re-derive it from those two sources.
+- **Test-driven development.** For pure logic — `src/lib/**`, `src/state/**`,
+  `worker/` — red-green-refactor is mandatory: write the failing test first and
+  watch it fail for the right reason, write the minimal code that makes it pass,
+  then refactor with the suite green. Every bug fix starts with a failing test
+  that reproduces the bug — no fix lands without one, and the test must fail
+  before the fix and pass after. For UI (`src/features/**`, `src/components/**`)
+  work test-first where feasible (component or e2e specs); pure visual polish
+  may instead be verified after the fact via the e2e visual baselines. Tests and
+  the code they drive belong to the same story commit.
 - **Validate before every commit:** `npm run format` then
   `npm run lint && npm run typecheck && npm run test && npm run build`
   (+ `npm run e2e` if a journey changed, + `npm run lhci` if UI/perf changed).
@@ -109,6 +127,13 @@ properties / namespaces).
   `src/test/setup.ts`; call `cleanup()` yourself in `afterEach` (no auto-cleanup).
 - Coverage is collected on `src/lib/**`, `src/state/**`, and the sync Worker
   (`worker/index.js`).
+- **TDD discipline** (see Workflow for when it's mandatory): one behavior per
+  test, named for the behavior, arrange-act-assert. Assert observable behavior —
+  function outputs, rendered UI, persisted documents — never implementation
+  details or store internals. When encoding a workbook formula, the golden-master
+  expectation (cached Excel output) is the failing test you write first; when
+  fixing a divergence from the workbook, pin the workbook's value in a test
+  before touching the formula.
 - **Playwright** serves the **built** app — run `npm run build` before `npm run e2e`.
   Runs the desktop chromium and realme 16 Pro+ mobile profiles.
   **Playwright must also verify any UI issues visible in screens for both desktop and specific mobile device defined.**
