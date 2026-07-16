@@ -16,7 +16,12 @@ import {
 } from '@/lib/playback'
 import { workoutOccurrences } from '@/lib/schedule/occurrences'
 import { formatScore, scoreExercise, sessionTotals } from '@/lib/scoring'
-import { setWorkoutCompleted, updatePlayerSettings, updateTimerSettings } from '@/state/actions'
+import {
+  setRoundValue,
+  setWorkoutCompleted,
+  updatePlayerSettings,
+  updateTimerSettings,
+} from '@/state/actions'
 import { useSchedule, useScoringSettings, useSettings, useWorkoutSessions } from '@/state/selectors'
 import { useStore } from '@/state/store'
 import { QuoteCard } from '@/features/dashboard/QuoteCard'
@@ -27,6 +32,7 @@ import { RoundInputs } from './entryUi'
 import { TimerCard } from './TimerCard'
 import { beep, mmss, speak } from './timerUtils'
 import { useWakeLock } from './playerHooks'
+import { VoiceEntryButton } from './VoiceEntryButton'
 
 function Sparkline({ points }: { points: number[] }) {
   if (points.length < 2) return null
@@ -362,6 +368,33 @@ export function FocusPage() {
             rounds={step.rounds}
           />
         </div>
+
+        {/* E30: speak the numbers — available while idle and during playback */}
+        <VoiceEntryButton
+          step={step}
+          entry={session?.entries?.[exercise.id]}
+          handsFree={settings.player.voiceHandsFree}
+          onToggleHandsFree={() =>
+            updatePlayerSettings({ voiceHandsFree: !settings.player.voiceHandsFree })
+          }
+          onValue={(slot, value) =>
+            setRoundValue(key, programDayId, exercise.id, slot.round, slot.field, value)
+          }
+          onCommand={(command) => {
+            // While the timer runs, the sequence position lives in playback
+            // state — "next" must go through the same skip path as the Skip
+            // button or the card and the timer drift apart.
+            if (command === 'next') {
+              if (playback !== null) onSkip()
+              else if (idx < steps.length - 1) setIdx(idx + 1)
+            } else if (command === 'previous') {
+              if (playback === null && idx > 0) setIdx(idx - 1)
+            } else if (command === 'finish') {
+              onStop()
+              finish()
+            }
+          }}
+        />
 
         {playback === null ? (
           <>

@@ -8,7 +8,10 @@ surrounding style.
 
 A client-only, offline-first PWA replacing a P90X Excel workbook. No accounts, and
 no network calls at runtime **except** the opt-in cloud sync of E10, which is off
-unless the user configures an endpoint they host themselves. Vite + React 19 +
+unless the user configures an endpoint they host themselves. (E30's voice entry
+relies on the browser's own speech-recognition engine, which may call its vendor's
+service while the user holds the mic open — the app itself sends nothing and
+stores only the parsed numbers.) Vite + React 19 +
 TypeScript, Zustand + Immer state, Zod-validated import, Tailwind, hand-rolled SVG
 charts, `vite-plugin-pwa`.
 
@@ -52,7 +55,7 @@ snapshot so later Settings changes never rewrite history.
 ## Layout
 
 ```
-src/lib/        pure logic (scoring, schedule/*, timelines/*, playback, focusSteps, body, setup,
+src/lib/        pure logic (scoring, schedule/*, timelines/*, playback, focusSteps, voiceEntry, body, setup,
                 bodyFat, ffmi, feasibility, nutrition, adherence, progression, overload,
                 roundReport, roundCompare, chart, links, quotes, dates, sync/syncCrypto,
                 importExport, migrations, version)

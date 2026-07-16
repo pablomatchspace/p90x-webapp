@@ -3,9 +3,10 @@ import { formatAppVersion } from '@/lib/version'
 
 /**
  * Help / About (US-074). The abbreviations legend is transcribed from the
- * workbook's INSTRUCTIONS sheet; the privacy note states the app's local-only
- * data stance (decision D3); and the About block shows the build version and
- * links to the source.
+ * workbook's INSTRUCTIONS sheet; the audio guide covers E26 cues and E30
+ * voice entry; the privacy note states the app's local-only data stance
+ * (decision D3); and the About block shows the build version and links to
+ * the source.
  */
 
 const REPO = 'https://github.com/pablomatchspace/p90x-webapp'
@@ -18,6 +19,15 @@ const ABBREVIATIONS: [string, string][] = [
   ['N / K', 'Push-ups — normal / on knees'],
   ['RA / LA', 'Right arm / left arm'],
   ['RL / LL', 'Right leg / left leg'],
+]
+
+/** What the E30 mic understands — mirrors the voiceEntry grammar. */
+const VOICE_PHRASES: [string, string][] = [
+  ['“reps 22, knee 8”', 'fills the named fields — trailing works too (“22 reps, 8 knee”)'],
+  ['“twenty-two” · “12.5”', 'bare numbers fill the card’s fields in order, first empty one first'],
+  ['“round 2 reps 20”', 'targets a round when the card shows more than one'],
+  ['“next” · “previous”', 'moves between exercises (while the timer runs, “next” skips the phase)'],
+  ['“finish workout”', 'completes the session — same as the Finish button'],
 ]
 
 export function HelpPage() {
@@ -36,6 +46,37 @@ export function HelpPage() {
             </div>
           ))}
         </dl>
+      </Card>
+
+      <Card>
+        <h2 className="text-base font-semibold">Audio &amp; voice</h2>
+        <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
+          <span className="font-medium">Hearing the workout:</span> during play and focus playback,
+          rest starts with a lower two-tone beep so it sounds different from work, and with{' '}
+          <span className="font-medium">Voice cues</span> on (the toggle on the play and focus
+          screens) each exercise is announced as it comes up.
+        </p>
+        <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
+          <span className="font-medium">Speaking your reps:</span> in focus mode, tap{' '}
+          <span className="font-medium">Voice entry</span> and say one phrase (English recognition):
+        </p>
+        <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
+          {VOICE_PHRASES.map(([phrase, meaning]) => (
+            <div key={phrase} className="contents">
+              <dt className="font-medium text-zinc-700 dark:text-zinc-200">{phrase}</dt>
+              <dd className="text-zinc-600 dark:text-zinc-300">{meaning}</dd>
+            </div>
+          ))}
+        </dl>
+        <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-300">
+          Turn on <span className="font-medium">Hands-free</span> next to the mic and it re-arms
+          after every phrase until you switch it off or leave the screen — starting always takes a
+          tap, so nothing listens on page load. The mic asks for browser permission the first time,
+          and the button only appears in browsers with speech recognition (Chrome, Edge, Safari).
+          Your browser&rsquo;s own speech engine turns audio into text — it may use an online
+          service for that — but the app itself never records anything and stores only the numbers
+          you log.
+        </p>
       </Card>
 
       <Card>

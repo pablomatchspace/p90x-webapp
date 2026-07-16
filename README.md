@@ -30,13 +30,23 @@ steppers, focus mode, rest timer), and a Classic⇄Lean toggle.
   weekly template remap) with preview, undo, and an audit trail.
 - **Workout logging** — the workbook's scoring engine computed live (adjusted
   reps, penalties, R×W), a familiar week grid, and a one-exercise-at-a-time focus
-  mode with per-exercise history.
+  mode with per-exercise history and a forward-looking target per exercise
+  (beat your last net score — or your last round's on day 1 of a new round).
+- **Voice rep entry** — a push-to-talk mic in focus mode: say
+  _"reps 22, knee 8"_, _"next"_ or _"finish workout"_ and it happens; an
+  opt-in hands-free mode re-arms the mic between sets so a whole session logs
+  without touching the screen. English recognition, feature-detected —
+  browsers without speech recognition simply don't show the button.
 - **Guided play mode** — press Play and the workout runs itself: authored
   video timelines for Plyometrics, Kenpo X, X Stretch, Cardio X and Yoga
   (classic or P90X3 30-min), plus a per-step timer in focus mode for strength
   days. Beeps distinguish rest from work, spoken announcements name each
   exercise (toggleable), and your video/audio deeplinks stay one tap away
   mid-session.
+- **Rounds** — complete a 90-day round, archive it with one tap and start the
+  next: an end-of-round report (adherence, strength, body deltas), a
+  round-over-round comparison, and archived history that feeds the next
+  round's targets. Later Settings changes never rewrite an archived round.
 - **Body log** — daily scale entries with derived BMI / lean mass / FFMI +
   category, colour-coded against your SETUP targets and limits.
 - **Dashboard & charts** — body-vs-target KPIs with an FFMI feasibility
