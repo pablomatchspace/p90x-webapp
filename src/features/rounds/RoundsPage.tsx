@@ -25,7 +25,7 @@ function CurrentRoundCard({ onArchived }: { onArchived: (label: string) => void 
   const settings = useSettings()
   const adherence = useAdherence()
   const bodyLog = useStore((s) => s.data.bodyLog)
-  const roundCount = useStore((s) => s.data.rounds.length)
+  const roundCount = useStore((s) => s.data.archivedRounds.length)
   const [confirming, setConfirming] = useState(false)
   const defaultLabel = `Round ${roundCount + 1}`
   const [label, setLabel] = useState(defaultLabel)
@@ -239,7 +239,7 @@ function ArchivedRoundCard({ round, canRestore }: { round: ArchivedRound; canRes
 }
 
 export function RoundsPage() {
-  const rounds = useStore((s) => s.data.rounds)
+  const rounds = useStore((s) => s.data.archivedRounds)
   const startDate = useStore((s) => s.data.settings.startDate)
   const [message, setMessage] = useState<string | null>(null)
 

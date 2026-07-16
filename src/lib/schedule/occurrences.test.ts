@@ -47,19 +47,19 @@ describe('previousValue', () => {
       'd001',
       {
         programDayId: 'd001',
-        entries: { 'standard-push-ups': { rounds: [{ main: 22, secondary: null }] } },
+        entries: { 'standard-push-ups': { rounds: [{ reps: 22, assist: null }] } },
       },
     ],
     ['d008', { programDayId: 'd008', entries: {} }],
   ])
 
   it('walks back past occurrences without data', () => {
-    expect(previousValue(occ, sessions, 2, 'standard-push-ups', 0, 'main')).toBe(22)
+    expect(previousValue(occ, sessions, 2, 'standard-push-ups', 0, 'reps')).toBe(22)
   })
 
   it('returns null with no earlier data', () => {
-    expect(previousValue(occ, sessions, 0, 'standard-push-ups', 0, 'main')).toBeNull()
-    expect(previousValue(occ, sessions, 2, 'standard-push-ups', 0, 'secondary')).toBeNull()
-    expect(previousValue(occ, sessions, 2, 'military-push-ups', 0, 'main')).toBeNull()
+    expect(previousValue(occ, sessions, 0, 'standard-push-ups', 0, 'reps')).toBeNull()
+    expect(previousValue(occ, sessions, 2, 'standard-push-ups', 0, 'assist')).toBeNull()
+    expect(previousValue(occ, sessions, 2, 'military-push-ups', 0, 'reps')).toBeNull()
   })
 })

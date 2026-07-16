@@ -49,10 +49,10 @@ describe('focusSteps', () => {
 
 describe('resumeIndex', () => {
   const steps = focusSteps(cb)
-  const entry = (main: number | null, r2main: number | null = null) => ({
+  const entry = (r1reps: number | null, r2reps: number | null = null) => ({
     rounds: [
-      { main, secondary: null },
-      { main: r2main, secondary: null },
+      { reps: r1reps, assist: null },
+      { reps: r2reps, assist: null },
     ],
   })
 

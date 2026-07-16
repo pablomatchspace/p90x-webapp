@@ -65,7 +65,7 @@ export function resumeIndex(steps: FocusStep[], session: Session | undefined): n
     if (entry === undefined) return true
     return step.rounds.every((round) => {
       const r = entry.rounds[round]
-      return (r?.main ?? null) === null && (r?.secondary ?? null) === null
+      return (r?.reps ?? null) === null && (r?.assist ?? null) === null
     })
   })
   return first === -1 ? Math.max(0, steps.length - 1) : first

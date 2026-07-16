@@ -19,7 +19,7 @@ export function CompletionButtons({
   return (
     <div className="flex gap-2" role="group" aria-label="Completed?">
       {options.map((option) => {
-        const selected = session?.status === option.value
+        const selected = session?.completion === option.value
         return (
           <button
             key={option.value}

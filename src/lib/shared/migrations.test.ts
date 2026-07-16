@@ -7,6 +7,7 @@ function docAt(version: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11): Record<str
   const doc = JSON.parse(JSON.stringify(emptyState())) as {
     schemaVersion: number
     rounds?: unknown
+    archivedRounds?: unknown
     settings: {
       timer?: unknown
       targets: Record<string, unknown>
@@ -18,6 +19,9 @@ function docAt(version: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11): Record<str
     }
   }
   doc.schemaVersion = version
+  // pre-v13 documents stored the archive under `rounds`
+  doc.rounds = doc.archivedRounds
+  delete doc.archivedRounds
   if (version < 12) delete doc.settings.player?.voiceHandsFree // v12 field
   if (version < 11) delete doc.rounds // v11 field
   if (version < 10) delete doc.settings.player?.voiceCues // v10 field
@@ -193,7 +197,7 @@ describe('migration pipeline', () => {
         voiceCues: true,
         voiceHandsFree: false,
       })
-      expect(result.state.rounds).toEqual([])
+      expect(result.state.archivedRounds).toEqual([])
     }
   })
 
@@ -202,7 +206,7 @@ describe('migration pipeline', () => {
     expect(result.ok).toBe(true)
     if (result.ok) {
       expect(result.migrated).toBe(true)
-      expect(result.state.rounds).toEqual([])
+      expect(result.state.archivedRounds).toEqual([])
     }
   })
 
@@ -234,5 +238,74 @@ describe('migration pipeline', () => {
   it('still rejects v0 and newer-than-current versions', () => {
     expect(migrateToCurrent({ schemaVersion: 0 }).ok).toBe(false)
     expect(migrateToCurrent({ schemaVersion: SCHEMA_VERSION + 1 }).ok).toBe(false)
+  })
+})
+
+describe('v12 → v13 (E31 U156): ubiquitous-language field renames', () => {
+  /** A faithful v12 document exercising every renamed field, live and archived. */
+  function v12Doc(): Record<string, unknown> {
+    const doc = JSON.parse(JSON.stringify(emptyState())) as Record<string, unknown>
+    doc.schemaVersion = 12
+    delete doc.archivedRounds
+    const session = {
+      programDayId: 'd001',
+      status: 'yes',
+      entries: { ex1: { rounds: [{ main: 10, secondary: 5 }] } },
+    }
+    doc.workoutLogs = { chestBack: { sessions: [JSON.parse(JSON.stringify(session))] } }
+    doc.rounds = [
+      {
+        id: 'r1',
+        archivedAt: '2026-01-01T00:00:00.000Z',
+        label: 'Round 1',
+        program: 'classic',
+        startDate: '2025-10-01',
+        scheduleOps: [],
+        workoutLogs: { chestBack: { sessions: [JSON.parse(JSON.stringify(session))] } },
+        bodyLog: [],
+        snapshot: {
+          age: null,
+          height: null,
+          startWeight: null,
+          startBodyFat: null,
+          limits: { weight: null, bodyFat: null, bmi: null },
+          targets: { leanMassIncrease: null, bodyFat: null, ffmi: null },
+          scoring: { penaltyDivisor: 2, penaltyOn: true, chairFactor: 2, rwDivisor: 10 },
+        },
+      },
+    ]
+    return doc
+  }
+
+  it('renames the top-level rounds archive to archivedRounds', () => {
+    const result = migrateToCurrent(v12Doc())
+    expect(result.ok).toBe(true)
+    if (result.ok) {
+      expect(result.state.archivedRounds).toHaveLength(1)
+      expect('rounds' in result.state).toBe(false)
+    }
+  })
+
+  it('renames session.status to session.completion in live and archived logs', () => {
+    const result = migrateToCurrent(v12Doc())
+    expect(result.ok).toBe(true)
+    if (result.ok) {
+      expect(result.state.workoutLogs.chestBack?.sessions[0]?.completion).toBe('yes')
+      expect(result.state.archivedRounds[0]?.workoutLogs.chestBack?.sessions[0]?.completion).toBe(
+        'yes',
+      )
+    }
+  })
+
+  it('renames exercise-round main/assist pair in live and archived entries', () => {
+    const result = migrateToCurrent(v12Doc())
+    expect(result.ok).toBe(true)
+    if (result.ok) {
+      const live = result.state.workoutLogs.chestBack?.sessions[0]?.entries?.ex1?.rounds[0]
+      expect(live).toEqual({ reps: 10, assist: 5 })
+      const archived =
+        result.state.archivedRounds[0]?.workoutLogs.chestBack?.sessions[0]?.entries?.ex1?.rounds[0]
+      expect(archived).toEqual({ reps: 10, assist: 5 })
+    }
   })
 })

@@ -86,7 +86,7 @@ export function FocusPage() {
 
   // E29: cross-round target fallback — per exercise, the newest archived round
   // that logged it, computed once per screen with each round's frozen scoring.
-  const rounds = useStore((s) => s.data.rounds)
+  const rounds = useStore((s) => s.data.archivedRounds)
   const archiveNets = useMemo(
     () => (valid ? archiveLatestNets(rounds, key) : null),
     [valid, rounds, key],
@@ -348,11 +348,11 @@ export function FocusPage() {
           </p>
         ) : null}
         {prior !== undefined &&
-        ((prior.main ?? null) !== null || (prior.secondary ?? null) !== null) ? (
+        ((prior.reps ?? null) !== null || (prior.assist ?? null) !== null) ? (
           <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-            Round {step.rounds[0]}: {prior.main ?? '—'}
+            Round {step.rounds[0]}: {prior.reps ?? '—'}
             {exercise.secondary !== undefined
-              ? ` · ${SECONDARY_LABELS[exercise.secondary]}: ${prior.secondary ?? '—'}`
+              ? ` · ${SECONDARY_LABELS[exercise.secondary]}: ${prior.assist ?? '—'}`
               : null}
           </p>
         ) : null}

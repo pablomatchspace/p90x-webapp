@@ -12,7 +12,7 @@ function ex(workoutKey: string, id: string): CatalogExercise {
 }
 
 function entry(...rounds: Array<[number | null, number | null]>): ExerciseEntry {
-  return { rounds: rounds.map(([main, secondary]) => ({ main, secondary })) }
+  return { rounds: rounds.map(([reps, assist]) => ({ reps, assist })) }
 }
 
 describe('US-040 golden master — Chest & Back week 1 (workbook)', () => {

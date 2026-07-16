@@ -18,7 +18,7 @@ function sampleState() {
     sessions: [
       {
         programDayId: 'd001',
-        entries: { 'standard-push-ups': { rounds: [{ main: 20, secondary: null }] } },
+        entries: { 'standard-push-ups': { rounds: [{ reps: 20, assist: null }] } },
       },
     ],
   }

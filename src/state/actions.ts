@@ -36,7 +36,7 @@ export function setCompletionStatus(
 ): void {
   useStore.getState().mutate((draft) => {
     const session = upsertSession(draft, workoutKey, programDayId)
-    session.status = status
+    session.completion = status
     session.loggedAt = new Date().toISOString()
   })
 }
@@ -66,7 +66,7 @@ export function setRoundValue(
   programDayId: string,
   exerciseId: string,
   round: number,
-  field: 'main' | 'secondary',
+  field: 'reps' | 'assist',
   value: number | null,
 ): void {
   const def = getWorkout(workoutKey).exercises?.find((e) => e.id === exerciseId)
@@ -75,13 +75,13 @@ export function setRoundValue(
     const session = upsertSession(draft, workoutKey, programDayId)
     const entries = (session.entries ??= {})
     const entry = (entries[exerciseId] ??= {
-      rounds: Array.from({ length: def.rounds }, () => ({ main: null, secondary: null })),
+      rounds: Array.from({ length: def.rounds }, () => ({ reps: null, assist: null })),
     })
     if (entry.rounds[round] === undefined) return // imported entry shorter than catalog
     entry.rounds[round][field] = value
     session.loggedAt = new Date().toISOString()
     const empty = entry.rounds.every(
-      (r) => (r.main ?? null) === null && (r.secondary ?? null) === null,
+      (r) => (r.reps ?? null) === null && (r.assist ?? null) === null,
     )
     if (empty) delete entries[exerciseId]
   })
@@ -419,8 +419,8 @@ export function completeRound(options: { label?: string; seedFromLatest?: boolea
     // `current` detaches plain copies, so moving the subtrees into the archive
     // while resetting the live slots can never alias immer drafts.
     const plain = current(draft)
-    const label = options.label?.trim() || `Round ${draft.rounds.length + 1}`
-    draft.rounds.push({
+    const label = options.label?.trim() || `Round ${draft.archivedRounds.length + 1}`
+    draft.archivedRounds.push({
       id: `r-${crypto.randomUUID()}`,
       archivedAt: new Date().toISOString(),
       label,
@@ -461,10 +461,10 @@ export function completeRound(options: { label?: string; seedFromLatest?: boolea
 export function restoreRound(id: string): void {
   useStore.getState().mutate((draft) => {
     if (draft.settings.startDate !== null) return
-    const index = draft.rounds.findIndex((r) => r.id === id)
+    const index = draft.archivedRounds.findIndex((r) => r.id === id)
     if (index === -1) return
-    const round = current(draft.rounds[index])
-    draft.rounds.splice(index, 1)
+    const round = current(draft.archivedRounds[index])
+    draft.archivedRounds.splice(index, 1)
     const s = draft.settings
     s.program = round.program
     s.startDate = round.startDate
@@ -486,7 +486,7 @@ export function renameRound(id: string, label: string): void {
   const trimmed = label.trim()
   if (trimmed === '') return
   useStore.getState().mutate((draft) => {
-    const round = draft.rounds.find((r) => r.id === id)
+    const round = draft.archivedRounds.find((r) => r.id === id)
     if (round !== undefined) round.label = trimmed
   })
 }
@@ -494,7 +494,7 @@ export function renameRound(id: string, label: string): void {
 /** E28: permanently delete an archived round (the UI confirms first). */
 export function deleteRound(id: string): void {
   useStore.getState().mutate((draft) => {
-    const index = draft.rounds.findIndex((r) => r.id === id)
-    if (index !== -1) draft.rounds.splice(index, 1)
+    const index = draft.archivedRounds.findIndex((r) => r.id === id)
+    if (index !== -1) draft.archivedRounds.splice(index, 1)
   })
 }

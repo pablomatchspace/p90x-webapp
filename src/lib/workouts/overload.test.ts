@@ -8,18 +8,18 @@ import { archiveLatestNets, overloadTarget, targetStatus } from './overload'
 const scoring = emptyState().settings.scoring
 const pushUps = getWorkout('chest-back').exercises!.find((e) => e.id === 'standard-push-ups')!
 
-/** Two equal rounds of main+knee reps: net = main + knee/chairFactor, no penalty. */
-function entry(main: number, knee = 0): ExerciseEntry {
+/** Two equal rounds of reps+knee reps: net = reps + knee/chairFactor, no penalty. */
+function entry(reps: number, knee = 0): ExerciseEntry {
   return {
     rounds: [
-      { main, secondary: knee },
-      { main, secondary: knee },
+      { reps, assist: knee },
+      { reps, assist: knee },
     ],
   }
 }
 
-function session(programDayId: string, main: number, knee = 0): Session {
-  return { programDayId, entries: { 'standard-push-ups': entry(main, knee) } }
+function session(programDayId: string, reps: number, knee = 0): Session {
+  return { programDayId, entries: { 'standard-push-ups': entry(reps, knee) } }
 }
 
 const schedule = materialize('classic', '2026-01-05', [])

@@ -275,7 +275,7 @@ function StrengthOutcomeCard({ report }: { report: RoundReport }) {
 export function RoundReportPage() {
   const { id } = useParams()
   const settings = useSettings()
-  const rounds = useStore((s) => s.data.rounds)
+  const rounds = useStore((s) => s.data.archivedRounds)
   const state = useStore((s) => s.data)
 
   const live = id === 'live'

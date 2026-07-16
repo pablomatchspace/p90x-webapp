@@ -84,6 +84,46 @@ const MIGRATIONS: Record<number, (doc: Record<string, unknown>) => void> = {
       settings.player.voiceHandsFree = false
     }
   },
+  // v12 → v13 (E31 U156): ubiquitous-language renames — rounds → archivedRounds,
+  // session.status → completion, exercise-round main/secondary → reps/assist
+  // (docs/GLOSSARY.md). Values are untouched; archived rounds migrate too.
+  12: (doc) => {
+    type OldRound = { main?: unknown; secondary?: unknown; reps?: unknown; assist?: unknown }
+    type OldSession = {
+      status?: unknown
+      completion?: unknown
+      entries?: Record<string, { rounds?: OldRound[] }>
+    }
+    type Logs = Record<string, { sessions?: OldSession[] }>
+    const renameLogs = (logs: Logs | undefined) => {
+      for (const log of Object.values(logs ?? {})) {
+        for (const session of log.sessions ?? []) {
+          if (session.status !== undefined && session.completion === undefined) {
+            session.completion = session.status
+          }
+          delete session.status
+          for (const entry of Object.values(session.entries ?? {})) {
+            for (const round of entry.rounds ?? []) {
+              if (round.main !== undefined && round.reps === undefined) round.reps = round.main
+              if (round.secondary !== undefined && round.assist === undefined) {
+                round.assist = round.secondary
+              }
+              delete round.main
+              delete round.secondary
+            }
+          }
+        }
+      }
+    }
+    if (doc.archivedRounds === undefined) {
+      doc.archivedRounds = doc.rounds ?? []
+    }
+    delete doc.rounds
+    renameLogs(doc.workoutLogs as Logs | undefined)
+    for (const round of doc.archivedRounds as { workoutLogs?: Logs }[]) {
+      renameLogs(round.workoutLogs)
+    }
+  },
 }
 
 export function migrateToCurrent(raw: unknown): MigrationResult {

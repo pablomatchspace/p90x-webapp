@@ -10,8 +10,8 @@ import { bodyFraction, kg, meters } from '@/lib/shared'
 function pushUps(reps: number): ExerciseEntry {
   return {
     rounds: [
-      { main: reps, secondary: null },
-      { main: reps, secondary: null },
+      { reps: reps, assist: null },
+      { reps: reps, assist: null },
     ],
   }
 }

@@ -15,6 +15,21 @@ didn't bump the package version — they're numbered B01/B02 here for a
 continuous record; #33's package column is left at the un-suffixed version
 that was actually shipped.
 
+## 1.E31.U156 (package 1.31.156) — 2026-07-16
+
+- **E31 — Domain-driven design alignment, story U156: persisted-field renames
+  (schema v13).** The document now speaks the glossary's language: the
+  top-level `rounds` archive is `archivedRounds` (no longer colliding with an
+  entry's exercise rounds), the cardio COMPLETED? dropdown is
+  `session.completion` (no longer shadowing the `completed` boolean), and the
+  exercise-round pair `main`/`secondary` is `reps`/`assist` (`assist` holds
+  knee/chair reps, the R×W weight, or the other-side count — and no longer
+  collides with the catalog's `exercise.secondary` row kind). Migration
+  12→13 renames in place — live logs and every archived round's logs — with
+  values untouched; older exports (including the shipped v1
+  `sample-data.json`) still import through the full chain. Display labels,
+  scoring, and all derived numbers are unchanged.
+
 ## 1.E31.U155 (package 1.31.155) — 2026-07-16
 
 - **E31 — Domain-driven design alignment, story U155: branded unit value

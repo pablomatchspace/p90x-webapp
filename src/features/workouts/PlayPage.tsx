@@ -183,10 +183,10 @@ export function PlayPage() {
 
   // Auto-mark completion at sequence-finished when the setting is on (Q17).
   useEffect(() => {
-    if (finished && settings.player.autoMarkDone && session?.status !== 'yes') {
+    if (finished && settings.player.autoMarkDone && session?.completion !== 'yes') {
       setCompletionStatus(key, programDayId, 'yes')
     }
-  }, [finished, settings.player.autoMarkDone, session?.status, key, programDayId])
+  }, [finished, settings.player.autoMarkDone, session?.completion, key, programDayId])
 
   // Occurrences for this key, incl. rest-day X Stretch guided-play entries.
   // Computed before the early returns below so the hook runs unconditionally
@@ -262,7 +262,7 @@ export function PlayPage() {
   if (finished) {
     const doneCount = loggedIds.filter((id) => doneMap.get(id) === true).length
     const autoMarked = settings.player.autoMarkDone
-    const alreadyYes = session?.status === 'yes'
+    const alreadyYes = session?.completion === 'yes'
     return (
       <Page title={def.name} subtitle={`Week ${day.week} · ${formatLong(day.date)}`}>
         <Card>

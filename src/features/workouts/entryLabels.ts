@@ -15,10 +15,10 @@ export function mainLabel(exercise: CatalogExercise): string {
 export function fieldAria(
   exercise: CatalogExercise,
   round: number,
-  field: 'main' | 'secondary',
+  field: 'reps' | 'assist',
 ): string {
   const kind = exercise.secondary
-  const name = field === 'main' || kind === undefined ? mainLabel(exercise) : SECONDARY_LABELS[kind]
+  const name = field === 'reps' || kind === undefined ? mainLabel(exercise) : SECONDARY_LABELS[kind]
   return exercise.rounds === 1
     ? `${exercise.name} ${name}`
     : `${exercise.name} round ${round + 1} ${name}`

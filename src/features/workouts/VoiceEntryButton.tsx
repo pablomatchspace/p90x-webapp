@@ -118,7 +118,7 @@ export function VoiceEntryButton({
     const secondary = current.exercise.secondary
     const applied = assignments.map(({ slot, value }) => {
       const name =
-        slot.field === 'main' || secondary === undefined
+        slot.field === 'reps' || secondary === undefined
           ? mainLabel(current.exercise)
           : SECONDARY_LABELS[secondary]
       return `${current.rounds.length > 1 ? `R${slot.round + 1} ` : ''}${name} ${value}`

@@ -4,7 +4,7 @@ import type { FocusStep } from './focusSteps'
 import { assignVoiceValues, parseVoiceTranscript, voiceSlots, type VoiceSlot } from './voiceEntry'
 
 const chestBack = getWorkout('chest-back').exercises!
-const pushUps = chestBack.find((e) => e.id === 'standard-push-ups')! // secondary: knee
+const pushUps = chestBack.find((e) => e.id === 'standard-push-ups')! // assist: knee
 const shouldersArms = getWorkout('shoulders-arms').exercises!
 
 describe('parseVoiceTranscript — numbers (US-150)', () => {
@@ -69,13 +69,13 @@ describe('parseVoiceTranscript — field words & rounds (US-150)', () => {
     expect(parseVoiceTranscript('reps 22 knee 8')).toEqual({
       kind: 'values',
       values: [
-        { value: 22, field: 'main' },
-        { value: 8, field: 'secondary' },
+        { value: 22, field: 'reps' },
+        { value: 8, field: 'assist' },
       ],
     })
     expect(parseVoiceTranscript('weight thirty five')).toEqual({
       kind: 'values',
-      values: [{ value: 35, field: 'secondary' }],
+      values: [{ value: 35, field: 'assist' }],
     })
   })
 
@@ -83,8 +83,8 @@ describe('parseVoiceTranscript — field words & rounds (US-150)', () => {
     expect(parseVoiceTranscript('22 reps 8 knee')).toEqual({
       kind: 'values',
       values: [
-        { value: 22, field: 'main' },
-        { value: 8, field: 'secondary' },
+        { value: 22, field: 'reps' },
+        { value: 8, field: 'assist' },
       ],
     })
   })
@@ -92,11 +92,11 @@ describe('parseVoiceTranscript — field words & rounds (US-150)', () => {
   it('keeps "knee reps" compounds secondary in both positions', () => {
     expect(parseVoiceTranscript('knee reps 8')).toEqual({
       kind: 'values',
-      values: [{ value: 8, field: 'secondary' }],
+      values: [{ value: 8, field: 'assist' }],
     })
     expect(parseVoiceTranscript('8 knee reps')).toEqual({
       kind: 'values',
-      values: [{ value: 8, field: 'secondary' }],
+      values: [{ value: 8, field: 'assist' }],
     })
   })
 
@@ -104,8 +104,8 @@ describe('parseVoiceTranscript — field words & rounds (US-150)', () => {
     expect(parseVoiceTranscript('round 2 reps 20 knee 6')).toEqual({
       kind: 'values',
       values: [
-        { value: 20, field: 'main', round: 1 },
-        { value: 6, field: 'secondary', round: 1 },
+        { value: 20, field: 'reps', round: 1 },
+        { value: 6, field: 'assist', round: 1 },
       ],
     })
     expect(parseVoiceTranscript('round one 25 round two 20')).toEqual({
@@ -137,15 +137,15 @@ describe('voiceSlots (US-150)', () => {
   it('orders fields per shown round, main then secondary', () => {
     // single-round card of a two-round exercise (Chest & Back two-pass order)
     expect(voiceSlots({ exercise: pushUps, rounds: [1] })).toEqual([
-      { round: 1, field: 'main' },
-      { round: 1, field: 'secondary' },
+      { round: 1, field: 'reps' },
+      { round: 1, field: 'assist' },
     ])
     // all-rounds card
     expect(voiceSlots({ exercise: pushUps, rounds: [0, 1] })).toEqual([
-      { round: 0, field: 'main' },
-      { round: 0, field: 'secondary' },
-      { round: 1, field: 'main' },
-      { round: 1, field: 'secondary' },
+      { round: 0, field: 'reps' },
+      { round: 0, field: 'assist' },
+      { round: 1, field: 'reps' },
+      { round: 1, field: 'assist' },
     ])
   })
 
@@ -153,69 +153,69 @@ describe('voiceSlots (US-150)', () => {
     const noSecondary = shouldersArms.find((e) => e.secondary === undefined)
     if (noSecondary === undefined) return // catalog guard — every row has one
     const step: FocusStep = { exercise: noSecondary, rounds: [0] }
-    expect(voiceSlots(step).every((s) => s.field === 'main')).toBe(true)
+    expect(voiceSlots(step).every((s) => s.field === 'reps')).toBe(true)
   })
 })
 
 describe('assignVoiceValues (US-150)', () => {
   const slots: VoiceSlot[] = [
-    { round: 0, field: 'main' },
-    { round: 0, field: 'secondary' },
-    { round: 1, field: 'main' },
-    { round: 1, field: 'secondary' },
+    { round: 0, field: 'reps' },
+    { round: 0, field: 'assist' },
+    { round: 1, field: 'reps' },
+    { round: 1, field: 'assist' },
   ]
   const empty = [false, false, false, false]
 
   it('fills bare values positionally, continuing at the first empty field', () => {
     expect(assignVoiceValues([{ value: 22 }, { value: 8 }], slots, empty)).toEqual([
-      { slot: { round: 0, field: 'main' }, value: 22 },
-      { slot: { round: 0, field: 'secondary' }, value: 8 },
+      { slot: { round: 0, field: 'reps' }, value: 22 },
+      { slot: { round: 0, field: 'assist' }, value: 8 },
     ])
     // round 1 already logged — a bare number lands on round 2's reps
     expect(assignVoiceValues([{ value: 20 }], slots, [true, true, false, false])).toEqual([
-      { slot: { round: 1, field: 'main' }, value: 20 },
+      { slot: { round: 1, field: 'reps' }, value: 20 },
     ])
   })
 
   it('starts over on a fully logged card so re-speaking corrects', () => {
     expect(assignVoiceValues([{ value: 30 }], slots, [true, true, true, true])).toEqual([
-      { slot: { round: 0, field: 'main' }, value: 30 },
+      { slot: { round: 0, field: 'reps' }, value: 30 },
     ])
   })
 
   it('honours field tags, preferring the empty round, and overwrites on repeat', () => {
     expect(
-      assignVoiceValues([{ value: 8, field: 'secondary' }], slots, [true, true, false, false]),
-    ).toEqual([{ slot: { round: 1, field: 'secondary' }, value: 8 }])
+      assignVoiceValues([{ value: 8, field: 'assist' }], slots, [true, true, false, false]),
+    ).toEqual([{ slot: { round: 1, field: 'assist' }, value: 8 }])
     // both knee fields filled — the tag overwrites the first one
     expect(
-      assignVoiceValues([{ value: 9, field: 'secondary' }], slots, [true, true, true, true]),
-    ).toEqual([{ slot: { round: 0, field: 'secondary' }, value: 9 }])
+      assignVoiceValues([{ value: 9, field: 'assist' }], slots, [true, true, true, true]),
+    ).toEqual([{ slot: { round: 0, field: 'assist' }, value: 9 }])
   })
 
   it('honours round tags and drops values with no matching slot', () => {
-    expect(assignVoiceValues([{ value: 20, field: 'main', round: 1 }], slots, empty)).toEqual([
-      { slot: { round: 1, field: 'main' }, value: 20 },
+    expect(assignVoiceValues([{ value: 20, field: 'reps', round: 1 }], slots, empty)).toEqual([
+      { slot: { round: 1, field: 'reps' }, value: 20 },
     ])
     // round 3 is not on this card; secondary doesn't exist on a main-only card
     expect(assignVoiceValues([{ value: 20, round: 2 }], slots, empty)).toEqual([])
     expect(
-      assignVoiceValues([{ value: 5, field: 'secondary' }], [{ round: 0, field: 'main' }], [false]),
+      assignVoiceValues([{ value: 5, field: 'assist' }], [{ round: 0, field: 'reps' }], [false]),
     ).toEqual([])
   })
 
   it('never assigns two values to the same slot in one utterance', () => {
     const out = assignVoiceValues(
       [
-        { value: 22, field: 'main' },
-        { value: 20, field: 'main' },
+        { value: 22, field: 'reps' },
+        { value: 20, field: 'reps' },
       ],
       slots,
       empty,
     )
     expect(out).toEqual([
-      { slot: { round: 0, field: 'main' }, value: 22 },
-      { slot: { round: 1, field: 'main' }, value: 20 },
+      { slot: { round: 0, field: 'reps' }, value: 22 },
+      { slot: { round: 1, field: 'reps' }, value: 20 },
     ])
   })
 })

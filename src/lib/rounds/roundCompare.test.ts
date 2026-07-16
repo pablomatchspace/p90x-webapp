@@ -7,8 +7,8 @@ import { kg, meters } from '@/lib/shared'
 function pushUps(reps: number): ExerciseEntry {
   return {
     rounds: [
-      { main: reps, secondary: null },
-      { main: reps, secondary: null },
+      { reps: reps, assist: null },
+      { reps: reps, assist: null },
     ],
   }
 }
@@ -131,11 +131,11 @@ describe('comparableWorkouts (US-146)', () => {
         sessions: [
           {
             programDayId: 'd001',
-            entries: { 'in-and-out': { rounds: [{ main: 25, secondary: null }] } },
+            entries: { 'in-and-out': { rounds: [{ reps: 25, assist: null }] } },
           },
         ],
       },
-      'yoga-x': { sessions: [{ programDayId: 'd004', status: 'yes' }] }, // completion-style: excluded
+      'yoga-x': { sessions: [{ programDayId: 'd004', completion: 'yes' }] }, // completion-style: excluded
     }
     expect(comparableWorkouts(a, b)).toEqual(['ab-ripper-x', 'chest-back'])
   })

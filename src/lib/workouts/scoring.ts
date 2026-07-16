@@ -43,11 +43,11 @@ export function adjustedRound(
   scoring: ScoringSettings,
 ): number | null {
   if (round === undefined) return null
-  const main = round.main ?? null
-  const secondary = round.secondary ?? null
-  if (main === null && secondary === null) return null
-  const m = main ?? 0
-  const s = secondary ?? 0
+  const reps = round.reps ?? null
+  const assist = round.assist ?? null
+  if (reps === null && assist === null) return null
+  const m = reps ?? 0
+  const s = assist ?? 0
   switch (exercise.secondary) {
     case 'knee':
     case 'chair':

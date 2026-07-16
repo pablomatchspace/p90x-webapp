@@ -38,13 +38,13 @@ describe('quick-log actions', () => {
     setCompletionStatus('plyometrics', 'd002', 'yes')
     let sessions = useStore.getState().data.workoutLogs['plyometrics'].sessions
     expect(sessions).toHaveLength(1)
-    expect(sessions[0]).toMatchObject({ programDayId: 'd002', status: 'yes' })
+    expect(sessions[0]).toMatchObject({ programDayId: 'd002', completion: 'yes' })
     expect(sessions[0].loggedAt).toBeTruthy()
 
     setCompletionStatus('plyometrics', 'd002', 'no')
     sessions = useStore.getState().data.workoutLogs['plyometrics'].sessions
     expect(sessions).toHaveLength(1)
-    expect(sessions[0].status).toBe('no')
+    expect(sessions[0].completion).toBe('no')
   })
 
   it('keeps sessions on different program days separate', () => {
@@ -66,27 +66,27 @@ describe('round entry actions', () => {
     useStore.getState().data.workoutLogs['chest-back'].sessions[0].entries?.['standard-push-ups']
 
   it('creates the entry with the catalog round count and sets the value', () => {
-    setRoundValue('chest-back', 'd001', 'standard-push-ups', 1, 'main', 15)
+    setRoundValue('chest-back', 'd001', 'standard-push-ups', 1, 'reps', 15)
     expect(entry()).toEqual({
       rounds: [
-        { main: null, secondary: null },
-        { main: 15, secondary: null },
+        { reps: null, assist: null },
+        { reps: 15, assist: null },
       ],
     })
   })
 
   it('removes the entry again once every value is cleared', () => {
-    setRoundValue('chest-back', 'd001', 'standard-push-ups', 0, 'main', 22)
-    setRoundValue('chest-back', 'd001', 'standard-push-ups', 0, 'secondary', 4)
-    setRoundValue('chest-back', 'd001', 'standard-push-ups', 0, 'main', null)
-    expect(entry()?.rounds[0]).toEqual({ main: null, secondary: 4 })
-    setRoundValue('chest-back', 'd001', 'standard-push-ups', 0, 'secondary', null)
+    setRoundValue('chest-back', 'd001', 'standard-push-ups', 0, 'reps', 22)
+    setRoundValue('chest-back', 'd001', 'standard-push-ups', 0, 'assist', 4)
+    setRoundValue('chest-back', 'd001', 'standard-push-ups', 0, 'reps', null)
+    expect(entry()?.rounds[0]).toEqual({ reps: null, assist: 4 })
+    setRoundValue('chest-back', 'd001', 'standard-push-ups', 0, 'assist', null)
     expect(entry()).toBeUndefined()
   })
 
   it('ignores out-of-range rounds and unknown exercises without leaving residue', () => {
-    setRoundValue('chest-back', 'd001', 'standard-push-ups', 5, 'main', 10)
-    setRoundValue('chest-back', 'd001', 'no-such-exercise', 0, 'main', 10)
+    setRoundValue('chest-back', 'd001', 'standard-push-ups', 5, 'reps', 10)
+    setRoundValue('chest-back', 'd001', 'no-such-exercise', 0, 'reps', 10)
     expect(useStore.getState().data.workoutLogs['chest-back']).toBeUndefined()
   })
 
@@ -297,7 +297,7 @@ describe('round lifecycle (E28 US-143)', () => {
     })
     updateTargets({ leanMassIncrease: kg(4), bodyFat: bodyFraction(0.15) })
     addScheduleOp({ kind: 'skip', id: 'op1', createdAt: 't', date: '2026-01-14' })
-    setRoundValue('chest-back', 'd001', 'standard-push-ups', 0, 'main', 20)
+    setRoundValue('chest-back', 'd001', 'standard-push-ups', 0, 'reps', 20)
     setCompletionStatus('plyometrics', 'd002', 'yes')
     upsertBodyEntry('2026-01-06', { weight: kg(82), bodyFat: bodyFraction(0.22) })
     upsertBodyEntry('2026-03-30', { weight: kg(78.5), bodyFat: bodyFraction(0.18) })
@@ -306,13 +306,13 @@ describe('round lifecycle (E28 US-143)', () => {
   it('archives the live round and resets the round-scoped state', () => {
     liveRound()
     completeRound()
-    const { settings, scheduleOps, workoutLogs, bodyLog, rounds } = useStore.getState().data
+    const { settings, scheduleOps, workoutLogs, bodyLog, archivedRounds } = useStore.getState().data
     expect(settings.startDate).toBeNull()
     expect(scheduleOps).toEqual([])
     expect(workoutLogs).toEqual({})
     expect(bodyLog).toEqual([])
-    expect(rounds).toHaveLength(1)
-    const round = rounds[0]
+    expect(archivedRounds).toHaveLength(1)
+    const round = archivedRounds[0]
     expect(round.label).toBe('Round 1')
     expect(round.program).toBe('classic')
     expect(round.startDate).toBe('2026-01-05')
@@ -347,12 +347,12 @@ describe('round lifecycle (E28 US-143)', () => {
 
   it('is a no-op without a live program, and labels default sequentially', () => {
     completeRound()
-    expect(useStore.getState().data.rounds).toEqual([])
+    expect(useStore.getState().data.archivedRounds).toEqual([])
     liveRound()
     completeRound()
     startProgram('2026-04-06', 'classic')
     completeRound({ label: '  ' }) // blank label falls back to the default
-    const labels = useStore.getState().data.rounds.map((r) => r.label)
+    const labels = useStore.getState().data.archivedRounds.map((r) => r.label)
     expect(labels).toEqual(['Round 1', 'Round 2'])
   })
 
@@ -360,7 +360,7 @@ describe('round lifecycle (E28 US-143)', () => {
     liveRound()
     const before = JSON.parse(JSON.stringify(useStore.getState().data))
     completeRound()
-    restoreRound(useStore.getState().data.rounds[0].id)
+    restoreRound(useStore.getState().data.archivedRounds[0].id)
     const after = JSON.parse(JSON.stringify(useStore.getState().data))
     expect(after).toEqual(before)
   })
@@ -368,26 +368,26 @@ describe('round lifecycle (E28 US-143)', () => {
   it('refuses to restore while a program is running', () => {
     liveRound()
     completeRound()
-    const id = useStore.getState().data.rounds[0].id
+    const id = useStore.getState().data.archivedRounds[0].id
     startProgram('2026-04-06', 'lean')
     restoreRound(id)
-    const { settings, rounds } = useStore.getState().data
+    const { settings, archivedRounds } = useStore.getState().data
     expect(settings.startDate).toBe('2026-04-06')
     expect(settings.program).toBe('lean')
-    expect(rounds).toHaveLength(1)
+    expect(archivedRounds).toHaveLength(1)
   })
 
   it('renames with a non-empty label and deletes by id', () => {
     liveRound()
     completeRound()
-    const id = useStore.getState().data.rounds[0].id
+    const id = useStore.getState().data.archivedRounds[0].id
     renameRound(id, '  Winter round  ')
-    expect(useStore.getState().data.rounds[0].label).toBe('Winter round')
+    expect(useStore.getState().data.archivedRounds[0].label).toBe('Winter round')
     renameRound(id, '   ')
-    expect(useStore.getState().data.rounds[0].label).toBe('Winter round')
+    expect(useStore.getState().data.archivedRounds[0].label).toBe('Winter round')
     deleteRound('nope')
-    expect(useStore.getState().data.rounds).toHaveLength(1)
+    expect(useStore.getState().data.archivedRounds).toHaveLength(1)
     deleteRound(id)
-    expect(useStore.getState().data.rounds).toEqual([])
+    expect(useStore.getState().data.archivedRounds).toEqual([])
   })
 })

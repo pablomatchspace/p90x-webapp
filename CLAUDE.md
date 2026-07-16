@@ -20,7 +20,7 @@ A program exists exactly when `settings.startDate` is non-null — the schedule 
 one comes into being: `startProgram` (the `/start` screen, no import), import,
 backup restore, and restoring an archived round (E28). `startProgram` refuses to
 overwrite an existing program; moving day 1 afterwards is `setStartDate`, which
-Settings guards behind a confirm. Completed rounds live in the top-level `rounds`
+Settings guards behind a confirm. Completed rounds live in the top-level `archivedRounds`
 archive (raw inputs + a frozen snapshot of the round-scoped SETUP inputs) —
 `completeRound` archives and resets, and reports/comparisons recompute from the
 snapshot so later Settings changes never rewrite history.

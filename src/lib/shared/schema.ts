@@ -7,7 +7,7 @@ import { bodyFractionSchema, kgSchema, metersSchema } from './units'
  * (scores, penalties, BMI, adherence…) is recomputed by pure functions, mirroring
  * the Excel design where formulas derive everything from entered cells (PRD §8).
  */
-export const SCHEMA_VERSION = 12
+export const SCHEMA_VERSION = 13
 
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'expected YYYY-MM-DD')
 
@@ -104,10 +104,10 @@ export const scheduleOpSchema = z.discriminatedUnion('kind', [
 ])
 
 const exerciseRoundSchema = z.object({
-  /** reps; for R×W rows this is reps */
-  main: nullableNumber,
-  /** assisted reps (knee/chair), the weight for R×W rows, or the extra/other-side count */
-  secondary: nullableNumber,
+  /** reps (all row types) */
+  reps: nullableNumber,
+  /** assisted (knee/chair) reps; the weight for R×W rows; the extra/other-side count */
+  assist: nullableNumber,
 })
 
 export const exerciseEntrySchema = z.object({
@@ -123,7 +123,7 @@ export const sessionSchema = z.object({
   /** explicit completion for strength/ARX sessions */
   completed: z.boolean().optional(),
   /** cardio-style sheets: the Excel COMPLETED? dropdown */
-  status: z.enum(['yes', 'no', 'not-yet']).optional(),
+  completion: z.enum(['yes', 'no', 'not-yet']).optional(),
   /** E16 play mode (Q21c): per-exercise done/skipped log for interval workouts */
   exerciseDone: z.record(z.string(), z.boolean()).optional(),
   entries: z.record(z.string(), exerciseEntrySchema).optional(),
@@ -190,7 +190,7 @@ export const appStateSchema = z.object({
   workoutLogs: workoutLogsSchema,
   bodyLog: z.array(bodyEntrySchema),
   /** E28: completed rounds, newest last — they travel with export/import/sync */
-  rounds: z.array(archivedRoundSchema),
+  archivedRounds: z.array(archivedRoundSchema),
   quotes: z.object({ disabledIds: z.array(z.string()), custom: z.array(customQuoteSchema) }),
   notes: z.string(),
 })
@@ -237,7 +237,7 @@ export function emptyState(): AppState {
     scheduleOps: [],
     workoutLogs: {},
     bodyLog: [],
-    rounds: [],
+    archivedRounds: [],
     quotes: { disabledIds: [], custom: [] },
     notes: '',
   }

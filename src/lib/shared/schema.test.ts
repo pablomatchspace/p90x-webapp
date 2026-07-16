@@ -40,8 +40,8 @@ function populated(): AppState {
         entries: {
           'standard-push-ups': {
             rounds: [
-              { main: 20, secondary: 0 },
-              { main: 15, secondary: 4 },
+              { reps: 20, assist: 0 },
+              { reps: 15, assist: 4 },
             ],
           },
         },

@@ -24,7 +24,7 @@ export type VoiceCommand = 'next' | 'previous' | 'finish'
 export interface VoiceValue {
   value: number
   /** column named by a spoken field word; absent = fill positionally */
-  field?: 'main' | 'secondary'
+  field?: 'reps' | 'assist'
   /** 0-based round named by a spoken "round N"; absent = any shown round */
   round?: number
 }
@@ -191,7 +191,7 @@ export function parseVoiceTranscript(transcript: string): VoiceParse | null {
   if (Object.hasOwn(COMMANDS, phrase)) return { kind: 'command', command: COMMANDS[phrase] }
 
   const values: VoiceValue[] = []
-  let pendingField: 'main' | 'secondary' | null = null
+  let pendingField: 'reps' | 'assist' | null = null
   let currentRound: number | null = null
   let last: VoiceValue | null = null // retro-attach target…
   let lastEnd = -1 // …only while the field word is adjacent
@@ -212,12 +212,9 @@ export function parseVoiceTranscript(transcript: string): VoiceParse | null {
 
     const isMainWord = MAIN_WORDS.has(token)
     if (isMainWord || SECONDARY_WORDS.has(token)) {
-      const tag = isMainWord ? 'main' : 'secondary'
+      const tag = isMainWord ? 'reps' : 'assist'
       const retro = last !== null && lastEnd === i
-      if (
-        tag === 'main' &&
-        (pendingField === 'secondary' || (retro && last?.field === 'secondary'))
-      ) {
+      if (tag === 'reps' && (pendingField === 'assist' || (retro && last?.field === 'assist'))) {
         // "knee reps 8" / "8 knee reps" — the compound stays secondary
         if (retro) lastEnd = i + 1
       } else if (retro && last !== null && last.field === undefined) {
@@ -250,15 +247,15 @@ export function parseVoiceTranscript(transcript: string): VoiceParse | null {
 export interface VoiceSlot {
   /** 0-based round index */
   round: number
-  field: 'main' | 'secondary'
+  field: 'reps' | 'assist'
 }
 
 /** The card's editable fields in display order: per shown round, main then secondary. */
 export function voiceSlots(step: FocusStep): VoiceSlot[] {
   const slots: VoiceSlot[] = []
   for (const round of step.rounds) {
-    slots.push({ round, field: 'main' })
-    if (step.exercise.secondary !== undefined) slots.push({ round, field: 'secondary' })
+    slots.push({ round, field: 'reps' })
+    if (step.exercise.secondary !== undefined) slots.push({ round, field: 'assist' })
   }
   return slots
 }
