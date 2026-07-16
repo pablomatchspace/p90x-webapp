@@ -86,7 +86,10 @@ Two modes:
 
 Results run through the parser: values → `setRoundValue` per assignment;
 `next`/`previous` → the same handlers as the buttons (within bounds);
-`finish` → the Finish action. An `aria-live` line echoes what was heard
+`finish` → the Finish action. While the timer runs, the sequence position
+lives in playback state, so "next" routes through the Skip path,
+"previous" is ignored, and "finish" stops playback before completing —
+the card and the timer can never drift apart. An `aria-live` line echoes what was heard
 ("Heard "reps 22, knee 8"") or the failure ("Didn't catch a number — try
 again", "Microphone unavailable").
 
@@ -109,7 +112,9 @@ unplaceable values · [x] null/empty/garbage transcripts parse to null
 **AC:** [x] button renders only when `SpeechRecognition` exists · [x] spoken
 values land via `setRoundValue` (score, target chip and ghosts react live) ·
 [x] "next"/"previous" step cards within bounds; "finish workout" completes
-the session · [x] hands-free toggle persists as `player.voiceHandsFree`
+the session · [x] during playback, "next" skips through playback state (no
+card/timer drift) and "finish" stops the timer first ·
+[x] hands-free toggle persists as `player.voiceHandsFree`
 (schema v12 + migration, default off) and auto-restarts recognition while
 armed · [x] arming always requires a tap — nothing listens on load ·
 [x] `aria-live` feedback echoes the heard transcript or the error ·

@@ -114,6 +114,39 @@ test('hands-free re-arms between utterances', async ({ page }) => {
   ).toHaveValue('8')
 })
 
+test('voice "next" during playback routes through the skip path', async ({ page }) => {
+  await page.clock.install({ time: new Date('2026-01-20T09:00:00') })
+  await stubRecognition(page)
+  await importSample(page)
+
+  await page.goto('#/workouts/chest-back/focus/d015')
+  await page.getByRole('button', { name: 'Play', exact: true }).click()
+  await expect(page.getByText('Work', { exact: true })).toBeVisible()
+
+  const mic = page.getByRole('button', { name: 'Voice entry' })
+  // "next" mid-work skips the phase like the Skip button — rest on the same step
+  await mic.click()
+  await speak(page, 'next')
+  await expect(page.getByText(/Rest — up next: Wide Front Pull-Ups/)).toBeVisible()
+  await expect(page.getByText('Step 1 of 24 · Round 1')).toBeVisible()
+
+  // and again during rest → the sequence itself advances to step 2
+  await mic.click()
+  await speak(page, 'next')
+  await expect(page.getByText('Step 2 of 24 · Round 1')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Wide Front Pull-Ups' })).toBeVisible()
+
+  // the timer keeps driving the SAME position — no snap-back on the next tick
+  await page.clock.fastForward(1_000)
+  await expect(page.getByText('Step 2 of 24 · Round 1')).toBeVisible()
+
+  // "finish workout" stops the timer and completes the session
+  await mic.click()
+  await speak(page, 'finish workout')
+  await expect(page.getByText('Workout complete 🎉')).toBeVisible()
+  await expect(page.getByRole('timer', { name: 'Sequence time remaining' })).not.toBeVisible()
+})
+
 test('mic is absent when SpeechRecognition is unsupported', async ({ page }) => {
   await page.addInitScript(() => {
     const w = window as unknown as StubWindow

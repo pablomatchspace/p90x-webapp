@@ -381,9 +381,18 @@ export function FocusPage() {
             setRoundValue(key, programDayId, exercise.id, slot.round, slot.field, value)
           }
           onCommand={(command) => {
-            if (command === 'next' && idx < steps.length - 1) setIdx(idx + 1)
-            else if (command === 'previous' && idx > 0) setIdx(idx - 1)
-            else if (command === 'finish') finish()
+            // While the timer runs, the sequence position lives in playback
+            // state — "next" must go through the same skip path as the Skip
+            // button or the card and the timer drift apart.
+            if (command === 'next') {
+              if (playback !== null) onSkip()
+              else if (idx < steps.length - 1) setIdx(idx + 1)
+            } else if (command === 'previous') {
+              if (playback === null && idx > 0) setIdx(idx - 1)
+            } else if (command === 'finish') {
+              onStop()
+              finish()
+            }
           }}
         />
 
