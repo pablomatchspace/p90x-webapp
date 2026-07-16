@@ -20,12 +20,20 @@ import { bodyValue, type BodyOutcomeKey, type RoundData } from '@/lib/roundRepor
  * unlogged occurrences stay null so the chart shows a gap, not a zero.
  */
 
-/** One body metric across a round, x = day of round (1-based). */
+/**
+ * One body metric across a round, x = day of round (1-based). Bounded to the
+ * round's own calendar span (day 1 through its last program day) — `bodyLog`
+ * isn't tied to the schedule, so pre-day-1 history or post-round weigh-ins
+ * (still logging while deciding whether to archive) would otherwise plot
+ * outside the round they're being compared within.
+ */
 export function bodySeriesByDay(data: RoundData, key: BodyOutcomeKey): Pt[] {
+  const schedule = materialize(data.program, data.startDate, data.scheduleOps)
+  const lastDay = diffDays(data.startDate, schedule.lastProgramDate) + 1
   const points: Pt[] = []
   for (const entry of data.bodyLog) {
     const day = diffDays(data.startDate, entry.date) + 1
-    if (day < 1) continue // weigh-ins predating day 1 have no round-relative slot
+    if (day < 1 || day > lastDay) continue
     const value = bodyValue(key, entry, data.snapshot)
     if (value === null) continue
     points.push({ x: day, y: value })

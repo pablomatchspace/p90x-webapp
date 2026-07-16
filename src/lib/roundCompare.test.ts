@@ -87,6 +87,19 @@ describe('bodySeriesByDay (US-146)', () => {
     expect(bodySeriesByDay(data, 'weight')).toEqual([{ x: 1, y: 82 }])
     expect(bodySeriesByDay(data, 'bodyFat')).toEqual([])
   })
+
+  it('drops weigh-ins logged after the round ended', () => {
+    // classic, no ops: last program day is 2026-04-05 (start + 89 days)
+    const data = round(
+      '2026-01-05',
+      [],
+      [
+        ['2026-01-05', 82],
+        ['2026-06-01', 70], // still logging months after this round ended
+      ],
+    )
+    expect(bodySeriesByDay(data, 'weight')).toEqual([{ x: 1, y: 82 }])
+  })
 })
 
 describe('netSeriesByOccurrence (US-146)', () => {

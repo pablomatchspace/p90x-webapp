@@ -1,6 +1,6 @@
 import { computeAdherence, type Adherence } from '@/lib/adherence'
 import { deriveBody } from '@/lib/body'
-import type { ISODate } from '@/lib/dates'
+import { compareISO, type ISODate } from '@/lib/dates'
 import { loggableWorkouts, type ProgramKey, type WorkoutStyle } from '@/lib/programData'
 import { workoutProgression, workoutTotalTrend, type TopMover } from '@/lib/progression'
 import { materialize, type Schedule } from '@/lib/schedule/materialize'
@@ -131,10 +131,20 @@ export function bodyValue(
   return derived[key]
 }
 
-function bodyOutcome(key: BodyOutcomeKey, data: RoundData): BodyOutcome {
+/**
+ * `windowEnd` bounds outcomes to the round's own calendar span (start through
+ * `schedule.lastProgramDate`) — `bodyLog` isn't tied to the schedule, so
+ * without this a weigh-in logged before day 1 (imported history) or after the
+ * round ended (still logging while deciding whether to archive) would read as
+ * this round's first/latest sample and skew the delta.
+ */
+function bodyOutcome(key: BodyOutcomeKey, data: RoundData, windowEnd: ISODate): BodyOutcome {
   let first: BodySample | null = null
   let latest: BodySample | null = null
   for (const entry of data.bodyLog) {
+    if (compareISO(entry.date, data.startDate) < 0 || compareISO(entry.date, windowEnd) > 0) {
+      continue
+    }
     const value = bodyValue(key, entry, data.snapshot)
     if (value === null) continue
     if (first === null) first = { date: entry.date, value }
@@ -202,7 +212,7 @@ export function buildRoundReport(data: RoundData, today?: ISODate): RoundReport 
     asOf,
     completed: adherence.programDays > 0 && adherence.dayReached >= adherence.programDays,
     adherence,
-    body: BODY_KEYS.map((key) => bodyOutcome(key, data)),
+    body: BODY_KEYS.map((key) => bodyOutcome(key, data, schedule.lastProgramDate)),
     workouts,
     topMovers,
   }

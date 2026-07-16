@@ -104,6 +104,22 @@ describe('buildRoundReport (US-144)', () => {
     expect(weight?.delta).toBeNull()
   })
 
+  it('ignores weigh-ins outside the round window (pre-day-1 history, post-round logging)', () => {
+    const data = roundData()
+    data.bodyLog = [
+      // pre-day-1: imported history from before the round started
+      { date: '2026-01-01', weight: 84, bodyFat: null, water: null, bone: null, zoneMinutes: null },
+      ...data.bodyLog,
+      // after the round's last program day: still logging before archiving
+      { date: '2026-06-01', weight: 70, bodyFat: null, water: null, bone: null, zoneMinutes: null },
+    ]
+    const report = buildRoundReport(data)
+    const weight = report.body.find((o) => o.key === 'weight')
+    expect(weight?.first).toEqual({ date: '2026-01-06', value: 82 })
+    expect(weight?.latest).toEqual({ date: '2026-03-30', value: 78.5 })
+    expect(weight?.delta).toBeCloseTo(-3.5, 10)
+  })
+
   it('rolls up workout outcomes and cross-workout top movers', () => {
     const report = buildRoundReport(roundData())
     const chestBack = report.workouts.find((w) => w.key === 'chest-back')
