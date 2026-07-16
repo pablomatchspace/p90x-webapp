@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { Card, Page } from '@/components/Page'
 import { formatLong } from '@/lib/dates'
+import { archiveLatestNets, overloadTarget, targetStatus } from '@/lib/overload'
 import { getWorkout, hasWorkout, type WorkoutDef } from '@/lib/programData'
 import {
   extendPlayback,
@@ -17,6 +18,7 @@ import { workoutOccurrences } from '@/lib/schedule/occurrences'
 import { formatScore, scoreExercise, sessionTotals } from '@/lib/scoring'
 import { setWorkoutCompleted, updatePlayerSettings, updateTimerSettings } from '@/state/actions'
 import { useSchedule, useScoringSettings, useSettings, useWorkoutSessions } from '@/state/selectors'
+import { useStore } from '@/state/store'
 import { QuoteCard } from '@/features/dashboard/QuoteCard'
 import { MediaLinks } from './MediaLinks'
 import { focusSteps, resumeIndex } from '@/lib/focusSteps'
@@ -75,6 +77,14 @@ export function FocusPage() {
   const [playback, setPlayback] = useState<PlaybackState | null>(null)
   const [playDone, setPlayDone] = useState(false)
   const [nowTick, setNowTick] = useState(() => Date.now())
+
+  // E29: cross-round target fallback — the newest archived round's latest nets
+  // for this workout, computed once per screen with its frozen scoring.
+  const rounds = useStore((s) => s.data.rounds)
+  const archiveNets = useMemo(
+    () => (valid ? archiveLatestNets(rounds, key) : null),
+    [valid, rounds, key],
+  )
 
   const playbackOpts = {
     stepCount: steps.length,
@@ -137,6 +147,16 @@ export function FocusPage() {
   const result = scoreExercise(session?.entries?.[exercise.id], exercise, scoring)
   const isArx = def?.style === 'arx'
 
+  // E29: the forward-looking coach number, tinted live as entries land.
+  const target = overloadTarget(occurrences, sessions, occIndex, exercise, scoring, archiveNets)
+  const status = target === null ? null : targetStatus(result.net, target)
+  const TARGET_TONE = {
+    pending: 'text-zinc-500 dark:text-zinc-400',
+    beaten: 'text-emerald-600 dark:text-emerald-400',
+    matched: 'text-amber-600 dark:text-amber-400',
+    behind: 'text-amber-600 dark:text-amber-400',
+  } as const
+
   const historyNets = (exerciseId: string, through: number): number[] => {
     const points: number[] = []
     for (let i = 0; i <= through; i++) {
@@ -192,6 +212,20 @@ export function FocusPage() {
       const previous = historyNets(e.id, occIndex - 1)
       return previous.length > 0 && current > Math.max(...previous)
     })
+    // E29: targets = beat *last time* (incl. last-round fallback); PRs = beat ALL history.
+    const targeted = exercises
+      .map((e) => ({
+        exercise: e,
+        goal: overloadTarget(occurrences, sessions, occIndex, e, scoring, archiveNets),
+      }))
+      .filter(
+        (t): t is { exercise: typeof t.exercise; goal: NonNullable<typeof t.goal> } =>
+          t.goal !== null,
+      )
+    const targetsBeaten = targeted.filter(({ exercise: e, goal }) => {
+      const net = scoreExercise(sessions.get(programDayId)?.entries?.[e.id], e, scoring).net
+      return net !== null && net > goal.net
+    }).length
     return (
       <Page title={def?.name ?? ''} subtitle={`Week ${day.week} · ${formatLong(day.date)}`}>
         <Card>
@@ -220,6 +254,14 @@ export function FocusPage() {
                     .map((e) => e.name)
                     .join(', ')}${prs.length > 4 ? '…' : ''}`}
           </p>
+          {targeted.length > 0 ? (
+            <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
+              Targets beaten:{' '}
+              <strong className="tabular-nums">
+                {targetsBeaten} of {targeted.length}
+              </strong>
+            </p>
+          ) : null}
           <div className="mt-4 flex flex-wrap gap-2">
             <Link
               to="/today"
@@ -286,6 +328,19 @@ export function FocusPage() {
                   : ''
               }`}
         </p>
+        {target !== null && status !== null ? (
+          <p aria-live="polite" className={`mt-1 text-xs font-medium ${TARGET_TONE[status]}`}>
+            Target: beat {formatScore(target.net)}{' '}
+            {target.source === 'round' ? `(last time, W${target.week})` : '(last round)'}
+            {status === 'beaten'
+              ? ' — beaten!'
+              : status === 'matched'
+                ? ' — matched'
+                : status === 'behind'
+                  ? ' — not yet'
+                  : ''}
+          </p>
+        ) : null}
         {prior !== undefined &&
         ((prior.main ?? null) !== null || (prior.secondary ?? null) !== null) ? (
           <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
