@@ -1,4 +1,4 @@
-import type { DayStatus, WorkoutState } from '@/lib/schedule/status'
+import type { DayStatus, WorkoutState } from '@/lib/schedule'
 import type { ChipTone } from './Chip'
 
 /** Compact workout codes for calendar cells. */

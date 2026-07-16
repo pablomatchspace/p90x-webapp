@@ -1,4 +1,4 @@
-import type { Session } from '@/lib/schema'
+import type { Session } from '@/lib/shared'
 import type { ProgramDay, Schedule } from './materialize'
 
 /**

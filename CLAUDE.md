@@ -64,10 +64,16 @@ snapshot so later Settings changes never rewrite history.
 ## Layout
 
 ```
-src/lib/        pure logic (scoring, schedule/*, timelines/*, playback, focusSteps, voiceEntry, body, setup,
-                bodyFat, ffmi, feasibility, nutrition, adherence, progression, overload,
-                roundReport, roundCompare, chart, links, quotes, dates, sync/syncCrypto,
-                importExport, migrations, version)
+src/lib/        pure domain logic in seven bounded contexts (docs/CONTEXT-MAP.md), each
+                with a public index.ts barrel enforced by architecture.test.ts:
+                  schedule/   materialize, occurrences, ops, status, adherence
+                  workouts/   scoring, progression, overload, playback, focusSteps, voiceEntry, timelines/*
+                  body/       body, bodyFat, ffmi, setup, feasibility
+                  nutrition/  nutrition
+                  rounds/     roundReport, roundCompare
+                  sync/       sync, syncCrypto
+                  shared/     schema, migrations, importExport, dates, programData, chart, links, quotes, version
+                Cross-context imports use the barrel (`@/lib/<context>`); vocabulary in docs/GLOSSARY.md
 src/state/      store.ts (Zustand+Immer), actions.ts (all mutations funnel through useStore.getState().mutate), persist.ts
 src/features/   screens by area: start, today, schedule, workouts, body, dashboard, more
 src/components/ Layout, Page, NoProgramCard, ErrorBoundary, SystemBanners, LineChart, UpdateToast

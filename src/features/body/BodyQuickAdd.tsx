@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Card } from '@/components/Page'
 import { deriveBody, formatFixed, kgToUnit, unitToKg, weightUnit } from '@/lib/body'
-import { compareISO, todayISO } from '@/lib/dates'
+import { compareISO, todayISO } from '@/lib/shared'
 import { NumberField } from '@/features/workouts/NumberField'
 import { upsertBodyEntry } from '@/state/actions'
 import { useBodyLog, useSettings } from '@/state/selectors'

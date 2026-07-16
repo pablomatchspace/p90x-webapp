@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { Card, Page } from '@/components/Page'
-import { formatLong } from '@/lib/dates'
+import { formatLong } from '@/lib/shared'
 import {
   extendPlayback,
   pausePlayback,
@@ -11,11 +11,11 @@ import {
   startPlayback,
   tickPlayback,
   type PlaybackState,
-} from '@/lib/playback'
-import { getWorkout, hasWorkout } from '@/lib/programData'
-import { workoutOccurrences } from '@/lib/schedule/occurrences'
-import { getTimeline, timelinesFor } from '@/lib/timelines'
-import type { PlaySegment, PlayTimeline } from '@/lib/timelines'
+} from '@/lib/workouts'
+import { getWorkout, hasWorkout } from '@/lib/shared'
+import { workoutOccurrences } from '@/lib/schedule'
+import { getTimeline, timelinesFor } from '@/lib/workouts'
+import type { PlaySegment, PlayTimeline } from '@/lib/workouts'
 import {
   setCompletionStatus,
   setExerciseDone,

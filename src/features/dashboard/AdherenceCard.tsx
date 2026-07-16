@@ -2,8 +2,8 @@ import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { Card } from '@/components/Page'
 import { LineChart } from '@/components/LineChart'
-import { adherenceTrend } from '@/lib/adherence'
-import { todayISO } from '@/lib/dates'
+import { adherenceTrend } from '@/lib/schedule'
+import { todayISO } from '@/lib/shared'
 import { useAdherence, useSchedule, useSessionIndex } from '@/state/selectors'
 
 /**

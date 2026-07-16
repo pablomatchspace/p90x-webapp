@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Card } from '@/components/Page'
-import { todayISO } from '@/lib/dates'
+import { todayISO } from '@/lib/shared'
 import {
   nutritionTargets,
   targetNutritionFromState,

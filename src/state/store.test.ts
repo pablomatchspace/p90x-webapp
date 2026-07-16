@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it } from 'vitest'
-import { emptyState } from '@/lib/schema'
+import { emptyState } from '@/lib/shared'
 import { readBackup } from './persist'
 import { useStore } from './store'
 

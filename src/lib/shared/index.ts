@@ -1,0 +1,10 @@
+/** Shared kernel: document schema, migrations, dates, reference data — see docs/CONTEXT-MAP.md. */
+export * from './schema'
+export * from './dates'
+export * from './chart'
+export * from './links'
+export * from './quotes'
+export * from './importExport'
+export * from './migrations'
+export * from './version'
+export * from './programData'

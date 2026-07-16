@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { getWorkout } from '@/lib/programData'
-import type { AppState, Session } from '@/lib/schema'
+import { getWorkout } from '@/lib/shared'
+import type { AppState, Session } from '@/lib/shared'
 import { materialize, type ProgramDay } from './materialize'
 import { dayStatus, indexSessions, workoutState } from './status'
 

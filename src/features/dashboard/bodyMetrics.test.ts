@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { Settings } from '@/lib/schema'
+import type { Settings } from '@/lib/shared'
 import {
   buildBodyMetrics,
   expectedProgressPct,

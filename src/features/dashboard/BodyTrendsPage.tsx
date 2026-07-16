@@ -10,9 +10,9 @@ import {
   threshold,
   weightUnit,
 } from '@/lib/body'
-import { fillForward, movingAverage, type Pt } from '@/lib/chart'
-import { addDays, compareISO, diffDays, formatShort, todayISO, type ISODate } from '@/lib/dates'
-import type { Schedule } from '@/lib/schedule/materialize'
+import { fillForward, movingAverage, type Pt } from '@/lib/shared'
+import { addDays, compareISO, diffDays, formatShort, todayISO, type ISODate } from '@/lib/shared'
+import type { Schedule } from '@/lib/schedule'
 import { useBodyLog, useSchedule, useSettings } from '@/state/selectors'
 import { Chip } from '@/features/schedule/Chip'
 import { buildBodyMetrics, progressToTarget, TONE_CHIP, type MetricKey } from './bodyMetrics'

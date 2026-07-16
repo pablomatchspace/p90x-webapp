@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { Card, Page } from '@/components/Page'
-import { BUILTIN_QUOTES } from '@/lib/quotes'
+import { BUILTIN_QUOTES } from '@/lib/shared'
 import {
   addCustomQuote,
   deleteCustomQuote,

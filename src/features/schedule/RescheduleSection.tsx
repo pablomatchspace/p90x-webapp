@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react'
 import { Card } from '@/components/Page'
-import { compareISO, formatLong, isISODate } from '@/lib/dates'
-import { getWorkout } from '@/lib/programData'
-import type { ScheduleDay } from '@/lib/schedule/materialize'
-import { newSkipOp, newSwapOp, nextProgramDateAfter } from '@/lib/schedule/ops'
+import { compareISO, formatLong, isISODate } from '@/lib/shared'
+import { getWorkout } from '@/lib/shared'
+import type { ScheduleDay } from '@/lib/schedule'
+import { newSkipOp, newSwapOp, nextProgramDateAfter } from '@/lib/schedule'
 import { addScheduleOp, revertScheduleOp } from '@/state/actions'
 import { useOpPreview, useSchedule } from '@/state/selectors'
 

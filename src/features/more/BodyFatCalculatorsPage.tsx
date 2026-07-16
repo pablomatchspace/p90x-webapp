@@ -10,7 +10,7 @@ import {
   sevenSiteBodyFat,
   THREE_SITE_SITES,
   threeSiteBodyFat,
-} from '@/lib/bodyFat'
+} from '@/lib/body'
 import { updateSettings } from '@/state/actions'
 import { useSettings } from '@/state/selectors'
 

@@ -1,4 +1,4 @@
-import type { Session } from '@/lib/schema'
+import type { Session } from '@/lib/shared'
 import { setCompletionStatus } from '@/state/actions'
 
 /** The Excel COMPLETED? dropdown as one-tap buttons (US-044), shared by Today and the log screens. */

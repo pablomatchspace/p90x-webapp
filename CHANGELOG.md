@@ -15,6 +15,20 @@ didn't bump the package version — they're numbered B01/B02 here for a
 continuous record; #33's package column is left at the un-suffixed version
 that was actually shipped.
 
+## 1.E31.U154 (package 1.31.154) — 2026-07-16
+
+- **E31 — Domain-driven design alignment, story U154: physical bounded
+  contexts.** `src/lib` is reorganized into the seven context directories the
+  context map named — `schedule/`, `workouts/`, `body/`, `nutrition/`,
+  `rounds/`, `sync/`, `shared/` — each publishing its API through an
+  `index.ts` barrel. A new `architecture.test.ts` enforces the rules in
+  `npm run test`: every module lives in a context, cross-context imports go
+  through the barrel and respect the allowed-dependency DAG, contexts never
+  import their own barrel, and the domain layer never imports state or UI.
+  Two identical `Sex` types (bodyFat, feasibility) are unified. Pure
+  restructure: no behavior, formula, or persisted-schema changes — the full
+  suite runs unchanged.
+
 ## 1.E31.U153 (package 1.31.153) — 2026-07-16
 
 - **E31 — Domain-driven design alignment, story U153: ubiquitous language.**

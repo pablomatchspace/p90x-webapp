@@ -1,6 +1,6 @@
-import { compareISO, formatLong, type ISODate } from '@/lib/dates'
-import type { ProgramKey } from '@/lib/programData'
-import type { RemapOp, ScheduleOp, SkipOp, SwapOp } from '@/lib/schema'
+import { compareISO, formatLong, type ISODate } from '@/lib/shared'
+import type { ProgramKey } from '@/lib/shared'
+import type { RemapOp, ScheduleOp, SkipOp, SwapOp } from '@/lib/shared'
 import { materialize, type ProgramDay, type Schedule } from './materialize'
 
 /**

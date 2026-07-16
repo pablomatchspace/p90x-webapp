@@ -1,4 +1,4 @@
-import type { CatalogExercise, SecondaryKind } from '@/lib/programData'
+import type { CatalogExercise, SecondaryKind } from '@/lib/shared'
 
 /** Workbook column meanings (INSTRUCTIONS abbreviations: N/K, NC/C, R/W, RA/LA…). */
 export const SECONDARY_LABELS: Record<SecondaryKind, string> = {

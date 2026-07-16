@@ -3,16 +3,16 @@ import { Link, useParams } from 'react-router-dom'
 import { Card, Page } from '@/components/Page'
 import { NoProgramCard } from '@/components/NoProgramCard'
 import { formatFixed, fractionToPercent, kgToUnit } from '@/lib/body'
-import { formatLong, todayISO } from '@/lib/dates'
+import { formatLong, todayISO } from '@/lib/shared'
 import {
   archivedRoundData,
   buildRoundReport,
   liveRoundData,
   type BodyOutcomeKey,
   type RoundReport,
-} from '@/lib/roundReport'
-import { formatScore } from '@/lib/scoring'
-import type { RoundSnapshot, Settings } from '@/lib/schema'
+} from '@/lib/rounds'
+import { formatScore } from '@/lib/workouts'
+import type { RoundSnapshot, Settings } from '@/lib/shared'
 import { Chip, type ChipTone } from '@/features/schedule/Chip'
 import {
   buildBodyMetrics,

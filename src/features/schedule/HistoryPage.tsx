@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Card, Page } from '@/components/Page'
-import { describeOp, opEffect } from '@/lib/schedule/ops'
+import { describeOp, opEffect } from '@/lib/schedule'
 import { revertScheduleOp } from '@/state/actions'
 import { useSchedule } from '@/state/selectors'
 import { useStore } from '@/state/store'

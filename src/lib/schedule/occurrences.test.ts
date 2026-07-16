@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { compareISO } from '@/lib/dates'
-import type { Session } from '@/lib/schema'
+import { compareISO } from '@/lib/shared'
+import type { Session } from '@/lib/shared'
 import { materialize } from './materialize'
 import { previousValue, workoutOccurrences } from './occurrences'
 

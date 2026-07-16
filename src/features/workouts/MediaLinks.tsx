@@ -1,5 +1,5 @@
 import { ExternalLink, Headphones, MonitorPlay } from 'lucide-react'
-import { MEDIA_KIND_LABELS, MEDIA_KINDS } from '@/lib/links'
+import { MEDIA_KIND_LABELS, MEDIA_KINDS } from '@/lib/shared'
 import { useWorkoutLinks } from '@/state/selectors'
 
 const KIND_ICONS = { video: MonitorPlay, audio: Headphones } as const

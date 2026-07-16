@@ -14,8 +14,8 @@ import {
   weightUnit,
   type Threshold,
 } from '@/lib/body'
-import { compareISO, diffDays, formatLong, isISODate, todayISO, type ISODate } from '@/lib/dates'
-import type { BodyEntry, Settings } from '@/lib/schema'
+import { compareISO, diffDays, formatLong, isISODate, todayISO, type ISODate } from '@/lib/shared'
+import type { BodyEntry, Settings } from '@/lib/shared'
 import { Chip, type ChipTone } from '@/features/schedule/Chip'
 import { NumberField } from '@/features/workouts/NumberField'
 import { deleteBodyEntry, upsertBodyEntry } from '@/state/actions'

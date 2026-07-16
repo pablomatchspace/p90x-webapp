@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { emptyState } from '@/lib/schema'
+import { emptyState } from '@/lib/shared'
 import {
   createDebouncedSaver,
   daysSinceExport,

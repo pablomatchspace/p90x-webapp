@@ -1,14 +1,14 @@
 import { Mic } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-import type { FocusStep } from '@/lib/focusSteps'
-import type { ExerciseEntry } from '@/lib/schema'
+import type { FocusStep } from '@/lib/workouts'
+import type { ExerciseEntry } from '@/lib/shared'
 import {
   assignVoiceValues,
   parseVoiceTranscript,
   voiceSlots,
   type VoiceCommand,
   type VoiceSlot,
-} from '@/lib/voiceEntry'
+} from '@/lib/workouts'
 import { mainLabel, SECONDARY_LABELS } from './entryLabels'
 
 /**

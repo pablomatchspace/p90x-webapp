@@ -1,6 +1,6 @@
-import { compareISO, type ISODate } from '@/lib/dates'
-import { getWorkout } from '@/lib/programData'
-import type { AppState, Session } from '@/lib/schema'
+import { compareISO, type ISODate } from '@/lib/shared'
+import { getWorkout } from '@/lib/shared'
+import type { AppState, Session } from '@/lib/shared'
 import type { ScheduleDay } from './materialize'
 
 /**

@@ -1,7 +1,7 @@
 import fc from 'fast-check'
 import { describe, expect, it } from 'vitest'
-import { addDays, formatLong } from '@/lib/dates'
-import { scheduleOpSchema, type ScheduleOp } from '@/lib/schema'
+import { addDays, formatLong } from '@/lib/shared'
+import { scheduleOpSchema, type ScheduleOp } from '@/lib/shared'
 import { materialize } from './materialize'
 import {
   describeOp,

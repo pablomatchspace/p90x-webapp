@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
-import { emptyState, type AppState } from '@/lib/schema'
+import { emptyState, type AppState } from '@/lib/shared'
 import {
   createDebouncedSaver,
   loadState,

@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { migrateToCurrent } from '@/lib/migrations'
+import { migrateToCurrent } from '@/lib/shared'
 import {
   decideSync,
   hasUserData,
@@ -21,7 +21,7 @@ import {
   randomBytes,
   SALT_BYTES,
   toBase64,
-} from '@/lib/syncCrypto'
+} from '@/lib/sync'
 import {
   clearSyncConfig,
   loadSyncConfig,

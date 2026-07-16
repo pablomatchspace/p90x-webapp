@@ -1,7 +1,7 @@
 import { current } from 'immer'
-import { compareISO, isISODate, type ISODate } from '@/lib/dates'
-import { isHttpUrl, type MediaKind } from '@/lib/links'
-import { getWorkout, hasWorkout, type ProgramKey } from '@/lib/programData'
+import { compareISO, isISODate, type ISODate } from '@/lib/shared'
+import { isHttpUrl, type MediaKind } from '@/lib/shared'
+import { getWorkout, hasWorkout, type ProgramKey } from '@/lib/shared'
 import type {
   AppState,
   BodyEntry,
@@ -9,7 +9,7 @@ import type {
   ScoringSettings,
   Session,
   Settings,
-} from '@/lib/schema'
+} from '@/lib/shared'
 import { useStore } from '@/state/store'
 
 /**

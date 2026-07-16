@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { Card } from '@/components/Page'
 import { deriveBody, formatFixed, threshold } from '@/lib/body'
 import { Chip } from '@/features/schedule/Chip'
-import { todayISO } from '@/lib/dates'
+import { todayISO } from '@/lib/shared'
 import { useBodyLog, useSettings } from '@/state/selectors'
 import { buildBodyMetrics, expectedProgressPct, progressToTarget, TONE_CHIP } from './bodyMetrics'
 

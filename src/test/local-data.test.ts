@@ -2,8 +2,8 @@
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { migrateToCurrent } from '@/lib/migrations'
-import { getWorkout, hasWorkout } from '@/lib/programData'
+import { migrateToCurrent } from '@/lib/shared'
+import { getWorkout, hasWorkout } from '@/lib/shared'
 
 /**
  * Local-only converter validation (US-011 / US-080 parity support).
