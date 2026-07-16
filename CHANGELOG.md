@@ -21,8 +21,8 @@ that was actually shipped.
   the goal before the set instead of only judging it afterwards. Each exercise
   card shows **`Target: beat N`** — the latest earlier logged net score in
   this round (U147, same walk-back as ghost prefill so skipped weeks don't
-  blank it), falling back to the **newest archived round** (E28) with that
-  round's frozen scoring snapshot when this round has no history yet, so day 1
+  blank it), falling back per exercise to the **newest archived round that
+  logged it** (E28) with that round's frozen scoring snapshot, so day 1
   of round 2 still has a number to chase. The line tints live as entries land
   (U148): emerald when beaten, amber when matched/behind. The finish summary
   adds **`Targets beaten: X of Y`** alongside the PR line — target = beat

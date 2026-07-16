@@ -64,8 +64,9 @@ emerald when beaten, amber when matched/behind. The finish card gains
 ### US-147 — Pure overload-target engine (M, P0)
 
 **AC:** [x] target = latest earlier logged net in this round, skipping
-unlogged occurrences · [x] archive fallback uses the newest archived round
-with data and its frozen scoring params · [x] null with no history anywhere ·
+unlogged occurrences · [x] archive fallback uses, per exercise, the newest
+archived round that logged it, with the owning round's frozen scoring params ·
+[x] null with no history anywhere ·
 [x] status covers pending/beaten/matched/behind.
 
 ### US-148 — Focus-mode target chip & summary tally (M, P0)

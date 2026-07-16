@@ -78,8 +78,8 @@ export function FocusPage() {
   const [playDone, setPlayDone] = useState(false)
   const [nowTick, setNowTick] = useState(() => Date.now())
 
-  // E29: cross-round target fallback — the newest archived round's latest nets
-  // for this workout, computed once per screen with its frozen scoring.
+  // E29: cross-round target fallback — per exercise, the newest archived round
+  // that logged it, computed once per screen with each round's frozen scoring.
   const rounds = useStore((s) => s.data.rounds)
   const archiveNets = useMemo(
     () => (valid ? archiveLatestNets(rounds, key) : null),

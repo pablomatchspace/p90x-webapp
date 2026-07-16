@@ -8,8 +8,8 @@ import { scoreExercise } from '@/lib/scoring'
  * Progressive-overload targets (E29 US-147). Focus mode's forward-looking
  * coach number: the net score (score − penalty, the DATA-sheet chart metric)
  * to beat for one exercise — the latest earlier logged net in this round,
- * falling back to the newest archived round (E28) so day 1 of round 2 still
- * has a number to chase. Pure derivations only (rule 2): nothing here is
+ * falling back per exercise to the newest archived round that logged it (E28)
+ * so day 1 of round 2 still has a number to chase. Pure derivations only (rule 2): nothing here is
  * stored, and archive nets are computed with the archive's frozen scoring
  * snapshot so history never shifts under later Settings changes.
  */
@@ -49,25 +49,28 @@ export function overloadTarget(
 }
 
 /**
- * exerciseId → latest logged net for `workoutKey` from the NEWEST archived
- * round that logged it at all, scored with that round's own frozen
- * `snapshot.scoring`. Null when no archive has data for this workout.
- * Compute once per screen (the map covers every exercise of the workout).
+ * exerciseId → latest logged net for `workoutKey`, each exercise taken from
+ * the NEWEST archived round that logged that exercise (an exercise missing
+ * from the latest round still falls back to an older one), scored with the
+ * owning round's frozen `snapshot.scoring`. Null when no archive has data
+ * for this workout. Compute once per screen (the map covers every exercise
+ * of the workout).
  */
 export function archiveLatestNets(
   rounds: ArchivedRound[],
   workoutKey: string,
 ): Map<string, number> | null {
   const exercises = getWorkout(workoutKey).exercises ?? []
-  for (let r = rounds.length - 1; r >= 0; r--) {
+  const nets = new Map<string, number>()
+  for (let r = rounds.length - 1; r >= 0 && nets.size < exercises.length; r--) {
     const round = rounds[r]
     const roundSessions = round.workoutLogs[workoutKey]?.sessions
     if (roundSessions === undefined || roundSessions.length === 0) continue
     const schedule = materialize(round.program, round.startDate, round.scheduleOps)
     const occurrences = workoutOccurrences(schedule, workoutKey)
     const sessions = new Map(roundSessions.map((s) => [s.programDayId, s]))
-    const nets = new Map<string, number>()
     for (const exercise of exercises) {
+      if (nets.has(exercise.id)) continue
       for (let i = occurrences.length - 1; i >= 0; i--) {
         const net = scoreExercise(
           sessions.get(occurrences[i].programDayId)?.entries?.[exercise.id],
@@ -80,9 +83,8 @@ export function archiveLatestNets(
         }
       }
     }
-    if (nets.size > 0) return nets
   }
-  return null
+  return nets.size > 0 ? nets : null
 }
 
 export type TargetStatus = 'pending' | 'beaten' | 'matched' | 'behind'

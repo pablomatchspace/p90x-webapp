@@ -93,6 +93,22 @@ describe('archiveLatestNets (US-147)', () => {
     expect(nets?.get('standard-push-ups')).toBe(18) // 12 + 6/1, not 12 + 6/2
   })
 
+  it('fills exercises missing from the newest archive from older rounds', () => {
+    const rounds = [
+      archive('r-old', [
+        {
+          programDayId: 'd001',
+          entries: { 'standard-push-ups': entry(30), 'wide-front-pull-ups': entry(8) },
+        },
+      ]),
+      // newest logs only push-ups — pull-ups must still fall back to r-old
+      archive('r-new', [session('d008', 12)]),
+    ]
+    const nets = archiveLatestNets(rounds, 'chest-back')
+    expect(nets?.get('standard-push-ups')).toBe(12)
+    expect(nets?.get('wide-front-pull-ups')).toBe(8)
+  })
+
   it('skips newer archives without this workout and returns null when none has it', () => {
     const rounds = [archive('r-old', [session('d001', 40)]), archive('r-new', [])]
     expect(archiveLatestNets(rounds, 'chest-back')?.get('standard-push-ups')).toBe(40)
