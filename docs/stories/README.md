@@ -249,3 +249,11 @@ Post-v1.0.0. Full write-up: [`docs/epics/E28-round-lifecycle.md`](../epics/E28-r
 - ✅ US-149 · E2E, visual baselines & release (S, P1)
 
 Post-v1.0.0. Full write-up: [`docs/epics/E29-overload-targets.md`](../epics/E29-overload-targets.md).
+
+## E30 — Voice rep entry in focus mode
+
+- 🔄 US-150 · Pure voice-transcript engine — `voiceEntry.ts` parser + slot assignment (M, P0)
+- 🔄 US-151 · Push-to-talk mic on the focus card (M, P0)
+- 🔄 US-152 · E2E, visual baselines & release (S, P1)
+
+Post-v1.0.0. Full write-up: [`docs/epics/E30-voice-entry.md`](../epics/E30-voice-entry.md).

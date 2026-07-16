@@ -52,7 +52,7 @@ snapshot so later Settings changes never rewrite history.
 ## Layout
 
 ```
-src/lib/        pure logic (scoring, schedule/*, timelines/*, playback, focusSteps, body, setup,
+src/lib/        pure logic (scoring, schedule/*, timelines/*, playback, focusSteps, voiceEntry, body, setup,
                 bodyFat, ffmi, feasibility, nutrition, adherence, progression, overload,
                 roundReport, roundCompare, chart, links, quotes, dates, sync/syncCrypto,
                 importExport, migrations, version)
