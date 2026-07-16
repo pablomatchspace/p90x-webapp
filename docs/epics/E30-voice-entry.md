@@ -127,8 +127,11 @@ entry · [x] listening state is visually and programmatically
 **AC:** [x] e2e with a stubbed `SpeechRecognition` (init-script): speak
 "reps 22" → field fills → "next" advances → "finish workout" completes ·
 [x] unsupported-browser e2e: stubbing out the constructors before boot hides
-the mic entirely · [x] linux visual baselines regenerated (focus shots gain
-the mic row) · [x] version/CHANGELOG/docs.
+the mic entirely · [x] Help gains an **Audio & voice** guide (E26 cues + the
+voice phrasebook, hands-free and privacy notes) · [x] linux visual baselines
+regenerated (focus shots gain the mic row; Help gains the guide) ·
+[x] version/CHANGELOG/docs (incl. README bullets for E28/E29/E30 and the
+CLAUDE.md network-claim clarification).
 
 ## 6. QA
 

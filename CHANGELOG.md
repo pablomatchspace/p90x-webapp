@@ -31,10 +31,11 @@ that was actually shipped.
   v12** with migration, default off) re-arms the mic after every utterance —
   a whole strength session logs without touching the screen; arming always
   requires a tap and no audio or transcript is ever stored. `aria-live`
-  feedback echoes what was heard; denied mics degrade to a message. New
-  `e2e/voice.spec.ts` journey (stubbed recognizer, incl. an
-  unsupported-browser case) and refreshed linux focus-mode visual baselines
-  (U152).
+  feedback echoes what was heard; denied mics degrade to a message. Help
+  gains an **Audio & voice** guide — the E26 cues explained plus a voice
+  phrasebook. New `e2e/voice.spec.ts` journey (stubbed recognizer, incl. an
+  unsupported-browser case) and refreshed linux visual baselines for the
+  focus cards and Help (U152).
 
 ## 1.E29.U149 (package 1.29.149) — 2026-07-16
 
