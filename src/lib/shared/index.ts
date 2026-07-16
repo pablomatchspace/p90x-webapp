@@ -1,5 +1,6 @@
 /** Shared kernel: document schema, migrations, dates, reference data — see docs/CONTEXT-MAP.md. */
 export * from './schema'
+export * from './units'
 export * from './dates'
 export * from './chart'
 export * from './links'

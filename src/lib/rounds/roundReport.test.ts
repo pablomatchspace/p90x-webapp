@@ -4,6 +4,7 @@ import { materialize } from '@/lib/schedule'
 import { indexSessions } from '@/lib/schedule'
 import { emptyState, type AppState, type ExerciseEntry } from '@/lib/shared'
 import { archivedRoundData, buildRoundReport, liveRoundData, type RoundData } from './roundReport'
+import { bodyFraction, kg, meters } from '@/lib/shared'
 
 /** Both rounds filled equally: score = reps, penalty = 0, net = reps. */
 function pushUps(reps: number): ExerciseEntry {
@@ -30,11 +31,18 @@ function roundData(): RoundData {
       },
     },
     bodyLog: [
-      { date: '2026-01-06', weight: 82, bodyFat: 0.22, water: null, bone: null, zoneMinutes: null },
+      {
+        date: '2026-01-06',
+        weight: kg(82),
+        bodyFat: bodyFraction(0.22),
+        water: null,
+        bone: null,
+        zoneMinutes: null,
+      },
       {
         date: '2026-03-30',
-        weight: 78.5,
-        bodyFat: 0.18,
+        weight: kg(78.5),
+        bodyFat: bodyFraction(0.18),
         water: null,
         bone: null,
         zoneMinutes: null,
@@ -42,11 +50,11 @@ function roundData(): RoundData {
     ],
     snapshot: {
       age: 40,
-      height: 1.8,
-      startWeight: 82,
-      startBodyFat: 0.22,
-      limits: { weight: 90, bodyFat: 0.25, bmi: 28 },
-      targets: { leanMassIncrease: 4, bodyFat: 0.15, ffmi: null },
+      height: meters(1.8),
+      startWeight: kg(82),
+      startBodyFat: bodyFraction(0.22),
+      limits: { weight: kg(90), bodyFat: bodyFraction(0.25), bmi: 28 },
+      targets: { leanMassIncrease: kg(4), bodyFat: bodyFraction(0.15), ffmi: null },
       scoring,
     },
   }
@@ -103,10 +111,24 @@ describe('buildRoundReport (US-144)', () => {
     const data = roundData()
     data.bodyLog = [
       // pre-day-1: imported history from before the round started
-      { date: '2026-01-01', weight: 84, bodyFat: null, water: null, bone: null, zoneMinutes: null },
+      {
+        date: '2026-01-01',
+        weight: kg(84),
+        bodyFat: null,
+        water: null,
+        bone: null,
+        zoneMinutes: null,
+      },
       ...data.bodyLog,
       // after the round's last program day: still logging before archiving
-      { date: '2026-06-01', weight: 70, bodyFat: null, water: null, bone: null, zoneMinutes: null },
+      {
+        date: '2026-06-01',
+        weight: kg(70),
+        bodyFat: null,
+        water: null,
+        bone: null,
+        zoneMinutes: null,
+      },
     ]
     const report = buildRoundReport(data)
     const weight = report.body.find((o) => o.key === 'weight')
@@ -141,12 +163,12 @@ describe('round data normalizers', () => {
     const state: AppState = emptyState()
     expect(liveRoundData(state)).toBeNull()
     state.settings.startDate = '2026-01-05'
-    state.settings.height = 1.8
+    state.settings.height = meters(1.8)
     const data = liveRoundData(state)
     expect(data).toMatchObject({
       program: 'classic',
       startDate: '2026-01-05',
-      snapshot: { height: 1.8, scoring: state.settings.scoring },
+      snapshot: { height: meters(1.8), scoring: state.settings.scoring },
     })
   })
 

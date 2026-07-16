@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { exportFilename, parseImport, serializeExport, summarize } from './importExport'
 import { emptyState } from './schema'
+import { kg } from './units'
 
 function sampleState() {
   const s = emptyState()
@@ -21,7 +22,7 @@ function sampleState() {
       },
     ],
   }
-  s.bodyLog.push({ date: '2026-01-06', weight: 82 })
+  s.bodyLog.push({ date: '2026-01-06', weight: kg(82) })
   s.notes = 'hi'
   return s
 }

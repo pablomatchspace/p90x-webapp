@@ -1,3 +1,5 @@
+import type { Kg } from '@/lib/shared'
+import { kg } from '@/lib/shared'
 /**
  * Normalized FFMI (E14) — the SCHEDULE col-J adjustment shared by deriveBody,
  * the dashboard metrics and the Settings target estimator, plus its inverse for
@@ -28,8 +30,8 @@ export interface FfmiPlan {
   lean: number
   /** FFMI-implied total weight at the plan body-fat (kg) */
   weight: number
-  /** honest lean-mass increase vs start lean, 3-dp (kg) — E14 option A */
-  increase: number
+  /** honest lean-mass increase vs start lean, 3-dp — E14 option A */
+  increase: Kg
   /** the workbook's quirky target-weight formula with the applied increase (kg) */
   sheetTargetWeight: number
 }
@@ -51,6 +53,6 @@ export function planFromFfmi(
   if (lean === null) return null
   const weight = weightForLeanMass(lean, bf)
   if (weight === null) return null
-  const increase = Math.round((lean - startLean) * 1000) / 1000
+  const increase = kg(Math.round((lean - startLean) * 1000) / 1000)
   return { lean, weight, increase, sheetTargetWeight: increase + startLean + startLean * bf }
 }

@@ -27,6 +27,7 @@ import {
   upsertBodyEntry,
 } from '@/state/actions'
 import { useStore } from '@/state/store'
+import { bodyFraction, kg, meters } from '@/lib/shared'
 
 beforeEach(() => {
   useStore.setState((s) => ({ ...s, data: emptyState() }))
@@ -100,16 +101,16 @@ describe('round entry actions', () => {
 
 describe('body log actions', () => {
   it('creates entries lazily, updates them in place, and keeps dates sorted', () => {
-    upsertBodyEntry('2026-01-07', { weight: 81.9 })
-    upsertBodyEntry('2026-01-06', { weight: 82 })
-    upsertBodyEntry('2026-01-07', { bodyFat: 0.219 })
+    upsertBodyEntry('2026-01-07', { weight: kg(81.9) })
+    upsertBodyEntry('2026-01-06', { weight: kg(82) })
+    upsertBodyEntry('2026-01-07', { bodyFat: bodyFraction(0.219) })
     const log = useStore.getState().data.bodyLog
     expect(log.map((e) => e.date)).toEqual(['2026-01-06', '2026-01-07'])
-    expect(log[1]).toMatchObject({ weight: 81.9, bodyFat: 0.219 })
+    expect(log[1]).toMatchObject({ weight: 81.9, bodyFat: bodyFraction(0.219) })
   })
 
   it('removes the entry once every field is cleared', () => {
-    upsertBodyEntry('2026-01-06', { weight: 82, water: 0.55 })
+    upsertBodyEntry('2026-01-06', { weight: kg(82), water: bodyFraction(0.55) })
     upsertBodyEntry('2026-01-06', { weight: null })
     expect(useStore.getState().data.bodyLog).toHaveLength(1)
     upsertBodyEntry('2026-01-06', { water: null })
@@ -117,8 +118,8 @@ describe('body log actions', () => {
   })
 
   it('deletes by date and ignores unknown dates or malformed input', () => {
-    upsertBodyEntry('2026-01-06', { weight: 82 })
-    upsertBodyEntry('not-a-date', { weight: 1 })
+    upsertBodyEntry('2026-01-06', { weight: kg(82) })
+    upsertBodyEntry('not-a-date', { weight: kg(1) })
     deleteBodyEntry('2026-02-01')
     expect(useStore.getState().data.bodyLog).toHaveLength(1)
     deleteBodyEntry('2026-01-06')
@@ -150,8 +151,8 @@ describe('settings & notes actions', () => {
   })
 
   it('patches core settings and nested target/limit groups', () => {
-    updateSettings({ startWeight: 80, units: 'imperial' })
-    updateTargets({ bodyFat: 0.14 })
+    updateSettings({ startWeight: kg(80), units: 'imperial' })
+    updateTargets({ bodyFat: bodyFraction(0.14) })
     updateLimits({ bmi: 27 })
     const s = useStore.getState().data.settings
     expect(s.startWeight).toBe(80)
@@ -288,13 +289,18 @@ describe('updateWorkoutLink (E23)', () => {
 describe('round lifecycle (E28 US-143)', () => {
   function liveRound() {
     startProgram('2026-01-05', 'classic')
-    updateSettings({ age: 40, height: 1.8, startWeight: 82, startBodyFat: 0.22 })
-    updateTargets({ leanMassIncrease: 4, bodyFat: 0.15 })
+    updateSettings({
+      age: 40,
+      height: meters(1.8),
+      startWeight: kg(82),
+      startBodyFat: bodyFraction(0.22),
+    })
+    updateTargets({ leanMassIncrease: kg(4), bodyFat: bodyFraction(0.15) })
     addScheduleOp({ kind: 'skip', id: 'op1', createdAt: 't', date: '2026-01-14' })
     setRoundValue('chest-back', 'd001', 'standard-push-ups', 0, 'main', 20)
     setCompletionStatus('plyometrics', 'd002', 'yes')
-    upsertBodyEntry('2026-01-06', { weight: 82, bodyFat: 0.22 })
-    upsertBodyEntry('2026-03-30', { weight: 78.5, bodyFat: 0.18 })
+    upsertBodyEntry('2026-01-06', { weight: kg(82), bodyFat: bodyFraction(0.22) })
+    upsertBodyEntry('2026-03-30', { weight: kg(78.5), bodyFat: bodyFraction(0.18) })
   }
 
   it('archives the live round and resets the round-scoped state', () => {
@@ -313,7 +319,11 @@ describe('round lifecycle (E28 US-143)', () => {
     expect(round.scheduleOps).toHaveLength(1)
     expect(round.workoutLogs['chest-back'].sessions).toHaveLength(1)
     expect(round.bodyLog).toHaveLength(2)
-    expect(round.snapshot).toMatchObject({ height: 1.8, startWeight: 82, startBodyFat: 0.22 })
+    expect(round.snapshot).toMatchObject({
+      height: meters(1.8),
+      startWeight: kg(82),
+      startBodyFat: bodyFraction(0.22),
+    })
     // global preferences survive
     expect(settings.units).toBe('metric')
     expect(settings.scoring).toEqual(emptyState().settings.scoring)
@@ -328,7 +338,7 @@ describe('round lifecycle (E28 US-143)', () => {
 
   it('seeds the next round start stats from the latest weigh-in on request', () => {
     liveRound()
-    upsertBodyEntry('2026-04-01', { bodyFat: 0.17 }) // BF-only weigh-in after the last weight
+    upsertBodyEntry('2026-04-01', { bodyFat: bodyFraction(0.17) }) // BF-only weigh-in after the last weight
     completeRound({ seedFromLatest: true })
     const { settings } = useStore.getState().data
     expect(settings.startWeight).toBe(78.5) // latest entry with a weight

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { Card, Page } from '@/components/Page'
 import { NumberField } from '@/features/workouts/NumberField'
 import { formatFixed, fractionToPercent } from '@/lib/body'
+import type { BodyFraction } from '@/lib/shared'
 import {
   type LengthUnit,
   navyBodyFat,
@@ -35,7 +36,7 @@ export function BodyFatCalculatorsPage() {
   const [navyHeight, setNavyHeight] = useState<number | null>(null)
   const [three, setThree] = useState<(number | null)[]>([null, null, null])
   const [seven, setSeven] = useState<(number | null)[]>(Array(7).fill(null))
-  const [pendingSave, setPendingSave] = useState<number | null>(null)
+  const [pendingSave, setPendingSave] = useState<BodyFraction | null>(null)
   const [savedPct, setSavedPct] = useState<string | null>(null)
 
   const bodyFat =

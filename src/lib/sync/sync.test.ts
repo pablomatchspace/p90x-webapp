@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { emptyState } from '@/lib/shared'
+import { emptyState, kg, meters } from '@/lib/shared'
 import {
   decideSync,
   hasUserData,
@@ -55,7 +55,7 @@ describe('hasUserData', () => {
       (s: ReturnType<typeof emptyState>) =>
         s.bodyLog.push({
           date: '2026-01-05',
-          weight: 80,
+          weight: kg(80),
           bodyFat: null,
           water: null,
           bone: null,
@@ -73,7 +73,10 @@ describe('hasUserData', () => {
     ['notes', (s: ReturnType<typeof emptyState>) => (s.notes = 'hello')],
     // A field list used to miss this: someone who had only filled in Settings
     // would have had them silently replaced by the first pull.
-    ['settings-only changes', (s: ReturnType<typeof emptyState>) => (s.settings.height = 1.8)],
+    [
+      'settings-only changes',
+      (s: ReturnType<typeof emptyState>) => (s.settings.height = meters(1.8)),
+    ],
     [
       'a scoring tweak',
       (s: ReturnType<typeof emptyState>) => (s.settings.scoring.penaltyOn = false),

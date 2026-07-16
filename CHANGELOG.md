@@ -15,6 +15,21 @@ didn't bump the package version — they're numbered B01/B02 here for a
 continuous record; #33's package column is left at the un-suffixed version
 that was actually shipped.
 
+## 1.E31.U155 (package 1.31.155) — 2026-07-16
+
+- **E31 — Domain-driven design alignment, story U155: branded unit value
+  objects.** The canonical metric storage units are now branded types in
+  `shared/units.ts` — `Kg`, `Meters`, and `BodyFraction` (a 0–1 composition
+  fraction covering body fat, water and bone) — applied to every
+  unit-carrying schema field (settings height/startWeight/startBodyFat,
+  limits, targets, body-log entries, round snapshots). Assigning a raw or
+  wrongly-converted number to a canonical field is now a compile error;
+  values are constructed at the existing conversion boundary (`unitToKg`,
+  `unitToM`, `percentToFraction`, the body-fat calculators, `planFromFfmi`).
+  Brands are compile-time only: constructors are pure casts and the schema's
+  runtime validation is byte-for-byte unchanged, so no document, import, or
+  formula behaves differently.
+
 ## 1.E31.U154 (package 1.31.154) — 2026-07-16
 
 - **E31 — Domain-driven design alignment, story U154: physical bounded

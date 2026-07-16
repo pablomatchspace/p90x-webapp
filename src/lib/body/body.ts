@@ -1,4 +1,5 @@
-import type { BodyEntry, Settings } from '@/lib/shared'
+import type { BodyEntry, BodyFraction, Kg, Meters, Settings } from '@/lib/shared'
+import { bodyFraction, kg, meters } from '@/lib/shared'
 import { normalizedFfmi } from './ffmi'
 
 /**
@@ -124,8 +125,8 @@ export function kgToUnit(kg: number, units: Settings['units']): number {
 }
 
 /** Display units → canonical kg, stored raw (only user edits pass through). */
-export function unitToKg(value: number, units: Settings['units']): number {
-  return units === 'imperial' ? value * KG_PER_LB : value
+export function unitToKg(value: number, units: Settings['units']): Kg {
+  return kg(units === 'imperial' ? value * KG_PER_LB : value)
 }
 
 /** Canonical metres → display units (inches, 1 dp). Height stays metric in storage. */
@@ -133,8 +134,8 @@ export function mToUnit(m: number, units: Settings['units']): number {
   return units === 'imperial' ? Math.round((m / M_PER_INCH) * 10) / 10 : m
 }
 
-export function unitToM(value: number, units: Settings['units']): number {
-  return units === 'imperial' ? value * M_PER_INCH : value
+export function unitToM(value: number, units: Settings['units']): Meters {
+  return meters(units === 'imperial' ? value * M_PER_INCH : value)
 }
 
 /** Stored fraction (0–1) → display percent, trimmed of float noise (0.212 → 21.2). */
@@ -142,8 +143,8 @@ export function fractionToPercent(value: number | null): number | null {
   return value === null ? null : Math.round(value * 100 * 1000) / 1000
 }
 
-export function percentToFraction(value: number | null): number | null {
-  return value === null ? null : value / 100
+export function percentToFraction(value: number | null): BodyFraction | null {
+  return value === null ? null : bodyFraction(value / 100)
 }
 
 /** Fixed-dp display that drops trailing zeros; '—' when the metric is null. */

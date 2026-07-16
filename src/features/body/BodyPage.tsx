@@ -15,7 +15,7 @@ import {
   type Threshold,
 } from '@/lib/body'
 import { compareISO, diffDays, formatLong, isISODate, todayISO, type ISODate } from '@/lib/shared'
-import type { BodyEntry, Settings } from '@/lib/shared'
+import type { BodyEntry, BodyFraction, Settings } from '@/lib/shared'
 import { Chip, type ChipTone } from '@/features/schedule/Chip'
 import { NumberField } from '@/features/workouts/NumberField'
 import { deleteBodyEntry, upsertBodyEntry } from '@/state/actions'
@@ -145,7 +145,7 @@ function PercentField({
   label: string
   value: number | null | undefined
   prev: number | null | undefined
-  onChange: (fraction: number | null) => void
+  onChange: (fraction: BodyFraction | null) => void
 }) {
   return (
     <NumberField

@@ -1,4 +1,5 @@
-import type { Settings } from '@/lib/shared'
+import type { BodyFraction, Settings } from '@/lib/shared'
+import { bodyFraction } from '@/lib/shared'
 
 /**
  * Body-fat estimators (US-072) — transcribed verbatim from the workbook's
@@ -29,7 +30,7 @@ export function navyBodyFat(input: {
   hip: number | null
   height: number | null
   unit: LengthUnit
-}): number | null {
+}): BodyFraction | null {
   const { sex, abdomen, neck, hip, height, unit } = input
   if (abdomen === null || neck === null || height === null) return null
   if (sex === 'female' && hip === null) return null
@@ -41,11 +42,11 @@ export function navyBodyFat(input: {
   if (sex === 'male') {
     const girth = (abdomen - neck) * k
     if (girth <= 0) return null
-    return 4.95 / (1.0324 - 0.19077 * log10(girth) + 0.15456 * log10(h)) - 4.5
+    return bodyFraction(4.95 / (1.0324 - 0.19077 * log10(girth) + 0.15456 * log10(h)) - 4.5)
   }
   const girth = (abdomen + (hip as number) - neck) * k
   if (girth <= 0) return null
-  return 4.95 / (1.29579 - 0.35004 * log10(girth) + 0.221 * log10(h)) - 4.5
+  return bodyFraction(4.95 / (1.29579 - 0.35004 * log10(girth) + 0.221 * log10(h)) - 4.5)
 }
 
 /** Jackson–Pollock body density → Brozek fraction, exactly as the sheet writes it. */
@@ -73,7 +74,7 @@ export function threeSiteBodyFat(input: {
   sex: Sex
   sites: (number | null)[]
   age: number | null
-}): number | null {
+}): BodyFraction | null {
   const { sex, sites, age } = input
   if (age === null || sites.length !== 3 || sites.some((s) => s === null)) return null
   const sum = (sites as number[]).reduce((a, b) => a + b, 0)
@@ -81,7 +82,7 @@ export function threeSiteBodyFat(input: {
     sex === 'male'
       ? 1.10938 - 0.0008267 * sum + 0.0000016 * sum ** 2 - 0.000257 * age
       : 1.0994921 - 0.0009929 * sum + 0.0000023 * sum ** 2 - 0.0001392 * age
-  return brozek(density)
+  return bodyFraction(brozek(density))
 }
 
 /**
@@ -93,7 +94,7 @@ export function sevenSiteBodyFat(input: {
   sex: Sex
   sites: (number | null)[]
   age: number | null
-}): number | null {
+}): BodyFraction | null {
   const { sex, sites, age } = input
   if (age === null || sites.length !== 7 || sites.some((s) => s === null)) return null
   const sum = (sites as number[]).reduce((a, b) => a + b, 0)
@@ -101,5 +102,5 @@ export function sevenSiteBodyFat(input: {
     sex === 'male'
       ? 1.112 - 0.00043499 * sum + 0.00000055 * sum ** 2 - 0.00028826 * age
       : 1.097 - 0.00046971 * sum + 0.00000056 * sum ** 2 - 0.00012828 * age
-  return brozek(density)
+  return bodyFraction(brozek(density))
 }

@@ -1,14 +1,15 @@
 import { describe, expect, it } from 'vitest'
 import { migrateToCurrent } from './migrations'
 import { appStateSchema, emptyState, SCHEMA_VERSION, type AppState } from './schema'
+import { bodyFraction, kg, meters } from './units'
 
 function populated(): AppState {
   const s = emptyState()
   s.settings.startDate = '2026-01-05'
   s.settings.age = 40
-  s.settings.height = 1.8
-  s.settings.startWeight = 82
-  s.settings.startBodyFat = 0.22
+  s.settings.height = meters(1.8)
+  s.settings.startWeight = kg(82)
+  s.settings.startBodyFat = bodyFraction(0.22)
   s.scheduleOps.push({
     id: 'op1',
     kind: 'skip',
@@ -48,7 +49,13 @@ function populated(): AppState {
       },
     ],
   }
-  s.bodyLog.push({ date: '2026-01-06', weight: 82, bodyFat: 0.22, water: 0.55, bone: 0.04 })
+  s.bodyLog.push({
+    date: '2026-01-06',
+    weight: kg(82),
+    bodyFat: bodyFraction(0.22),
+    water: bodyFraction(0.55),
+    bone: bodyFraction(0.04),
+  })
   s.quotes.custom.push({ id: 'q-custom-1', text: 'One more rep.' })
   s.notes = 'free-form'
   return s
@@ -72,7 +79,7 @@ describe('appStateSchema', () => {
   })
 
   it('rejects malformed dates, ops and entries', () => {
-    const badDate = { ...emptyState(), bodyLog: [{ date: '06/01/2026', weight: 80 }] }
+    const badDate = { ...emptyState(), bodyLog: [{ date: '06/01/2026', weight: kg(80) }] }
     expect(appStateSchema.safeParse(badDate).success).toBe(false)
 
     const badOp = {

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { setupDerived, settingsWarnings } from './setup'
 import { emptyState, type Settings } from '@/lib/shared'
+import { bodyFraction, kg, meters } from '@/lib/shared'
 
 /** The fabricated sample's SETUP block (public/sample-data.json). */
 const sample: Settings = {
@@ -9,11 +10,11 @@ const sample: Settings = {
   units: 'metric',
   gender: 'male',
   age: 40,
-  height: 1.8,
-  startWeight: 82,
-  startBodyFat: 0.22,
-  limits: { weight: 90, bodyFat: 0.25, bmi: 28 },
-  targets: { leanMassIncrease: 4, bodyFat: 0.15 },
+  height: meters(1.8),
+  startWeight: kg(82),
+  startBodyFat: bodyFraction(0.22),
+  limits: { weight: kg(90), bodyFat: bodyFraction(0.25), bmi: 28 },
+  targets: { leanMassIncrease: kg(4), bodyFat: bodyFraction(0.15) },
   scoring: { penaltyDivisor: 2, penaltyOn: true, chairFactor: 2, rwDivisor: 10 },
   timer: { workSeconds: 60, restSeconds: 60 },
   player: { autoMarkDone: false, voiceCues: true, voiceHandsFree: false },
@@ -52,17 +53,20 @@ describe('settingsWarnings', () => {
   })
 
   it('flags a target body-fat that is not below the start', () => {
-    const w = settingsWarnings({ ...sample, targets: { ...sample.targets, bodyFat: 0.25 } })
+    const w = settingsWarnings({
+      ...sample,
+      targets: { ...sample.targets, bodyFat: bodyFraction(0.25) },
+    })
     expect(w).toContain('Target body-fat is not below your starting body-fat.')
   })
 
   it('flags a body-fat entered as a whole percent instead of a fraction', () => {
-    const w = settingsWarnings({ ...sample, startBodyFat: 22 })
+    const w = settingsWarnings({ ...sample, startBodyFat: bodyFraction(22) })
     expect(w.some((m) => m.includes('out of range'))).toBe(true)
   })
 
   it('flags an upper weight limit at or below the target weight', () => {
-    const w = settingsWarnings({ ...sample, limits: { ...sample.limits, weight: 77 } })
+    const w = settingsWarnings({ ...sample, limits: { ...sample.limits, weight: kg(77) } })
     expect(w).toContain('Upper weight limit is at or below your target weight.')
   })
 

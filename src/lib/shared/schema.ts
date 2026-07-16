@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { isHttpUrl } from './links'
+import { bodyFractionSchema, kgSchema, metersSchema } from './units'
 
 /**
  * The single persisted document. Raw user inputs only — every derived number
@@ -11,6 +12,11 @@ export const SCHEMA_VERSION = 12
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'expected YYYY-MM-DD')
 
 const nullableNumber = z.number().finite().nullable().optional()
+
+/** Canonical metric units, branded (units.ts) — same runtime validation as `nullableNumber`. */
+const nullableKg = kgSchema.nullable().optional()
+const nullableMeters = metersSchema.nullable().optional()
+const nullableFraction = bodyFractionSchema.nullable().optional()
 
 export const scoringSettingsSchema = z.object({
   /** SETUP!C44 — divide the round-1→2 drop by this for the penalty */
@@ -40,13 +46,13 @@ export const settingsSchema = z.object({
   gender: z.enum(['male', 'female']),
   age: nullableNumber,
   /** canonical metric storage: meters / kg / body-fat fraction 0–1 */
-  height: nullableNumber,
-  startWeight: nullableNumber,
-  startBodyFat: nullableNumber,
-  limits: z.object({ weight: nullableNumber, bodyFat: nullableNumber, bmi: nullableNumber }),
+  height: nullableMeters,
+  startWeight: nullableKg,
+  startBodyFat: nullableFraction,
+  limits: z.object({ weight: nullableKg, bodyFat: nullableFraction, bmi: nullableNumber }),
   targets: z.object({
-    leanMassIncrease: nullableNumber,
-    bodyFat: nullableNumber,
+    leanMassIncrease: nullableKg,
+    bodyFat: nullableFraction,
     ffmi: nullableNumber,
   }),
   scoring: scoringSettingsSchema,
@@ -127,10 +133,10 @@ export const sessionSchema = z.object({
 
 export const bodyEntrySchema = z.object({
   date: isoDate,
-  weight: nullableNumber,
-  bodyFat: nullableNumber,
-  water: nullableNumber,
-  bone: nullableNumber,
+  weight: nullableKg,
+  bodyFat: nullableFraction,
+  water: nullableFraction,
+  bone: nullableFraction,
   zoneMinutes: nullableNumber,
 })
 
@@ -151,13 +157,13 @@ const workoutLogsSchema = z.record(z.string(), z.object({ sessions: z.array(sess
  */
 export const roundSnapshotSchema = z.object({
   age: nullableNumber,
-  height: nullableNumber,
-  startWeight: nullableNumber,
-  startBodyFat: nullableNumber,
-  limits: z.object({ weight: nullableNumber, bodyFat: nullableNumber, bmi: nullableNumber }),
+  height: nullableMeters,
+  startWeight: nullableKg,
+  startBodyFat: nullableFraction,
+  limits: z.object({ weight: nullableKg, bodyFat: nullableFraction, bmi: nullableNumber }),
   targets: z.object({
-    leanMassIncrease: nullableNumber,
-    bodyFat: nullableNumber,
+    leanMassIncrease: nullableKg,
+    bodyFat: nullableFraction,
     ffmi: nullableNumber,
   }),
   scoring: scoringSettingsSchema,

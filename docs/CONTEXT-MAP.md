@@ -7,15 +7,15 @@ directory with a public API barrel (`index.ts`). Terms are defined in
 
 ## Contexts
 
-| Context     | Directory            | Owns                                                                                                                                                                    |
-| ----------- | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `schedule`  | `src/lib/schedule/`  | Materializing the calendar (`materialize`, `occurrences`), reschedule ops, day/session status, adherence.                                                               |
-| `workouts`  | `src/lib/workouts/`  | Scoring (workbook formulas), progression, overload targets, focus steps, playback, voice entry, interval timelines.                                                     |
-| `body`      | `src/lib/body/`      | Body log derivations, BMI/FFMI, body-fat calculators, SETUP derivations & warnings, feasibility.                                                                        |
-| `nutrition` | `src/lib/nutrition/` | Nutrition phases, calorie/macro targets, diet styles.                                                                                                                   |
-| `rounds`    | `src/lib/rounds/`    | End-of-round report and round-over-round comparison, computed from archived rounds.                                                                                     |
-| `sync`      | `src/lib/sync/`      | Cloud-sync document envelope and end-to-end crypto (E10).                                                                                                               |
-| `shared`    | `src/lib/shared/`    | Shared kernel: the persisted document schema, migrations, import/export, ISO dates, workbook reference data (`programData`), chart helpers, links, quotes, app version. |
+| Context     | Directory            | Owns                                                                                                                                                                                                     |
+| ----------- | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `schedule`  | `src/lib/schedule/`  | Materializing the calendar (`materialize`, `occurrences`), reschedule ops, day/session status, adherence.                                                                                                |
+| `workouts`  | `src/lib/workouts/`  | Scoring (workbook formulas), progression, overload targets, focus steps, playback, voice entry, interval timelines.                                                                                      |
+| `body`      | `src/lib/body/`      | Body log derivations, BMI/FFMI, body-fat calculators, SETUP derivations & warnings, feasibility.                                                                                                         |
+| `nutrition` | `src/lib/nutrition/` | Nutrition phases, calorie/macro targets, diet styles.                                                                                                                                                    |
+| `rounds`    | `src/lib/rounds/`    | End-of-round report and round-over-round comparison, computed from archived rounds.                                                                                                                      |
+| `sync`      | `src/lib/sync/`      | Cloud-sync document envelope and end-to-end crypto (E10).                                                                                                                                                |
+| `shared`    | `src/lib/shared/`    | Shared kernel: the persisted document schema, migrations, import/export, ISO dates, branded unit types (`units.ts`), workbook reference data (`programData`), chart helpers, links, quotes, app version. |
 
 `src/state` is the application layer (store wiring, actions as use-cases,
 selectors as the read model); `src/features` + `src/components` are the UI.

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { deriveBody } from './body'
 import { leanMassForFfmi, normalizedFfmi, planFromFfmi, weightForLeanMass } from './ffmi'
+import { bodyFraction, kg, meters } from '@/lib/shared'
 
 describe('normalizedFfmi', () => {
   it('matches the sample-data goldens (height 1.8 → zero adjustment)', () => {
@@ -16,13 +17,13 @@ describe('normalizedFfmi', () => {
     const derived = deriveBody(
       {
         date: '2026-01-19',
-        weight: 80.8,
-        bodyFat: 0.212,
+        weight: kg(80.8),
+        bodyFat: bodyFraction(0.212),
         water: null,
         bone: null,
         zoneMinutes: null,
       },
-      { height: 1.8, startWeight: 82 },
+      { height: meters(1.8), startWeight: kg(82) },
     )
     expect(derived.ffmi).toBeCloseTo(normalizedFfmi(80.8 * (1 - 0.212), 1.8) ?? NaN, 12)
   })

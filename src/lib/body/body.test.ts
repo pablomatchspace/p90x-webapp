@@ -16,14 +16,22 @@ import {
   weightUnit,
 } from './body'
 import type { BodyEntry } from '@/lib/shared'
+import { bodyFraction, kg, meters } from '@/lib/shared'
 
 function entry(weight: number | null, bodyFat: number | null): BodyEntry {
-  return { date: '2026-05-29', weight, bodyFat, water: null, bone: null, zoneMinutes: null }
+  return {
+    date: '2026-05-29',
+    weight: weight === null ? null : kg(weight),
+    bodyFat: bodyFat === null ? null : bodyFraction(bodyFat),
+    water: null,
+    bone: null,
+    zoneMinutes: null,
+  }
 }
 
 describe('deriveBody', () => {
   it('reproduces the workbook golden row (2026-05-29: 69 kg / 17% @ 1.65 m)', () => {
-    const d = deriveBody(entry(69, 0.17), { height: 1.65, startWeight: 67.9 })
+    const d = deriveBody(entry(69, 0.17), { height: meters(1.65), startWeight: kg(67.9) })
     expect(formatFixed(d.leanMass, 1)).toBe('57.3')
     expect(formatFixed(d.ffmi, 2)).toBe('21.95')
     expect(d.ffmiCategory).toBe('Above Average')
@@ -33,7 +41,7 @@ describe('deriveBody', () => {
   })
 
   it('derives the sample persona row (80.8 kg / 21.2% @ 1.8 m, start 82)', () => {
-    const d = deriveBody(entry(80.8, 0.212), { height: 1.8, startWeight: 82 })
+    const d = deriveBody(entry(80.8, 0.212), { height: meters(1.8), startWeight: kg(82) })
     expect(d.weightLoss).toBeCloseTo(1.2, 10)
     expect(formatFixed(d.bodyFatKg, 1)).toBe('17.1')
     expect(formatFixed(d.bmi, 2)).toBe('24.94')
@@ -43,7 +51,7 @@ describe('deriveBody', () => {
   })
 
   it('derives nothing without a weight (B2: empty days stay empty)', () => {
-    const d = deriveBody(entry(null, 0.2), { height: 1.8, startWeight: 82 })
+    const d = deriveBody(entry(null, 0.2), { height: meters(1.8), startWeight: kg(82) })
     expect(d).toEqual({
       weightLoss: null,
       bodyFatKg: null,
@@ -55,7 +63,7 @@ describe('deriveBody', () => {
   })
 
   it('derives weight-only metrics when body fat is missing', () => {
-    const d = deriveBody(entry(80, null), { height: 1.8, startWeight: 82 })
+    const d = deriveBody(entry(80, null), { height: meters(1.8), startWeight: kg(82) })
     expect(d.weightLoss).toBeCloseTo(2, 10)
     expect(formatFixed(d.bmi, 2)).toBe('24.69')
     expect(d.bodyFatKg).toBeNull()
@@ -70,7 +78,7 @@ describe('deriveBody', () => {
     expect(d.ffmi).toBeNull()
     expect(d.bodyFatKg).toBeCloseTo(16, 10)
     expect(d.leanMass).toBeCloseTo(64, 10)
-    expect(deriveBody(entry(80, 0.2), { height: 0, startWeight: 82 }).bmi).toBeNull()
+    expect(deriveBody(entry(80, 0.2), { height: meters(0), startWeight: kg(82) }).bmi).toBeNull()
   })
 })
 
@@ -89,18 +97,18 @@ describe('ffmiCategory', () => {
 describe('targetWeight', () => {
   it('reproduces the real SETUP target (67.9 kg / 17.3% → 66.9 kg)', () => {
     const t = targetWeight({
-      startWeight: 67.9,
-      startBodyFat: 0.173,
-      targets: { leanMassIncrease: 4, bodyFat: 0.12 },
+      startWeight: kg(67.9),
+      startBodyFat: bodyFraction(0.173),
+      targets: { leanMassIncrease: kg(4), bodyFat: bodyFraction(0.12) },
     })
     expect(formatFixed(t, 1)).toBe('66.9')
   })
 
   it('derives the sample persona target', () => {
     const t = targetWeight({
-      startWeight: 82,
-      startBodyFat: 0.22,
-      targets: { leanMassIncrease: 4, bodyFat: 0.15 },
+      startWeight: kg(82),
+      startBodyFat: bodyFraction(0.22),
+      targets: { leanMassIncrease: kg(4), bodyFat: bodyFraction(0.15) },
     })
     expect(t).toBeCloseTo(77.554, 3)
   })
@@ -108,16 +116,16 @@ describe('targetWeight', () => {
   it('is null while any input is missing', () => {
     expect(
       targetWeight({
-        startWeight: 82,
+        startWeight: kg(82),
         startBodyFat: null,
-        targets: { leanMassIncrease: 4, bodyFat: 0.15 },
+        targets: { leanMassIncrease: kg(4), bodyFat: bodyFraction(0.15) },
       }),
     ).toBeNull()
     expect(
       targetWeight({
-        startWeight: 82,
-        startBodyFat: 0.22,
-        targets: { leanMassIncrease: null, bodyFat: 0.15 },
+        startWeight: kg(82),
+        startBodyFat: bodyFraction(0.22),
+        targets: { leanMassIncrease: null, bodyFat: bodyFraction(0.15) },
       }),
     ).toBeNull()
   })

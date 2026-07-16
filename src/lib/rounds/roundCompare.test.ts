@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { emptyState, type ExerciseEntry } from '@/lib/shared'
 import { bodySeriesByDay, comparableWorkouts, netSeriesByOccurrence } from './roundCompare'
 import type { RoundData } from './roundReport'
+import { kg, meters } from '@/lib/shared'
 
 function pushUps(reps: number): ExerciseEntry {
   return {
@@ -29,7 +30,7 @@ function round(startDate: string, reps: number[], weights: [string, number][]): 
     },
     bodyLog: weights.map(([date, weight]) => ({
       date,
-      weight,
+      weight: weight === null ? null : kg(weight),
       bodyFat: null,
       water: null,
       bone: null,
@@ -37,8 +38,8 @@ function round(startDate: string, reps: number[], weights: [string, number][]): 
     })),
     snapshot: {
       age: null,
-      height: 1.8,
-      startWeight: weights[0]?.[1] ?? null,
+      height: meters(1.8),
+      startWeight: weights[0]?.[1] != null ? kg(weights[0][1]) : null,
       startBodyFat: null,
       limits: { weight: null, bodyFat: null, bmi: null },
       targets: { leanMassIncrease: null, bodyFat: null, ffmi: null },

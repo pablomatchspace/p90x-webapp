@@ -20,16 +20,24 @@ import {
   targetNutrition,
 } from './nutrition'
 import { emptyState, type BodyEntry, type Settings } from '@/lib/shared'
+import { bodyFraction, kg, meters } from '@/lib/shared'
 
 /** Guide arithmetic goldens use round-number pound weights; storage is kg. */
-const lb = (pounds: number) => pounds * KG_PER_LB
+const lb = (pounds: number) => kg(pounds * KG_PER_LB)
 
 function settingsWith(patch: Partial<Settings> = {}): Settings {
   return { ...emptyState().settings, ...patch }
 }
 
 function entry(date: string, weight: number | null): BodyEntry {
-  return { date, weight, bodyFat: null, water: null, bone: null, zoneMinutes: null }
+  return {
+    date,
+    weight: weight === null ? null : kg(weight),
+    bodyFat: null,
+    water: null,
+    bone: null,
+    zoneMinutes: null,
+  }
 }
 
 describe('energyAmount', () => {
@@ -90,13 +98,13 @@ describe('macroGrams', () => {
 
 describe('currentWeightKg', () => {
   it('prefers the latest logged weight, skipping weight-less entries', () => {
-    const settings = settingsWith({ startWeight: 80 })
+    const settings = settingsWith({ startWeight: kg(80) })
     const log = [entry('2026-01-01', 82), entry('2026-01-08', 81), entry('2026-01-15', null)]
     expect(currentWeightKg(settings, log)).toBe(81)
   })
 
   it('falls back to the start weight, then to null', () => {
-    expect(currentWeightKg(settingsWith({ startWeight: 80 }), [])).toBe(80)
+    expect(currentWeightKg(settingsWith({ startWeight: kg(80) }), [])).toBe(80)
     expect(currentWeightKg(settingsWith(), [])).toBeNull()
   })
 })
@@ -166,9 +174,16 @@ describe('BMR equations', () => {
 
 describe('currentLeanKg', () => {
   it('uses the latest complete weigh-in, then start stats, then null', () => {
-    const settings = settingsWith({ startWeight: 82, startBodyFat: 0.25 })
+    const settings = settingsWith({ startWeight: kg(82), startBodyFat: bodyFraction(0.25) })
     const log = [
-      { date: '2026-01-01', weight: 80, bodyFat: 0.2, water: null, bone: null, zoneMinutes: null },
+      {
+        date: '2026-01-01',
+        weight: kg(80),
+        bodyFat: bodyFraction(0.2),
+        water: null,
+        bone: null,
+        zoneMinutes: null,
+      },
     ]
     expect(currentLeanKg(settings, log)).toBeCloseTo(64, 6) // 80 * 0.8
     expect(currentLeanKg(settings, [])).toBeCloseTo(61.5, 6) // 82 * 0.75
@@ -192,27 +207,37 @@ describe('remainingProgramDays', () => {
 describe('targetComposition', () => {
   const withTargets = (targets: Partial<Settings['targets']>, patch: Partial<Settings> = {}) =>
     settingsWith({
-      startWeight: 82,
-      startBodyFat: 0.22,
-      height: 1.8,
+      startWeight: kg(82),
+      startBodyFat: bodyFraction(0.22),
+      height: meters(1.8),
       targets: { leanMassIncrease: null, bodyFat: null, ffmi: null, ...targets },
       ...patch,
     })
   const log: BodyEntry[] = [
-    { date: '2026-01-19', weight: 80, bodyFat: 0.2, water: null, bone: null, zoneMinutes: null },
+    {
+      date: '2026-01-19',
+      weight: kg(80),
+      bodyFat: bodyFraction(0.2),
+      water: null,
+      bone: null,
+      zoneMinutes: null,
+    },
   ]
 
   it('composes lean-mass increase (from start lean) with the target body-fat %', () => {
-    const comp = targetComposition(withTargets({ leanMassIncrease: 4, bodyFat: 0.15 }), log)
+    const comp = targetComposition(
+      withTargets({ leanMassIncrease: kg(4), bodyFat: bodyFraction(0.15) }),
+      log,
+    )
     expect(comp?.targetLeanKg).toBeCloseTo(82 * 0.78 + 4, 9) // 67.96
     expect(comp?.targetFatKg).toBeCloseTo(((82 * 0.78 + 4) * 0.15) / 0.85, 9)
   })
 
   it('a body-fat-only target keeps current lean; a lean-only target keeps current fat', () => {
-    const bfOnly = targetComposition(withTargets({ bodyFat: 0.15 }), log)
+    const bfOnly = targetComposition(withTargets({ bodyFat: bodyFraction(0.15) }), log)
     expect(bfOnly?.targetLeanKg).toBeCloseTo(64, 9) // latest weigh-in lean
     expect(bfOnly?.targetFatKg).toBeCloseTo((64 * 0.15) / 0.85, 9)
-    const leanOnly = targetComposition(withTargets({ leanMassIncrease: 4 }), log)
+    const leanOnly = targetComposition(withTargets({ leanMassIncrease: kg(4) }), log)
     expect(leanOnly?.targetLeanKg).toBeCloseTo(67.96, 9)
     expect(leanOnly?.targetFatKg).toBeCloseTo(16, 9) // 80 − 64
   })
@@ -225,7 +250,9 @@ describe('targetComposition', () => {
 
   it('is null without any target set, or without body-fat data to aim from', () => {
     expect(targetComposition(withTargets({}), log)).toBeNull()
-    expect(targetComposition(withTargets({ bodyFat: 0.15 }, { startBodyFat: null }), [])).toBeNull()
+    expect(
+      targetComposition(withTargets({ bodyFat: bodyFraction(0.15) }, { startBodyFat: null }), []),
+    ).toBeNull()
   })
 })
 
