@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { isHttpUrl, parseLinkInput } from './links'
+import { applyWorkoutLink, isHttpUrl, parseLinkInput } from './links'
 
 describe('isHttpUrl', () => {
   it('accepts absolute http and https URLs', () => {
@@ -40,5 +40,19 @@ describe('parseLinkInput', () => {
   it('flags invalid input instead of clearing or storing it', () => {
     expect(parseLinkInput('example.com/x')).toEqual({ ok: false })
     expect(parseLinkInput('javascript:alert(1)')).toEqual({ ok: false })
+  })
+})
+
+describe('applyWorkoutLink', () => {
+  it('sets, replaces and clears links, dropping empty workouts and rejecting non-http urls', () => {
+    const links: Record<string, { video?: string; audio?: string }> = {}
+    applyWorkoutLink(links, 'chest-back', 'video', 'https://example.com/v')
+    expect(links['chest-back']).toEqual({ video: 'https://example.com/v' })
+    applyWorkoutLink(links, 'chest-back', 'video', 'javascript:alert(1)')
+    expect(links['chest-back']).toEqual({ video: 'https://example.com/v' })
+    applyWorkoutLink(links, 'chest-back', 'video', null)
+    expect(links['chest-back']).toBeUndefined()
+    applyWorkoutLink(links, 'no-such-workout', 'video', 'https://example.com/v')
+    expect(links['no-such-workout']).toBeUndefined()
   })
 })

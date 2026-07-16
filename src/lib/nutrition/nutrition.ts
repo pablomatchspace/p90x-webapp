@@ -430,3 +430,20 @@ export function targetNutritionFromState(
     dietStyle: settings.nutrition.dietStyle,
   })
 }
+
+/**
+ * Nutrition-override guard (E22). Only the raw override inputs are stored —
+ * calories, level and grams stay derived (rule 2). Live mutation bypasses
+ * Zod, so a non-positive calorie override is treated as clearing it.
+ */
+export function applyNutritionPatch(
+  nutrition: Settings['nutrition'],
+  patch: Partial<Settings['nutrition']>,
+): void {
+  if (patch.phaseOverride !== undefined) nutrition.phaseOverride = patch.phaseOverride
+  if (patch.calorieOverride !== undefined) {
+    const value = patch.calorieOverride
+    nutrition.calorieOverride = value !== null && Number.isFinite(value) && value > 0 ? value : null
+  }
+  if (patch.dietStyle !== undefined) nutrition.dietStyle = patch.dietStyle
+}

@@ -133,3 +133,39 @@ export function quoteOfDay(seed: number, quotes: AppState['quotes']): Quote | nu
   const index = ((Math.trunc(seed) % active.length) + active.length) % active.length
   return active[index]
 }
+
+/**
+ * Custom-quote list invariants (US-064): text is trimmed and never empty;
+ * deleting a quote also clears its disabled flag; disabling is idempotent.
+ * The caller supplies ids so the domain stays free of randomness.
+ */
+type QuoteList = AppState['quotes']
+
+export function addQuote(quotes: QuoteList, id: string, text: string, author?: string): void {
+  const trimmed = text.trim()
+  if (trimmed === '') return
+  const trimmedAuthor = author?.trim()
+  quotes.custom.push({ id, text: trimmed, ...(trimmedAuthor ? { author: trimmedAuthor } : {}) })
+}
+
+export function updateQuote(quotes: QuoteList, id: string, text: string, author?: string): void {
+  const quote = quotes.custom.find((q) => q.id === id)
+  if (quote === undefined) return
+  const trimmed = text.trim()
+  if (trimmed === '') return
+  quote.text = trimmed
+  const trimmedAuthor = author?.trim()
+  if (trimmedAuthor) quote.author = trimmedAuthor
+  else delete quote.author
+}
+
+export function deleteQuote(quotes: QuoteList, id: string): void {
+  quotes.custom = quotes.custom.filter((q) => q.id !== id)
+  quotes.disabledIds = quotes.disabledIds.filter((d) => d !== id)
+}
+
+export function setQuoteDisabled(quotes: QuoteList, id: string, disabled: boolean): void {
+  const has = quotes.disabledIds.includes(id)
+  if (disabled && !has) quotes.disabledIds.push(id)
+  else if (!disabled && has) quotes.disabledIds = quotes.disabledIds.filter((d) => d !== id)
+}

@@ -116,3 +116,19 @@ export function formatScore(value: number | null): string {
   if (value === null) return '—'
   return String(Math.round(value * 100) / 100)
 }
+
+/**
+ * Scoring-params guard (US-070). The divisors/factors must stay positive —
+ * the schema enforces it on import, but live mutation bypasses Zod, and a
+ * zero would divide the engine by zero — so non-positive or non-finite
+ * values are ignored rather than stored.
+ */
+export function applyScoringPatch(scoring: ScoringSettings, patch: Partial<ScoringSettings>): void {
+  if (patch.penaltyOn !== undefined) scoring.penaltyOn = patch.penaltyOn
+  for (const key of ['penaltyDivisor', 'chairFactor', 'rwDivisor'] as const) {
+    const value = patch[key]
+    if (value !== undefined && Number.isFinite(value) && value > 0) {
+      scoring[key] = value
+    }
+  }
+}

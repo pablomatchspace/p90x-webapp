@@ -18,6 +18,7 @@ import {
   remainingProgramDays,
   targetComposition,
   targetNutrition,
+  applyNutritionPatch,
 } from './nutrition'
 import { emptyState, type BodyEntry, type Settings } from '@/lib/shared'
 import { bodyFraction, kg, meters } from '@/lib/shared'
@@ -358,5 +359,15 @@ describe('targetNutrition', () => {
     expect(targetNutrition({ ...base, fatDeltaKg: null })).toBeNull()
     expect(targetNutrition({ ...base, leanDeltaKg: null })).toBeNull()
     expect(targetNutrition({ ...base, leanKg: null, heightM: null, age: null })).toBeNull()
+  })
+})
+
+describe('applyNutritionPatch', () => {
+  it('stores overrides and treats a non-positive calorie override as clearing it', () => {
+    const nutrition = emptyState().settings.nutrition
+    applyNutritionPatch(nutrition, { phaseOverride: 2, calorieOverride: 2200 })
+    expect(nutrition).toMatchObject({ phaseOverride: 2, calorieOverride: 2200 })
+    applyNutritionPatch(nutrition, { calorieOverride: -5, dietStyle: 'lowCarb' })
+    expect(nutrition).toMatchObject({ calorieOverride: null, dietStyle: 'lowCarb' })
   })
 })

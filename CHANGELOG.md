@@ -15,6 +15,23 @@ didn't bump the package version — they're numbered B01/B02 here for a
 continuous record; #33's package column is left at the un-suffixed version
 that was actually shipped.
 
+## 1.E31.U157 (package 1.31.157) — 2026-07-16
+
+- **E31 — Domain-driven design alignment, story U157: application layer &
+  domain invariants.** Every business rule that lived in the 500-line
+  `actions.ts` (or implicitly in the UI) is now a named, unit-tested pure
+  function in its bounded context: session upsert & the lazy-create/prune
+  entry rule (`workouts/sessions`), timer/player/scoring guards
+  (`workouts/playerSettings`, `applyScoringPatch`), the sorted/prune body-log
+  upsert (`body/bodyLog`), the never-overwrite program-start guard
+  (`schedule/program`), the round freeze/seed/restore rules
+  (`rounds/archive`), nutrition-override and media-link guards, and the
+  custom-quote list rules. `actions.ts` is now a barrel over six thin
+  per-context use-case modules (`src/state/actions/*`) — call sites are
+  unchanged. The architecture test gains a layering rule: UI components never
+  touch the store's `mutate`/`getState` — writes go through the application
+  layer. Behavior identical; 28 new domain tests pin the extracted rules.
+
 ## 1.E31.U156 (package 1.31.156) — 2026-07-16
 
 - **E31 — Domain-driven design alignment, story U156: persisted-field renames

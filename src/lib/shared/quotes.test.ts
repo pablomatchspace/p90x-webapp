@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import { activeQuotes, BUILTIN_QUOTES, quoteOfDay } from './quotes'
+import {
+  activeQuotes,
+  addQuote,
+  BUILTIN_QUOTES,
+  deleteQuote,
+  quoteOfDay,
+  setQuoteDisabled,
+  updateQuote,
+} from './quotes'
 import type { AppState } from './schema'
 
 const empty: AppState['quotes'] = { disabledIds: [], custom: [] }
@@ -41,5 +49,41 @@ describe('quoteOfDay', () => {
   it('returns null when every quote is disabled', () => {
     const allOff: AppState['quotes'] = { disabledIds: BUILTIN_QUOTES.map((q) => q.id), custom: [] }
     expect(quoteOfDay(3, allOff)).toBeNull()
+  })
+})
+
+describe('custom-quote list invariants', () => {
+  it('addQuote trims and refuses empty text', () => {
+    const quotes = {
+      disabledIds: [] as string[],
+      custom: [] as { id: string; text: string; author?: string }[],
+    }
+    addQuote(quotes, 'q1', '  push play  ', '  ')
+    expect(quotes.custom).toEqual([{ id: 'q1', text: 'push play' }])
+    addQuote(quotes, 'q2', '   ')
+    expect(quotes.custom).toHaveLength(1)
+  })
+
+  it('updateQuote edits text/author and refuses empty text', () => {
+    const quotes = { disabledIds: [] as string[], custom: [{ id: 'q1', text: 'a', author: 'X' }] }
+    updateQuote(quotes, 'q1', 'b', '')
+    expect(quotes.custom[0]).toEqual({ id: 'q1', text: 'b' })
+    updateQuote(quotes, 'q1', '  ')
+    expect(quotes.custom[0]?.text).toBe('b')
+  })
+
+  it('deleteQuote removes the quote and its disabled flag', () => {
+    const quotes = { disabledIds: ['q1'], custom: [{ id: 'q1', text: 'a' }] }
+    deleteQuote(quotes, 'q1')
+    expect(quotes).toEqual({ disabledIds: [], custom: [] })
+  })
+
+  it('setQuoteDisabled toggles without duplicating ids', () => {
+    const quotes = { disabledIds: [] as string[], custom: [] }
+    setQuoteDisabled(quotes, 'b1', true)
+    setQuoteDisabled(quotes, 'b1', true)
+    expect(quotes.disabledIds).toEqual(['b1'])
+    setQuoteDisabled(quotes, 'b1', false)
+    expect(quotes.disabledIds).toEqual([])
   })
 })

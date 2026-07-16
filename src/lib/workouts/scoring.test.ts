@@ -3,6 +3,7 @@ import { getWorkout, type CatalogExercise } from '@/lib/shared'
 import { emptyState, type ExerciseEntry, type Session } from '@/lib/shared'
 import { formatScore, scoreExercise, sessionTotals } from './scoring'
 
+import { applyScoringPatch } from './scoring'
 const SCORING = emptyState().settings.scoring // workbook defaults: ÷2 on, chair 2, R×W ÷10
 
 function ex(workoutKey: string, id: string): CatalogExercise {
@@ -160,5 +161,18 @@ describe('formatScore', () => {
     expect(formatScore(8)).toBe('8')
     expect(formatScore((11 + 13.2) / 2)).toBe('12.1') // float noise rounded away
     expect(formatScore(0.4999999999)).toBe('0.5')
+  })
+})
+
+describe('applyScoringPatch', () => {
+  it('writes the switch and only positive finite divisors/factors', () => {
+    const scoring = { penaltyDivisor: 2, penaltyOn: true, chairFactor: 2, rwDivisor: 10 }
+    applyScoringPatch(scoring, {
+      penaltyOn: false,
+      penaltyDivisor: 3,
+      chairFactor: 0,
+      rwDivisor: Number.NaN,
+    })
+    expect(scoring).toEqual({ penaltyDivisor: 3, penaltyOn: false, chairFactor: 2, rwDivisor: 10 })
   })
 })

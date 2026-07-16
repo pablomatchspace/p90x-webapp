@@ -1,3 +1,5 @@
+import { hasWorkout } from './programData'
+
 /**
  * E23: per-workout media deeplinks. The athlete pastes a video and/or audio URL
  * for each routine in Settings; the Today card and workout screens then offer
@@ -39,4 +41,30 @@ export function parseLinkInput(raw: string): LinkParse {
   const trimmed = raw.trim()
   if (trimmed === '') return { ok: true, url: null }
   return isHttpUrl(trimmed) ? { ok: true, url: trimmed } : { ok: false }
+}
+
+/**
+ * Per-workout media deeplinks (E23): set or clear one workout's video/audio
+ * link on the settings slice. Live mutation bypasses Zod, so the http(s)-only
+ * rule is enforced here too — anything else is ignored rather than stored.
+ * `null` clears; a workout whose links all clear drops out of the record.
+ * Unknown workout keys are ignored.
+ */
+export function applyWorkoutLink(
+  links: Record<string, { video?: string; audio?: string }>,
+  workoutKey: string,
+  kind: MediaKind,
+  url: string | null,
+): void {
+  if (!hasWorkout(workoutKey)) return
+  const trimmed = url?.trim() ?? null
+  if (trimmed !== null && !isHttpUrl(trimmed)) return
+  if (trimmed === null) {
+    const entry = links[workoutKey]
+    if (entry === undefined) return
+    delete entry[kind]
+    if (entry.video === undefined && entry.audio === undefined) delete links[workoutKey]
+  } else {
+    ;(links[workoutKey] ??= {})[kind] = trimmed
+  }
 }

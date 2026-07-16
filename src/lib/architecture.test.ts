@@ -141,6 +141,17 @@ describe('bounded contexts (docs/CONTEXT-MAP.md)', () => {
     expect(violations).toEqual([])
   })
 
+  it('the UI layer never mutates the store directly (writes go through state/actions)', () => {
+    const violations: string[] = []
+    for (const file of outsideFiles) {
+      const rel = path.relative(SRC, file)
+      if (!/^(features|components)[/\\]/.test(rel)) continue
+      const source = readFileSync(file, 'utf8')
+      if (/\.getState\(\)|\.mutate\(/.test(source)) violations.push(rel)
+    }
+    expect(violations).toEqual([])
+  })
+
   it('application and UI layers import contexts only through barrels', () => {
     const violations: string[] = []
     for (const file of outsideFiles) {
