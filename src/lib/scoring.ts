@@ -1,5 +1,5 @@
 import type { CatalogExercise, WorkoutDef } from '@/lib/programData'
-import type { ExerciseEntry, Round, ScoringSettings, Session } from '@/lib/schema'
+import type { ExerciseEntry, ExerciseRound, ScoringSettings, Session } from '@/lib/schema'
 
 /**
  * The Excel scoring engine (PRD §6.3), recomputed live from raw rounds.
@@ -38,7 +38,7 @@ export interface ExerciseScore {
 const EMPTY: ExerciseScore = { score: null, penalty: null, net: null, drop: null }
 
 export function adjustedRound(
-  round: Round | undefined,
+  round: ExerciseRound | undefined,
   exercise: CatalogExercise,
   scoring: ScoringSettings,
 ): number | null {

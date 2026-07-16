@@ -15,6 +15,19 @@ didn't bump the package version — they're numbered B01/B02 here for a
 continuous record; #33's package column is left at the un-suffixed version
 that was actually shipped.
 
+## 1.E31.U153 (package 1.31.153) — 2026-07-16
+
+- **E31 — Domain-driven design alignment, story U153: ubiquitous language.**
+  New [`docs/GLOSSARY.md`](docs/GLOSSARY.md) pins the app's vocabulary to the
+  workbook's (term → schema field → code identifier), and
+  [`docs/CONTEXT-MAP.md`](docs/CONTEXT-MAP.md) names the seven bounded
+  contexts of `src/lib` (schedule, workouts, body, nutrition, rounds, sync,
+  shared) with their allowed-dependency matrix — the map U154 will make
+  physical. One code-internal rename resolves the glossary's worst collision:
+  the `Round` type (an exercise's attempt column) is now `ExerciseRound`,
+  distinct from a 90-day round (`ArchivedRound`). No persisted-schema or
+  behavior changes.
+
 ## 1.E30.U152 (package 1.30.152) — 2026-07-16
 
 - **E30 — Voice rep entry in focus mode.** The focus card grows a

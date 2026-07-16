@@ -97,7 +97,7 @@ export const scheduleOpSchema = z.discriminatedUnion('kind', [
   }),
 ])
 
-const roundSchema = z.object({
+const exerciseRoundSchema = z.object({
   /** reps; for R×W rows this is reps */
   main: nullableNumber,
   /** assisted reps (knee/chair), the weight for R×W rows, or the extra/other-side count */
@@ -106,7 +106,7 @@ const roundSchema = z.object({
 
 export const exerciseEntrySchema = z.object({
   /** one entry per catalog round: 1, 2, or 4 (Strip-Set Curls) */
-  rounds: z.array(roundSchema).min(1).max(4),
+  rounds: z.array(exerciseRoundSchema).min(1).max(4),
 })
 
 export const sessionSchema = z.object({
@@ -196,7 +196,8 @@ export type ScheduleOp = z.infer<typeof scheduleOpSchema>
 export type SkipOp = Extract<ScheduleOp, { kind: 'skip' }>
 export type SwapOp = Extract<ScheduleOp, { kind: 'swap' }>
 export type RemapOp = Extract<ScheduleOp, { kind: 'remap' }>
-export type Round = z.infer<typeof roundSchema>
+/** One attempt column of an exercise — "exercise round", distinct from a 90-day round. */
+export type ExerciseRound = z.infer<typeof exerciseRoundSchema>
 export type ExerciseEntry = z.infer<typeof exerciseEntrySchema>
 export type Session = z.infer<typeof sessionSchema>
 export type BodyEntry = z.infer<typeof bodyEntrySchema>
