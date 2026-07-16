@@ -1,6 +1,6 @@
 # Epic E30 — Voice rep entry in focus mode
 
-> **Status:** in progress · **Stories:** US-150 → US-152
+> **Status:** delivered · **Stories:** US-150 → US-152
 > **Ships as:** package **1.30.152**, displayed **`1.E30.U150`**…`U152` (final `1.E30.U152`) · **Schema:** **v11 → v12** (`player.voiceHandsFree`)
 > **One-liner:** Focus mode grows a mic: say **"reps twenty-two, knee eight"**
 > and the numbers land in the named fields — hands stay on the bar. Web Speech
@@ -106,24 +106,24 @@ unplaceable values · [x] null/empty/garbage transcripts parse to null
 
 ### US-151 — Mic on the focus card + hands-free mode (M, P0)
 
-**AC:** [ ] button renders only when `SpeechRecognition` exists · [ ] spoken
+**AC:** [x] button renders only when `SpeechRecognition` exists · [x] spoken
 values land via `setRoundValue` (score, target chip and ghosts react live) ·
-[ ] "next"/"previous" step cards within bounds; "finish workout" completes
-the session · [ ] hands-free toggle persists as `player.voiceHandsFree`
+[x] "next"/"previous" step cards within bounds; "finish workout" completes
+the session · [x] hands-free toggle persists as `player.voiceHandsFree`
 (schema v12 + migration, default off) and auto-restarts recognition while
-armed · [ ] arming always requires a tap — nothing listens on load ·
-[ ] `aria-live` feedback echoes the heard transcript or the error ·
-[ ] recognition errors (not-allowed, no-speech) surface as text, never break
-entry · [ ] listening state is visually and programmatically
+armed · [x] arming always requires a tap — nothing listens on load ·
+[x] `aria-live` feedback echoes the heard transcript or the error ·
+[x] recognition errors (not-allowed, no-speech) surface as text, never break
+entry · [x] listening state is visually and programmatically
 (`aria-pressed`) distinct.
 
 ### US-152 — E2E, baselines & release (S, P1)
 
-**AC:** [ ] e2e with a stubbed `SpeechRecognition` (init-script): speak
+**AC:** [x] e2e with a stubbed `SpeechRecognition` (init-script): speak
 "reps 22" → field fills → "next" advances → "finish workout" completes ·
-[ ] unsupported-browser e2e: deleting the constructors before boot hides the
-mic entirely · [ ] linux visual baselines regenerated (focus shots gain the
-mic row) · [ ] version/CHANGELOG/docs.
+[x] unsupported-browser e2e: stubbing out the constructors before boot hides
+the mic entirely · [x] linux visual baselines regenerated (focus shots gain
+the mic row) · [x] version/CHANGELOG/docs.
 
 ## 6. QA
 

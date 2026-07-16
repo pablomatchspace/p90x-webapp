@@ -15,6 +15,27 @@ didn't bump the package version — they're numbered B01/B02 here for a
 continuous record; #33's package column is left at the un-suffixed version
 that was actually shipped.
 
+## 1.E30.U152 (package 1.30.152) — 2026-07-16
+
+- **E30 — Voice rep entry in focus mode.** The focus card grows a
+  **push-to-talk mic** (Web Speech recognition, pinned en-US,
+  feature-detected — browsers without it simply don't render the button).
+  Say **"reps 22, knee 8"** and the values land in the named fields through
+  the ordinary `setRoundValue` pipeline, so ghosts, drop verdicts and E29
+  targets react as if typed; bare numbers fill the card's fields positionally
+  from the first empty one, "round 2 …" scopes values on multi-round cards,
+  and numbers work as digits or words ("twenty-two", "a hundred and five",
+  "and a half"). Whole-utterance **"next" / "previous" / "finish workout"**
+  drive the card buttons (U150 pure parser, U151 mic UI). An opt-in
+  **Hands-free** toggle (persisted `player.voiceHandsFree`, **schema v11 →
+  v12** with migration, default off) re-arms the mic after every utterance —
+  a whole strength session logs without touching the screen; arming always
+  requires a tap and no audio or transcript is ever stored. `aria-live`
+  feedback echoes what was heard; denied mics degrade to a message. New
+  `e2e/voice.spec.ts` journey (stubbed recognizer, incl. an
+  unsupported-browser case) and refreshed linux focus-mode visual baselines
+  (U152).
+
 ## 1.E29.U149 (package 1.29.149) — 2026-07-16
 
 - **E29 — Progressive-overload targets in focus mode.** Focus mode now states
