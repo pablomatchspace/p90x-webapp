@@ -13,10 +13,14 @@ TypeScript, Zustand + Immer state, Zod-validated import, Tailwind, hand-rolled S
 charts, `vite-plugin-pwa`.
 
 A program exists exactly when `settings.startDate` is non-null — the schedule is
-`materialize(program, startDate, ops)`, nothing is stored. So there are three ways
-one comes into being: `startProgram` (the `/start` screen, no import), import, and
-backup restore. `startProgram` refuses to overwrite an existing program; moving
-day 1 afterwards is `setStartDate`, which Settings guards behind a confirm.
+`materialize(program, startDate, ops)`, nothing is stored. So there are four ways
+one comes into being: `startProgram` (the `/start` screen, no import), import,
+backup restore, and restoring an archived round (E28). `startProgram` refuses to
+overwrite an existing program; moving day 1 afterwards is `setStartDate`, which
+Settings guards behind a confirm. Completed rounds live in the top-level `rounds`
+archive (raw inputs + a frozen snapshot of the round-scoped SETUP inputs) —
+`completeRound` archives and resets, and reports/comparisons recompute from the
+snapshot so later Settings changes never rewrite history.
 
 ## Non-negotiable rules
 
@@ -49,8 +53,9 @@ day 1 afterwards is `setStartDate`, which Settings guards behind a confirm.
 
 ```
 src/lib/        pure logic (scoring, schedule/*, timelines/*, playback, focusSteps, body, setup,
-                bodyFat, ffmi, feasibility, nutrition, adherence, progression, chart, links,
-                quotes, dates, sync/syncCrypto, importExport, migrations, version)
+                bodyFat, ffmi, feasibility, nutrition, adherence, progression, roundReport,
+                roundCompare, chart, links, quotes, dates, sync/syncCrypto, importExport,
+                migrations, version)
 src/state/      store.ts (Zustand+Immer), actions.ts (all mutations funnel through useStore.getState().mutate), persist.ts
 src/features/   screens by area: start, today, schedule, workouts, body, dashboard, more
 src/components/ Layout, Page, NoProgramCard, ErrorBoundary, SystemBanners, LineChart, UpdateToast

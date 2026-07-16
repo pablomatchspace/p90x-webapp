@@ -232,3 +232,12 @@ Post-v1.0.0. Full write-up: [`docs/epics/E26-audible-play-coaching.md`](../epics
 - ✅ US-142 · E23 `MediaLinks` on the focus and play screens, visible during playback (M, P0)
 
 Post-v1.0.0. Full write-up: [`docs/epics/E27-play-media-links.md`](../epics/E27-play-media-links.md).
+
+## E28 — Round lifecycle: archive, report & round-over-round comparison
+
+- ✅ US-143 · Round archive schema v11 (`rounds`) & lifecycle actions (M, P0)
+- ✅ US-144 · End-of-round report — `roundReport.ts`, report view, dashboard card (L, P0)
+- ✅ US-145 · Rounds page & guarded complete-and-archive flow (M, P0)
+- ✅ US-146 · Round-over-round comparison — `roundCompare.ts` + report overlays (L, P1)
+
+Post-v1.0.0. Full write-up: [`docs/epics/E28-round-lifecycle.md`](../epics/E28-round-lifecycle.md).

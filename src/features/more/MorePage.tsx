@@ -1,4 +1,5 @@
 import {
+  Archive,
   Calculator,
   Cloud,
   Database,
@@ -17,6 +18,12 @@ const items = [
     icon: Database,
     title: 'Data',
     desc: 'Import your Excel conversion, export backups, reset',
+  },
+  {
+    to: '/rounds',
+    icon: Archive,
+    title: 'Rounds',
+    desc: 'End-of-round report, archive, round-over-round',
   },
   {
     to: '/more/sync',

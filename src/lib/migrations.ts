@@ -73,6 +73,10 @@ const MIGRATIONS: Record<number, (doc: Record<string, unknown>) => void> = {
       settings.player.voiceCues = true
     }
   },
+  // v10 → v11 (E28): archived rounds live alongside the active program.
+  10: (doc) => {
+    if (doc.rounds === undefined) doc.rounds = []
+  },
 }
 
 export function migrateToCurrent(raw: unknown): MigrationResult {

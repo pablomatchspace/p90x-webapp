@@ -42,6 +42,38 @@ function NextUp() {
   )
 }
 
+/**
+ * E28 (US-144): once the last program day is reached, day 90 gets its moment —
+ * and the path to the report + archive flow is one tap away.
+ */
+function RoundCompleteCard() {
+  const a = useAdherence()
+  if (a === null || a.programDays === 0 || a.dayReached < a.programDays) return null
+  return (
+    <Card className="border-emerald-300 dark:border-emerald-700">
+      <h2 className="font-semibold">Round complete — 90 days in the books</h2>
+      <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+        Every program day has been reached. See how the round went, then archive it to start the
+        next one with your history intact.
+      </p>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <Link
+          to="/rounds/live"
+          className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+        >
+          View round report
+        </Link>
+        <Link
+          to="/rounds"
+          className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800"
+        >
+          Archive &amp; start next
+        </Link>
+      </div>
+    </Card>
+  )
+}
+
 export function DashboardPage() {
   const startDate = useStore((s) => s.data.settings.startDate)
   const adherence = useAdherence()
@@ -58,6 +90,7 @@ export function DashboardPage() {
     <Page title="Dashboard" subtitle="Your program at a glance">
       {/* E25: daily motivation leads the page — first widget below the title */}
       <QuoteCard seed={adherence?.dayReached ?? 0} />
+      <RoundCompleteCard />
       <ProgramStatusBar />
       <NextUp />
       <KpiCards />

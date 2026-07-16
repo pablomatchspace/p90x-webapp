@@ -37,6 +37,12 @@ const PlayPage = lazy(() =>
 const BodyPage = lazy(() =>
   import('@/features/body/BodyPage').then((m) => ({ default: m.BodyPage })),
 )
+const RoundsPage = lazy(() =>
+  import('@/features/rounds/RoundsPage').then((m) => ({ default: m.RoundsPage })),
+)
+const RoundReportPage = lazy(() =>
+  import('@/features/rounds/RoundReportPage').then((m) => ({ default: m.RoundReportPage })),
+)
 const BodyTrendsPage = lazy(() =>
   import('@/features/dashboard/BodyTrendsPage').then((m) => ({ default: m.BodyTrendsPage })),
 )
@@ -92,6 +98,8 @@ export default function App() {
           <Route path="workouts/:key/focus/:programDayId" element={<FocusPage />} />
           <Route path="workouts/:key/play/:programDayId" element={<PlayPage />} />
           <Route path="body" element={<BodyPage />} />
+          <Route path="rounds" element={<RoundsPage />} />
+          <Route path="rounds/:id" element={<RoundReportPage />} />
           <Route path="trends" element={<BodyTrendsPage />} />
           <Route path="progress" element={<StrengthProgressPage />} />
           <Route path="more" element={<MorePage />} />
