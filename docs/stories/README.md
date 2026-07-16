@@ -241,3 +241,11 @@ Post-v1.0.0. Full write-up: [`docs/epics/E27-play-media-links.md`](../epics/E27-
 - ✅ US-146 · Round-over-round comparison — `roundCompare.ts` + report overlays (L, P1)
 
 Post-v1.0.0. Full write-up: [`docs/epics/E28-round-lifecycle.md`](../epics/E28-round-lifecycle.md).
+
+## E29 — Progressive-overload targets in focus mode
+
+- ✅ US-147 · Pure overload-target engine — `overload.ts` with archive fallback (M, P0)
+- ✅ US-148 · Focus-mode target chip & finish-summary tally (M, P0)
+- ✅ US-149 · E2E, visual baselines & release (S, P1)
+
+Post-v1.0.0. Full write-up: [`docs/epics/E29-overload-targets.md`](../epics/E29-overload-targets.md).

@@ -53,9 +53,9 @@ snapshot so later Settings changes never rewrite history.
 
 ```
 src/lib/        pure logic (scoring, schedule/*, timelines/*, playback, focusSteps, body, setup,
-                bodyFat, ffmi, feasibility, nutrition, adherence, progression, roundReport,
-                roundCompare, chart, links, quotes, dates, sync/syncCrypto, importExport,
-                migrations, version)
+                bodyFat, ffmi, feasibility, nutrition, adherence, progression, overload,
+                roundReport, roundCompare, chart, links, quotes, dates, sync/syncCrypto,
+                importExport, migrations, version)
 src/state/      store.ts (Zustand+Immer), actions.ts (all mutations funnel through useStore.getState().mutate), persist.ts
 src/features/   screens by area: start, today, schedule, workouts, body, dashboard, more
 src/components/ Layout, Page, NoProgramCard, ErrorBoundary, SystemBanners, LineChart, UpdateToast
