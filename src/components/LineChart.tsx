@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { extent, fillSegments, linePath, nearestX, niceTicks, scale, type Pt } from '@/lib/chart'
+import { extent, fillSegments, linePath, nearestX, niceTicks, scale, type Pt } from '@/lib/shared'
 
 /**
  * Presentational multi-series line chart (US-061 / US-063, upgraded in E21).

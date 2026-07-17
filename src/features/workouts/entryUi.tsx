@@ -1,7 +1,7 @@
-import type { CatalogExercise } from '@/lib/programData'
-import { previousValue } from '@/lib/schedule/occurrences'
-import type { ProgramDay } from '@/lib/schedule/materialize'
-import type { Session } from '@/lib/schema'
+import type { CatalogExercise } from '@/lib/shared'
+import { previousValue } from '@/lib/schedule'
+import type { ProgramDay } from '@/lib/schedule'
+import type { Session } from '@/lib/shared'
 import { setRoundValue } from '@/state/actions'
 import { fieldAria, mainLabel, SECONDARY_LABELS } from './entryLabels'
 import { NumberField } from './NumberField'
@@ -34,19 +34,19 @@ export function RoundInputs({
   const entry = sessions.get(programDayId)?.entries?.[exercise.id]
   const kind = exercise.secondary
 
-  const field = (round: number, name: 'main' | 'secondary') => (
+  const field = (round: number, name: 'reps' | 'assist') => (
     <div className="flex flex-col items-center gap-0.5">
       <NumberField
         label={fieldAria(exercise, round, name)}
         value={entry?.rounds[round]?.[name] ?? null}
         prev={previousValue(occurrences, sessions, occIndex, exercise.id, round, name)}
-        step={name === 'secondary' && kind === 'weight' ? 2.5 : 1}
+        step={name === 'assist' && kind === 'weight' ? 2.5 : 1}
         onChange={(value) =>
           setRoundValue(workoutKey, programDayId, exercise.id, round, name, value)
         }
       />
       <span className="text-[10px] text-zinc-500 dark:text-zinc-400">
-        {name === 'main' || kind === undefined ? mainLabel(exercise) : SECONDARY_LABELS[kind]}
+        {name === 'reps' || kind === undefined ? mainLabel(exercise) : SECONDARY_LABELS[kind]}
       </span>
     </div>
   )
@@ -70,8 +70,8 @@ export function RoundInputs({
                 </p>
               ) : null}
               <div className="flex flex-wrap items-start gap-3">
-                {field(round, 'main')}
-                {kind !== undefined ? field(round, 'secondary') : null}
+                {field(round, 'reps')}
+                {kind !== undefined ? field(round, 'assist') : null}
               </div>
             </div>
           )

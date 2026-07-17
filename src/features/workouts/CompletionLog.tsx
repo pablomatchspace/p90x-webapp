@@ -1,11 +1,11 @@
 import { Link } from 'react-router-dom'
 import { Card } from '@/components/Page'
-import { formatLong, todayISO } from '@/lib/dates'
-import type { WorkoutDef } from '@/lib/programData'
-import type { ProgramDay } from '@/lib/schedule/materialize'
+import { formatLong, todayISO } from '@/lib/shared'
+import type { WorkoutDef } from '@/lib/shared'
+import type { ProgramDay } from '@/lib/schedule'
 import { setSessionNotes } from '@/state/actions'
 import { useWorkoutSessions } from '@/state/selectors'
-import { hasTimeline } from '@/lib/timelines'
+import { hasTimeline } from '@/lib/workouts'
 import { CompletionButtons } from './CompletionButtons'
 
 /**

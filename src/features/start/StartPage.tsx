@@ -1,8 +1,8 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Card, Page } from '@/components/Page'
-import { formatLong, isISODate, todayISO } from '@/lib/dates'
-import { getTemplate, getWorkout, type ProgramKey } from '@/lib/programData'
+import { formatLong, isISODate, todayISO } from '@/lib/shared'
+import { getTemplate, getWorkout, type ProgramKey } from '@/lib/shared'
 import { startProgram } from '@/state/actions'
 import { useSettings } from '@/state/selectors'
 

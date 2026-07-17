@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react'
 import { Card } from '@/components/Page'
-import { compareISO, formatLong, isISODate } from '@/lib/dates'
-import { getWorkout } from '@/lib/programData'
-import type { ScheduleDay } from '@/lib/schedule/materialize'
-import { newSkipOp, newSwapOp, nextProgramDateAfter } from '@/lib/schedule/ops'
+import { compareISO, formatLong, isISODate } from '@/lib/shared'
+import { getWorkout } from '@/lib/shared'
+import type { ScheduleDay } from '@/lib/schedule'
+import { newSkipOp, newSwapOp, nextProgramDateAfter } from '@/lib/schedule'
 import { addScheduleOp, revertScheduleOp } from '@/state/actions'
+import { clock } from '@/state/ports'
 import { useOpPreview, useSchedule } from '@/state/selectors'
 
 const ghostBtn =
@@ -37,10 +38,11 @@ export function RescheduleSection({ day }: { day: ScheduleDay }) {
   )
 
   const candidate = useMemo(() => {
-    if (mode === 'skip') return newSkipOp(day.date)
-    if (mode === 'pull' && pullSource !== null) return newSwapOp(day.date, pullSource)
+    if (mode === 'skip') return newSkipOp(day.date, clock.nowISO())
+    if (mode === 'pull' && pullSource !== null)
+      return newSwapOp(day.date, pullSource, clock.nowISO())
     if (mode === 'swap' && isISODate(swapTarget) && swapTarget !== day.date)
-      return newSwapOp(day.date, swapTarget)
+      return newSwapOp(day.date, swapTarget, clock.nowISO())
     return null
   }, [mode, day.date, swapTarget, pullSource])
 

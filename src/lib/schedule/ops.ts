@@ -1,6 +1,6 @@
-import { compareISO, formatLong, type ISODate } from '@/lib/dates'
-import type { ProgramKey } from '@/lib/programData'
-import type { RemapOp, ScheduleOp, SkipOp, SwapOp } from '@/lib/schema'
+import { compareISO, formatLong, type ISODate } from '@/lib/shared'
+import type { ProgramKey } from '@/lib/shared'
+import type { RemapOp, ScheduleOp, SkipOp, SwapOp } from '@/lib/shared'
 import { materialize, type ProgramDay, type Schedule } from './materialize'
 
 /**
@@ -11,20 +11,25 @@ import { materialize, type ProgramDay, type Schedule } from './materialize'
  * drift from replay rules.
  */
 
-function opBase() {
-  return { id: crypto.randomUUID(), createdAt: new Date().toISOString() }
+/**
+ * `createdAt` is supplied by the caller (the clock port in application code)
+ * rather than read from `new Date()` here — this stays a pure function, and
+ * every persisted timestamp in the document is stamped through the same seam.
+ */
+function opBase(createdAt: string) {
+  return { id: crypto.randomUUID(), createdAt }
 }
 
-export function newSkipOp(date: ISODate): SkipOp {
-  return { ...opBase(), kind: 'skip', date }
+export function newSkipOp(date: ISODate, createdAt: string): SkipOp {
+  return { ...opBase(createdAt), kind: 'skip', date }
 }
 
-export function newSwapOp(dateA: ISODate, dateB: ISODate): SwapOp {
-  return { ...opBase(), kind: 'swap', dateA, dateB }
+export function newSwapOp(dateA: ISODate, dateB: ISODate, createdAt: string): SwapOp {
+  return { ...opBase(createdAt), kind: 'swap', dateA, dateB }
 }
 
-export function newRemapOp(fromWeek: number, order: number[]): RemapOp {
-  return { ...opBase(), kind: 'remap', fromWeek, order }
+export function newRemapOp(fromWeek: number, order: number[], createdAt: string): RemapOp {
+  return { ...opBase(createdAt), kind: 'remap', fromWeek, order }
 }
 
 export interface OpPreview {

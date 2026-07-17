@@ -1,4 +1,4 @@
-import type { Session } from '@/lib/schema'
+import type { Session } from '@/lib/shared'
 import type { ProgramDay, Schedule } from './materialize'
 
 /**
@@ -25,7 +25,7 @@ export function previousValue(
   beforeIndex: number,
   exerciseId: string,
   round: number,
-  field: 'main' | 'secondary',
+  field: 'reps' | 'assist',
 ): number | null {
   for (let i = beforeIndex - 1; i >= 0; i--) {
     const value = sessions.get(occurrences[i].programDayId)?.entries?.[exerciseId]?.rounds[round]?.[

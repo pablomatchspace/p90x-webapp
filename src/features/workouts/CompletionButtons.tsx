@@ -1,4 +1,4 @@
-import type { Session } from '@/lib/schema'
+import type { Session } from '@/lib/shared'
 import { setCompletionStatus } from '@/state/actions'
 
 /** The Excel COMPLETED? dropdown as one-tap buttons (US-044), shared by Today and the log screens. */
@@ -19,7 +19,7 @@ export function CompletionButtons({
   return (
     <div className="flex gap-2" role="group" aria-label="Completed?">
       {options.map((option) => {
-        const selected = session?.status === option.value
+        const selected = session?.completion === option.value
         return (
           <button
             key={option.value}

@@ -1,5 +1,5 @@
-import { compareISO, diffDays, formatLong, formatShort, todayISO } from '@/lib/dates'
-import type { Schedule } from '@/lib/schedule/materialize'
+import { compareISO, diffDays, formatLong, formatShort, todayISO } from '@/lib/shared'
+import type { Schedule } from '@/lib/schedule'
 import { useSchedule } from '@/state/selectors'
 import { Chip } from './Chip'
 

@@ -3,11 +3,12 @@ import { ArrowDown, ArrowUp } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { NoProgramCard } from '@/components/NoProgramCard'
 import { Card, Page } from '@/components/Page'
-import { compareISO, todayISO } from '@/lib/dates'
-import { getWorkout } from '@/lib/programData'
-import type { ProgramDay } from '@/lib/schedule/materialize'
-import { newRemapOp, remapBaseWeek } from '@/lib/schedule/ops'
+import { compareISO, todayISO } from '@/lib/shared'
+import { getWorkout } from '@/lib/shared'
+import type { ProgramDay } from '@/lib/schedule'
+import { newRemapOp, remapBaseWeek } from '@/lib/schedule'
 import { addScheduleOp } from '@/state/actions'
+import { clock } from '@/state/ports'
 import { useSchedule } from '@/state/selectors'
 import { useStore } from '@/state/store'
 
@@ -86,7 +87,7 @@ function OrderList({
           className={primaryBtn}
           disabled={!dirty}
           onClick={() => {
-            addScheduleOp(newRemapOp(fromWeek, order))
+            addScheduleOp(newRemapOp(fromWeek, order, clock.nowISO()))
             onApplied()
           }}
         >

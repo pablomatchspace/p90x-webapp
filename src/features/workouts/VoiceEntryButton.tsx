@@ -1,14 +1,14 @@
 import { Mic } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-import type { FocusStep } from '@/lib/focusSteps'
-import type { ExerciseEntry } from '@/lib/schema'
+import type { FocusStep } from '@/lib/workouts'
+import type { ExerciseEntry } from '@/lib/shared'
 import {
   assignVoiceValues,
   parseVoiceTranscript,
   voiceSlots,
   type VoiceCommand,
   type VoiceSlot,
-} from '@/lib/voiceEntry'
+} from '@/lib/workouts'
 import { mainLabel, SECONDARY_LABELS } from './entryLabels'
 
 /**
@@ -118,7 +118,7 @@ export function VoiceEntryButton({
     const secondary = current.exercise.secondary
     const applied = assignments.map(({ slot, value }) => {
       const name =
-        slot.field === 'main' || secondary === undefined
+        slot.field === 'reps' || secondary === undefined
           ? mainLabel(current.exercise)
           : SECONDARY_LABELS[secondary]
       return `${current.rounds.length > 1 ? `R${slot.round + 1} ` : ''}${name} ${value}`

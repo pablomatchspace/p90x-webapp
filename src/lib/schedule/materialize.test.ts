@@ -1,7 +1,7 @@
 import fc from 'fast-check'
 import { describe, expect, it } from 'vitest'
-import { addDays } from '@/lib/dates'
-import type { ScheduleOp } from '@/lib/schema'
+import { addDays } from '@/lib/shared'
+import type { ScheduleOp } from '@/lib/shared'
 import { groupByWeek, materialize, slotId, type ProgramDay } from './materialize'
 
 const START = '2026-05-25' // the real workbook's start date (structure only, no personal data)

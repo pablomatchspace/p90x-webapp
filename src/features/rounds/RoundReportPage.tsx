@@ -3,16 +3,16 @@ import { Link, useParams } from 'react-router-dom'
 import { Card, Page } from '@/components/Page'
 import { NoProgramCard } from '@/components/NoProgramCard'
 import { formatFixed, fractionToPercent, kgToUnit } from '@/lib/body'
-import { formatLong, todayISO } from '@/lib/dates'
+import { formatLong, todayISO } from '@/lib/shared'
 import {
   archivedRoundData,
   buildRoundReport,
   liveRoundData,
   type BodyOutcomeKey,
   type RoundReport,
-} from '@/lib/roundReport'
-import { formatScore } from '@/lib/scoring'
-import type { RoundSnapshot, Settings } from '@/lib/schema'
+} from '@/lib/rounds'
+import { formatScore } from '@/lib/workouts'
+import type { RoundSnapshot, Settings } from '@/lib/shared'
 import { Chip, type ChipTone } from '@/features/schedule/Chip'
 import {
   buildBodyMetrics,
@@ -275,7 +275,7 @@ function StrengthOutcomeCard({ report }: { report: RoundReport }) {
 export function RoundReportPage() {
   const { id } = useParams()
   const settings = useSettings()
-  const rounds = useStore((s) => s.data.rounds)
+  const rounds = useStore((s) => s.data.archivedRounds)
   const state = useStore((s) => s.data)
 
   const live = id === 'live'

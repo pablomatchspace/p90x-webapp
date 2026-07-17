@@ -1,6 +1,6 @@
-import { addDays, compareISO, type ISODate } from '@/lib/dates'
-import { getTemplate, type ProgramKey } from '@/lib/programData'
-import type { ScheduleOp } from '@/lib/schema'
+import { addDays, compareISO, type ISODate } from '@/lib/shared'
+import { getTemplate, type ProgramKey } from '@/lib/shared'
+import type { ScheduleOp } from '@/lib/shared'
 
 /**
  * Schedule materialization (US-020). Pure replay of the op log onto the

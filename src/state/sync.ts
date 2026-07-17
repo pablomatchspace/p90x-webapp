@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { migrateToCurrent } from '@/lib/migrations'
+import { migrateToCurrent } from '@/lib/shared'
 import {
   decideSync,
   hasUserData,
@@ -21,7 +21,7 @@ import {
   randomBytes,
   SALT_BYTES,
   toBase64,
-} from '@/lib/syncCrypto'
+} from '@/lib/sync'
 import {
   clearSyncConfig,
   loadSyncConfig,
@@ -37,7 +37,8 @@ import {
   putState,
   type ApiFailure,
 } from '@/state/syncApi'
-import { setResetListener, useStore } from '@/state/store'
+import type { SyncPort } from '@/state/ports'
+import { onStoreEvent, useStore } from '@/state/store'
 
 /**
  * Cloud-sync engine (E10, US-092). Mirrors `attachPersistence`: subscribe to the
@@ -566,7 +567,7 @@ export function attachSync(): () => void {
     schedulePush()
   })
 
-  setResetListener(() => {
+  const offReset = onStoreEvent('reset', () => {
     if (useSyncStore.getState().config === null) return
     generation += 1
     cancelPush()
@@ -581,7 +582,10 @@ export function attachSync(): () => void {
 
   return () => {
     unsubscribe()
-    setResetListener(null)
+    offReset()
     cancelPush()
   }
 }
+
+/** The cloud-sync wiring as a port — same seam as persistence. */
+export const syncPort: SyncPort = { attach: attachSync }

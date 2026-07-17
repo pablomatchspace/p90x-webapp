@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { emptyState } from '@/lib/schema'
+import { emptyState } from '@/lib/shared'
 import { useStore } from '@/state/store'
 import { TimerCard } from './TimerCard'
 

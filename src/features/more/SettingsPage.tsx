@@ -16,15 +16,15 @@ import {
   unitToM,
   weightUnit,
 } from '@/lib/body'
-import { diffDays, formatLong, todayISO } from '@/lib/dates'
+import { diffDays, formatLong, todayISO } from '@/lib/shared'
 import {
   assessFatLoss,
   assessLeanGain,
   ceilingStatus,
   recompFlag,
   suggestedTarget,
-} from '@/lib/feasibility'
-import { normalizedFfmi, planFromFfmi } from '@/lib/ffmi'
+} from '@/lib/body'
+import { normalizedFfmi, planFromFfmi } from '@/lib/body'
 import {
   currentWeightKg,
   energyAmount,
@@ -38,8 +38,8 @@ import {
   type NutritionGoal,
   type NutritionPhase,
 } from '@/lib/nutrition'
-import { getTemplate, getWorkout, type ProgramKey } from '@/lib/programData'
-import { setupDerived, settingsWarnings } from '@/lib/setup'
+import { getTemplate, getWorkout, type ProgramKey } from '@/lib/shared'
+import { setupDerived, settingsWarnings } from '@/lib/body'
 import {
   setStartDate,
   updateLimits,

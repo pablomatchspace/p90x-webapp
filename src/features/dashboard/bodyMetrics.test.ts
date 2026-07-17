@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import type { Settings } from '@/lib/schema'
+import type { Settings } from '@/lib/shared'
+import { bodyFraction, kg, meters } from '@/lib/shared'
 import {
   buildBodyMetrics,
   expectedProgressPct,
@@ -14,11 +15,11 @@ const sample: Settings = {
   units: 'metric',
   gender: 'male',
   age: 40,
-  height: 1.8,
-  startWeight: 82,
-  startBodyFat: 0.22,
-  limits: { weight: 90, bodyFat: 0.25, bmi: 28 },
-  targets: { leanMassIncrease: 4, bodyFat: 0.15, ffmi: 21 },
+  height: meters(1.8),
+  startWeight: kg(82),
+  startBodyFat: bodyFraction(0.22),
+  limits: { weight: kg(90), bodyFat: bodyFraction(0.25), bmi: 28 },
+  targets: { leanMassIncrease: kg(4), bodyFat: bodyFraction(0.15), ffmi: 21 },
   scoring: { penaltyDivisor: 2, penaltyOn: true, chairFactor: 2, rwDivisor: 10 },
   timer: { workSeconds: 60, restSeconds: 60 },
   player: { autoMarkDone: false, voiceCues: true, voiceHandsFree: false },

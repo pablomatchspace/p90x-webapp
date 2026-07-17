@@ -1,7 +1,7 @@
 import fc from 'fast-check'
 import { describe, expect, it } from 'vitest'
-import { addDays, formatLong } from '@/lib/dates'
-import { scheduleOpSchema, type ScheduleOp } from '@/lib/schema'
+import { addDays, formatLong } from '@/lib/shared'
+import { scheduleOpSchema, type ScheduleOp } from '@/lib/shared'
 import { materialize } from './materialize'
 import {
   describeOp,
@@ -15,9 +15,10 @@ import {
 } from './ops'
 
 const START = '2026-01-05' // Monday, like the sample persona
+const T = '2026-01-01T00:00:00.000Z'
 
 let seq = 0
-const mkBase = () => ({ id: `op${seq++}`, createdAt: '2026-01-01T00:00:00.000Z' })
+const mkBase = () => ({ id: `op${seq++}`, createdAt: T })
 const skip = (date: string): ScheduleOp => ({ ...mkBase(), kind: 'skip', date })
 const swap = (dateA: string, dateB: string): ScheduleOp => ({
   ...mkBase(),
@@ -29,9 +30,9 @@ const swap = (dateA: string, dateB: string): ScheduleOp => ({
 describe('op builders', () => {
   it('produce schema-valid ops with unique ids', () => {
     const ops = [
-      newSkipOp('2026-01-14'),
-      newSwapOp('2026-01-20', '2026-01-21'),
-      newRemapOp(3, [1, 0, 2, 3, 4, 5, 6]),
+      newSkipOp('2026-01-14', T),
+      newSwapOp('2026-01-20', '2026-01-21', T),
+      newRemapOp(3, [1, 0, 2, 3, 4, 5, 6], T),
     ]
     for (const op of ops) expect(scheduleOpSchema.safeParse(op).success).toBe(true)
     expect(new Set(ops.map((o) => o.id)).size).toBe(3)
@@ -42,7 +43,7 @@ describe('previewOp', () => {
   it('accepts a valid skip and pushes the projected finish out a day', () => {
     const ops: ScheduleOp[] = []
     const before = materialize('classic', START, ops)
-    const preview = previewOp('classic', START, ops, newSkipOp('2026-01-14'))
+    const preview = previewOp('classic', START, ops, newSkipOp('2026-01-14', T))
     expect(preview.ok).toBe(true)
     expect(preview.reason).toBeNull()
     expect(preview.after?.projectedCompletion).toBe(addDays(before.projectedCompletion, 1))
@@ -50,14 +51,14 @@ describe('previewOp', () => {
   })
 
   it('refuses an out-of-range skip with the engine reason, state unchanged', () => {
-    const preview = previewOp('classic', START, [], newSkipOp('2025-12-25'))
+    const preview = previewOp('classic', START, [], newSkipOp('2025-12-25', T))
     expect(preview.ok).toBe(false)
     expect(preview.reason).toBeTruthy()
     expect(preview.after).toBeNull()
   })
 
   it('refuses a swap outside the calendar with a reason', () => {
-    const preview = previewOp('classic', START, [], newSwapOp('2026-01-20', '2027-01-01'))
+    const preview = previewOp('classic', START, [], newSwapOp('2026-01-20', '2027-01-01', T))
     expect(preview.ok).toBe(false)
     expect(preview.reason).toBeTruthy()
   })
@@ -70,7 +71,7 @@ describe('previewOp', () => {
     const next = nextProgramDateAfter(schedule, '2026-01-14')
     expect(next).toBe('2026-01-15')
 
-    const preview = previewOp('classic', START, ops, newSwapOp('2026-01-14', next as string))
+    const preview = previewOp('classic', START, ops, newSwapOp('2026-01-14', next as string, T))
     expect(preview.ok).toBe(true)
     const pulled = preview.after?.byDate.get('2026-01-14')
     expect(pulled?.kind === 'program' && pulled.programDayId).toBe('d010')

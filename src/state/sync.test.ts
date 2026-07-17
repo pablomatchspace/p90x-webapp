@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
 import { webcrypto } from 'node:crypto'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { emptyState, SCHEMA_VERSION, type AppState } from '@/lib/schema'
+import { emptyState, SCHEMA_VERSION, type AppState } from '@/lib/shared'
 import type { SyncEnvelope } from '@/lib/sync'
-import { deriveKey, encryptJson, fromBase64 } from '@/lib/syncCrypto'
+import { deriveKey, encryptJson, fromBase64 } from '@/lib/sync'
 import {
   attachSync,
   disableSync,
@@ -27,8 +27,8 @@ if (globalThis.crypto?.subtle === undefined) {
 // Real AES-GCM and real PBKDF2 — just not 600k rounds. This suite is about sync
 // decisions, and a full-cost derivation per push would burn seconds of CPU and
 // starve the parallel property-based suites. syncCrypto.test.ts pins the shipped cost.
-vi.mock('@/lib/syncCrypto', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@/lib/syncCrypto')>()),
+vi.mock('@/lib/sync', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/sync')>()),
   PBKDF2_ITERATIONS: 1000,
 }))
 

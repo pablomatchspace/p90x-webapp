@@ -1,5 +1,5 @@
 import { Card, Page } from '@/components/Page'
-import { formatAppVersion } from '@/lib/version'
+import { formatAppVersion } from '@/lib/shared'
 
 /**
  * Help / About (US-074). The abbreviations legend is transcribed from the

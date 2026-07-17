@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Card } from '@/components/Page'
-import { MEDIA_KINDS, parseLinkInput, type MediaKind } from '@/lib/links'
-import { workouts } from '@/lib/programData'
+import { MEDIA_KINDS, parseLinkInput, type MediaKind } from '@/lib/shared'
+import { workouts } from '@/lib/shared'
 import { updateWorkoutLink } from '@/state/actions'
 import { useSettings } from '@/state/selectors'
 

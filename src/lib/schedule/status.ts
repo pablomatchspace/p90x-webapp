@@ -1,6 +1,6 @@
-import { compareISO, type ISODate } from '@/lib/dates'
-import { getWorkout } from '@/lib/programData'
-import type { AppState, Session } from '@/lib/schema'
+import { compareISO, type ISODate } from '@/lib/shared'
+import { getWorkout } from '@/lib/shared'
+import type { AppState, Session } from '@/lib/shared'
 import type { ScheduleDay } from './materialize'
 
 /**
@@ -37,8 +37,8 @@ export type WorkoutState = 'done' | 'partial' | 'no' | 'pending'
 export function workoutState(workoutKey: string, session: Session | undefined): WorkoutState {
   const def = getWorkout(workoutKey)
   if (def.style === 'completion' || def.style === 'rest') {
-    if (session?.status === 'yes') return 'done'
-    if (session?.status === 'no') return 'no'
+    if (session?.completion === 'yes') return 'done'
+    if (session?.completion === 'no') return 'no'
     return 'pending'
   }
   // strength / arx

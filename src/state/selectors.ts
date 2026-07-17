@@ -1,10 +1,10 @@
 import { useMemo } from 'react'
-import { computeAdherence, type Adherence } from '@/lib/adherence'
-import { todayISO } from '@/lib/dates'
-import { materialize, type Schedule } from '@/lib/schedule/materialize'
-import { previewOp, type OpPreview } from '@/lib/schedule/ops'
-import { indexSessions, type SessionIndex } from '@/lib/schedule/status'
-import type { AppState, ScheduleOp, ScoringSettings, Session, Settings } from '@/lib/schema'
+import { computeAdherence, type Adherence } from '@/lib/schedule'
+import { todayISO } from '@/lib/shared'
+import { materialize, type Schedule } from '@/lib/schedule'
+import { previewOp, type OpPreview } from '@/lib/schedule'
+import { indexSessions, type SessionIndex } from '@/lib/schedule'
+import type { AppState, ScheduleOp, ScoringSettings, Session, Settings } from '@/lib/shared'
 import { useStore } from '@/state/store'
 
 /** Materialized schedule, or null until a start date exists. Recomputes only

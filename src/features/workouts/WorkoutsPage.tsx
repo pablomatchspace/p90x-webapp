@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Card, Page } from '@/components/Page'
-import { workouts, type WorkoutDef } from '@/lib/programData'
+import { workouts, type WorkoutDef } from '@/lib/shared'
 import { useWorkoutLogs } from '@/state/selectors'
 
 const GROUPS: Array<{ title: string; match: (w: WorkoutDef) => boolean }> = [

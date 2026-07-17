@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Card } from '@/components/Page'
-import { quoteOfDay } from '@/lib/quotes'
+import { quoteOfDay } from '@/lib/shared'
 import { useStore } from '@/state/store'
 
 /**

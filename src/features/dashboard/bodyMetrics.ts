@@ -1,7 +1,7 @@
 import { fractionToPercent, kgToUnit, targetWeight, weightUnit, type BodyDerived } from '@/lib/body'
-import { normalizedFfmi } from '@/lib/ffmi'
-import { diffDays, type ISODate } from '@/lib/dates'
-import type { BodyEntry, Settings } from '@/lib/schema'
+import { normalizedFfmi } from '@/lib/body'
+import { diffDays, type ISODate } from '@/lib/shared'
+import type { BodyEntry, Settings } from '@/lib/shared'
 import type { ChipTone } from '@/features/schedule/Chip'
 
 /**

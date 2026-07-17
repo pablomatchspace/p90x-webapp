@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { getWorkout } from '@/lib/programData'
-import type { AppState, Session } from '@/lib/schema'
+import { getWorkout } from '@/lib/shared'
+import type { AppState, Session } from '@/lib/shared'
 import { materialize, type ProgramDay } from './materialize'
 import { dayStatus, indexSessions, workoutState } from './status'
 
@@ -24,15 +24,17 @@ function logs(...pairs: [string, Session][]): AppState['workoutLogs'] {
 function entriesFor(workoutKey: string, count: number): Session['entries'] {
   const ids = (getWorkout(workoutKey).exercises ?? []).map((e) => e.id)
   return Object.fromEntries(
-    ids.slice(0, count).map((id) => [id, { rounds: [{ main: 10, secondary: null }] }]),
+    ids.slice(0, count).map((id) => [id, { rounds: [{ reps: 10, assist: null }] }]),
   )
 }
 
 describe('workoutState', () => {
   it('completion style follows the COMPLETED? dropdown', () => {
-    expect(workoutState('plyometrics', { programDayId: 'd002', status: 'yes' })).toBe('done')
-    expect(workoutState('plyometrics', { programDayId: 'd002', status: 'no' })).toBe('no')
-    expect(workoutState('plyometrics', { programDayId: 'd002', status: 'not-yet' })).toBe('pending')
+    expect(workoutState('plyometrics', { programDayId: 'd002', completion: 'yes' })).toBe('done')
+    expect(workoutState('plyometrics', { programDayId: 'd002', completion: 'no' })).toBe('no')
+    expect(workoutState('plyometrics', { programDayId: 'd002', completion: 'not-yet' })).toBe(
+      'pending',
+    )
     expect(workoutState('plyometrics', undefined)).toBe('pending')
   })
 
@@ -80,7 +82,7 @@ describe('dayStatus', () => {
     const rest = dayNo(7) // 2026-05-31, past
     expect(dayStatus(rest, indexSessions({}), TODAY)).toBe('rest')
     const stretched = indexSessions(
-      logs(['x-stretch', { programDayId: rest.programDayId, status: 'yes' }]),
+      logs(['x-stretch', { programDayId: rest.programDayId, completion: 'yes' }]),
     )
     expect(dayStatus(rest, stretched, TODAY)).toBe('done')
   })
@@ -109,7 +111,7 @@ describe('dayStatus', () => {
   it('an explicit NO on every workout marks the day missed regardless of date', () => {
     const plyoDay = dayNo(2)
     const declined = indexSessions(
-      logs(['plyometrics', { programDayId: plyoDay.programDayId, status: 'no' }]),
+      logs(['plyometrics', { programDayId: plyoDay.programDayId, completion: 'no' }]),
     )
     expect(dayStatus(plyoDay, declined, '2026-05-25')).toBe('missed')
   })

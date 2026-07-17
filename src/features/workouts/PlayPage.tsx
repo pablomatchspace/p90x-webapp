@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { Card, Page } from '@/components/Page'
-import { formatLong } from '@/lib/dates'
+import { formatLong } from '@/lib/shared'
 import {
   extendPlayback,
   pausePlayback,
@@ -11,11 +11,11 @@ import {
   startPlayback,
   tickPlayback,
   type PlaybackState,
-} from '@/lib/playback'
-import { getWorkout, hasWorkout } from '@/lib/programData'
-import { workoutOccurrences } from '@/lib/schedule/occurrences'
-import { getTimeline, timelinesFor } from '@/lib/timelines'
-import type { PlaySegment, PlayTimeline } from '@/lib/timelines'
+} from '@/lib/workouts'
+import { getWorkout, hasWorkout } from '@/lib/shared'
+import { workoutOccurrences } from '@/lib/schedule'
+import { getTimeline, timelinesFor } from '@/lib/workouts'
+import type { PlaySegment, PlayTimeline } from '@/lib/workouts'
 import {
   setCompletionStatus,
   setExerciseDone,
@@ -183,10 +183,10 @@ export function PlayPage() {
 
   // Auto-mark completion at sequence-finished when the setting is on (Q17).
   useEffect(() => {
-    if (finished && settings.player.autoMarkDone && session?.status !== 'yes') {
+    if (finished && settings.player.autoMarkDone && session?.completion !== 'yes') {
       setCompletionStatus(key, programDayId, 'yes')
     }
-  }, [finished, settings.player.autoMarkDone, session?.status, key, programDayId])
+  }, [finished, settings.player.autoMarkDone, session?.completion, key, programDayId])
 
   // Occurrences for this key, incl. rest-day X Stretch guided-play entries.
   // Computed before the early returns below so the hook runs unconditionally
@@ -262,7 +262,7 @@ export function PlayPage() {
   if (finished) {
     const doneCount = loggedIds.filter((id) => doneMap.get(id) === true).length
     const autoMarked = settings.player.autoMarkDone
-    const alreadyYes = session?.status === 'yes'
+    const alreadyYes = session?.completion === 'yes'
     return (
       <Page title={def.name} subtitle={`Week ${day.week} · ${formatLong(day.date)}`}>
         <Card>

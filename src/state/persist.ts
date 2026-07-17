@@ -1,5 +1,5 @@
-import { migrateToCurrent } from '@/lib/migrations'
-import { emptyState, type AppState } from '@/lib/schema'
+import { migrateToCurrent } from '@/lib/shared'
+import { emptyState, type AppState } from '@/lib/shared'
 
 const STATE_KEY = 'p90x.state'
 const BACKUP_KEY = 'p90x.backup'
