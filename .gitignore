@@ -18,6 +18,7 @@ p90x-data*.json
 local/
 
 # Test & tooling artifacts
+repomix-output.xml
 coverage
 playwright-report
 test-results
