@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Card, Page } from '@/components/Page'
 import { NumberField } from '@/features/workouts/NumberField'
-import { formatFixed, fractionToPercent } from '@/lib/body'
+import { formatFixed, fractionToPercent, mToUnit } from '@/lib/body'
 import type { BodyFraction } from '@/lib/shared'
 import {
   type LengthUnit,
@@ -33,7 +33,9 @@ export function BodyFatCalculatorsPage() {
   const [abdomen, setAbdomen] = useState<number | null>(null)
   const [neck, setNeck] = useState<number | null>(null)
   const [hip, setHip] = useState<number | null>(null)
-  const [navyHeight, setNavyHeight] = useState<number | null>(null)
+  const [navyHeight, setNavyHeight] = useState<number | null>(() =>
+    settings.height ? mToUnit(settings.height, settings.units) : null,
+  )
   const [three, setThree] = useState<(number | null)[]>([null, null, null])
   const [seven, setSeven] = useState<(number | null)[]>(Array(7).fill(null))
   const [pendingSave, setPendingSave] = useState<BodyFraction | null>(null)

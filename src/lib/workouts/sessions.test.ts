@@ -52,7 +52,7 @@ describe('writeRoundValue', () => {
     const l = logs()
     writeRoundValue(l, 'chest-back', 'd001', 'standard-push-ups', 0, 'reps', 10, T)
     writeRoundValue(l, 'chest-back', 'd001', 'standard-push-ups', 0, 'reps', null, T)
-    expect(l['chest-back']?.sessions[0]?.entries?.['standard-push-ups']).toBeUndefined()
+    expect(l['chest-back']).toBeUndefined()
   })
 
   it('ignores an unknown exercise or out-of-range round', () => {

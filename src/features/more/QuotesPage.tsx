@@ -76,7 +76,14 @@ export function QuotesPage() {
                   <input
                     aria-label={`Edit quote ${q.id}`}
                     defaultValue={q.text}
-                    onBlur={(e) => updateCustomQuote(q.id, e.target.value, q.author)}
+                    onBlur={(e) => {
+                      const val = e.target.value.trim()
+                      if (val === '') {
+                        e.target.value = q.text
+                      } else {
+                        updateCustomQuote(q.id, e.target.value, q.author)
+                      }
+                    }}
                     className="w-full rounded-md border border-transparent bg-transparent px-1 py-0.5 text-sm hover:border-zinc-200 focus:border-zinc-300 dark:hover:border-zinc-700"
                   />
                   {q.author ? (

@@ -57,7 +57,7 @@ describe('quick-log actions', () => {
     setWorkoutCompleted('chest-back', 'd001', true)
     expect(useStore.getState().data.workoutLogs['chest-back'].sessions[0].completed).toBe(true)
     setWorkoutCompleted('chest-back', 'd001', undefined)
-    expect(useStore.getState().data.workoutLogs['chest-back'].sessions[0].completed).toBeUndefined()
+    expect(useStore.getState().data.workoutLogs['chest-back']).toBeUndefined()
   })
 })
 
@@ -81,7 +81,15 @@ describe('round entry actions', () => {
     setRoundValue('chest-back', 'd001', 'standard-push-ups', 0, 'reps', null)
     expect(entry()?.rounds[0]).toEqual({ reps: null, assist: 4 })
     setRoundValue('chest-back', 'd001', 'standard-push-ups', 0, 'assist', null)
-    expect(entry()).toBeUndefined()
+    expect(useStore.getState().data.workoutLogs['chest-back']).toBeUndefined()
+  })
+
+  it('removes the session object and workout log entirely when all data is cleared', () => {
+    setRoundValue('chest-back', 'd001', 'standard-push-ups', 0, 'reps', 10)
+    expect(useStore.getState().data.workoutLogs['chest-back'].sessions).toHaveLength(1)
+
+    setRoundValue('chest-back', 'd001', 'standard-push-ups', 0, 'reps', null)
+    expect(useStore.getState().data.workoutLogs['chest-back']).toBeUndefined()
   })
 
   it('ignores out-of-range rounds and unknown exercises without leaving residue', () => {

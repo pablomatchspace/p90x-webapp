@@ -165,6 +165,13 @@ describe('lossThreshold', () => {
     expect(lossThreshold(1, null, 77.554)).toBeNull()
     expect(lossThreshold(1, 82, null)).toBeNull()
   })
+
+  it('handles gaining targets correctly: red at zero gain, green at full start→target gain', () => {
+    expect(lossThreshold(0, 80, 85)).toBe('over')
+    expect(lossThreshold(1.0, 80, 85)).toBe('over')
+    expect(lossThreshold(-2.0, 80, 85)).toBe('watch')
+    expect(lossThreshold(-5.0, 80, 85)).toBe('good')
+  })
 })
 
 describe('unit conversion', () => {

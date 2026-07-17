@@ -104,8 +104,16 @@ export function lossThreshold(
   target: number | null,
 ): Threshold | null {
   if (loss === null || startWeight === null || target === null) return null
-  if (loss <= 0) return 'over'
-  return loss >= startWeight - target ? 'good' : 'watch'
+  const isLossGoal = target < startWeight
+  if (isLossGoal) {
+    if (loss <= 0) return 'over'
+    return loss >= startWeight - target ? 'good' : 'watch'
+  } else {
+    const gain = -loss
+    const targetGain = target - startWeight
+    if (gain <= 0) return 'over'
+    return gain >= targetGain ? 'good' : 'watch'
+  }
 }
 
 export const KG_PER_LB = 0.45359237
