@@ -86,7 +86,10 @@ const MIGRATIONS: Record<number, (doc: Record<string, unknown>) => void> = {
   },
   // v12 → v13 (E31 U156): ubiquitous-language renames — rounds → archivedRounds,
   // session.status → completion, exercise-round main/secondary → reps/assist
-  // (docs/GLOSSARY.md). Values are untouched; archived rounds migrate too.
+  // (docs/GLOSSARY.md). Values are untouched; renameLogs() walks two known
+  // locations (doc.workoutLogs and each archived round's workoutLogs) — a
+  // future field that holds another sessions-shaped structure needs a third
+  // call site added here by hand; nothing enforces that automatically.
   12: (doc) => {
     type OldRound = { main?: unknown; secondary?: unknown; reps?: unknown; assist?: unknown }
     type OldSession = {
@@ -95,15 +98,30 @@ const MIGRATIONS: Record<number, (doc: Record<string, unknown>) => void> = {
       entries?: Record<string, { rounds?: OldRound[] }>
     }
     type Logs = Record<string, { sessions?: OldSession[] }>
+    /**
+     * Malformed-but-valid-JSON input (a hand-edited or partially-corrupted
+     * document) must never throw here, at ANY depth: a well-formed array can
+     * still hold a `null` (or otherwise non-object) element, not just a
+     * wrong-typed container. `isRecord` gates every property access below, so
+     * a malformed element is skipped rather than dereferenced — it still
+     * falls through to the Zod validation at the end of migrateToCurrent as a
+     * graceful `{ ok: false }` instead of crashing loadState() at boot.
+     */
+    const isRecord = (v: unknown): v is Record<string, unknown> =>
+      typeof v === 'object' && v !== null
     const renameLogs = (logs: Logs | undefined) => {
       for (const log of Object.values(logs ?? {})) {
-        for (const session of log.sessions ?? []) {
+        if (!isRecord(log)) continue
+        for (const session of Array.isArray(log.sessions) ? log.sessions : []) {
+          if (!isRecord(session)) continue
           if (session.status !== undefined && session.completion === undefined) {
             session.completion = session.status
           }
           delete session.status
-          for (const entry of Object.values(session.entries ?? {})) {
-            for (const round of entry.rounds ?? []) {
+          for (const entry of Object.values((session.entries as object | undefined) ?? {})) {
+            if (!isRecord(entry)) continue
+            for (const round of Array.isArray(entry.rounds) ? entry.rounds : []) {
+              if (!isRecord(round)) continue
               if (round.main !== undefined && round.reps === undefined) round.reps = round.main
               if (round.secondary !== undefined && round.assist === undefined) {
                 round.assist = round.secondary
@@ -115,13 +133,18 @@ const MIGRATIONS: Record<number, (doc: Record<string, unknown>) => void> = {
         }
       }
     }
+    // Move the archive under its new name without reshaping it: a malformed
+    // `rounds`/`archivedRounds` value (wrong type, not just wrong key) is left
+    // as-is so the Zod validation at the end of migrateToCurrent still rejects
+    // it as corrupt — exactly like it did under the old field name. Only the
+    // iteration below is guarded, so renaming never throws regardless of shape.
     if (doc.archivedRounds === undefined) {
-      doc.archivedRounds = doc.rounds ?? []
+      doc.archivedRounds = doc.rounds
     }
     delete doc.rounds
     renameLogs(doc.workoutLogs as Logs | undefined)
-    for (const round of doc.archivedRounds as { workoutLogs?: Logs }[]) {
-      renameLogs(round.workoutLogs)
+    for (const round of Array.isArray(doc.archivedRounds) ? doc.archivedRounds : []) {
+      renameLogs(isRecord(round) ? (round.workoutLogs as Logs | undefined) : undefined)
     }
   },
 }

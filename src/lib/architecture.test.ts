@@ -37,13 +37,28 @@ function walk(dir: string): string[] {
   })
 }
 
-/** All import/export specifiers of a file: static, re-export, dynamic, side-effect. */
+/**
+ * All module specifiers of a file: static imports/re-exports, dynamic
+ * `import()`, side-effect imports, `require()`, and vitest's `vi.mock` /
+ * `vi.importActual` — mocks resolve module ids the same way imports do, so
+ * they must follow the same boundary rules. Memoized: several `it()` blocks
+ * below each scan every file in `src/lib`, and the result is a pure function
+ * of the file's on-disk content within a single test run.
+ */
+const specCache = new Map<string, string[]>()
 function importSpecifiers(file: string): string[] {
+  const cached = specCache.get(file)
+  if (cached !== undefined) return cached
   const source = readFileSync(file, 'utf8')
   const specs: string[] = []
-  for (const m of source.matchAll(/(?:from|import)\s*\(?\s*['"]([^'"]+)['"]\s*\)?/g)) {
-    specs.push(m[1] as string)
+  const patterns = [
+    /(?:from|import)\s*\(?\s*['"]([^'"]+)['"]\s*\)?/g,
+    /(?:require|vi\.mock|vi\.importActual)\(\s*['"]([^'"]+)['"]/g,
+  ]
+  for (const pattern of patterns) {
+    for (const m of source.matchAll(pattern)) specs.push(m[1] as string)
   }
+  specCache.set(file, specs)
   return specs
 }
 
@@ -129,11 +144,16 @@ describe('bounded contexts (docs/CONTEXT-MAP.md)', () => {
     expect(violations).toEqual([])
   })
 
-  it('the domain layer never imports application or UI layers', () => {
+  it('the domain layer never imports application, UI, or state-management layers', () => {
     const violations: string[] = []
     for (const file of libFiles) {
       for (const spec of importSpecifiers(file)) {
-        if (/^@\/(state|features|components)\//.test(spec) || spec === 'react') {
+        if (
+          /^@\/(state|features|components)\//.test(spec) ||
+          spec === 'react' ||
+          spec === 'zustand' ||
+          spec === 'immer'
+        ) {
           violations.push(`${path.relative(SRC, file)} → '${spec}'`)
         }
       }

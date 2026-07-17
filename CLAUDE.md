@@ -66,13 +66,15 @@ snapshot so later Settings changes never rewrite history.
 ```
 src/lib/        pure domain logic in seven bounded contexts (docs/CONTEXT-MAP.md), each
                 with a public index.ts barrel enforced by architecture.test.ts:
-                  schedule/   materialize, occurrences, ops, status, adherence
-                  workouts/   scoring, progression, overload, playback, focusSteps, voiceEntry, timelines/*
-                  body/       body, bodyFat, ffmi, setup, feasibility
+                  schedule/   materialize, occurrences, ops, status, adherence, program
+                  workouts/   scoring, progression, overload, playback, focusSteps, voiceEntry,
+                              sessions, playerSettings, timelines/*
+                  body/       body, bodyLog, bodyFat, ffmi, setup, feasibility
                   nutrition/  nutrition
-                  rounds/     roundReport, roundCompare
+                  rounds/     roundReport, roundCompare, archive
                   sync/       sync, syncCrypto
-                  shared/     schema, migrations, importExport, dates, programData, chart, links, quotes, version
+                  shared/     schema, units, migrations, importExport, dates, programData, chart,
+                              links, quotes, version
                 Cross-context imports use the barrel (`@/lib/<context>`); vocabulary in docs/GLOSSARY.md
 src/state/      store.ts (Zustand+Immer + lifecycle events), actions/* per-context use-cases
                 (barrel actions.ts; all mutations funnel through useStore.getState().mutate,

@@ -309,3 +309,106 @@ describe('v12 → v13 (E31 U156): ubiquitous-language field renames', () => {
     }
   })
 })
+
+describe('migration never throws on malformed-but-valid-JSON input', () => {
+  /**
+   * A hand-edited or partially-corrupted localStorage/import blob is valid
+   * JSON but can have the wrong shape at any field. Every migration step must
+   * degrade to a graceful `{ ok: false }` — never throw — so `loadState()`
+   * (called at module-load time) can never crash the whole app on boot.
+   */
+  it('does not throw when the pre-v13 rounds archive is an object instead of an array', () => {
+    const doc = {
+      schemaVersion: 10,
+      settings: JSON.parse(JSON.stringify(emptyState().settings)),
+      scheduleOps: [],
+      workoutLogs: {},
+      bodyLog: [],
+      rounds: {}, // malformed: valid JSON, wrong shape
+      quotes: { disabledIds: [], custom: [] },
+      notes: '',
+    }
+    expect(() => migrateToCurrent(doc)).not.toThrow()
+    expect(migrateToCurrent(doc).ok).toBe(false)
+  })
+
+  it('does not throw when workoutLogs sessions/entries are malformed', () => {
+    const doc = {
+      schemaVersion: 12,
+      settings: JSON.parse(JSON.stringify(emptyState().settings)),
+      scheduleOps: [],
+      workoutLogs: { chestBack: { sessions: 'not-an-array' } },
+      bodyLog: [],
+      archivedRounds: [],
+      quotes: { disabledIds: [], custom: [] },
+      notes: '',
+    }
+    expect(() => migrateToCurrent(doc)).not.toThrow()
+    expect(migrateToCurrent(doc).ok).toBe(false)
+  })
+
+  it('does not throw when an archived round has a malformed workoutLogs shape', () => {
+    const doc = {
+      schemaVersion: 12,
+      settings: JSON.parse(JSON.stringify(emptyState().settings)),
+      scheduleOps: [],
+      workoutLogs: {},
+      bodyLog: [],
+      archivedRounds: [{ id: 'r1', workoutLogs: null }],
+      quotes: { disabledIds: [], custom: [] },
+      notes: '',
+    }
+    expect(() => migrateToCurrent(doc)).not.toThrow()
+    expect(migrateToCurrent(doc).ok).toBe(false)
+  })
+})
+
+describe('migration never throws on malformed elements within otherwise-valid arrays', () => {
+  /**
+   * The container-shape guards (Array.isArray) aren't enough on their own —
+   * a well-formed array can still contain a null/malformed element at any
+   * depth of the workoutLogs → sessions → entries → rounds walk.
+   */
+  function baseDoc(workoutLogs: unknown) {
+    return {
+      schemaVersion: 12,
+      settings: JSON.parse(JSON.stringify(emptyState().settings)),
+      scheduleOps: [],
+      workoutLogs,
+      bodyLog: [],
+      archivedRounds: [],
+      quotes: { disabledIds: [], custom: [] },
+      notes: '',
+    }
+  }
+
+  it('does not throw when a workout log entry is null', () => {
+    const doc = baseDoc({ chestBack: null })
+    expect(() => migrateToCurrent(doc)).not.toThrow()
+    expect(migrateToCurrent(doc).ok).toBe(false)
+  })
+
+  it('does not throw when a session in the sessions array is null', () => {
+    const doc = baseDoc({ chestBack: { sessions: [null] } })
+    expect(() => migrateToCurrent(doc)).not.toThrow()
+    expect(migrateToCurrent(doc).ok).toBe(false)
+  })
+
+  it('does not throw when an entry in session.entries is null', () => {
+    const doc = baseDoc({
+      chestBack: { sessions: [{ programDayId: 'd001', entries: { ex1: null } }] },
+    })
+    expect(() => migrateToCurrent(doc)).not.toThrow()
+    expect(migrateToCurrent(doc).ok).toBe(false)
+  })
+
+  it('does not throw when a round in entry.rounds is null', () => {
+    const doc = baseDoc({
+      chestBack: {
+        sessions: [{ programDayId: 'd001', entries: { ex1: { rounds: [null] } } }],
+      },
+    })
+    expect(() => migrateToCurrent(doc)).not.toThrow()
+    expect(migrateToCurrent(doc).ok).toBe(false)
+  })
+})

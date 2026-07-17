@@ -70,6 +70,17 @@ describe('store lifecycle events', () => {
     off()
   })
 
+  it('emits documentReplaced when restoreBackup runs (it is also a wholesale swap)', () => {
+    useStore.getState().replaceData(emptyState(), 'import') // creates a restorable backup
+    let fired = 0
+    const off = onStoreEvent('documentReplaced', () => {
+      fired += 1
+    })
+    expect(useStore.getState().restoreBackup()).toBe(true)
+    expect(fired).toBe(1)
+    off()
+  })
+
   it('emits documentReplaced when replaceData runs', () => {
     let fired = 0
     const off = onStoreEvent('documentReplaced', () => {

@@ -15,6 +15,69 @@ didn't bump the package version — they're numbered B01/B02 here for a
 continuous record; #33's package column is left at the un-suffixed version
 that was actually shipped.
 
+## 1.E31.U158.B01 (package 1.31.158-b1) — 2026-07-16
+
+Adversarial re-review of E31 (8 independent finder passes: line-by-line diff,
+removed-behavior audit, cross-file trace, reuse, simplification, efficiency,
+altitude, CLAUDE.md conventions). Two real bugs and several completeness gaps
+confirmed and fixed; findings that turned out to be deliberate, already-made
+architecture decisions (barrel-granularity vs. bundle size; the migration
+walker's hand-enumerated call sites) are left as documented tradeoffs, not
+re-litigated.
+
+- **Fix: migration could crash the app on boot instead of degrading
+  gracefully.** The v12→v13 migration step (U156) assumed every renamed
+  container was an array, and — one level deeper — that every _element_
+  inside an otherwise-valid array was itself a plain object. A hand-edited or
+  partially-corrupted-but-valid-JSON document (`"rounds": {}` instead of an
+  array; or a well-formed `sessions` array containing a `null` element; same
+  for `entries` and `rounds`) threw an uncaught `TypeError` during the rename
+  walk. `loadState()` runs at module-load time, so this crashed the entire
+  app at boot instead of showing the documented corrupt-storage recovery
+  banner (CLAUDE.md: "loading an old/corrupt document must degrade to a clean
+  empty state with a recovery offer, never a crash"). Fixed with an
+  `isRecord` guard at every level of the walk (container _and_ element), so a
+  malformed value is skipped rather than dereferenced; the archive is still
+  moved to its new field name without reshaping it, so Zod's validation at
+  the end of `migrateToCurrent` continues to correctly reject a malformed
+  document as corrupt — matching the pre-refactor behavior exactly, just
+  under the renamed field. Seven new failing-test-first cases cover both the
+  container-shape and element-shape scenarios at each depth.
+- **Fix: `ScheduleOp.createdAt` bypassed the U158 clock port.** `newSkipOp`/
+  `newSwapOp`/`newRemapOp` (`lib/schedule/ops.ts`, unrelated to this epic's
+  own commits but audited as part of verifying the clock port's completeness)
+  stamped `createdAt` via a direct `new Date()` call inside otherwise-pure
+  domain code — the one remaining persisted timestamp that didn't go through
+  `clock.nowISO()`, contradicting the U158 CHANGELOG's own claim. `createdAt`
+  is now a required parameter, supplied by the two call sites
+  (`RescheduleSection.tsx`, `WeeklyEditorPage.tsx`) from the clock port.
+- **Fix: `Sex` type still duplicated after U154.** U154's commit explicitly
+  said it unified the duplicate `Sex` type, but only `feasibility.ts` was
+  updated — `nutrition.ts` still declared two inline `'male' | 'female'`
+  unions. Now imports `Sex` from `@/lib/body` like `feasibility.ts` does.
+- **Fix: dead `PersistencePort`/`SyncPort` conformance scaffolding.** U158
+  added `persistencePort`/`syncPort` consts described as "the seam main.tsx
+  plugs in," but `main.tsx` still called `attachPersistence()`/`attachSync()`
+  directly — nothing consumed the ports. `main.tsx` now goes through
+  `persistencePort.attach()` / `syncPort.attach()`, making the seam real.
+- **Fix: `restoreBackup` didn't emit `documentReplaced`.** It performs the
+  same wholesale document swap as `replaceData`, which does emit the event —
+  the omission was a live inconsistency in the store's own lifecycle-event
+  contract (no current subscriber, but the next one to rely on
+  `documentReplaced` firing for "every full replacement" would have silently
+  missed backup restores).
+- **Simplify:** removed the redundant `active`/`clock` indirection in
+  `state/ports.ts` (no caller destructures `clock`, so a live `let` binding
+  reassigned by `setClock`/`resetClock` is equivalent and simpler).
+- **Efficiency:** `architecture.test.ts`'s `importSpecifiers` is now memoized
+  — it was re-parsing every file in `src/lib` from disk up to 4× per test
+  run, once per `it()` block that scans the same file list.
+- Also strengthened `architecture.test.ts` to scan `vi.mock`/`require`
+  specifiers and reject `zustand`/`immer` imports from the domain layer, and
+  refreshed `docs/PRD.md`'s document-shape example and `docs/CONTEXT-MAP.md`
+  /`CLAUDE.md`'s module lists, which had drifted from the finished U157/U158
+  layout.
+
 ## 1.E31.U158 (package 1.31.158) — 2026-07-16
 
 - **E31 — Domain-driven design alignment, story U158: ports & typed store

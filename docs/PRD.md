@@ -143,7 +143,7 @@ Single versioned JSON document, persisted to `localStorage`, identical shape for
 
 ```jsonc
 {
-  "schemaVersion": 1,
+  "schemaVersion": 13,
   "settings": {
     "program": "classic",
     "startDate": "2026-01-05",
@@ -176,8 +176,8 @@ Single versioned JSON document, persisted to `localStorage`, identical shape for
           "entries": {
             "standard-push-ups": {
               "rounds": [
-                { "main": 8, "secondary": 0 },
-                { "main": 6, "secondary": 2 },
+                { "reps": 8, "assist": 0 },
+                { "reps": 6, "assist": 2 },
               ],
             },
           },
@@ -185,7 +185,7 @@ Single versioned JSON document, persisted to `localStorage`, identical shape for
           "notes": "",
         },
       ],
-    } /* …per workout type; cardio-style: status + notes; ARX: reps per exercise */,
+    } /* …per workout type; cardio-style: completion + notes; ARX: reps per exercise */,
   },
   "bodyLog": [
     {
@@ -196,6 +196,10 @@ Single versioned JSON document, persisted to `localStorage`, identical shape for
       "bone": 0.04,
       "zoneMinutes": null,
     },
+  ],
+  "archivedRounds": [
+    /* E28: completed rounds — raw ops/logs + a frozen snapshot of the
+       round-scoped SETUP inputs, so reports recompute history exactly */
   ],
   "quotes": { "disabledIds": [], "custom": [] },
   "notes": "",

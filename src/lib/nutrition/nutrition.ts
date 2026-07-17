@@ -1,7 +1,5 @@
-import { KG_PER_LB } from '@/lib/body'
-import { diffDays, type ISODate } from '@/lib/shared'
-import { leanMassForFfmi } from '@/lib/body'
-import type { BodyEntry, Settings } from '@/lib/shared'
+import { KG_PER_LB, leanMassForFfmi, type Sex } from '@/lib/body'
+import { diffDays, type BodyEntry, type ISODate, type Settings } from '@/lib/shared'
 
 /**
  * P90X Nutrition Plan targets (E22). The workbook's nutrition tabs were excluded
@@ -205,7 +203,7 @@ export function mifflinStJeor(
   weightKg: number | null,
   heightM: number | null,
   age: number | null,
-  gender: 'male' | 'female',
+  gender: Sex,
 ): number | null {
   if (weightKg == null || heightM == null || age == null) return null
   return 10 * weightKg + 6.25 * (heightM * 100) - 5 * age + (gender === 'male' ? 5 : -161)
@@ -329,7 +327,7 @@ export function targetNutrition(opts: {
   leanKg: number | null
   heightM: number | null
   age: number | null
-  gender: 'male' | 'female'
+  gender: Sex
   fatDeltaKg: number | null
   leanDeltaKg: number | null
   horizonWeeks: number

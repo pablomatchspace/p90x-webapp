@@ -85,6 +85,8 @@ export const useStore = create<Store>()(
         s.data = backup.state
         s.bootIssue = 'none'
       })
+      // A wholesale swap, same as replaceData — announce it the same way.
+      emitStoreEvent('documentReplaced')
       return true
     },
     acknowledgeBootIssue: () =>

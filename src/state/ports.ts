@@ -11,18 +11,21 @@ export interface Clock {
 
 const realClock: Clock = { nowISO: () => new Date().toISOString() }
 
-let active: Clock = realClock
-
-/** The clock actions stamp loggedAt/createdAt/archivedAt through. */
-export const clock: Clock = { nowISO: () => active.nowISO() }
+/**
+ * The clock actions stamp loggedAt/createdAt/archivedAt through. A live
+ * binding (`let`, reassigned by setClock/resetClock) — every caller uses
+ * `clock.nowISO()` rather than destructuring, so reassignment is visible
+ * everywhere without an extra indirection layer.
+ */
+export let clock: Clock = realClock
 
 /** Swap the clock (tests); pair with `resetClock` in afterEach. */
 export function setClock(next: Clock): void {
-  active = next
+  clock = next
 }
 
 export function resetClock(): void {
-  active = realClock
+  clock = realClock
 }
 
 export type Detach = () => void
