@@ -112,6 +112,16 @@ properties / namespaces).
     latest CHANGELOG heading to find the last N used for this story — increment it for
     another bug fix; a new story drops the suffix entirely (reset to B00, next epic/story
     numbers). Never guess N from memory — always re-derive it from those two sources.
+- **Codebase-wide context (`npm run repomix`):** for read-only, cross-cutting
+  work at the _start_ of a session — before scoping a new epic, auditing
+  bounded-context boundaries against `docs/CONTEXT-MAP.md`, or reviewing
+  golden-master formula fidelity across `workouts`/`body`/`shared` — regenerate
+  a pack and read it whole instead of assembling the picture through many
+  searches; this trades freshness for completeness, catching cross-references
+  piecemeal search can miss. It goes stale the moment any file in the session
+  is edited — fall back to direct reads after that. Skip it for single-file
+  bug fixes, one story on the TDD loop, or anything CI-facing;
+  `repomix-output.xml` is gitignored and never committed.
 - **Test-driven development.** For pure logic — `src/lib/**`, `src/state/**`,
   `worker/` — red-green-refactor is mandatory: write the failing test first and
   watch it fail for the right reason, write the minimal code that makes it pass,
