@@ -223,8 +223,8 @@ export function SyncPage() {
           <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
             This device has changes that were never uploaded, and the cloud copy moved on (revision{' '}
             {conflictRemote?.revision ?? '—'}) — probably from your other device. Choose which one
-            wins. Whichever you pick, the replaced document is saved to the backup slot in{' '}
-            <strong>More → Data</strong> first.
+            wins. If you take the cloud copy, the replaced local document is saved to the backup
+            slot in <strong>More → Data</strong> first.
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             <button

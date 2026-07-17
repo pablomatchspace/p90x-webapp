@@ -52,5 +52,28 @@ export function writeRoundValue(
   entry.rounds[round][field] = value
   session.loggedAt = loggedAt
   const empty = entry.rounds.every((r) => (r.reps ?? null) === null && (r.assist ?? null) === null)
-  if (empty) delete entries[exerciseId]
+  if (empty) {
+    delete entries[exerciseId]
+    cleanupSession(logs, workoutKey, programDayId)
+  }
+}
+
+export function cleanupSession(logs: WorkoutLogs, workoutKey: string, programDayId: string): void {
+  const log = logs[workoutKey]
+  if (log === undefined) return
+  const idx = log.sessions.findIndex((s) => s.programDayId === programDayId)
+  if (idx === -1) return
+  const session = log.sessions[idx]
+  const empty =
+    Object.keys(session.entries ?? {}).length === 0 &&
+    (session.notes === undefined || session.notes.trim() === '') &&
+    (session.annotation === undefined || session.annotation.trim() === '') &&
+    session.completed === undefined &&
+    (session.completion === undefined || session.completion === 'not-yet')
+  if (empty) {
+    log.sessions.splice(idx, 1)
+    if (log.sessions.length === 0) {
+      delete logs[workoutKey]
+    }
+  }
 }

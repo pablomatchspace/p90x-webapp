@@ -15,6 +15,16 @@ didn't bump the package version — they're numbered B01/B02 here for a
 continuous record; #33's package column is left at the un-suffixed version
 that was actually shipped.
 
+## 1.E31.U158.B02 (package 1.31.158-b2) — 2026-07-17
+
+Second bugfix batch. Resolves functional and state-management discrepancies discovered during validation.
+
+- **Fix: Workout session and log residue database bloat.** Clearing all round values, notes, annotations, completion markers, or completion status from a workout session now completely garbage-collects the empty session and empty log from state, preventing sync and export payload database bloat.
+- **Fix: Weight loss color thresholds for gaining targets.** Configures `lossThreshold` to detect if target weight >= start weight. Evaluates boundaries correctly based on weight gain relative to target gain instead of assuming only weight loss, resolving target coloring mismatches for muscle building / FFMI goals.
+- **Fix: Navy body fat height parameter initialization.** Pre-fills the height input in the Navy body fat calculator directly from settings, converting automatically to the active unit.
+- **Fix: Custom quote blank editor onBlur desync.** Restores the original quote text visually in the motivation editor if the user blurs the input while empty.
+- **Fix: Rest timer custom input preset reset.** Ensures clicking preset options completely clears custom draft buffers.
+
 ## 1.E31.U158.B01 (package 1.31.158-b1) — 2026-07-16
 
 Adversarial re-review of E31 (8 independent finder passes: line-by-line diff,

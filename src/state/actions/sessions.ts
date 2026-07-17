@@ -1,5 +1,5 @@
 import { clock } from '@/state/ports'
-import { upsertSession, writeRoundValue } from '@/lib/workouts'
+import { cleanupSession, upsertSession, writeRoundValue } from '@/lib/workouts'
 import { useStore } from '@/state/store'
 
 /**
@@ -17,6 +17,7 @@ export function setCompletionStatus(
     const session = upsertSession(draft.workoutLogs, workoutKey, programDayId)
     session.completion = completion
     session.loggedAt = clock.nowISO()
+    cleanupSession(draft.workoutLogs, workoutKey, programDayId)
   })
 }
 
@@ -52,6 +53,7 @@ export function setSessionAnnotation(
   useStore.getState().mutate((draft) => {
     const session = upsertSession(draft.workoutLogs, workoutKey, programDayId)
     session.annotation = annotation
+    cleanupSession(draft.workoutLogs, workoutKey, programDayId)
   })
 }
 
@@ -60,6 +62,7 @@ export function setSessionNotes(workoutKey: string, programDayId: string, notes:
   useStore.getState().mutate((draft) => {
     const session = upsertSession(draft.workoutLogs, workoutKey, programDayId)
     session.notes = notes
+    cleanupSession(draft.workoutLogs, workoutKey, programDayId)
   })
 }
 
@@ -73,6 +76,7 @@ export function setWorkoutCompleted(
     const session = upsertSession(draft.workoutLogs, workoutKey, programDayId)
     session.completed = completed
     session.loggedAt = clock.nowISO()
+    cleanupSession(draft.workoutLogs, workoutKey, programDayId)
   })
 }
 
