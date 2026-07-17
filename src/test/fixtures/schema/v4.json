@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 4,
+  "settings": {
+    "program": "classic",
+    "startDate": null,
+    "units": "metric",
+    "gender": "male",
+    "age": null,
+    "height": null,
+    "startWeight": null,
+    "startBodyFat": null,
+    "limits": {
+      "weight": null,
+      "bodyFat": null,
+      "bmi": null
+    },
+    "targets": {
+      "leanMassIncrease": null,
+      "bodyFat": null,
+      "ffmi": null
+    },
+    "scoring": {
+      "penaltyDivisor": 2,
+      "penaltyOn": true,
+      "chairFactor": 2,
+      "rwDivisor": 10
+    },
+    "timer": {
+      "workSeconds": 60,
+      "restSeconds": 60
+    },
+    "player": {
+      "autoMarkDone": false
+    }
+  },
+  "scheduleOps": [],
+  "workoutLogs": {},
+  "bodyLog": [],
+  "quotes": {
+    "disabledIds": [],
+    "custom": []
+  },
+  "notes": ""
+}

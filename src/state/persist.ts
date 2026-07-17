@@ -33,6 +33,16 @@ export function loadState(): LoadResult {
     stashCorrupt(raw)
     return { state: emptyState(), issue: 'corrupt' }
   }
+  if (migrated.migrated) {
+    const originalVersion = (parsed as { schemaVersion?: unknown }).schemaVersion
+    if (typeof originalVersion === 'number') {
+      try {
+        localStorage.setItem(`p90x.backup.pre-migration.v${originalVersion}`, raw)
+      } catch {
+        // Quota exhausted or private mode
+      }
+    }
+  }
   return { state: migrated.state, issue: 'none' }
 }
 

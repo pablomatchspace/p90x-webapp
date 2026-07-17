@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 12,
+  "settings": {
+    "program": "classic",
+    "startDate": null,
+    "units": "metric",
+    "gender": "male",
+    "age": null,
+    "height": null,
+    "startWeight": null,
+    "startBodyFat": null,
+    "limits": {
+      "weight": null,
+      "bodyFat": null,
+      "bmi": null
+    },
+    "targets": {
+      "leanMassIncrease": null,
+      "bodyFat": null,
+      "ffmi": null
+    },
+    "scoring": {
+      "penaltyDivisor": 2,
+      "penaltyOn": true,
+      "chairFactor": 2,
+      "rwDivisor": 10
+    },
+    "timer": {
+      "workSeconds": 60,
+      "restSeconds": 60
+    },
+    "player": {
+      "autoMarkDone": false,
+      "voiceCues": true,
+      "voiceHandsFree": false
+    },
+    "yoga": "classic",
+    "training": "intermediate",
+    "nutrition": {
+      "phaseOverride": null,
+      "calorieOverride": null,
+      "dietStyle": "balanced"
+    },
+    "workoutLinks": {}
+  },
+  "scheduleOps": [],
+  "workoutLogs": {
+    "chestBack": {
+      "sessions": [
+        {
+          "programDayId": "d001",
+          "status": "yes",
+          "entries": {
+            "ex1": {
+              "rounds": [
+                {
+                  "main": 10,
+                  "secondary": 5
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  },
+  "bodyLog": [],
+  "quotes": {
+    "disabledIds": [],
+    "custom": []
+  },
+  "notes": "",
+  "rounds": [
+    {
+      "id": "r1",
+      "archivedAt": "2026-01-01T00:00:00.000Z",
+      "label": "Round 1",
+      "program": "classic",
+      "startDate": "2025-10-01",
+      "scheduleOps": [],
+      "workoutLogs": {
+        "chestBack": {
+          "sessions": [
+            {
+              "programDayId": "d001",
+              "status": "yes",
+              "entries": {
+                "ex1": {
+                  "rounds": [
+                    {
+                      "main": 10,
+                      "secondary": 5
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "bodyLog": [],
+      "snapshot": {
+        "age": null,
+        "height": null,
+        "startWeight": null,
+        "startBodyFat": null,
+        "limits": {
+          "weight": null,
+          "bodyFat": null,
+          "bmi": null
+        },
+        "targets": {
+          "leanMassIncrease": null,
+          "bodyFat": null,
+          "ffmi": null
+        },
+        "scoring": {
+          "penaltyDivisor": 2,
+          "penaltyOn": true,
+          "chairFactor": 2,
+          "rwDivisor": 10
+        }
+      }
+    }
+  ]
+}

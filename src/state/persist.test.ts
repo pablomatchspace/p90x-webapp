@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { emptyState } from '@/lib/shared'
+import { emptyState, SCHEMA_VERSION } from '@/lib/shared'
 import {
   createDebouncedSaver,
   daysSinceExport,
@@ -44,6 +44,44 @@ describe('loadState', () => {
     const { issue } = loadState()
     expect(issue).toBe('corrupt')
     expect(localStorage.getItem('p90x.corrupt')).toContain('999')
+  })
+
+  it('saves pre-migration backup when upgrading old schema version', () => {
+    const oldState = {
+      schemaVersion: 12,
+      settings: {
+        program: 'classic',
+        startDate: null,
+        units: 'metric',
+        gender: 'male',
+        age: null,
+        height: null,
+        startWeight: null,
+        startBodyFat: null,
+        limits: { weight: null, bodyFat: null, bmi: null },
+        targets: { leanMassIncrease: null, bodyFat: null, ffmi: null },
+        scoring: { penaltyDivisor: 2, penaltyOn: true, chairFactor: 2, rwDivisor: 10 },
+        timer: { workSeconds: 60, restSeconds: 60 },
+        player: { autoMarkDone: false, voiceCues: true, voiceHandsFree: false },
+        yoga: 'classic',
+        training: 'intermediate',
+        nutrition: { phaseOverride: null, calorieOverride: null, dietStyle: 'balanced' },
+        workoutLinks: {},
+      },
+      scheduleOps: [],
+      workoutLogs: {},
+      bodyLog: [],
+      rounds: [],
+      quotes: { disabledIds: [], custom: [] },
+      notes: '',
+    }
+    const raw = JSON.stringify(oldState)
+    localStorage.setItem('p90x.state', raw)
+
+    const { state, issue } = loadState()
+    expect(issue).toBe('none')
+    expect(state.schemaVersion).toBe(SCHEMA_VERSION)
+    expect(localStorage.getItem('p90x.backup.pre-migration.v12')).toBe(raw)
   })
 })
 
