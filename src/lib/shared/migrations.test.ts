@@ -1,39 +1,13 @@
+import { readFileSync } from 'node:fs'
+import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { migrateToCurrent } from './migrations'
 import { emptyState, SCHEMA_VERSION } from './schema'
 
-/** A faithful document at an older version: current empty state minus later fields. */
+/** A faithful document at an older version: loaded from JSON fixtures on disk. */
 function docAt(version: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11): Record<string, unknown> {
-  const doc = JSON.parse(JSON.stringify(emptyState())) as {
-    schemaVersion: number
-    rounds?: unknown
-    archivedRounds?: unknown
-    settings: {
-      timer?: unknown
-      targets: Record<string, unknown>
-      player?: Record<string, unknown>
-      yoga?: unknown
-      training?: unknown
-      nutrition?: Record<string, unknown>
-      workoutLinks?: unknown
-    }
-  }
-  doc.schemaVersion = version
-  // pre-v13 documents stored the archive under `rounds`
-  doc.rounds = doc.archivedRounds
-  delete doc.archivedRounds
-  if (version < 12) delete doc.settings.player?.voiceHandsFree // v12 field
-  if (version < 11) delete doc.rounds // v11 field
-  if (version < 10) delete doc.settings.player?.voiceCues // v10 field
-  if (version < 9) delete doc.settings.nutrition?.dietStyle // v9 field
-  if (version < 8) delete doc.settings.workoutLinks // v8 field
-  if (version < 7) delete doc.settings.nutrition // v7 field
-  if (version < 6) delete doc.settings.training // v6 field
-  if (version < 5) delete doc.settings.yoga // v5 field
-  if (version < 4) delete doc.settings.player // v4 field
-  if (version < 3) delete doc.settings.targets.ffmi // v3 field
-  if (version < 2) delete doc.settings.timer // v2 field
-  return doc
+  const filePath = path.resolve(__dirname, `../../test/fixtures/schema/v${version}.json`)
+  return JSON.parse(readFileSync(filePath, 'utf8'))
 }
 
 describe('migration pipeline', () => {
@@ -244,37 +218,8 @@ describe('migration pipeline', () => {
 describe('v12 → v13 (E31 U156): ubiquitous-language field renames', () => {
   /** A faithful v12 document exercising every renamed field, live and archived. */
   function v12Doc(): Record<string, unknown> {
-    const doc = JSON.parse(JSON.stringify(emptyState())) as Record<string, unknown>
-    doc.schemaVersion = 12
-    delete doc.archivedRounds
-    const session = {
-      programDayId: 'd001',
-      status: 'yes',
-      entries: { ex1: { rounds: [{ main: 10, secondary: 5 }] } },
-    }
-    doc.workoutLogs = { chestBack: { sessions: [JSON.parse(JSON.stringify(session))] } }
-    doc.rounds = [
-      {
-        id: 'r1',
-        archivedAt: '2026-01-01T00:00:00.000Z',
-        label: 'Round 1',
-        program: 'classic',
-        startDate: '2025-10-01',
-        scheduleOps: [],
-        workoutLogs: { chestBack: { sessions: [JSON.parse(JSON.stringify(session))] } },
-        bodyLog: [],
-        snapshot: {
-          age: null,
-          height: null,
-          startWeight: null,
-          startBodyFat: null,
-          limits: { weight: null, bodyFat: null, bmi: null },
-          targets: { leanMassIncrease: null, bodyFat: null, ffmi: null },
-          scoring: { penaltyDivisor: 2, penaltyOn: true, chairFactor: 2, rwDivisor: 10 },
-        },
-      },
-    ]
-    return doc
+    const filePath = path.resolve(__dirname, '../../test/fixtures/schema/v12.json')
+    return JSON.parse(readFileSync(filePath, 'utf8'))
   }
 
   it('renames the top-level rounds archive to archivedRounds', () => {
@@ -410,5 +355,47 @@ describe('migration never throws on malformed elements within otherwise-valid ar
     })
     expect(() => migrateToCurrent(doc)).not.toThrow()
     expect(migrateToCurrent(doc).ok).toBe(false)
+  })
+})
+
+describe('historical schema snapshots and unmapped keys validation', () => {
+  function assertNoUnmappedKeys(val: unknown, pathStr = 'root'): void {
+    if (typeof val !== 'object' || val === null) return
+
+    if (Array.isArray(val)) {
+      val.forEach((item, i) => assertNoUnmappedKeys(item, `${pathStr}[${i}]`))
+      return
+    }
+
+    const obj = val as Record<string, unknown>
+
+    if (pathStr === 'root' && 'rounds' in obj) {
+      throw new Error(`State has unmapped key 'rounds' at root`)
+    }
+
+    if ('programDayId' in obj && 'status' in obj) {
+      throw new Error(`Session at ${pathStr} has unmapped key 'status'`)
+    }
+
+    if (('reps' in obj || 'assist' in obj) && ('main' in obj || 'secondary' in obj)) {
+      throw new Error(`Exercise round at ${pathStr} has unmapped keys ('main' or 'secondary')`)
+    }
+
+    for (const [key, value] of Object.entries(obj)) {
+      assertNoUnmappedKeys(value, `${pathStr}.${key}`)
+    }
+  }
+
+  it('successfully migrates all historical schemas and has no unmapped keys', () => {
+    for (let v = 1; v <= SCHEMA_VERSION; v++) {
+      const filePath = path.resolve(__dirname, `../../test/fixtures/schema/v${v}.json`)
+      const raw = JSON.parse(readFileSync(filePath, 'utf8'))
+      const result = migrateToCurrent(raw)
+      expect(result.ok).toBe(true)
+      if (result.ok) {
+        expect(result.state.schemaVersion).toBe(SCHEMA_VERSION)
+        expect(() => assertNoUnmappedKeys(result.state)).not.toThrow()
+      }
+    }
   })
 })

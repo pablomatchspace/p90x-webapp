@@ -15,6 +15,13 @@ didn't bump the package version — they're numbered B01/B02 here for a
 continuous record; #33's package column is left at the un-suffixed version
 that was actually shipped.
 
+## 1.E32.U159 (package 1.32.159) — 2026-07-17
+
+- **E32 — Schema migration safety, story U159: pre-migration safety backups & snapshot validation.** Adds automated safety backups prior to schema migration, isolates historical test data into static JSON fixtures, and validates that migrated historical formats are free from unmapped outdated fields.
+  - **Pre-Migration safety backups**: When the application boots and detects an older schema version, `loadState()` automatically writes a copy of the raw stored document to a dedicated `p90x.backup.pre-migration.v{version}` key in `localStorage` before executing the migration pipeline.
+  - **Static JSON snapshots**: Frozen JSON mocks for schemas v1 to v13 are saved as fixtures under `src/test/fixtures/schema/` to decouple historical validation from code changes.
+  - **Unmapped key auditor**: `migrations.test.ts` dynamically loads all 13 snapshot JSON files and runs a recursive key checking suite ensuring no unmapped keys (`rounds` at root, `status` inside session, or `main`/`secondary` inside exercise rounds) remain after migrating.
+
 ## 1.E31.U158.B02 (package 1.31.158-b2) — 2026-07-17
 
 Second bugfix batch. Resolves functional and state-management discrepancies discovered during validation.

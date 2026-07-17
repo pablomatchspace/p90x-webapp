@@ -22,7 +22,8 @@
       "package-lock.json",
       "e2e/**/*-snapshots/**",
       "public/icons/**",
-      "docs/audits/**"
+      "docs/audits/**",
+      "**/*.md"
     ]
   },
   "security": {
