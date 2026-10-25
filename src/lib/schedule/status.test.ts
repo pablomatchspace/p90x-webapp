@@ -142,3 +142,12 @@ describe('indexSessions', () => {
     expect(index.get('d999')).toBeUndefined()
   })
 })
+
+describe('Generation Next days (E33 U162)', () => {
+  it('treats Myofascial Release as a required completion workout', () => {
+    expect(workoutState('gn-myofascial-release', undefined)).toBe('pending')
+    expect(workoutState('gn-myofascial-release', { programDayId: 'd007', completion: 'yes' })).toBe(
+      'done',
+    )
+  })
+})

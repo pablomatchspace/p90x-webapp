@@ -15,6 +15,15 @@ didn't bump the package version — they're numbered B01/B02 here for a
 continuous record; #33's package column is left at the un-suffixed version
 that was actually shipped.
 
+## 1.E33.U162 (package 1.33.162) — 2026-10-26
+
+- **E33 — P90X Generation Next program, story U162: dumbbell logging & D9 scoring.**
+  The strength grid groups Generation Next rows under Block 1 / Block 2 / Finisher
+  headings (Dumbbell Tracker layout); finishers log 5 rounds of reps × weight.
+  Scoring is the unchanged Classic engine (decision D9): R×W/rwDivisor averaged
+  over entered rounds, no 2-round drop penalty. Pinned by tests, as is
+  Myofascial Release counting as a required completion workout.
+
 ## 1.E33.U161 (package 1.33.161) — 2026-10-26
 
 - **E33 — P90X Generation Next program, story U161: generated program data.**

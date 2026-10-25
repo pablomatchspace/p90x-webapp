@@ -176,3 +176,35 @@ describe('applyScoringPatch', () => {
     expect(scoring).toEqual({ penaltyDivisor: 3, penaltyOn: false, chairFactor: 2, rwDivisor: 10 })
   })
 })
+
+describe('D9 — Generation Next reuses the Classic engine (E33 U162)', () => {
+  const scoring = emptyState().settings.scoring // rwDivisor 10
+  const thruster = getWorkout('gn-push-strength').exercises!.find((e) => e.id === 'squat-thruster')!
+
+  it('scores a 5-round finisher as the average of reps × weight / rwDivisor, with no penalty', () => {
+    const rounds = [
+      { reps: 10, assist: 20 },
+      { reps: 8, assist: 20 },
+      { reps: 6, assist: 25 },
+      { reps: 6, assist: 25 },
+      { reps: 4, assist: 30 },
+    ]
+    // (20 + 16 + 15 + 15 + 12) / 5 = 15.6 — rounds keep dropping, yet no penalty (not a 2-round row)
+    expect(scoreExercise({ rounds }, thruster, scoring)).toEqual({
+      score: 15.6,
+      penalty: 0,
+      net: 15.6,
+      drop: null,
+    })
+  })
+
+  it('averages only the rounds entered so far', () => {
+    const goblet = getWorkout('gn-push-strength').exercises!.find((e) => e.id === 'goblet-squat')!
+    const rounds = [
+      { reps: 12, assist: 40 },
+      { reps: null, assist: null },
+      { reps: null, assist: null },
+    ]
+    expect(scoreExercise({ rounds }, goblet, scoring).score).toBe(48)
+  })
+})
