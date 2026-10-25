@@ -1,9 +1,11 @@
 import catalogJson from '@/data/catalog.json'
+import gennextJson from '@/data/gennext.json'
 import templatesJson from '@/data/templates.json'
 
 /**
  * Static program assets generated from the P90Xcel workbook by
- * tools/gen_catalog.py (structure only — no personal data). See PRD §8.
+ * tools/gen_catalog.py, plus Generation Next by tools/gen_gennext.py (E33)
+ * (structure only — no personal data). See PRD §8.
  */
 
 export type SecondaryKind = 'weight' | 'knee' | 'chair' | 'extra'
@@ -16,21 +18,28 @@ export interface RoundLabels {
 export interface CatalogExercise {
   id: string
   name: string
-  /** entry rows per session: 1, 2 or 4 (Strip-Set Curls) */
+  /** entry rows per session: 1, 2 or 4 (Strip-Set Curls); Generation Next 3 or 5 */
   rounds: number
   /** meaning of the second value per round; absent = single count */
   secondary?: SecondaryKind
   /** how the workbook aggregates rounds into the score */
   agg: 'avg' | 'sum'
   labels: RoundLabels[]
+  /** E33: Generation Next Dumbbell Tracker grouping */
+  block?: 'Block 1' | 'Block 2' | 'Finisher'
 }
 
-export type WorkoutStyle = 'strength' | 'completion' | 'arx' | 'rest'
+/** `bonus`: an optional Generation Next add-on — done/not done, never scheduled (E33) */
+export type WorkoutStyle = 'strength' | 'completion' | 'arx' | 'rest' | 'bonus'
+
+/** E33: Generation Next's pillars — Metabolic Overload, Neuro-Performance, Active Recovery */
+export type Pillar = 'MOT' | 'NPT' | 'ART'
 
 export interface WorkoutDef {
   key: string
   name: string
   style: WorkoutStyle
+  pillar?: Pillar
   exercises?: CatalogExercise[]
 }
 
@@ -53,6 +62,7 @@ export type ProgramVariant = ProgramRef['variant']
 
 const catalog = catalogJson as { workouts: WorkoutDef[] }
 const templates = templatesJson as Record<'classic' | 'lean', TemplateDay[]>
+const gennext = gennextJson as { workouts: WorkoutDef[]; template: TemplateDay[] }
 
 const VARIANT_LABELS: Record<ProgramVariant, string> = {
   classic: 'Classic',
@@ -60,7 +70,8 @@ const VARIANT_LABELS: Record<ProgramVariant, string> = {
   standard: 'Generation Next',
 }
 
-export const workouts: WorkoutDef[] = catalog.workouts
+/** Every catalog workout of every suite — keys are unique (Generation Next keys are `gn-*`). */
+export const workouts: WorkoutDef[] = [...catalog.workouts, ...gennext.workouts]
 
 const byKey = new Map(workouts.map((w) => [w.key, w]))
 
@@ -75,8 +86,7 @@ export function hasWorkout(key: string): boolean {
 }
 
 export function getTemplate(program: ProgramRef): TemplateDay[] {
-  if (program.suite === 'p90x') return templates[program.variant]
-  throw new Error(`No template for ${program.suite}/${program.variant}`)
+  return program.suite === 'p90x' ? templates[program.variant] : gennext.template
 }
 
 export function programLabel(program: ProgramRef): string {
@@ -85,7 +95,7 @@ export function programLabel(program: ProgramRef): string {
 
 /** The catalog workouts belonging to one suite. */
 export function workoutsFor(suite: ProgramSuite): WorkoutDef[] {
-  return suite === 'p90x' ? catalog.workouts : []
+  return suite === 'p90x' ? catalog.workouts : gennext.workouts
 }
 
 /** Strength + ARX workouts of a suite — the ones with per-exercise logging. */

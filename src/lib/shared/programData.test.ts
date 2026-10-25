@@ -98,3 +98,99 @@ describe('program suites & variants (E33 U160)', () => {
     ).toBe(true)
   })
 })
+
+describe('Generation Next program data (E33 U161, golden master vs BODi calendar + Dumbbell Tracker)', () => {
+  const GN: ProgramRef = { suite: 'gennext', variant: 'standard' }
+  const days = () => getTemplate(GN)
+  const dayOf = (week: number, weekday: number) => days()[(week - 1) * 7 + (weekday - 1)]
+
+  it('is a 90-day calendar whose week 13 has six days', () => {
+    expect(days()).toHaveLength(90)
+    expect(days().filter((d) => d.week === 13)).toHaveLength(6)
+    days().forEach((d, i) => {
+      expect(d.day).toBe(i + 1)
+      expect(d.workouts).toHaveLength(1)
+      expect(hasWorkout(d.workouts[0]), `day ${d.day}`).toBe(true)
+    })
+  })
+
+  it('pins calendar cells from the PDF', () => {
+    expect(dayOf(1, 1).workouts).toEqual(['gn-push-strength'])
+    expect(dayOf(1, 2).workouts).toEqual(['gn-plyometrix'])
+    expect(dayOf(4, 3).workouts).toEqual(['gn-core-circuit'])
+    expect(dayOf(5, 2).workouts).toEqual(['gn-accel-decel'])
+    // the PDF text layer misplaces "Myofascial Release" here; the page image reads Push Strength
+    expect(dayOf(6, 3).workouts).toEqual(['gn-push-strength'])
+    expect(dayOf(13, 6).workouts).toEqual(['gn-speed-and-agility'])
+    for (let week = 1; week <= 12; week++) {
+      expect(dayOf(week, 7).workouts).toEqual(['gn-myofascial-release'])
+    }
+  })
+
+  it('flags weeks 4, 8 and 13 as recovery and splits three phases', () => {
+    const recoveryWeeks = new Set(
+      days()
+        .filter((d) => d.recovery)
+        .map((d) => d.week),
+    )
+    expect([...recoveryWeeks]).toEqual([4, 8, 13])
+    expect(dayOf(4, 7).phase).toBe(1)
+    expect(dayOf(5, 1).phase).toBe(2)
+    expect(dayOf(9, 1).phase).toBe(3)
+  })
+
+  it('logs the seven dumbbell workouts exactly like the Dumbbell Tracker', () => {
+    const shape = (key: string) =>
+      getWorkout(key).exercises!.map((e) => `${e.block}|${e.name}|${e.rounds}`)
+    expect(shape('gn-push-strength')).toEqual([
+      'Block 1|Goblet Squat|3',
+      'Block 1|Alternating Step Ups|3',
+      'Block 1|Wide Stance Rotational Push|3',
+      'Block 2|Sumo Squats|3',
+      'Block 2|Incline Bench Press|3',
+      'Block 2|Curtsey Lunges|3',
+      'Block 2|Push Press|3',
+      'Finisher|Squat Thruster|5',
+    ])
+    const counts = Object.fromEntries(
+      loggableWorkoutsFor('gennext').map((w) => [w.key, w.exercises!.length]),
+    )
+    expect(counts).toEqual({
+      'gn-upper-body': 9,
+      'gn-lower-body': 8,
+      'gn-push-strength': 8,
+      'gn-pull-strength': 9,
+      'gn-core-circuit': 5,
+      'gn-full-body-strength': 8,
+      'gn-full-body-power': 8,
+    })
+    for (const w of loggableWorkoutsFor('gennext')) {
+      expect(w.pillar).toBe('MOT')
+      for (const e of w.exercises!) {
+        expect(e).toMatchObject({ secondary: 'weight', agg: 'avg' })
+        expect(e.labels).toHaveLength(e.rounds)
+        expect(e.rounds).toBe(
+          e.block === 'Finisher' && w.key !== 'gn-upper-body' && w.key !== 'gn-lower-body' ? 5 : 3,
+        )
+      }
+    }
+  })
+
+  it('carries pillars, completion-style cardio/recovery and five bonus workouts', () => {
+    const gn = workoutsFor('gennext')
+    expect(gn.every((w) => w.key.startsWith('gn-'))).toBe(true)
+    expect(getWorkout('gn-plyometrix')).toMatchObject({ style: 'completion', pillar: 'NPT' })
+    expect(getWorkout('gn-myofascial-release')).toMatchObject({
+      style: 'completion',
+      pillar: 'ART',
+    })
+    expect(gn.filter((w) => w.style === 'bonus').map((w) => w.key)).toEqual([
+      'gn-bonus-abs',
+      'gn-bonus-arms',
+      'gn-bonus-classic-push-pull',
+      'gn-bonus-glutes',
+      'gn-bonus-shoulders',
+    ])
+    expect(programLabel(GN)).toBe('Generation Next')
+  })
+})

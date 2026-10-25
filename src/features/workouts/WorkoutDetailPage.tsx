@@ -12,6 +12,7 @@ const STYLE_LABELS = {
   arx: 'Reps per session',
   completion: 'Completion log',
   rest: 'Completion log',
+  bonus: 'Bonus add-on — done / not done',
 } as const
 
 export function WorkoutDetailPage() {
@@ -63,7 +64,7 @@ export function WorkoutDetailPage() {
             page.
           </p>
         </Card>
-      ) : def.style === 'completion' || def.style === 'rest' ? (
+      ) : def.style === 'completion' || def.style === 'rest' || def.style === 'bonus' ? (
         <CompletionLog def={def} occurrences={occurrences} />
       ) : (
         <StrengthGrid def={def} occurrences={occurrences} />
