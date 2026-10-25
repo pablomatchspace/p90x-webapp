@@ -3,3 +3,5 @@
 e2e/**/*-snapshots/
 public/icons/
 public/favicon.svg
+# Docs (PRD, epics, requirements, changelog) stay out of the graph: code + CI config only.
+*.md
