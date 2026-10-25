@@ -257,3 +257,32 @@ Post-v1.0.0. Full write-up: [`docs/epics/E29-overload-targets.md`](../epics/E29-
 - ✅ US-152 · E2E, visual baselines & release (S, P1)
 
 Post-v1.0.0. Full write-up: [`docs/epics/E30-voice-entry.md`](../epics/E30-voice-entry.md).
+
+## E31 — Domain-driven design alignment
+
+- ✅ US-153 · Ubiquitous language — `docs/GLOSSARY.md`
+- ✅ US-154 · Physical bounded contexts in `src/lib/*` + barrels + `architecture.test.ts`
+- ✅ US-155 · Branded unit value objects — `units.ts`
+- ✅ US-156 · Persisted-field renames, schema v13
+- ✅ US-157 · Application layer — `src/state/actions/*`
+- ✅ US-158 · Ports & typed store
+
+Post-v1.0.0. No standalone epic doc — see the `1.E31.*` CHANGELOG entries and [`docs/CONTEXT-MAP.md`](../CONTEXT-MAP.md).
+
+## E32 — Schema migration safety
+
+- ✅ US-159 · Pre-migration safety backups & schema snapshot fixtures
+
+Post-v1.0.0. See the `1.E32.U159` CHANGELOG entry.
+
+## E33 — P90X Generation Next program
+
+- ⏳ US-160 · Suite/variant program model + schema v14 (M, P0)
+- ⏳ US-161 · Generation Next data generator — `tools/gen_gennext.py` → `src/data/gennext.json` (M, P0)
+- ⏳ US-162 · Dumbbell logging by block + Classic scoring (D9) (M, P0)
+- ⏳ US-163 · Start suite/variant, program lock & same-suite comparisons (M, P0)
+- ⏳ US-164 · Program-agnostic UI copy (S, P1)
+- ⏳ US-165 · Bonus 5-min add-ons (S, P1)
+- ⏳ US-166 · E2E, visual baselines & release (S, P1)
+
+Post-v1.0.0. Full write-up: [`docs/epics/E33-gennext-program.md`](../epics/E33-gennext-program.md).
