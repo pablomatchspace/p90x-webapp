@@ -26,6 +26,15 @@ dev-dist
 .lighthouseci
 *.tsbuildinfo
 
+# Local code indexes & agent scratch (graphify-out/ is committed)
+.vexp/
+.codegraph/
+.non-git-files/
+# graphify scratch: cache + machine-local paths; labels keep community names on update
+graphify-out/cache/
+graphify-out/.graphify_*
+!graphify-out/.graphify_labels.json
+
 # Python bytecode (tools/)
 __pycache__/
 *.pyc

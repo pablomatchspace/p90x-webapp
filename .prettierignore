@@ -10,3 +10,4 @@ package-lock.json
 # rewrap/reformat the markdown and break the SHA256-verified copy invariant).
 docs/requirements/
 docs/epics/
+graphify-out/
