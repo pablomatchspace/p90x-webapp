@@ -5,7 +5,7 @@ import { bodyFraction, kg, meters } from '@/lib/shared'
 
 /** The fabricated sample's SETUP block (public/sample-data.json). */
 const sample: Settings = {
-  program: 'classic',
+  program: { suite: 'p90x', variant: 'classic' },
   startDate: '2026-01-05',
   units: 'metric',
   gender: 'male',

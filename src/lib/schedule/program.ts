@@ -1,5 +1,5 @@
 import type { Settings } from '@/lib/shared'
-import type { ProgramKey } from '@/lib/shared'
+import type { ProgramRef } from '@/lib/shared'
 import type { ISODate } from '@/lib/shared'
 
 /**
@@ -14,7 +14,7 @@ export function canStartProgram(settings: Settings): boolean {
 }
 
 /** Begin a program on a fresh document; returns false (unchanged) if one exists. */
-export function beginProgram(settings: Settings, startDate: ISODate, program: ProgramKey): boolean {
+export function beginProgram(settings: Settings, startDate: ISODate, program: ProgramRef): boolean {
   if (!canStartProgram(settings)) return false
   settings.program = program
   settings.startDate = startDate

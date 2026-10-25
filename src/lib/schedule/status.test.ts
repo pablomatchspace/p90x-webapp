@@ -5,7 +5,7 @@ import { materialize, type ProgramDay } from './materialize'
 import { dayStatus, indexSessions, workoutState } from './status'
 
 const TODAY = '2026-06-15'
-const schedule = materialize('classic', '2026-05-25', [])
+const schedule = materialize({ suite: 'p90x', variant: 'classic' }, '2026-05-25', [])
 
 function dayNo(n: number): ProgramDay {
   const day = schedule.days[n - 1]
@@ -72,7 +72,7 @@ describe('workoutState', () => {
 
 describe('dayStatus', () => {
   it('gap days report gap', () => {
-    const s = materialize('classic', '2026-05-25', [
+    const s = materialize({ suite: 'p90x', variant: 'classic' }, '2026-05-25', [
       { id: 'k1', createdAt: 'x', kind: 'skip', date: '2026-05-27' },
     ])
     expect(dayStatus(s.days[2], indexSessions({}), TODAY)).toBe('gap')

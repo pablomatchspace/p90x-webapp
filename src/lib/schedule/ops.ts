@@ -1,5 +1,5 @@
 import { compareISO, formatLong, type ISODate } from '@/lib/shared'
-import type { ProgramKey } from '@/lib/shared'
+import type { ProgramRef } from '@/lib/shared'
 import type { RemapOp, ScheduleOp, SkipOp, SwapOp } from '@/lib/shared'
 import { materialize, type ProgramDay, type Schedule } from './materialize'
 
@@ -41,7 +41,7 @@ export interface OpPreview {
 }
 
 export function previewOp(
-  program: ProgramKey,
+  program: ProgramRef,
   startDate: ISODate,
   ops: ScheduleOp[],
   candidate: ScheduleOp,
@@ -68,7 +68,7 @@ export function nextProgramDateAfter(schedule: Schedule, date: ISODate): ISODate
  * remaps already in the log. Week 13 returns 6 slots.
  */
 export function remapBaseWeek(
-  program: ProgramKey,
+  program: ProgramRef,
   startDate: ISODate,
   ops: ScheduleOp[],
   week: number,

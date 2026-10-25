@@ -2,17 +2,25 @@ import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Card, Page } from '@/components/Page'
 import { formatLong, isISODate, todayISO } from '@/lib/shared'
-import { getTemplate, getWorkout, type ProgramKey } from '@/lib/shared'
+import { getTemplate, getWorkout, type ProgramRef } from '@/lib/shared'
 import { startProgram } from '@/state/actions'
 import { useSettings } from '@/state/selectors'
 
-const VARIANTS: { value: ProgramKey; label: string; hint: string }[] = [
-  { value: 'classic', label: 'Classic', hint: 'The standard rotation — resistance-heavy.' },
-  { value: 'lean', label: 'Lean', hint: 'More cardio, less resistance.' },
+const VARIANTS: { value: ProgramRef; label: string; hint: string }[] = [
+  {
+    value: { suite: 'p90x', variant: 'classic' },
+    label: 'Classic',
+    hint: 'The standard rotation — resistance-heavy.',
+  },
+  {
+    value: { suite: 'p90x', variant: 'lean' },
+    label: 'Lean',
+    hint: 'More cardio, less resistance.',
+  },
 ]
 
 /** The workouts scheduled on day 1, so the variant choice is concrete. */
-function day1Of(program: ProgramKey): string {
+function day1Of(program: ProgramRef): string {
   return getTemplate(program)[0]
     .workouts.map((key) => getWorkout(key).name)
     .join(' + ')
@@ -32,7 +40,7 @@ export function StartPage() {
   const settings = useSettings()
   const navigate = useNavigate()
   const [date, setDate] = useState(todayISO())
-  const [program, setProgram] = useState<ProgramKey>(settings.program)
+  const [program, setProgram] = useState<ProgramRef>(settings.program)
 
   // Landing here with a program already running (typed URL, back button): never
   // clobber it. Changing day 1 belongs in Settings, which confirms the shift.
@@ -103,13 +111,13 @@ export function StartPage() {
           >
             {VARIANTS.map((variant) => (
               <button
-                key={variant.value}
+                key={variant.value.variant}
                 type="button"
                 role="radio"
-                aria-checked={program === variant.value}
+                aria-checked={program.variant === variant.value.variant}
                 onClick={() => setProgram(variant.value)}
                 className={`flex-1 rounded-lg border p-3 text-left transition-colors ${
-                  program === variant.value
+                  program.variant === variant.value.variant
                     ? 'border-red-600 bg-red-50 dark:bg-red-950/30'
                     : 'border-zinc-300 hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800'
                 }`}

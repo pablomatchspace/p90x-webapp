@@ -1,5 +1,5 @@
 import { addDays, compareISO, type ISODate } from '@/lib/shared'
-import { getTemplate, type ProgramKey } from '@/lib/shared'
+import { getTemplate, type ProgramRef } from '@/lib/shared'
 import type { ScheduleOp } from '@/lib/shared'
 
 /**
@@ -47,7 +47,7 @@ export interface IgnoredOp {
 }
 
 export interface Schedule {
-  program: ProgramKey
+  program: ProgramRef
   startDate: ISODate
   /** contiguous calendar days: days[i].date === addDays(startDate, i) */
   days: ScheduleDay[]
@@ -70,7 +70,7 @@ interface Content {
   workouts: string[]
 }
 
-export function materialize(program: ProgramKey, startDate: ISODate, ops: ScheduleOp[]): Schedule {
+export function materialize(program: ProgramRef, startDate: ISODate, ops: ScheduleOp[]): Schedule {
   const active = ops.filter((op) => op.revertedAt === undefined)
   const ignoredOps: IgnoredOp[] = []
 

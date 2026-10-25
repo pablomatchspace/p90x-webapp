@@ -1,9 +1,20 @@
 import { describe, expect, it } from 'vitest'
-import { getTemplate, getWorkout, hasWorkout, loggableWorkouts, workouts } from './programData'
+import {
+  getTemplate,
+  getWorkout,
+  hasWorkout,
+  loggableWorkoutsFor,
+  programLabel,
+  workoutsFor,
+  type ProgramRef,
+} from './programData'
+
+const CLASSIC: ProgramRef = { suite: 'p90x', variant: 'classic' }
+const LEAN: ProgramRef = { suite: 'p90x', variant: 'lean' }
 
 describe('generated program assets (US-010)', () => {
   it('contains both 90-day templates with resolvable workout keys', () => {
-    for (const program of ['classic', 'lean'] as const) {
+    for (const program of [CLASSIC, LEAN]) {
       const days = getTemplate(program)
       expect(days).toHaveLength(90)
       days.forEach((d, i) => {
@@ -12,13 +23,13 @@ describe('generated program assets (US-010)', () => {
         expect([1, 2, 3]).toContain(d.phase)
         expect(d.workouts.length).toBeGreaterThan(0)
         for (const key of d.workouts)
-          expect(hasWorkout(key), `${program} day ${d.day}: ${key}`).toBe(true)
+          expect(hasWorkout(key), `${program.variant} day ${d.day}: ${key}`).toBe(true)
       })
     }
   })
 
   it('classic template matches the workbook schedule', () => {
-    const classic = getTemplate('classic')
+    const classic = getTemplate(CLASSIC)
     expect(classic[0].workouts).toEqual(['chest-back', 'ab-ripper-x'])
     expect(classic[1].workouts).toEqual(['plyometrics'])
     expect(classic[6].workouts).toEqual(['rest'])
@@ -40,14 +51,14 @@ describe('generated program assets (US-010)', () => {
   })
 
   it('lean template swaps in Core Synergistics and Cardio X', () => {
-    const lean = getTemplate('lean')
+    const lean = getTemplate(LEAN)
     expect(lean[0].workouts).toEqual(['core-synergistics'])
     expect(lean[1].workouts).toEqual(['cardio-x'])
     expect(lean.some((d) => d.workouts.includes('plyometrics'))).toBe(false)
   })
 
   it('catalog exercise structures are well-formed', () => {
-    expect(workouts.map((w) => w.key)).toContain('chest-back')
+    expect(workoutsFor('p90x').map((w) => w.key)).toContain('chest-back')
     const cb = getWorkout('chest-back')
     expect(cb.exercises).toHaveLength(12)
     expect(cb.exercises![0]).toMatchObject({
@@ -62,12 +73,28 @@ describe('generated program assets (US-010)', () => {
     const arx = getWorkout('ab-ripper-x')
     expect(arx.style).toBe('arx')
     expect(arx.exercises).toHaveLength(11)
-    for (const w of loggableWorkouts()) {
+    for (const w of loggableWorkoutsFor('p90x')) {
       for (const e of w.exercises!) {
         expect(e.labels).toHaveLength(e.rounds)
         expect(['avg', 'sum']).toContain(e.agg)
       }
     }
     expect(() => getWorkout('nope')).toThrow()
+  })
+})
+
+describe('program suites & variants (E33 U160)', () => {
+  it('labels each program for display', () => {
+    expect(programLabel(CLASSIC)).toBe('Classic')
+    expect(programLabel(LEAN)).toBe('Lean')
+  })
+
+  it('scopes the catalog to a suite', () => {
+    const p90x = workoutsFor('p90x').map((w) => w.key)
+    expect(p90x).toContain('chest-back')
+    expect(p90x.every((k) => !k.startsWith('gn-'))).toBe(true)
+    expect(
+      loggableWorkoutsFor('p90x').every((w) => w.style === 'strength' || w.style === 'arx'),
+    ).toBe(true)
   })
 })

@@ -38,7 +38,7 @@ import {
   type NutritionGoal,
   type NutritionPhase,
 } from '@/lib/nutrition'
-import { getTemplate, getWorkout, type ProgramKey } from '@/lib/shared'
+import { getTemplate, getWorkout, programLabel, type ProgramRef } from '@/lib/shared'
 import { setupDerived, settingsWarnings } from '@/lib/body'
 import {
   setStartDate,
@@ -210,7 +210,7 @@ export function SettingsPage() {
   )
   // null = no dialog; { value } holds the candidate start date (value null = clear)
   const [pendingStart, setPendingStart] = useState<{ value: string | null } | null>(null)
-  const [pendingProgram, setPendingProgram] = useState<ProgramKey | null>(null)
+  const [pendingProgram, setPendingProgram] = useState<ProgramRef | null>(null)
   // FFMI estimator drafts (E14) — FFMI as-is, body-fat as display percent
   const [ffmiDraft, setFfmiDraft] = useState<number | null>(settings.targets.ffmi ?? null)
   const [bfDraft, setBfDraft] = useState<number | null>(
@@ -379,13 +379,16 @@ export function SettingsPage() {
   // calendar, rest days and every reschedule op are identical between variants, so
   // the ops replay unchanged and logged sessions are kept. A confirm guards a switch
   // once data exists.
-  const otherProgram: ProgramKey = settings.program === 'classic' ? 'lean' : 'classic'
-  const day1Of = (program: ProgramKey) =>
+  const otherProgram: ProgramRef = {
+    suite: 'p90x',
+    variant: settings.program.variant === 'classic' ? 'lean' : 'classic',
+  }
+  const day1Of = (program: ProgramRef) =>
     getTemplate(program)[0]
       .workouts.map((key) => getWorkout(key).name)
       .join(' + ')
 
-  function switchProgram(next: ProgramKey) {
+  function switchProgram(next: ProgramRef) {
     if (hasData) setPendingProgram(next)
     else updateSettings({ program: next })
   }
@@ -406,19 +409,19 @@ export function SettingsPage() {
           <Row
             label="Variant"
             hint={
-              settings.program === 'classic'
+              settings.program.variant === 'classic'
                 ? 'Classic rotation — switch to Lean for more cardio, less resistance'
                 : 'Lean rotation (Cardio X + Core Synergistics Lean) — switch back anytime'
             }
           >
             <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold capitalize">{settings.program}</span>
+              <span className="text-sm font-semibold">{programLabel(settings.program)}</span>
               <button
                 type="button"
                 onClick={() => switchProgram(otherProgram)}
                 className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm font-medium hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800"
               >
-                Switch to <span className="capitalize">{otherProgram}</span>
+                Switch to {programLabel(otherProgram)}
               </button>
             </div>
           </Row>
@@ -1135,15 +1138,12 @@ export function SettingsPage() {
           aria-label="Confirm program variant"
         >
           <Card className="max-w-md">
-            <h2 className="text-base font-semibold">
-              Switch to <span className="capitalize">{pendingProgram}</span>?
-            </h2>
+            <h2 className="text-base font-semibold">Switch to {programLabel(pendingProgram)}?</h2>
             <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
               Your start date, rest days and every reschedule adjustment stay exactly the same —
-              only the workout on each day changes to the{' '}
-              <span className="capitalize">{pendingProgram}</span> rotation (day 1 becomes{' '}
-              <span className="font-medium">{day1Of(pendingProgram)}</span>). Logged sessions are
-              kept and reappear if you switch back.
+              only the workout on each day changes to the {programLabel(pendingProgram)} rotation
+              (day 1 becomes <span className="font-medium">{day1Of(pendingProgram)}</span>). Logged
+              sessions are kept and reappear if you switch back.
             </p>
             <div className="mt-4 flex gap-2">
               <button
@@ -1151,7 +1151,7 @@ export function SettingsPage() {
                 onClick={applyProgram}
                 className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
               >
-                Switch to <span className="capitalize">{pendingProgram}</span>
+                Switch to {programLabel(pendingProgram)}
               </button>
               <button
                 type="button"

@@ -30,7 +30,7 @@ function sampleState() {
 describe('summarize', () => {
   it('counts sessions, entries, body rows and only active skips', () => {
     expect(summarize(sampleState())).toEqual({
-      program: 'classic',
+      program: 'Classic',
       startDate: '2026-01-05',
       workoutCount: 1,
       sessionCount: 1,

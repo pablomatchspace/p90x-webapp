@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { Card, Page } from '@/components/Page'
 import { NoProgramCard } from '@/components/NoProgramCard'
 import { formatFixed, fractionToPercent, kgToUnit } from '@/lib/body'
-import { formatLong, todayISO } from '@/lib/shared'
+import { formatLong, programLabel, todayISO } from '@/lib/shared'
 import {
   archivedRoundData,
   buildRoundReport,
@@ -345,7 +345,7 @@ export function RoundReportPage() {
   const range = `${formatLong(data.startDate)} → ${formatLong(report.schedule.lastProgramDate)}`
   const subtitle = live
     ? `So far — day ${report.adherence.dayReached} of ${report.adherence.programDays} · ${range}`
-    : `${data.program === 'lean' ? 'Lean' : 'Classic'} · ${range}`
+    : `${programLabel(data.program)} · ${range}`
 
   return (
     <Page

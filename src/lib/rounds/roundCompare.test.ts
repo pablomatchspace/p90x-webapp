@@ -16,7 +16,7 @@ function pushUps(reps: number): ExerciseEntry {
 /** Two rounds with different start dates and logs, comparable by construction. */
 function round(startDate: string, reps: number[], weights: [string, number][]): RoundData {
   return {
-    program: 'classic',
+    program: { suite: 'p90x', variant: 'classic' },
     startDate,
     scheduleOps: [],
     workoutLogs: {

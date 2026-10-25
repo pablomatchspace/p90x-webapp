@@ -230,10 +230,10 @@ describe('player settings & per-exercise play log (E16)', () => {
 
 describe('startProgram (US-084)', () => {
   it('begins a program on a fresh document without importing anything', () => {
-    startProgram('2026-01-05', 'lean')
+    startProgram('2026-01-05', { suite: 'p90x', variant: 'lean' })
     const { settings, workoutLogs, bodyLog } = useStore.getState().data
     expect(settings.startDate).toBe('2026-01-05')
-    expect(settings.program).toBe('lean')
+    expect(settings.program).toEqual({ suite: 'p90x', variant: 'lean' })
     // the schedule derives from (program, startDate) alone — nothing else is seeded
     expect(workoutLogs).toEqual({})
     expect(bodyLog).toEqual([])
@@ -241,15 +241,15 @@ describe('startProgram (US-084)', () => {
   })
 
   it('refuses to overwrite an existing program', () => {
-    startProgram('2026-01-05', 'classic')
-    startProgram('2026-03-01', 'lean')
+    startProgram('2026-01-05', { suite: 'p90x', variant: 'classic' })
+    startProgram('2026-03-01', { suite: 'p90x', variant: 'lean' })
     const { settings } = useStore.getState().data
     expect(settings.startDate).toBe('2026-01-05')
-    expect(settings.program).toBe('classic')
+    expect(settings.program).toEqual({ suite: 'p90x', variant: 'classic' })
   })
 
   it('ignores a malformed start date', () => {
-    startProgram('05/01/2026', 'classic')
+    startProgram('05/01/2026', { suite: 'p90x', variant: 'classic' })
     expect(useStore.getState().data.settings.startDate).toBeNull()
   })
 })
@@ -296,7 +296,7 @@ describe('updateWorkoutLink (E23)', () => {
 
 describe('round lifecycle (E28 US-143)', () => {
   function liveRound() {
-    startProgram('2026-01-05', 'classic')
+    startProgram('2026-01-05', { suite: 'p90x', variant: 'classic' })
     updateSettings({
       age: 40,
       height: meters(1.8),
@@ -322,7 +322,7 @@ describe('round lifecycle (E28 US-143)', () => {
     expect(archivedRounds).toHaveLength(1)
     const round = archivedRounds[0]
     expect(round.label).toBe('Round 1')
-    expect(round.program).toBe('classic')
+    expect(round.program).toEqual({ suite: 'p90x', variant: 'classic' })
     expect(round.startDate).toBe('2026-01-05')
     expect(round.scheduleOps).toHaveLength(1)
     expect(round.workoutLogs['chest-back'].sessions).toHaveLength(1)
@@ -358,7 +358,7 @@ describe('round lifecycle (E28 US-143)', () => {
     expect(useStore.getState().data.archivedRounds).toEqual([])
     liveRound()
     completeRound()
-    startProgram('2026-04-06', 'classic')
+    startProgram('2026-04-06', { suite: 'p90x', variant: 'classic' })
     completeRound({ label: '  ' }) // blank label falls back to the default
     const labels = useStore.getState().data.archivedRounds.map((r) => r.label)
     expect(labels).toEqual(['Round 1', 'Round 2'])
@@ -377,11 +377,11 @@ describe('round lifecycle (E28 US-143)', () => {
     liveRound()
     completeRound()
     const id = useStore.getState().data.archivedRounds[0].id
-    startProgram('2026-04-06', 'lean')
+    startProgram('2026-04-06', { suite: 'p90x', variant: 'lean' })
     restoreRound(id)
     const { settings, archivedRounds } = useStore.getState().data
     expect(settings.startDate).toBe('2026-04-06')
-    expect(settings.program).toBe('lean')
+    expect(settings.program).toEqual({ suite: 'p90x', variant: 'lean' })
     expect(archivedRounds).toHaveLength(1)
   })
 

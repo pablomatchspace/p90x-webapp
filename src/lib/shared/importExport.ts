@@ -1,4 +1,5 @@
 import { migrateToCurrent } from './migrations'
+import { programLabel } from './programData'
 import type { AppState } from './schema'
 
 export interface ImportSummary {
@@ -21,7 +22,7 @@ export function summarize(state: AppState): ImportSummary {
     for (const s of log.sessions) entryCount += Object.keys(s.entries ?? {}).length
   }
   return {
-    program: state.settings.program,
+    program: programLabel(state.settings.program),
     startDate: state.settings.startDate,
     workoutCount: Object.keys(state.workoutLogs).length,
     sessionCount,

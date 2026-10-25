@@ -147,6 +147,20 @@ const MIGRATIONS: Record<number, (doc: Record<string, unknown>) => void> = {
       renameLogs(isRecord(round) ? (round.workoutLogs as Logs | undefined) : undefined)
     }
   },
+  // v13 → v14 (E33 U160): program suites — the Classic/Lean string becomes a
+  // { suite, variant } ref, live and in every archived round. Anything else is
+  // left as-is for the final Zod validation to reject.
+  13: (doc) => {
+    const toRef = (holder: unknown) => {
+      if (typeof holder !== 'object' || holder === null) return
+      const h = holder as { program?: unknown }
+      if (h.program === 'classic' || h.program === 'lean') {
+        h.program = { suite: 'p90x', variant: h.program }
+      }
+    }
+    toRef(doc.settings)
+    for (const round of Array.isArray(doc.archivedRounds) ? doc.archivedRounds : []) toRef(round)
+  },
 }
 
 export function migrateToCurrent(raw: unknown): MigrationResult {

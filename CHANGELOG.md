@@ -15,6 +15,19 @@ didn't bump the package version — they're numbered B01/B02 here for a
 continuous record; #33's package column is left at the un-suffixed version
 that was actually shipped.
 
+## 1.E33.U160 (package 1.33.160) — 2026-10-25
+
+- **E33 — P90X Generation Next program, story U160: program suites & variants
+  (schema v14).** A program is now a suite plus a variant — `ProgramRef`
+  `{ suite: 'p90x', variant: 'classic' | 'lean' }`, with `gennext` reserved for
+  Generation Next — replacing `ProgramKey`. `settings.program` and every
+  `archivedRounds[].program` hold the ref; `MIGRATIONS[13]` maps old Classic/Lean
+  strings (live and archived) and leaves anything else for validation to reject.
+  Exercise entries now allow 5 rounds (Generation Next finishers).
+  `programLabel`, `workoutsFor(suite)` and `loggableWorkoutsFor(suite)` replace
+  hardcoded labels and the global loggable list; a `v14` schema fixture joins
+  the historical set and the unmapped-key check rejects leftover program strings.
+
 ## 1.E32.U159 (package 1.32.159) — 2026-07-17
 
 - **E32 — Schema migration safety, story U159: pre-migration safety backups & snapshot validation.** Adds automated safety backups prior to schema migration, isolates historical test data into static JSON fixtures, and validates that migrated historical formats are free from unmapped outdated fields.

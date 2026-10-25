@@ -255,6 +255,41 @@ describe('v12 → v13 (E31 U156): ubiquitous-language field renames', () => {
   })
 })
 
+describe('v13 → v14 (E33 U160): program becomes a suite/variant ref', () => {
+  function fixture(version: 12 | 13): Record<string, unknown> {
+    const filePath = path.resolve(__dirname, `../../test/fixtures/schema/v${version}.json`)
+    return JSON.parse(readFileSync(filePath, 'utf8'))
+  }
+
+  it('maps a Classic or Lean v13 document to the p90x suite', () => {
+    for (const variant of ['classic', 'lean'] as const) {
+      const doc = fixture(13)
+      ;(doc.settings as Record<string, unknown>).program = variant
+      const result = migrateToCurrent(doc)
+      expect(result.ok).toBe(true)
+      if (result.ok) expect(result.state.settings.program).toEqual({ suite: 'p90x', variant })
+    }
+  })
+
+  it('maps every archived round’s program the same way', () => {
+    const doc = fixture(12)
+    const round = (doc.rounds as Record<string, unknown>[])[0]
+    round.program = 'lean'
+    const result = migrateToCurrent(doc)
+    expect(result.ok).toBe(true)
+    if (result.ok) {
+      expect(result.state.archivedRounds[0]?.program).toEqual({ suite: 'p90x', variant: 'lean' })
+    }
+  })
+
+  it('leaves an unknown program string for validation to reject, without throwing', () => {
+    const doc = fixture(13)
+    ;(doc.settings as Record<string, unknown>).program = 'p90x3'
+    const result = migrateToCurrent(doc)
+    expect(result.ok).toBe(false)
+  })
+})
+
 describe('migration never throws on malformed-but-valid-JSON input', () => {
   /**
    * A hand-edited or partially-corrupted localStorage/import blob is valid
@@ -375,6 +410,10 @@ describe('historical schema snapshots and unmapped keys validation', () => {
 
     if ('programDayId' in obj && 'status' in obj) {
       throw new Error(`Session at ${pathStr} has unmapped key 'status'`)
+    }
+
+    if ('program' in obj && typeof obj.program === 'string') {
+      throw new Error(`${pathStr}.program is still a pre-v14 program string`)
     }
 
     if (('reps' in obj || 'assist' in obj) && ('main' in obj || 'secondary' in obj)) {

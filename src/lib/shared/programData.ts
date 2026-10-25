@@ -42,10 +42,23 @@ export interface TemplateDay {
   workouts: string[]
 }
 
-export type ProgramKey = 'classic' | 'lean'
+/**
+ * E33: a program is a suite (the catalog family) plus a variant (its schedule).
+ * Persisted as `settings.program` / `archivedRounds[].program`.
+ */
+export type ProgramRef =
+  { suite: 'p90x'; variant: 'classic' | 'lean' } | { suite: 'gennext'; variant: 'standard' }
+export type ProgramSuite = ProgramRef['suite']
+export type ProgramVariant = ProgramRef['variant']
 
 const catalog = catalogJson as { workouts: WorkoutDef[] }
-const templates = templatesJson as Record<ProgramKey, TemplateDay[]>
+const templates = templatesJson as Record<'classic' | 'lean', TemplateDay[]>
+
+const VARIANT_LABELS: Record<ProgramVariant, string> = {
+  classic: 'Classic',
+  lean: 'Lean',
+  standard: 'Generation Next',
+}
 
 export const workouts: WorkoutDef[] = catalog.workouts
 
@@ -61,11 +74,21 @@ export function hasWorkout(key: string): boolean {
   return byKey.has(key)
 }
 
-export function getTemplate(program: ProgramKey): TemplateDay[] {
-  return templates[program]
+export function getTemplate(program: ProgramRef): TemplateDay[] {
+  if (program.suite === 'p90x') return templates[program.variant]
+  throw new Error(`No template for ${program.suite}/${program.variant}`)
 }
 
-/** Strength + ARX workouts — the ones with per-exercise logging. */
-export function loggableWorkouts(): WorkoutDef[] {
-  return workouts.filter((w) => w.style === 'strength' || w.style === 'arx')
+export function programLabel(program: ProgramRef): string {
+  return VARIANT_LABELS[program.variant]
+}
+
+/** The catalog workouts belonging to one suite. */
+export function workoutsFor(suite: ProgramSuite): WorkoutDef[] {
+  return suite === 'p90x' ? catalog.workouts : []
+}
+
+/** Strength + ARX workouts of a suite — the ones with per-exercise logging. */
+export function loggableWorkoutsFor(suite: ProgramSuite): WorkoutDef[] {
+  return workoutsFor(suite).filter((w) => w.style === 'strength' || w.style === 'arx')
 }

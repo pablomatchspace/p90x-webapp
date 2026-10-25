@@ -19,7 +19,7 @@ function pushUps(reps: number): ExerciseEntry {
 function roundData(): RoundData {
   const scoring = emptyState().settings.scoring
   return {
-    program: 'classic',
+    program: { suite: 'p90x', variant: 'classic' },
     startDate: '2026-01-05',
     scheduleOps: [],
     workoutLogs: {
@@ -166,7 +166,7 @@ describe('round data normalizers', () => {
     state.settings.height = meters(1.8)
     const data = liveRoundData(state)
     expect(data).toMatchObject({
-      program: 'classic',
+      program: { suite: 'p90x', variant: 'classic' },
       startDate: '2026-01-05',
       snapshot: { height: meters(1.8), scoring: state.settings.scoring },
     })

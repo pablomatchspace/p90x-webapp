@@ -94,6 +94,34 @@ describe('appStateSchema', () => {
     }
     expect(appStateSchema.safeParse(badRemap).success).toBe(false)
   })
+
+  it('accepts 5-round exercise entries (E33 finishers) but not 6', () => {
+    const entryWith = (n: number) => ({
+      ...emptyState(),
+      workoutLogs: {
+        'gn-push-strength': {
+          sessions: [
+            {
+              programDayId: 'd001',
+              entries: {
+                x: { rounds: Array.from({ length: n }, () => ({ reps: 8, assist: 20 })) },
+              },
+            },
+          ],
+        },
+      },
+    })
+    expect(appStateSchema.safeParse(entryWith(5)).success).toBe(true)
+    expect(appStateSchema.safeParse(entryWith(6)).success).toBe(false)
+  })
+
+  it('stores the program as a suite/variant ref (E33)', () => {
+    const gn = { ...emptyState() }
+    gn.settings = { ...gn.settings, program: { suite: 'gennext', variant: 'standard' } }
+    expect(appStateSchema.safeParse(gn).success).toBe(true)
+    const legacy = { ...emptyState(), settings: { ...emptyState().settings, program: 'classic' } }
+    expect(appStateSchema.safeParse(legacy).success).toBe(false)
+  })
 })
 
 describe('migrateToCurrent', () => {
