@@ -61,11 +61,32 @@ export function getTimeline(workoutKey: string, variant?: string): PlayTimeline 
 }
 
 /**
- * Summary-checklist label for a logged exercise id: the first segment's name
- * (keeps "— Left" / "— Right" and long ids intact); the id itself as a fallback.
+ * Summary-checklist labels, one per logged exercise id. A label is the move's
+ * segment name; when one id spans differently-named segments (clockwise /
+ * counterclockwise) the shared text before " — " is used, and when two ids
+ * would still collide (Plank Reset right/left) the id's last word is appended.
  */
-export function loggedLabel(timeline: PlayTimeline, id: string): string {
-  return timeline.segments.find((s) => s.exerciseId === id)?.name ?? id.replace(/-/g, ' ')
+export function loggedLabels(timeline: PlayTimeline): Map<string, string> {
+  const base = new Map<string, string>()
+  for (const id of timeline.loggedExerciseIds) {
+    const names = [
+      ...new Set(timeline.segments.filter((s) => s.exerciseId === id).map((s) => s.name)),
+    ]
+    const label =
+      names.length === 0
+        ? id.replace(/-/g, ' ')
+        : names.length === 1
+          ? names[0]
+          : names[0].split(' — ')[0]
+    base.set(id, label)
+  }
+  const counts = new Map<string, number>()
+  for (const label of base.values()) counts.set(label, (counts.get(label) ?? 0) + 1)
+  const out = new Map<string, string>()
+  for (const [id, label] of base) {
+    out.set(id, (counts.get(label) ?? 0) > 1 ? `${label} — ${id.split('-').at(-1)}` : label)
+  }
+  return out
 }
 
 export type { PlayTimeline, PlaySegment } from './types'

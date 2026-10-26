@@ -22,7 +22,9 @@ that was actually shipped.
   where bonuses are added. Voice entry on a single-round card (E36) now says
   "this card is round N, nothing logged" when you name another round, instead
   of the generic "no matching field" message (`mismatchedRound`). Bonus on a
-  rest day via URL is intentionally left as is.
+  rest day via URL is intentionally left as is. Summary checklist labels
+  (B01) now stay unique across every timeline and name two-direction moves by
+  their shared base (`loggedLabels`).
 
 ## 1.E36.U173.B01 (package 1.36.173-b1) — 2026-10-26
 

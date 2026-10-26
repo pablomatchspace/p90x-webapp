@@ -1,24 +1,35 @@
 import { describe, expect, it } from 'vitest'
-import { getTimeline, loggedLabel } from './index'
+import { timelinesFor, loggedLabels } from './index'
+import { getTimeline } from './index'
+import { workoutsFor } from '@/lib/shared'
 
-describe('loggedLabel', () => {
+const KEYS = [
+  'plyometrics',
+  'kenpo-x',
+  'x-stretch',
+  'cardio-x',
+  'yoga-x',
+  ...workoutsFor('gennext').map((w) => w.key),
+]
+
+describe('loggedLabels', () => {
   it('keeps left and right sides distinguishable in the play summary checklist', () => {
-    const glutes = getTimeline('gn-bonus-glutes')!
-    const labels = glutes.loggedExerciseIds.map((id) => loggedLabel(glutes, id))
-    expect(new Set(labels).size).toBe(labels.length)
-    expect(labels).toContain('Single-Leg Hip Thrust — Left')
+    const t = getTimeline('gn-bonus-glutes')!
+    expect(loggedLabels(t).get('single-leg-hip-thrust-left')).toBe('Single-Leg Hip Thrust — Left')
   })
 
-  it('has a unique label for every logged id of every timeline', () => {
-    for (const key of ['kenpo-x', 'cardio-x', 'gn-speed-and-agility', 'gn-bonus-glutes']) {
-      const t = getTimeline(key)!
-      const labels = t.loggedExerciseIds.map((id) => loggedLabel(t, id))
-      expect(new Set(labels).size, key).toBe(labels.length)
+  it('gives every logged id of every registered timeline a unique label', () => {
+    for (const key of KEYS) {
+      for (const t of timelinesFor(key)) {
+        const labels = [...loggedLabels(t).values()]
+        expect(labels.length, key).toBe(t.loggedExerciseIds.length)
+        expect(new Set(labels).size, `${key} ${t.variant ?? ''}`).toBe(labels.length)
+      }
     }
   })
 
-  it('falls back to the id when no segment carries it', () => {
-    const t = getTimeline('gn-bonus-abs')!
-    expect(loggedLabel(t, 'not-a-move')).toBe('not a move')
+  it('names an id spanning both directions by its shared base, not one half', () => {
+    const t = getTimeline('plyometrics')!
+    expect(loggedLabels(t).get('circle-run')).toBe('Circle Run')
   })
 })
