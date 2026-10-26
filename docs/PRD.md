@@ -377,6 +377,7 @@ The table below is a snapshot; the **living record** is the story index
 | E31 — Domain-driven design alignment ([CHANGELOG](../CHANGELOG.md))                   | US-153 → US-158 | ✅ delivered |
 | E32 — Schema migration safety ([CHANGELOG](../CHANGELOG.md))                          | US-159          | ✅ delivered |
 | [E33 — P90X Generation Next program](epics/E33-gennext-program.md)                    | US-160 → US-166 | ✅ delivered |
+| [E34 — Generation Next Focus Play](epics/E34-gennext-play.md)                         | US-167 → US-170 | ✅ delivered |
 
 E22/E24 carve an exception out of the §3 "Nutrition" non-goal: the excluded
 workbook nutrition _sheets_ stay excluded, but the app now derives calorie and
@@ -428,7 +429,7 @@ All ACs demonstrably met · unit tests for new logic (lib code: required) · E2E
 | --------------- | ----------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- | ------------------------------ |
 | **V1 core**     | E0 → E1 → E2 → E3 (US-030/031/032/034) → E4 (minus US-046) → E5 → E6 → US-070, US-080, US-082, US-083 | Owner demo: import real file locally, use for a real workout day | ✅ shipped · ⏳ demo gate open |
 | **V1.1 extras** | US-033, US-046, US-071, US-072, US-073, US-074, US-081                                                | CI green + owner spot-check                                      | ✅ shipped                     |
-| **Post-v1.0.0** | E9 onwards — each later epic spec'd under `docs/epics/` and indexed in `docs/stories/README.md`       | CI green + per-epic merge                                        | ✅ E9 → E33 shipped            |
+| **Post-v1.0.0** | E9 onwards — each later epic spec'd under `docs/epics/` and indexed in `docs/stories/README.md`       | CI green + per-epic merge                                        | ✅ E9 → E34 shipped            |
 | Ongoing         | Hardening, quote-pack curation, feedback fixes                                                        | —                                                                | —                              |
 
 E0–E8 shipped as **v1.0.0**; E9 followed on `main`. The one V1 gate still open is
