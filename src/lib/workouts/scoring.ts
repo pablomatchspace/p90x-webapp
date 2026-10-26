@@ -5,7 +5,7 @@ import type { ExerciseEntry, ExerciseRound, ScoringSettings, Session } from '@/l
  * The Excel scoring engine (PRD §6.3), recomputed live from raw rounds.
  *
  * Adjusted value per round, by the catalog's `secondary` kind:
- *   knee / chair   main + secondary/chairFactor        (SETUP!C47)
+ *   knee / chair / mod   main + secondary/chairFactor  (SETUP!C47; mod = E36)
  *   weight (R×W)   main × secondary / rwDivisor        (SETUP!C49)
  *   extra          main + secondary (other side/extra counts fully)
  *   none           main
@@ -51,6 +51,7 @@ export function adjustedRound(
   switch (exercise.secondary) {
     case 'knee':
     case 'chair':
+    case 'mod':
       return m + s / scoring.chairFactor
     case 'weight':
       return (m * s) / scoring.rwDivisor

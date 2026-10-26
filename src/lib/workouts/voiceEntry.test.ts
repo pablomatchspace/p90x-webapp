@@ -100,6 +100,16 @@ describe('parseVoiceTranscript — field words & rounds (US-150)', () => {
     })
   })
 
+  it('routes "modified reps" to the secondary column for Generation Next bodyweight moves (E36)', () => {
+    expect(parseVoiceTranscript('12 reps 4 modified reps')).toEqual({
+      kind: 'values',
+      values: [
+        { value: 12, field: 'reps' },
+        { value: 4, field: 'assist' },
+      ],
+    })
+  })
+
   it('scopes values with a spoken round prefix until changed', () => {
     expect(parseVoiceTranscript('round 2 reps 20 knee 6')).toEqual({
       kind: 'values',

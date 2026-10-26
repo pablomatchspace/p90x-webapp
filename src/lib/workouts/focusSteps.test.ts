@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { focusSteps, resumeIndex } from './focusSteps'
-import { getWorkout } from '@/lib/shared'
+import { getWorkout, loggableWorkoutsFor } from '@/lib/shared'
 import type { Session } from '@/lib/shared'
 
 const cb = getWorkout('chest-back')
@@ -44,6 +44,62 @@ describe('focusSteps', () => {
     const arx = focusSteps(getWorkout('ab-ripper-x'))
     expect(arx).toHaveLength(11)
     expect(arx.every((s) => s.rounds.join() === '0')).toBe(true)
+  })
+})
+
+describe('focusSteps — Generation Next follows the video (E36)', () => {
+  const order = (key: string) =>
+    focusSteps(getWorkout(key)).map((s) => `${s.exercise.id}#${s.rounds.join()}`)
+
+  it('plays each block round by round: every move once, then round 2, then round 3', () => {
+    expect(order('gn-push-strength').slice(0, 12)).toEqual([
+      'goblet-squat#0',
+      'narrow-to-wide-push-up#0',
+      'alternating-step-ups#0',
+      'wide-stance-rotational-push#0',
+      'goblet-squat#1',
+      'narrow-to-wide-push-up#1',
+      'alternating-step-ups#1',
+      'wide-stance-rotational-push#1',
+      'goblet-squat#2',
+      'narrow-to-wide-push-up#2',
+      'alternating-step-ups#2',
+      'wide-stance-rotational-push#2',
+    ])
+    expect(order('gn-push-strength')[12]).toBe('sumo-squats#0')
+  })
+
+  it('finishes each Full Body Power cluster (right, left, core) before the next', () => {
+    const cluster1 = ['glute-swings-r', 'glute-swings-l', 'hollow-hold-sec']
+    expect(order('gn-full-body-power').slice(0, 9)).toEqual(
+      [0, 1, 2].flatMap((r) => cluster1.map((id) => `${id}#${r}`)),
+    )
+    expect(order('gn-full-body-power')[9]).toBe('clean-to-press-r#0')
+  })
+
+  it('opens the Full Body Strength finisher with the buy-in and closes it with the cash-out', () => {
+    const steps = order('gn-full-body-strength')
+    const amrap = 'buy-in-cash-out-amrap-rounds'
+    expect(steps.at(-1)).toBe(`${amrap}#1`)
+    expect(steps.at(-11)).toBe(`${amrap}#0`)
+    expect(steps.slice(-10, -1)).toEqual(
+      [0, 1, 2].flatMap((r) =>
+        ['renegade-row', 'ground-to-overhead', 'x-sit-up'].map((id) => `${id}#${r}`),
+      ),
+    )
+  })
+
+  it('covers every (exercise, round) of every Generation Next strength workout exactly once', () => {
+    for (const def of loggableWorkoutsFor('gennext')) {
+      const steps = focusSteps(def)
+      expect(steps.every((s) => s.rounds.length === 1)).toBe(true)
+      const seen = steps.map((s) => `${s.exercise.id}#${s.rounds[0]}`)
+      const expected = (def.exercises ?? []).flatMap((e) =>
+        Array.from({ length: e.rounds }, (_, r) => `${e.id}#${r}`),
+      )
+      expect(new Set(seen).size).toBe(seen.length)
+      expect([...seen].sort()).toEqual([...expected].sort())
+    }
   })
 })
 

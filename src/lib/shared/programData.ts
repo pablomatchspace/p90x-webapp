@@ -8,7 +8,8 @@ import templatesJson from '@/data/templates.json'
  * (structure only — no personal data). See PRD §8.
  */
 
-export type SecondaryKind = 'weight' | 'knee' | 'chair' | 'extra'
+/** `mod`: Generation Next bodyweight move done with the video's modification (E36) */
+export type SecondaryKind = 'weight' | 'knee' | 'chair' | 'extra' | 'mod'
 
 export interface RoundLabels {
   main: string
@@ -41,6 +42,8 @@ export interface WorkoutDef {
   style: WorkoutStyle
   pillar?: Pillar
   exercises?: CatalogExercise[]
+  /** E36: focus-mode play order as [exercise id, 0-based round], one card each (Generation Next videos) */
+  focusOrder?: [string, number][]
 }
 
 export interface TemplateDay {

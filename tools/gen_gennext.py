@@ -115,6 +115,72 @@ TRACKER: dict[str, dict] = {
     },
 }
 
+# E36: what the app logs and the order focus mode plays it — the videos
+# (docs/requirements/gennext-workouts.md §1–§6). Per workout: blocks of
+# (block, rounds, circuits[, bookend]). A circuit plays round by round (every
+# move once, then again); Full Body Power's Block 1 is three clusters played
+# one after another. A bookend row logs its round 1 before the block and its
+# round 2 after it (Full Body Strength's buy-in / cash-out AMRAP). Tracker
+# moves keep their tracker names (= exercise ids already in logged data).
+W, BW, SEC = "weight", "mod", None  # R×W · reps + modified reps · seconds held
+VIDEO: dict[str, list[tuple]] = {
+    "Push Strength": [
+        ("Block 1", 3, [[("Goblet Squat", W), ("Narrow to Wide Push-Up", BW),
+                         ("Alternating Step Ups", W), ("Wide Stance Rotational Push", W)]]),
+        ("Block 2", 3, [[("Sumo Squats", W), ("Incline Bench Press", W),
+                         ("Curtsey Lunges", W), ("Push Press", W)]]),
+        # "multiples of two" ladder: rung N = round N, 5 rungs (tracker)
+        ("Finisher", 5, [[("Squat Thruster", W), ("Diamond Push-Up", BW), ("Bench Dip", BW)]]),
+    ],
+    "Pull Strength": [
+        ("Block 1", 3, [[("Pull-Up", BW), ("Dumbbell Clean", W),
+                         ("Hip Thrust on Bench", W), ("Upright Row", W)]]),
+        ("Block 2", 3, [[("RDL", W), ("SA Row Right", W), ("SA Row Left", W), ("Pull Over", W)]]),
+        ("Finisher", 5, [[("Chin-Up", BW), ("Skier Swing", W), ("Bent Over Reverse Flys", W)]]),
+    ],
+    "Upper Body": [
+        ("Block 1", 3, [[("Tempo Bench Press", W), ("Strict Arnie Press", W),
+                         ("Chest Fly", W), ("Skull Crusher", W)]]),
+        ("Block 2", 3, [[("Wide Grip Pull-Up", BW), ("Narrow Supported Row", W),
+                         ("Prone Fly", W), ("Supinated Biceps Curl", W)]]),
+        # EMOM: A push-ups + hammer curls, B bench dips + lateral raises, C burpee pull-ups
+        ("Finisher", 3, [[("Push-Ups", BW), ("Hammer Curls", W), ("Bench Dips", BW),
+                          ("Lateral Raises", W), ("Burpee Pull-Ups", BW)]]),
+    ],
+    "Lower Body": [
+        ("Block 1", 3, [[("Dual Front Squat", W), ("Bulgarian Split Squat (Right Side)", W),
+                         ("Bulgarian Split Squat (Left Side)", W), ("Jump Squat", BW)]]),
+        ("Block 2", 3, [[("Romanian Deadlift (RDL)", W), ("Lateral Bench Step Downs (Right)", W),
+                         ("Lateral Bench Step Downs (Left)", W), ("Skater to Broad Jump", BW)]]),
+        ("Finisher", 3, [[("Alt Lateral Lunges", W), ("Suitcase Deadlift", W), ("Gorilla Burpees", BW)]]),
+    ],
+    "Full Body Strength": [
+        ("Block 1", 3, [[("Squat Thruster", W), ("Chest Press to Leg Raise", W),
+                         ("2 RDL to 2 Bent Over Row", W), ("Devil's Press", W)]]),
+        ("Block 2", 3, [[("Negative Pull-Up", BW), ("Tempo Push-Up", BW),
+                         ("Heel Elevated Squat", W), ("Frontal to Lateral Raise", W)]]),
+        # video runs 3 rounds (tracker printed 5)
+        ("Finisher", 3, [[("Renegade Row", W), ("Ground to Overhead", W), ("X Sit-Up", BW)]],
+         "Buy-In / Cash-Out AMRAP (rounds)"),
+    ],
+    "Full Body Power": [
+        ("Block 1", 3, [
+            [("Glute Swings R", W), ("Glute Swings L", W), ("Hollow Hold (sec)", SEC)],
+            [("Clean to Press R", W), ("Clean to Press L", W), ("Low Plank Reach", BW)],
+            [("SA Devil's Press R", W), ("SA Devil's Press L", W), ("Unilateral V-Sit", BW)],
+        ]),
+        # 10-min accumulator: one lap = one round, capped at the schema's 5
+        ("Block 2", 5, [[("Chin-Up", BW), ("Decline Push-Up", BW), ("Single Leg Squat to Bench", W)]]),
+        # EMOM: video runs 3 rounds (tracker printed 5)
+        ("Finisher", 3, [[("Heromaker", W), ("Box Jumps", BW)]]),
+    ],
+    # No video in the folder yet — tracker only (E33)
+    "Core Circuit": [
+        ("Block 1", 3, [[("Russian Twist", W), ("Tall Kneeling Alt Halo", W), ("Plank Pull Through", W)]]),
+        ("Block 2", 3, [[("Half Kneeling Woodchop R/L", W), ("Butterfly Sit Up", W)]]),
+    ],
+}
+
 # Workout Calendar PDF, Monday → Sunday. Week 13 has no Sunday (90 days).
 CALENDAR: list[list[str]] = [
     ["Push Strength", "Plyometrix", "Upper Body", "Active Mobility", "Lower Body", "Cardio Boxing", "Myofascial Release"],
@@ -144,26 +210,44 @@ def build_workouts() -> list[dict]:
         w: dict = {"key": key, "name": name, "style": style}
         if pillar:
             w["pillar"] = pillar
-        if name in TRACKER:
-            t = TRACKER[name]
-            exercises = []
-            for block in ("Block 1", "Block 2", "Finisher"):
-                rounds = t["finisher_rounds"] if block == "Finisher" else 3
-                for ex in t[block]:
-                    exercises.append(
-                        {
-                            "id": slugify(ex),
-                            "name": ex,
-                            "rounds": rounds,
-                            "secondary": "weight",
-                            "agg": "avg",
-                            "labels": [{"main": f"R{i + 1}", "secondary": "W"} for i in range(rounds)],
-                            "block": block,
-                        }
-                    )
-            w["exercises"] = exercises
+        if name in VIDEO:
+            w["exercises"], w["focusOrder"] = build_exercises(VIDEO[name])
         out.append(w)
     return out
+
+
+LABEL_SECONDARY = {W: "W", BW: "M"}
+
+
+def exercise(name: str, kind: str | None, block: str, rounds: int) -> dict:
+    e: dict = {"id": slugify(name), "name": name, "rounds": rounds}
+    if kind is not None:
+        e["secondary"] = kind
+    e["agg"] = "avg"
+    e["labels"] = [
+        {"main": f"R{i + 1}", **({"secondary": LABEL_SECONDARY[kind]} if kind else {})}
+        for i in range(rounds)
+    ]
+    e["block"] = block
+    return e
+
+
+def build_exercises(blocks: list[tuple]) -> tuple[list[dict], list[list]]:
+    """Catalog rows in video order, plus focus mode's (exercise id, round) play order."""
+    exercises: list[dict] = []
+    order: list[list] = []
+    for block, rounds, circuits, *bookend in blocks:
+        if bookend:
+            row = exercise(bookend[0], None, block, 2)
+            row["labels"] = [{"main": "Buy-in"}, {"main": "Cash-out"}]
+            exercises.append(row)
+            order.append([row["id"], 0])
+        for circuit in circuits:
+            exercises.extend(exercise(n, kind, block, rounds) for n, kind in circuit)
+            order.extend([slugify(n), r] for r in range(rounds) for n, _ in circuit)
+        if bookend:
+            order.append([row["id"], 1])
+    return exercises, order
 
 
 def build_template() -> list[dict]:
@@ -197,17 +281,27 @@ def verify(workouts: list[dict], template: list[dict]) -> list[str]:
     assert sum(counts.values()) == 90
     lengths = {w["key"]: len(w["exercises"]) for w in workouts if "exercises" in w}
     assert lengths == {
-        "gn-upper-body": 9,
-        "gn-lower-body": 8,
-        "gn-push-strength": 8,
-        "gn-pull-strength": 9,
+        "gn-upper-body": 13,
+        "gn-lower-body": 11,
+        "gn-push-strength": 11,
+        "gn-pull-strength": 11,
         "gn-core-circuit": 5,
-        "gn-full-body-strength": 8,
-        "gn-full-body-power": 8,
+        "gn-full-body-strength": 12,
+        "gn-full-body-power": 14,
     }, lengths
     for w in workouts:
         ids = [e["id"] for e in w.get("exercises", [])]
         assert len(ids) == len(set(ids)), f"duplicate exercise id in {w['key']}"
+        pairs = sorted(map(tuple, w.get("focusOrder", [])))
+        expected = sorted((e["id"], r) for e in w.get("exercises", []) for r in range(e["rounds"]))
+        assert pairs == expected, f"focusOrder must play every round once in {w['key']}"
+        assert all(e["rounds"] <= 5 for e in w.get("exercises", [])), "schema caps rounds at 5"
+    # Every Dumbbell Tracker move is still logged, in its block, as R×W (its id is in user data)
+    for name, t in TRACKER.items():
+        rows = {e["name"]: e for w in workouts if w["name"] == name for e in w["exercises"]}
+        for block in ("Block 1", "Block 2", "Finisher"):
+            for ex in t[block]:
+                assert rows[ex]["block"] == block and rows[ex]["secondary"] == "weight", (name, ex)
     assert all(k.startswith("gn-") for k in keys)
     return [f"{k}: {n} days" for k, n in counts.items() if n]
 
