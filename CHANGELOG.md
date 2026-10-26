@@ -15,6 +15,17 @@ didn't bump the package version — they're numbered B01/B02 here for a
 continuous record; #33's package column is left at the un-suffixed version
 that was actually shipped.
 
+## 1.E33.U163 (package 1.33.163) — 2026-10-26
+
+- **E33 — P90X Generation Next program, story U163: start choice & program lock.**
+  `/start` offers Classic, Lean and Generation Next ("Which program?"). Once a
+  round runs, the program is locked: Settings shows it read-only with a link to
+  Rounds (the Classic↔Lean switch and its confirm dialog are gone — amends D8).
+  Round-over-round comparisons only list rounds of the same program suite.
+  `e2e/lean.spec.ts` now covers choosing Lean at start, the lock, and a Lean v1
+  backup importing as Lean; the Cardio X play test imports a Lean copy of the
+  sample instead of switching variants.
+
 ## 1.E33.U162 (package 1.33.162) — 2026-10-26
 
 - **E33 — P90X Generation Next program, story U162: dumbbell logging & D9 scoring.**

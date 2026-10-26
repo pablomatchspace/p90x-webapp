@@ -17,6 +17,11 @@ const VARIANTS: { value: ProgramRef; label: string; hint: string }[] = [
     label: 'Lean',
     hint: 'More cardio, less resistance.',
   },
+  {
+    value: { suite: 'gennext', variant: 'standard' },
+    label: 'Generation Next',
+    hint: 'BODi 2026 — strength, athletic and recovery pillars, 7 days a week. Dumbbells, bench, foam roller.',
+  },
 ]
 
 /** The workouts scheduled on day 1, so the variant choice is concrete. */
@@ -103,10 +108,10 @@ export function StartPage() {
         </Card>
 
         <Card>
-          <h2 className="text-base font-semibold">Which rotation?</h2>
+          <h2 className="text-base font-semibold">Which program?</h2>
           <div
             role="radiogroup"
-            aria-label="Program variant"
+            aria-label="Program"
             className="mt-3 flex flex-col gap-2 sm:flex-row"
           >
             {VARIANTS.map((variant) => (
@@ -133,7 +138,8 @@ export function StartPage() {
             ))}
           </div>
           <p className="mt-3 text-xs text-zinc-500 dark:text-zinc-400">
-            You can switch rotation later without losing logged sessions.
+            The program is locked for the round — to change it later, complete or delete the round
+            on Rounds.
           </p>
         </Card>
 

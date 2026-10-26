@@ -141,7 +141,7 @@ export function DataPage() {
             <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-sm sm:grid-cols-3">
               <div>
                 <dt className="text-zinc-500 dark:text-zinc-400">Program</dt>
-                <dd className="font-medium capitalize">{pending.summary.program}</dd>
+                <dd className="font-medium">{pending.summary.program}</dd>
               </div>
               <div>
                 <dt className="text-zinc-500 dark:text-zinc-400">Start date</dt>

@@ -38,7 +38,7 @@ import {
   type NutritionGoal,
   type NutritionPhase,
 } from '@/lib/nutrition'
-import { getTemplate, getWorkout, programLabel, type ProgramRef } from '@/lib/shared'
+import { programLabel } from '@/lib/shared'
 import { setupDerived, settingsWarnings } from '@/lib/body'
 import {
   setStartDate,
@@ -52,6 +52,7 @@ import {
 } from '@/state/actions'
 import { useBodyLog, useSchedule, useSettings } from '@/state/selectors'
 import { useStore } from '@/state/store'
+import { Link } from 'react-router-dom'
 import { WorkoutLinksCard } from './WorkoutLinksCard'
 
 /**
@@ -210,7 +211,6 @@ export function SettingsPage() {
   )
   // null = no dialog; { value } holds the candidate start date (value null = clear)
   const [pendingStart, setPendingStart] = useState<{ value: string | null } | null>(null)
-  const [pendingProgram, setPendingProgram] = useState<ProgramRef | null>(null)
   // FFMI estimator drafts (E14) — FFMI as-is, body-fat as display percent
   const [ffmiDraft, setFfmiDraft] = useState<number | null>(settings.targets.ffmi ?? null)
   const [bfDraft, setBfDraft] = useState<number | null>(
@@ -375,28 +375,6 @@ export function SettingsPage() {
   const shiftDays =
     pendingStart?.value && settings.startDate ? diffDays(settings.startDate, pendingStart.value) : 0
 
-  // Program variant (US-073). Switching only changes the workout on each day; the
-  // calendar, rest days and every reschedule op are identical between variants, so
-  // the ops replay unchanged and logged sessions are kept. A confirm guards a switch
-  // once data exists.
-  const otherProgram: ProgramRef = {
-    suite: 'p90x',
-    variant: settings.program.variant === 'classic' ? 'lean' : 'classic',
-  }
-  const day1Of = (program: ProgramRef) =>
-    getTemplate(program)[0]
-      .workouts.map((key) => getWorkout(key).name)
-      .join(' + ')
-
-  function switchProgram(next: ProgramRef) {
-    if (hasData) setPendingProgram(next)
-    else updateSettings({ program: next })
-  }
-  function applyProgram() {
-    if (pendingProgram) updateSettings({ program: pendingProgram })
-    setPendingProgram(null)
-  }
-
   return (
     <Page
       title="Settings"
@@ -407,22 +385,24 @@ export function SettingsPage() {
         <h2 className="text-base font-semibold">Program</h2>
         <div className="mt-2 divide-y divide-zinc-100 dark:divide-zinc-800">
           <Row
-            label="Variant"
+            label="Program"
             hint={
-              settings.program.variant === 'classic'
-                ? 'Classic rotation — switch to Lean for more cardio, less resistance'
-                : 'Lean rotation (Cardio X + Core Synergistics Lean) — switch back anytime'
+              settings.startDate === null
+                ? 'Chosen when you start a program'
+                : 'Locked for this round — complete or delete it on Rounds to start another program'
             }
           >
             <div className="flex items-center gap-2">
               <span className="text-sm font-semibold">{programLabel(settings.program)}</span>
-              <button
-                type="button"
-                onClick={() => switchProgram(otherProgram)}
-                className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm font-medium hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800"
-              >
-                Switch to {programLabel(otherProgram)}
-              </button>
+              {settings.startDate !== null ? (
+                <Link
+                  to="/rounds"
+                  aria-label="Change program on Rounds"
+                  className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm font-medium hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800"
+                >
+                  Rounds
+                </Link>
+              ) : null}
             </div>
           </Row>
           <Row
@@ -1129,41 +1109,6 @@ export function SettingsPage() {
         </div>
       )}
 
-      {/* Program variant re-anchor confirm (US-073) */}
-      {pendingProgram && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Confirm program variant"
-        >
-          <Card className="max-w-md">
-            <h2 className="text-base font-semibold">Switch to {programLabel(pendingProgram)}?</h2>
-            <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
-              Your start date, rest days and every reschedule adjustment stay exactly the same —
-              only the workout on each day changes to the {programLabel(pendingProgram)} rotation
-              (day 1 becomes <span className="font-medium">{day1Of(pendingProgram)}</span>). Logged
-              sessions are kept and reappear if you switch back.
-            </p>
-            <div className="mt-4 flex gap-2">
-              <button
-                type="button"
-                onClick={applyProgram}
-                className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
-              >
-                Switch to {programLabel(pendingProgram)}
-              </button>
-              <button
-                type="button"
-                onClick={() => setPendingProgram(null)}
-                className="rounded-lg px-4 py-2 text-sm font-medium hover:bg-zinc-100 dark:hover:bg-zinc-800"
-              >
-                Cancel
-              </button>
-            </div>
-          </Card>
-        </div>
-      )}
       {/* FFMI estimator apply confirm (E14) */}
       {pendingFfmi && ffmiPlan !== null && ffmiDraft !== null && bfDraft !== null && (
         <div
