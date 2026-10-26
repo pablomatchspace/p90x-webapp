@@ -23,7 +23,7 @@ bar, bench or foam roller was missing after the video had started.
 
 ## 3. Design
 
-`src/lib/workouts/gear.ts` is hand-authored display data (like `focusSteps`'
+`src/lib/workouts/gear.ts` is hand-authored display data (the list is "gear", not "required": props a video makes optional are included) (like `focusSteps`'
 round order): a small gear vocabulary (`GEAR_LABELS`, whose key order is display
 order) and one list per workout key. Generation Next entries come from the
 equipment lines of `docs/requirements/gennext-workouts.md`; Classic/Lean entries

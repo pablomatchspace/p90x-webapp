@@ -62,17 +62,30 @@ const WORKOUT_GEAR: Record<string, GearId[]> = {
 }
 
 const ORDER = Object.keys(GEAR_LABELS) as GearId[]
+const byOrder = (a: GearId, b: GearId) => ORDER.indexOf(a) - ORDER.indexOf(b)
+// normalised once: every list in display order
+const SORTED_GEAR: Record<string, GearId[]> = Object.fromEntries(
+  Object.entries(WORKOUT_GEAR).map(([key, gear]) => [key, [...gear].sort(byOrder)]),
+)
 
-/** Gear for one workout, in display order. Throws for a key with no entry. */
-export function gearFor(workoutKey: string): GearId[] {
-  const gear = Object.hasOwn(WORKOUT_GEAR, workoutKey) ? WORKOUT_GEAR[workoutKey] : undefined
-  if (gear === undefined) throw new Error(`No gear entry for workout "${workoutKey}"`)
-  return [...gear].sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b))
+/** Gear for one workout, in display order; null for a key with no entry. */
+export function findGear(workoutKey: string): GearId[] | null {
+  return Object.hasOwn(SORTED_GEAR, workoutKey) ? SORTED_GEAR[workoutKey] : null
 }
 
-/** Union of gear across workouts (e.g. a week's prep list), in display order. */
+/** Like `findGear`, but throws — the test suite uses it to require an entry per workout. */
+export function gearFor(workoutKey: string): GearId[] {
+  const gear = findGear(workoutKey)
+  if (gear === null) throw new Error(`No gear entry for workout "${workoutKey}"`)
+  return gear
+}
+
+/**
+ * Union of gear across workouts (e.g. a week's prep list), in display order.
+ * Keys with no entry are skipped — a display feature must never break a screen.
+ */
 export function gearForWorkouts(workoutKeys: readonly string[]): GearId[] {
-  const needed = new Set(workoutKeys.flatMap((key) => gearFor(key)))
+  const needed = new Set(workoutKeys.flatMap((key) => findGear(key) ?? []))
   return ORDER.filter((id) => needed.has(id))
 }
 

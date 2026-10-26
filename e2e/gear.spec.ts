@@ -16,7 +16,7 @@ test('Today card, week roll-up, list, detail and focus mode show the gear', asyn
   await start(page, /Generation Next/)
 
   // Today: the workout card names its gear, and the week roll-up unions the days
-  await expect(page.getByText('You’ll need: Dumbbells · Bench').first()).toBeVisible()
+  await expect(page.getByText('Gear: Dumbbells · Bench').first()).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Gear for the next 7 days' })).toBeVisible()
   await expect(page.getByText('Have ready:')).toBeVisible()
 
@@ -26,18 +26,19 @@ test('Today card, week roll-up, list, detail and focus mode show the gear', asyn
   await page.goto('#/workouts/gn-pull-strength')
   await expect(page.getByText('Pull-up bar', { exact: true })).toBeVisible()
 
-  // Focus mode shows it on the first step only
+  // Focus mode keeps it on every step (a resumed session never misses it)
   await page.goto('#/today')
   await page.getByRole('link', { name: 'Log in focus mode' }).first().click()
   await expect(page.getByText('Step 1 of 39 · Round 1')).toBeVisible()
-  await expect(page.getByText('Bench', { exact: true })).toBeVisible()
+  await expect(page.getByText('Gear: Dumbbells · Bench')).toBeVisible()
   await page.getByRole('button', { name: 'Next', exact: true }).click()
-  await expect(page.getByText('Bench', { exact: true })).toHaveCount(0)
+  await expect(page.getByText('Step 2 of 39 · Round 1')).toBeVisible()
+  await expect(page.getByText('Gear: Dumbbells · Bench')).toBeVisible()
 })
 
 test('Classic: Chest & Back lists the pull-up bar; Kenpo X needs nothing', async ({ page }) => {
   await start(page, /Classic/)
-  await expect(page.getByText(/You’ll need: .*Pull-up bar/).first()).toBeVisible()
+  await expect(page.getByText(/Gear: .*Pull-up bar/).first()).toBeVisible()
   await page.goto('#/workouts/kenpo-x')
   await expect(page.getByText('No equipment needed')).toBeVisible()
 })

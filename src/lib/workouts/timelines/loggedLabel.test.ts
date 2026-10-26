@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { timelinesFor, loggedLabels } from './index'
-import { getTimeline } from './index'
+import { getTimeline, loggedLabels, timelinesFor } from './index'
 import { workoutsFor } from '@/lib/shared'
 
 const KEYS = [

@@ -75,11 +75,18 @@ const GEAR_HORIZON_DAYS = 7
 
 function WeekGear({ from }: { from: ISODate }) {
   const schedule = useSchedule()
+  const index = useSessionIndex()
   if (schedule === null) return null
   const keys: string[] = []
   for (let i = 0; i < GEAR_HORIZON_DAYS; i++) {
     const day = schedule.byDate.get(addDays(from, i))
-    if (day?.kind === 'program') keys.push(...day.workouts)
+    if (day?.kind !== 'program') continue
+    // a workout already finished today is no longer something to prep for
+    for (const key of day.workouts) {
+      if (i > 0 || workoutState(key, index.get(day.programDayId)?.get(key)) !== 'done') {
+        keys.push(key)
+      }
+    }
   }
   const gear = gearForWorkouts(keys)
   if (gear.length === 0) return null

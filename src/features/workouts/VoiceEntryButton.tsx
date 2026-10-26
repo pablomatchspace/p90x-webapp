@@ -111,8 +111,8 @@ export function VoiceEntryButton({
       (slot) => (currentEntry?.rounds[slot.round]?.[slot.field] ?? null) !== null,
     )
     const assignments = assignVoiceValues(parsed.values, slots, filled)
+    const wrong = mismatchedRound(parsed.values, slots)
     if (assignments.length === 0) {
-      const wrong = mismatchedRound(parsed.values, slots)
       if (wrong !== null) {
         const shown = current.rounds.map((r) => r + 1).join(', ')
         setFeedback(
@@ -132,8 +132,7 @@ export function VoiceEntryButton({
           : SECONDARY_LABELS[secondary]
       return `${current.rounds.length > 1 ? `R${slot.round + 1} ` : ''}${name} ${value}`
     })
-    const wrongRound = mismatchedRound(parsed.values, slots)
-    const skipped = wrongRound === null ? '' : ` Round ${wrongRound} isn’t on this card — skipped.`
+    const skipped = wrong === null ? '' : ` Round ${wrong} isn’t on this card — skipped.`
     setFeedback(`Logged ${applied.join(' · ')}.${skipped}`)
   }
 

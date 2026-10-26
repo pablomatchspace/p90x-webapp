@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { workoutsFor } from '@/lib/shared'
-import { gearFor, gearForWorkouts, gearLabel, GEAR_LABELS, type GearId } from './gear'
+import { findGear, gearFor, gearForWorkouts, gearLabel, GEAR_LABELS, type GearId } from './gear'
 
 const everyKey = [...new Set([...workoutsFor('p90x'), ...workoutsFor('gennext')].map((w) => w.key))]
 
@@ -42,6 +42,11 @@ describe('gearForWorkouts', () => {
     expect(new Set(ids).size).toBe(ids.length)
     expect(ids).toEqual(expect.arrayContaining(['pull-up-bar', 'dumbbells', 'mat']))
     expect(ids).toEqual(Object.keys(GEAR_LABELS).filter((id) => ids.includes(id as GearId)))
+  })
+
+  it('skips a key with no entry instead of throwing', () => {
+    expect(findGear('nope')).toBeNull()
+    expect(gearForWorkouts(['nope', 'ab-ripper-x'])).toEqual(['mat'])
   })
 
   it('is empty when no workout needs gear', () => {

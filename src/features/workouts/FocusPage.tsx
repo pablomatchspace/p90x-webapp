@@ -326,11 +326,9 @@ export function FocusPage() {
           />
         </div>
 
-        {idx === 0 ? (
-          <div className="mt-3">
-            <GearList workoutKey={key} />
-          </div>
-        ) : null}
+        <div className="mt-3">
+          <GearList workoutKey={key} inline />
+        </div>
 
         <h2 className="mt-4 text-xl font-semibold">{exercise.name}</h2>
         <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400" aria-live="polite">

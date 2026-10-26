@@ -1,21 +1,22 @@
-import { gearFor, gearLabel, type GearId } from '@/lib/workouts'
+import { findGear, gearLabel, type GearId } from '@/lib/workouts'
 
 /**
- * E37: the gear a workout needs. `inline` is a one-line summary for cards;
+ * E37: the gear a workout uses (props the video makes optional are listed too). `inline` is a one-line summary for cards;
  * the default renders chips with a "You'll need" lead-in.
  */
 export function GearList({
   workoutKey,
   gear,
   inline = false,
-  lead = 'You’ll need',
+  lead = 'Gear',
 }: {
   workoutKey?: string
   gear?: GearId[]
   inline?: boolean
   lead?: string
 }) {
-  const ids = gear ?? (workoutKey === undefined ? [] : gearFor(workoutKey))
+  const ids = gear ?? (workoutKey === undefined ? null : findGear(workoutKey))
+  if (ids === null) return null
   const text = ids.length === 0 ? 'No equipment needed' : ids.map(gearLabel).join(' · ')
   if (inline) {
     return (

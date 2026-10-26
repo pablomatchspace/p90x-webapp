@@ -18,8 +18,8 @@ that was actually shipped.
 ## 1.E37.U174 (package 1.37.174) — 2026-10-26
 
 - **E37 — Workout gear (U174).** Every workout now says what gear it needs:
-  a "You'll need" line on Today's workout cards, a gear row on each workout's page
-  and the Workouts list, the same before Play starts and on Focus step 1, and a
+  a "Gear" line on Today's workout cards, a gear row on each workout's page
+  and the Workouts list, the same before Play starts and on every Focus step, and a
   "Gear for the next 7 days" roll-up on Today. Display only — no gear-owned
   tracking, no schema change (v14). Generation Next gear comes from the
   requirements doc; Classic/Lean gear is authored from the catalog and is not
@@ -31,7 +31,7 @@ that was actually shipped.
   detail page no longer says it's "logged from rest days" — it points to Today,
   where bonuses are added. Voice entry on a single-round card (E36) now says
   "this card is round N, nothing logged" when you name another round, instead
-  of the generic "no matching field" message (`mismatchedRound`). Bonus on a
+  of the generic "no matching field" message (wording later settled on "round N isn’t on this card") (`mismatchedRound`). Bonus on a
   rest day via URL is intentionally left as is. Summary checklist labels
   (B01) now stay unique across every timeline and name two-direction moves by
   their shared base (`loggedLabels`).
@@ -42,7 +42,7 @@ that was actually shipped.
   row's label by truncating the exercise id to four words, so left/right pairs
   (Kenpo X, Cardio X, Generation Next bonus Glutes) rendered as identical rows
   and long ids lost their tail ("squat hand release in"). Rows now use the
-  timeline's own move name (`loggedLabel`), keeping "— Left" / "— Right".
+  timeline's own move name (`loggedLabels`), keeping "— Left" / "— Right".
 
 ## 1.E36.U173 (package 1.36.173) — 2026-10-26
 
