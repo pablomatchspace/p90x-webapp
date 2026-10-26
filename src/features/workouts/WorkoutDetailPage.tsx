@@ -5,6 +5,7 @@ import { workoutOccurrences } from '@/lib/schedule'
 import { useSchedule, useSettings } from '@/state/selectors'
 import { CompletionLog } from './CompletionLog'
 import { MediaLinks } from './MediaLinks'
+import { GearList } from './GearList'
 import { StrengthGrid } from './StrengthGrid'
 
 const STYLE_LABELS = {
@@ -58,6 +59,7 @@ export function WorkoutDetailPage() {
 
   return (
     <Page title={def.name} subtitle={STYLE_LABELS[def.style]} actions={backLink}>
+      {def.style === 'rest' ? null : <GearList workoutKey={key} />}
       {occurrences.length === 0 ? (
         <Card>
           <p className="text-sm text-zinc-500 dark:text-zinc-400">

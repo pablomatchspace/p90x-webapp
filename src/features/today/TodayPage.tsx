@@ -4,11 +4,12 @@ import { NoProgramCard } from '@/components/NoProgramCard'
 import { Card, Page } from '@/components/Page'
 import { addDays, compareISO, formatLong, isISODate, todayISO, type ISODate } from '@/lib/shared'
 import { getWorkout, workoutsFor } from '@/lib/shared'
-import { hasTimeline } from '@/lib/workouts'
+import { gearForWorkouts, hasTimeline } from '@/lib/workouts'
 import type { ProgramDay } from '@/lib/schedule'
 import { dayStatus, workoutState } from '@/lib/schedule'
 import { BodyQuickAdd } from '@/features/body/BodyQuickAdd'
 import { NutritionCard } from '@/features/today/NutritionCard'
+import { GearList } from '@/features/workouts/GearList'
 import { Chip } from '@/features/schedule/Chip'
 import { ProgramStatusBar } from '@/features/schedule/ProgramStatusBar'
 import { RescheduleSection } from '@/features/schedule/RescheduleSection'
@@ -65,6 +66,40 @@ function BonusAddOns({ day }: { day: ProgramDay }) {
   )
 }
 
+/**
+ * E37: gear to have ready for the next seven days of the schedule (today
+ * included), so the week can be prepped ahead. Bonus fivers are optional
+ * add-ons and are left out.
+ */
+const GEAR_HORIZON_DAYS = 7
+
+function WeekGear({ from }: { from: ISODate }) {
+  const schedule = useSchedule()
+  const index = useSessionIndex()
+  if (schedule === null) return null
+  const keys: string[] = []
+  for (let i = 0; i < GEAR_HORIZON_DAYS; i++) {
+    const day = schedule.byDate.get(addDays(from, i))
+    if (day?.kind !== 'program') continue
+    // a workout already finished today is no longer something to prep for
+    for (const key of day.workouts) {
+      if (i > 0 || workoutState(key, index.get(day.programDayId)?.get(key)) !== 'done') {
+        keys.push(key)
+      }
+    }
+  }
+  const gear = gearForWorkouts(keys)
+  if (gear.length === 0) return null
+  return (
+    <Card>
+      <h2 className="text-sm font-semibold">Gear for the next 7 days</h2>
+      <div className="mt-2">
+        <GearList gear={gear} lead="Have ready" />
+      </div>
+    </Card>
+  )
+}
+
 function WorkoutCard({
   day,
   workoutKey,
@@ -93,6 +128,11 @@ function WorkoutCard({
         <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">{session.annotation}</p>
       ) : null}
       {intro ? <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{intro}</p> : null}
+      {def.style === 'rest' ? null : (
+        <div className="mt-1">
+          <GearList workoutKey={workoutKey} inline />
+        </div>
+      )}
 
       {def.style === 'completion' || def.style === 'bonus' ? (
         <div className="mt-3">
@@ -268,6 +308,8 @@ export function TodayPage() {
       {isToday && day !== undefined && day.kind === 'program' ? (
         <NutritionCard schedulePhase={day.phase} />
       ) : null}
+
+      {isToday && day?.kind === 'program' ? <WeekGear from={date} /> : null}
 
       {isToday ? <BodyQuickAdd /> : null}
 

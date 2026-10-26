@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { Card, Page } from '@/components/Page'
 import { programLabel, workoutsFor, type WorkoutDef } from '@/lib/shared'
 import { useSettings, useWorkoutLogs } from '@/state/selectors'
+import { GearList } from './GearList'
 
 type Group = { title: string; match: (w: WorkoutDef) => boolean }
 
@@ -52,6 +53,9 @@ export function WorkoutsPage() {
                         ? 'Completed? + notes'
                         : `${def.exercises?.length ?? 0} exercises`}
                     </p>
+                    <div className="mt-1.5">
+                      <GearList workoutKey={def.key} inline />
+                    </div>
                   </Card>
                 </Link>
               )

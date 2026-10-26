@@ -23,6 +23,7 @@ import {
   updatePlayerSettings,
 } from '@/state/actions'
 import { useSchedule, useSettings, useWorkoutLinks, useWorkoutSessions } from '@/state/selectors'
+import { GearList } from './GearList'
 import { MediaLinks } from './MediaLinks'
 import { beep, mmss, speak } from './timerUtils'
 import { useWakeLock } from './playerHooks'
@@ -404,6 +405,12 @@ export function PlayPage() {
             ) : null}
           </>
         )}
+
+        {playback === null ? (
+          <div className="mt-3">
+            <GearList workoutKey={key} />
+          </div>
+        ) : null}
 
         <div className="mt-5 flex flex-wrap items-center gap-3">
           {playback !== null ? (
