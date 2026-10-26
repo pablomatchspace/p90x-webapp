@@ -304,3 +304,9 @@ Post-v1.0.0. Full write-up: [`docs/epics/E34-gennext-play.md`](../epics/E34-genn
 
 Post-v1.0.0. Full write-up: [`docs/epics/E36-gennext-video-logging.md`](../epics/E36-gennext-video-logging.md).
 E35 (Portion Fix nutrition) is reserved and blocked on BODi's container-plan PDFs.
+
+## E37 — Workout gear
+
+- ✅ US-174 · Gear per workout on Today, workout pages, play/focus and a 7-day roll-up (M, P1)
+
+Post-v1.0.0. Full write-up: [`docs/epics/E37-workout-gear.md`](../epics/E37-workout-gear.md).

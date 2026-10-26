@@ -29,6 +29,7 @@ import { MediaLinks } from './MediaLinks'
 import { focusSteps, resumeIndex } from '@/lib/workouts'
 import { SECONDARY_LABELS } from './entryLabels'
 import { RoundInputs } from './entryUi'
+import { GearList } from './GearList'
 import { TimerCard } from './TimerCard'
 import { beep, mmss, speak } from './timerUtils'
 import { useWakeLock } from './playerHooks'
@@ -324,6 +325,12 @@ export function FocusPage() {
             style={{ width: `${((idx + 1) / steps.length) * 100}%` }}
           />
         </div>
+
+        {idx === 0 ? (
+          <div className="mt-3">
+            <GearList workoutKey={key} />
+          </div>
+        ) : null}
 
         <h2 className="mt-4 text-xl font-semibold">{exercise.name}</h2>
         <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400" aria-live="polite">

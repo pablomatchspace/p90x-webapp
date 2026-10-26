@@ -15,6 +15,16 @@ didn't bump the package version — they're numbered B01/B02 here for a
 continuous record; #33's package column is left at the un-suffixed version
 that was actually shipped.
 
+## 1.E37.U174 (package 1.37.174) — 2026-10-26
+
+- **E37 — Workout gear (U174).** Every workout now says what gear it needs:
+  a "You'll need" line on Today's workout cards, a gear row on each workout's page
+  and the Workouts list, the same before Play starts and on Focus step 1, and a
+  "Gear for the next 7 days" roll-up on Today. Display only — no gear-owned
+  tracking, no schema change (v14). Generation Next gear comes from the
+  requirements doc; Classic/Lean gear is authored from the catalog and is not
+  workbook-verified.
+
 ## 1.E36.U173.B02 (package 1.36.173-b2) — 2026-10-26
 
 - **fix(workouts): bonus detail copy & voice round feedback.** A bonus fiver's
