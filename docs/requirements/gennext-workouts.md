@@ -358,15 +358,22 @@ if back down before time, hold plank of choice. Mods: chin-ups, pull-up assist.
 - **Full Body Power**: B1 = 3 clusters; tracker's 6 R/L moves match in order; cluster core moves (Hollow Hold, Low Plank Reach, Unilateral V-Sit) not in tracker. B2 is a 10-min +1-rep accumulator (5 to ~10 reps), not fixed rounds; Chin-Ups + Decline Push-Up not in tracker. Finisher: **tracker 5 rounds vs video 3 EMOM rounds** of Heromaker; Box Jumps not in tracker.
 - **Cardio Boxing / Accel-Decel**: no tracker; nothing to compare.
 
-**App rule (E33):** the catalog logs exactly the tracker's exercises and round
-counts; bodyweight moves and finisher formats (ladders, EMOMs, accumulators) are
-performed with the video and logged only as part of the workout. The open
-questions below are listed in the E33 PR for the owner to confirm.
+**App rule (E36, decision D10, superseding E33's tracker-only rule):** the catalog
+logs every block and finisher move **in video order**. Tracker moves keep their
+tracker names (their ids are in logged data) and log reps × weight; bodyweight moves
+log reps + modified reps (knees, assist band, step instead of jump); Hollow Hold
+logs seconds. Round counts follow the video: EMOM finishers run 3 rounds (Full Body
+Strength, Full Body Power, Upper Body, Lower Body); the Push / Pull ladders keep 5
+rungs (rung N = round N); Full Body Power's accumulator logs each lap as a round
+(capped at 5); Full Body Strength's buy-in / cash-out is one "AMRAP (rounds)" row
+with two rounds. Focus mode plays each block round by round (every move once, then
+again), except Full Body Power's Block 1, which finishes each R / L / core cluster
+before the next; the buy-in opens the Full Body Strength finisher and the cash-out
+closes it. Warm-ups and cool-downs are not logged.
 
 ## Open questions
 
-1. Full Body Strength and Full Body Power finishers: tracker shows 5 rounds, the
-   videos run 3. The app keeps 5 (unused rounds simply stay empty).
-2. Lower Body step-downs: does tracker "(Right)" mean the working or the floating leg?
+1. Lower Body step-downs: does tracker "(Right)" mean the working or the floating leg?
    The app keeps the tracker's order.
-3. Should the tracker-absent bodyweight moves (pull-ups, push-ups…) get rep logging?
+
+Resolved (E36): finisher rounds follow the video; bodyweight moves get rep logging.

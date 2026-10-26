@@ -295,3 +295,12 @@ Post-v1.0.0. Full write-up: [`docs/epics/E33-gennext-program.md`](../epics/E33-g
 - ✅ US-170 · E2E & release (S, P1)
 
 Post-v1.0.0. Full write-up: [`docs/epics/E34-gennext-play.md`](../epics/E34-gennext-play.md).
+
+## E36 — Generation Next video-faithful logging
+
+- ✅ US-171 · Bodyweight moves + video round counts in the catalog (M, P0)
+- ✅ US-172 · Focus mode plays rounds in video order (S, P0)
+- ✅ US-173 · Core Circuit from its video, E2E & release (S, P1)
+
+Post-v1.0.0. Full write-up: [`docs/epics/E36-gennext-video-logging.md`](../epics/E36-gennext-video-logging.md).
+E35 (Portion Fix nutrition) is reserved and blocked on BODi's container-plan PDFs.
