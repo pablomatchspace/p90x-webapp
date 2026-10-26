@@ -77,7 +77,7 @@ test('persists per-jump corrections and explicit completion', async ({ page }) =
   await skipToSummary(page)
 
   // Skipping all segments leaves every logged jump unchecked; correct one on the summary.
-  const jumpSquats = page.getByLabel('jump squats', { exact: true })
+  const jumpSquats = page.getByLabel('Jump Squats', { exact: true })
   await expect(jumpSquats).not.toBeChecked()
   await jumpSquats.check()
   await expect(page.getByText('Jumps done 1 of 23')).toBeVisible()
