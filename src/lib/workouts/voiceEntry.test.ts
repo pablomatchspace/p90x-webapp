@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import { getWorkout } from '@/lib/shared'
 import type { FocusStep } from './focusSteps'
-import { assignVoiceValues, parseVoiceTranscript, voiceSlots, type VoiceSlot } from './voiceEntry'
+import {
+  assignVoiceValues,
+  mismatchedRound,
+  parseVoiceTranscript,
+  voiceSlots,
+  type VoiceSlot,
+} from './voiceEntry'
 
 const chestBack = getWorkout('chest-back').exercises!
 const pushUps = chestBack.find((e) => e.id === 'standard-push-ups')! // assist: knee
@@ -227,5 +233,18 @@ describe('assignVoiceValues (US-150)', () => {
       { slot: { round: 0, field: 'reps' }, value: 22 },
       { slot: { round: 1, field: 'reps' }, value: 20 },
     ])
+  })
+})
+
+describe('mismatchedRound', () => {
+  const step = { exercise: { id: 'x', rounds: 3 }, rounds: [2] } as unknown as FocusStep
+
+  it('reports the spoken round when it is not the one shown on the card', () => {
+    expect(mismatchedRound([{ value: 20, round: 0 }], voiceSlots(step))).toBe(1)
+  })
+
+  it('is null when the spoken round is on the card or no round was spoken', () => {
+    expect(mismatchedRound([{ value: 20, round: 2 }], voiceSlots(step))).toBeNull()
+    expect(mismatchedRound([{ value: 20 }], voiceSlots(step))).toBeNull()
   })
 })

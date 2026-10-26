@@ -61,8 +61,17 @@ export function WorkoutDetailPage() {
       {occurrences.length === 0 ? (
         <Card>
           <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            This routine isn't on the program calendar — it's logged from rest days on the Today
-            page.
+            {def.style === 'bonus' ? (
+              <>
+                Bonus fivers aren't scheduled — add one from any program day on{' '}
+                <Link to="/today" className="underline">
+                  Today
+                </Link>
+                .
+              </>
+            ) : (
+              "This routine isn't on the program calendar — it's logged from rest days on the Today page."
+            )}
           </p>
         </Card>
       ) : def.style === 'completion' || def.style === 'rest' || def.style === 'bonus' ? (

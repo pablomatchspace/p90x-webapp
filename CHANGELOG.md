@@ -15,6 +15,15 @@ didn't bump the package version — they're numbered B01/B02 here for a
 continuous record; #33's package column is left at the un-suffixed version
 that was actually shipped.
 
+## 1.E36.U173.B02 (package 1.36.173-b2) — 2026-10-26
+
+- **fix(workouts): bonus detail copy & voice round feedback.** A bonus fiver's
+  detail page no longer says it's "logged from rest days" — it points to Today,
+  where bonuses are added. Voice entry on a single-round card (E36) now says
+  "this card is round N, nothing logged" when you name another round, instead
+  of the generic "no matching field" message (`mismatchedRound`). Bonus on a
+  rest day via URL is intentionally left as is.
+
 ## 1.E36.U173.B01 (package 1.36.173-b1) — 2026-10-26
 
 - **fix(play): summary checklist labels.** The guided-play summary built each

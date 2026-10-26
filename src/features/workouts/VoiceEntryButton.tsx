@@ -4,6 +4,7 @@ import type { FocusStep } from '@/lib/workouts'
 import type { ExerciseEntry } from '@/lib/shared'
 import {
   assignVoiceValues,
+  mismatchedRound,
   parseVoiceTranscript,
   voiceSlots,
   type VoiceCommand,
@@ -111,6 +112,12 @@ export function VoiceEntryButton({
     )
     const assignments = assignVoiceValues(parsed.values, slots, filled)
     if (assignments.length === 0) {
+      const wrong = mismatchedRound(parsed.values, slots)
+      if (wrong !== null) {
+        const shown = current.rounds.map((r) => r + 1).join(', ')
+        setFeedback(`Heard “${heard}” — this card is round ${shown}, nothing logged.`)
+        return
+      }
       setFeedback(`Heard “${heard}” — no matching field on this card.`)
       return
     }

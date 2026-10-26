@@ -292,3 +292,13 @@ export function assignVoiceValues(
   }
   return out
 }
+
+/**
+ * 1-based round the athlete named that this card doesn't show (E36 cards carry
+ * a single round), else null. Lets the UI say why a value was not logged.
+ */
+export function mismatchedRound(values: VoiceValue[], slots: VoiceSlot[]): number | null {
+  const shown = new Set(slots.map((s) => s.round))
+  const miss = values.find((v) => v.round !== undefined && !shown.has(v.round))
+  return miss?.round === undefined ? null : miss.round + 1
+}
