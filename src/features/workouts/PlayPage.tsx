@@ -13,7 +13,7 @@ import {
   type PlaybackState,
 } from '@/lib/workouts'
 import { getWorkout, hasWorkoutIn } from '@/lib/shared'
-import { workoutOccurrences } from '@/lib/schedule'
+import { workoutOccurrences, type ProgramDay } from '@/lib/schedule'
 import { getTimeline, timelinesFor } from '@/lib/workouts'
 import type { PlaySegment, PlayTimeline } from '@/lib/workouts'
 import {
@@ -194,6 +194,10 @@ export function PlayPage() {
   // (rules-of-hooks); guards the null schedule internally.
   const occurrences = useMemo(() => {
     if (schedule === null) return []
+    // E34: bonus fivers are never scheduled — any program day can host one
+    if (valid && getWorkout(key).style === 'bonus') {
+      return schedule.days.filter((d): d is ProgramDay => d.kind === 'program')
+    }
     const standard = workoutOccurrences(schedule, key)
     if (key !== 'x-stretch') return standard
     const out = [...standard]
@@ -205,7 +209,7 @@ export function PlayPage() {
       }
     }
     return out.sort((a, b) => a.day - b.day)
-  }, [schedule, key])
+  }, [schedule, key, valid])
 
   if (!valid || timeline === null) return <Navigate to={`/workouts/${key}`} replace />
   if (schedule === null) return <Navigate to={`/workouts/${key}`} replace />

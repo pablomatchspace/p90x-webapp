@@ -286,3 +286,12 @@ Post-v1.0.0. See the `1.E32.U159` CHANGELOG entry.
 - ✅ US-166 · E2E, visual baselines & release (S, P1)
 
 Post-v1.0.0. Full write-up: [`docs/epics/E33-gennext-program.md`](../epics/E33-gennext-program.md).
+
+## E34 — P90X Generation Next Focus Play
+
+- ✅ US-167 · NPT play timelines — Plyometrix, Speed and Agility, Accel/Decel, Cardio Boxing (M, P0)
+- ✅ US-168 · ART play timelines — Active Mobility, Active Flexibility, Myofascial Release (S, P0)
+- ✅ US-169 · Bonus fiver timelines (S, P1)
+- ✅ US-170 · E2E & release (S, P1)
+
+Post-v1.0.0. Full write-up: [`docs/epics/E34-gennext-play.md`](../epics/E34-gennext-play.md).

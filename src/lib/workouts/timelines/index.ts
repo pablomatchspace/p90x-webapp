@@ -5,6 +5,15 @@ import { plyometrics } from './plyometrics'
 import { xStretch } from './xStretch'
 import { yogaClassic } from './yogaClassic'
 import { yogaX3 } from './yogaX3'
+import { gnActiveFlexibility, gnActiveMobility, gnMyofascialRelease } from './gennext/art'
+import {
+  gnBonusAbs,
+  gnBonusArms,
+  gnBonusClassicPushPull,
+  gnBonusGlutes,
+  gnBonusShoulders,
+} from './gennext/bonus'
+import { gnAccelDecel, gnCardioBoxing, gnPlyometrix, gnSpeedAndAgility } from './gennext/npt'
 
 /**
  * Registry of authored play timelines (E16/E17/E18/E19). Pure data lookup — no side
@@ -12,7 +21,27 @@ import { yogaX3 } from './yogaX3'
  * a workout may carry multiple variants (E19 yoga classic/x3) resolved via
  * `getTimeline`.
  */
-const TIMELINES: PlayTimeline[] = [plyometrics, kenpoX, xStretch, cardioX, yogaClassic, yogaX3]
+const TIMELINES: PlayTimeline[] = [
+  plyometrics,
+  kenpoX,
+  xStretch,
+  cardioX,
+  yogaClassic,
+  yogaX3,
+  // E34 Generation Next — completion + bonus workouts (strength days use focus mode)
+  gnPlyometrix,
+  gnSpeedAndAgility,
+  gnAccelDecel,
+  gnCardioBoxing,
+  gnActiveMobility,
+  gnActiveFlexibility,
+  gnMyofascialRelease,
+  gnBonusAbs,
+  gnBonusArms,
+  gnBonusClassicPushPull,
+  gnBonusGlutes,
+  gnBonusShoulders,
+]
 
 export function hasTimeline(workoutKey: string): boolean {
   return TIMELINES.some((t) => t.workoutKey === workoutKey)
