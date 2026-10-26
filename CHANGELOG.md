@@ -26,6 +26,8 @@ that was actually shipped.
   workout's warm-up / blocks / rounds / timing / finisher with video timestamps,
   the video↔tracker differences and open questions. Visual baselines updated for
   the 3-option start screen and the locked Settings program row.
+  Review fixes: workout, focus and play routes only accept the active suite's
+  workouts (`hasWorkoutIn`), and bonus fivers are managed from Today only.
 
 ## 1.E33.U165 (package 1.33.165) — 2026-10-26
 

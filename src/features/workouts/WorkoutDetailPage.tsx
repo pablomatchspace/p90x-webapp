@@ -1,8 +1,8 @@
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { Card, Page } from '@/components/Page'
-import { getWorkout, hasWorkout } from '@/lib/shared'
+import { getWorkout, hasWorkoutIn } from '@/lib/shared'
 import { workoutOccurrences } from '@/lib/schedule'
-import { useSchedule } from '@/state/selectors'
+import { useSchedule, useSettings } from '@/state/selectors'
 import { CompletionLog } from './CompletionLog'
 import { MediaLinks } from './MediaLinks'
 import { StrengthGrid } from './StrengthGrid'
@@ -19,7 +19,8 @@ export function WorkoutDetailPage() {
   const params = useParams<{ key: string }>()
   const schedule = useSchedule()
   const key = params.key ?? ''
-  if (!hasWorkout(key)) return <Navigate to="/workouts" replace />
+  const suite = useSettings().program.suite
+  if (!hasWorkoutIn(suite, key)) return <Navigate to="/workouts" replace />
   const def = getWorkout(key)
 
   const backLink = (

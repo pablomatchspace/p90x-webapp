@@ -3,6 +3,7 @@ import {
   getTemplate,
   getWorkout,
   hasWorkout,
+  hasWorkoutIn,
   loggableWorkoutsFor,
   programLabel,
   workoutsFor,
@@ -192,5 +193,15 @@ describe('Generation Next program data (E33 U161, golden master vs BODi calendar
       'gn-bonus-shoulders',
     ])
     expect(programLabel(GN)).toBe('Generation Next')
+  })
+})
+
+describe('hasWorkoutIn (E33 review)', () => {
+  it('only resolves keys of the given suite', () => {
+    expect(hasWorkoutIn('p90x', 'chest-back')).toBe(true)
+    expect(hasWorkoutIn('p90x', 'gn-push-strength')).toBe(false)
+    expect(hasWorkoutIn('gennext', 'gn-push-strength')).toBe(true)
+    expect(hasWorkoutIn('gennext', 'chest-back')).toBe(false)
+    expect(hasWorkoutIn('gennext', 'nope')).toBe(false)
   })
 })

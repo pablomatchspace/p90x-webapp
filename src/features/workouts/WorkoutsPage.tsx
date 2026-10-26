@@ -15,12 +15,11 @@ const P90X_GROUPS: Group[] = [
   },
 ]
 
-/** E33: Generation Next groups by its three pillars, bonus fivers last. */
+/** E33: Generation Next groups by its three pillars; bonus fivers are added from Today. */
 const GENNEXT_GROUPS: Group[] = [
   { title: 'Metabolic Overload (strength)', match: (w) => w.pillar === 'MOT' },
   { title: 'Neuro-Performance (athletic)', match: (w) => w.pillar === 'NPT' },
   { title: 'Active Recovery', match: (w) => w.pillar === 'ART' },
-  { title: '5-minute bonus', match: (w) => w.style === 'bonus' },
 ]
 
 export function WorkoutsPage() {

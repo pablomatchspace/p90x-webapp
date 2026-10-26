@@ -40,7 +40,11 @@ test('Generation Next: start, log a 5-round finisher, bonus, archive, start Clas
   // Workouts list groups the suite by pillar
   await page.goto('#/workouts')
   await expect(page.getByRole('heading', { name: 'Metabolic Overload (strength)' })).toBeVisible()
-  await expect(page.getByRole('heading', { name: '5-minute bonus' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: '5-minute bonus' })).toHaveCount(0)
+
+  // Other-suite deep links bounce back to the list
+  await page.goto('#/workouts/chest-back')
+  await expect(page).toHaveURL(/#\/workouts$/)
 
   // Complete the round, then start the next one as Classic
   await page.goto('#/rounds')

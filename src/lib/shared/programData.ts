@@ -98,6 +98,11 @@ export function workoutsFor(suite: ProgramSuite): WorkoutDef[] {
   return suite === 'p90x' ? catalog.workouts : gennext.workouts
 }
 
+/** A workout key of this suite — guards routes against other-suite deep links. */
+export function hasWorkoutIn(suite: ProgramSuite, key: string): boolean {
+  return workoutsFor(suite).some((w) => w.key === key)
+}
+
 /** Strength + ARX workouts of a suite — the ones with per-exercise logging. */
 export function loggableWorkoutsFor(suite: ProgramSuite): WorkoutDef[] {
   return workoutsFor(suite).filter((w) => w.style === 'strength' || w.style === 'arx')
