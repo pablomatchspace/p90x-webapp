@@ -15,6 +15,15 @@ didn't bump the package version — they're numbered B01/B02 here for a
 continuous record; #33's package column is left at the un-suffixed version
 that was actually shipped.
 
+## 1.E33.U165 (package 1.33.165) — 2026-10-26
+
+- **E33 — P90X Generation Next program, story U165: 5-minute bonus add-ons.** On
+  any Generation Next day (Today and day detail), "Add a 5-minute bonus" offers
+  the five fivers (Abs, Arms, Classic Push-Pull, Glutes, Shoulders). Adding one
+  logs it done in its own session on that program day; its card then shows the
+  usual completion buttons. Bonuses never change day status or adherence — a
+  test pins that a done bonus on an undone day leaves both unchanged.
+
 ## 1.E33.U164 (package 1.33.164) — 2026-10-26
 
 - **E33 — P90X Generation Next program, story U164: program-aware UI.** Workouts
