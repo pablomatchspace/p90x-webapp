@@ -164,7 +164,7 @@ describe('Generation Next program data (E33 U161, golden master vs BODi calendar
       'gn-lower-body': 11,
       'gn-push-strength': 11,
       'gn-pull-strength': 11,
-      'gn-core-circuit': 5,
+      'gn-core-circuit': 9,
       'gn-full-body-strength': 12,
       'gn-full-body-power': 14,
     })
@@ -188,6 +188,23 @@ describe('Generation Next program data (E33 U161, golden master vs BODi calendar
     // ladder finishers keep 5 rungs; the accumulator logs its laps as rounds (cap 5)
     expect(rounds('gn-pull-strength', 'Finisher')).toEqual([5, 5, 5])
     expect(rounds('gn-full-body-power', 'Block 2')).toEqual([5, 5, 5])
+  })
+
+  it('builds Core Circuit from its video: two 4-move blocks and an AMRAP finisher (E36)', () => {
+    const shape = getWorkout('gn-core-circuit').exercises!.map(
+      (e) => `${e.block}|${e.name}|${e.rounds}|${e.secondary ?? ''}`,
+    )
+    expect(shape).toEqual([
+      'Block 1|Single Arm Plank (sec)|3|',
+      'Block 1|Russian Twist|3|weight',
+      'Block 1|Tall Kneeling Alt Halo|3|weight',
+      'Block 1|Plank Pull Through|3|weight',
+      'Block 2|Half Kneeling Woodchop R/L|3|weight',
+      'Block 2|Military Plank|3|mod',
+      'Block 2|Butterfly Sit Up|3|weight',
+      'Block 2|Alternating Side Plank|3|mod',
+      'Finisher|Core AMRAP (rounds)|1|',
+    ])
   })
 
   it('logs holds in seconds and the AMRAP as rounds, without a modified count', () => {

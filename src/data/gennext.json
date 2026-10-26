@@ -1945,6 +1945,24 @@
       "pillar": "MOT",
       "exercises": [
         {
+          "id": "single-arm-plank-sec",
+          "name": "Single Arm Plank (sec)",
+          "rounds": 3,
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1"
+            },
+            {
+              "main": "R2"
+            },
+            {
+              "main": "R3"
+            }
+          ],
+          "block": "Block 1"
+        },
+        {
           "id": "russian-twist",
           "name": "Russian Twist",
           "rounds": 3,
@@ -2033,6 +2051,28 @@
           "block": "Block 2"
         },
         {
+          "id": "military-plank",
+          "name": "Military Plank",
+          "rounds": 3,
+          "secondary": "mod",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "M"
+            },
+            {
+              "main": "R2",
+              "secondary": "M"
+            },
+            {
+              "main": "R3",
+              "secondary": "M"
+            }
+          ],
+          "block": "Block 2"
+        },
+        {
           "id": "butterfly-sit-up",
           "name": "Butterfly Sit Up",
           "rounds": 3,
@@ -2053,24 +2093,68 @@
             }
           ],
           "block": "Block 2"
+        },
+        {
+          "id": "alternating-side-plank",
+          "name": "Alternating Side Plank",
+          "rounds": 3,
+          "secondary": "mod",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "M"
+            },
+            {
+              "main": "R2",
+              "secondary": "M"
+            },
+            {
+              "main": "R3",
+              "secondary": "M"
+            }
+          ],
+          "block": "Block 2"
+        },
+        {
+          "id": "core-amrap-rounds",
+          "name": "Core AMRAP (rounds)",
+          "rounds": 1,
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1"
+            }
+          ],
+          "block": "Finisher"
         }
       ],
       "focusOrder": [
+        ["single-arm-plank-sec", 0],
         ["russian-twist", 0],
         ["tall-kneeling-alt-halo", 0],
         ["plank-pull-through", 0],
+        ["single-arm-plank-sec", 1],
         ["russian-twist", 1],
         ["tall-kneeling-alt-halo", 1],
         ["plank-pull-through", 1],
+        ["single-arm-plank-sec", 2],
         ["russian-twist", 2],
         ["tall-kneeling-alt-halo", 2],
         ["plank-pull-through", 2],
         ["half-kneeling-woodchop-r-l", 0],
+        ["military-plank", 0],
         ["butterfly-sit-up", 0],
+        ["alternating-side-plank", 0],
         ["half-kneeling-woodchop-r-l", 1],
+        ["military-plank", 1],
         ["butterfly-sit-up", 1],
+        ["alternating-side-plank", 1],
         ["half-kneeling-woodchop-r-l", 2],
-        ["butterfly-sit-up", 2]
+        ["military-plank", 2],
+        ["butterfly-sit-up", 2],
+        ["alternating-side-plank", 2],
+        ["core-amrap-rounds", 0]
       ]
     },
     {

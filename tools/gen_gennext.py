@@ -174,10 +174,14 @@ VIDEO: dict[str, list[tuple]] = {
         # EMOM: video runs 3 rounds (tracker printed 5)
         ("Finisher", 3, [[("Heromaker", W), ("Box Jumps", BW)]]),
     ],
-    # No video in the folder yet — tracker only (E33)
+    # Each block's first move is 30 s per side, logged as one row (tracker's "R/L")
     "Core Circuit": [
-        ("Block 1", 3, [[("Russian Twist", W), ("Tall Kneeling Alt Halo", W), ("Plank Pull Through", W)]]),
-        ("Block 2", 3, [[("Half Kneeling Woodchop R/L", W), ("Butterfly Sit Up", W)]]),
+        ("Block 1", 3, [[("Single Arm Plank (sec)", SEC), ("Russian Twist", W),
+                         ("Tall Kneeling Alt Halo", W), ("Plank Pull Through", W)]]),
+        ("Block 2", 3, [[("Half Kneeling Woodchop R/L", W), ("Military Plank", BW),
+                         ("Butterfly Sit Up", W), ("Alternating Side Plank", BW)]]),
+        # 6-min AMRAP: side crunches, shoulder taps, hollow rocks, twisted mountain climbers
+        ("Finisher", 1, [[("Core AMRAP (rounds)", SEC)]]),
     ],
 }
 
@@ -285,7 +289,7 @@ def verify(workouts: list[dict], template: list[dict]) -> list[str]:
         "gn-lower-body": 11,
         "gn-push-strength": 11,
         "gn-pull-strength": 11,
-        "gn-core-circuit": 5,
+        "gn-core-circuit": 9,
         "gn-full-body-strength": 12,
         "gn-full-body-power": 14,
     }, lengths

@@ -63,6 +63,31 @@ test('Generation Next: start, log a 5-round finisher, bonus, archive, start Clas
   await expect(page.getByRole('heading', { name: 'Round over round' })).toHaveCount(0)
 })
 
+test('E36: focus mode plays Push Strength round by round, with bodyweight moves', async ({
+  page,
+}) => {
+  await startGenerationNext(page)
+  await page.getByRole('link', { name: 'Log in focus mode' }).first().click()
+  // 4 + 4 moves × 3 rounds, 3 finisher moves × 5 rungs = 39 one-round cards
+  await expect(page.getByText('Step 1 of 39 · Round 1')).toBeVisible()
+  await expect(page.getByRole('textbox', { name: 'Goblet Squat round 1 reps' })).toBeVisible()
+
+  const next = page.getByRole('button', { name: 'Next', exact: true })
+  await next.click()
+  await expect(page.getByText('Step 2 of 39 · Round 1')).toBeVisible()
+  await page.getByRole('textbox', { name: 'Narrow to Wide Push-Up round 1 reps' }).fill('10')
+  await page
+    .getByRole('textbox', { name: 'Narrow to Wide Push-Up round 1 modified reps' })
+    .fill('4')
+
+  // after the block's 4th move, round 2 starts again at the first move
+  await next.click()
+  await next.click()
+  await next.click()
+  await expect(page.getByText('Step 5 of 39 · Round 2')).toBeVisible()
+  await expect(page.getByRole('textbox', { name: 'Goblet Squat round 2 reps' })).toBeVisible()
+})
+
 test('Generation Next is locked for the round in Settings', async ({ page }) => {
   await startGenerationNext(page)
   await page.goto('#/more/settings')

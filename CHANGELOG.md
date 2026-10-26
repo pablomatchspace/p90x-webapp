@@ -15,6 +15,21 @@ didn't bump the package version — they're numbered B01/B02 here for a
 continuous record; #33's package column is left at the un-suffixed version
 that was actually shipped.
 
+## 1.E36.U173 (package 1.36.173) — 2026-10-26
+
+- **E36 — Generation Next video-faithful logging (U171–U173).** Strength days now
+  log every move the video does, in video order: bodyweight moves (push-ups,
+  pull-ups, jump squats, burpees, planks…) log reps + modified reps, scored like
+  Classic knee/chair rows; holds log seconds; finisher rounds follow the video
+  (EMOMs 3 rounds, Push/Pull ladders 5 rungs, Full Body Power's accumulator one
+  lap per round, Full Body Strength's buy-in/cash-out as one AMRAP row). Focus mode
+  now shows one card per round and walks each block round by round — every move
+  once, then again — with Full Body Power's clusters and the buy-in/cash-out
+  bookends in place (decision D10). Core Circuit is rebuilt from its video (two
+  4-move blocks and an AMRAP finisher). Voice entry understands "modified reps".
+  Tracker moves keep their ids, so logged sessions are untouched; schema unchanged
+  (v14). E35 (Portion Fix) stays reserved and blocked on BODi's container-plan PDFs.
+
 ## 1.E34.U170 (package 1.34.170) — 2026-10-26
 
 - **E34 — P90X Generation Next Focus Play (U167–U170).** Guided Play timelines
