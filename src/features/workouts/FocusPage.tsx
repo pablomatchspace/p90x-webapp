@@ -6,6 +6,7 @@ import { archiveLatestNets, overloadTarget, targetStatus } from '@/lib/workouts'
 import { getWorkout, hasWorkoutIn, type WorkoutDef } from '@/lib/shared'
 import {
   extendPlayback,
+  futureCues,
   pausePlayback,
   remainingMs,
   resumePlayback,
@@ -31,7 +32,17 @@ import { SECONDARY_LABELS } from './entryLabels'
 import { RoundInputs } from './entryUi'
 import { GearList } from './GearList'
 import { TimerCard } from './TimerCard'
-import { beep, mmss, speak } from './timerUtils'
+import {
+  beep,
+  BEEP_MS,
+  cancelCues,
+  cueScheduledAt,
+  scheduleCues,
+  speak,
+  stopSpeech,
+  unlockAudio,
+} from './audio'
+import { mmss } from './timerUtils'
 import { useWakeLock } from './playerHooks'
 import { VoiceEntryButton } from './VoiceEntryButton'
 
@@ -101,19 +112,26 @@ export function FocusPage() {
   }
 
   // E26: rest gets its own lower beep; voice cues speak the upcoming exercise.
-  const applyTick = (result: { state: PlaybackState | null; event: string | null }) => {
+  // E38: beeps sit on the audio clock while playing (effect below); a tick only
+  // beeps when no scheduled cue covers it, and speech follows the beep.
+  const applyTick = (
+    result: { state: PlaybackState | null; event: string | null },
+    fromTick = false,
+  ) => {
     if (result.event !== null) {
-      beep(result.event === 'rest-started' ? 'rest' : 'work')
+      const kind = result.event === 'rest-started' ? 'rest' : 'work'
+      if (!(fromTick && cueScheduledAt(Date.now()))) beep(kind)
       if ('vibrate' in navigator) navigator.vibrate([200, 100, 200])
       if (settings.player.voiceCues) {
+        const after = BEEP_MS[kind]
         if (result.event === 'rest-started' && result.state !== null) {
           const next = steps[result.state.stepIndex + 1]
-          if (next !== undefined) speak(`Rest. Up next: ${next.exercise.name}`)
+          if (next !== undefined) speak(`Rest. Up next: ${next.exercise.name}`, after)
         } else if (result.event === 'step-advanced' && result.state !== null) {
           const step = steps[result.state.stepIndex]
-          if (step !== undefined) speak(step.exercise.name)
+          if (step !== undefined) speak(step.exercise.name, after)
         } else if (result.event === 'sequence-finished') {
-          speak('Sequence complete')
+          speak('Sequence complete', after)
         }
       }
     }
@@ -128,7 +146,7 @@ export function FocusPage() {
       const now = Date.now()
       setNowTick(now)
       const result = tickPlayback(playback, playbackOpts, now)
-      if (result.state !== playback || result.event !== null) applyTick(result)
+      if (result.state !== playback || result.event !== null) applyTick(result, true)
     }, 200)
     return () => clearInterval(id)
     // eslint-disable-next-line react-hooks/exhaustive-deps -- interval is rebuilt on every playback change by design
@@ -136,6 +154,33 @@ export function FocusPage() {
 
   // hold the screen awake for the whole play session (E12/E16 shared hook)
   useWakeLock(playback !== null)
+
+  // E38: put every upcoming beep on the audio clock so cues keep sounding with
+  // the screen off (page timers freeze, scheduled Web Audio doesn't).
+  useEffect(() => {
+    if (playback === null) {
+      cancelCues()
+      return
+    }
+    const opts = {
+      stepCount: steps.length,
+      workSeconds: settings.timer.workSeconds,
+      restSeconds: settings.timer.restSeconds,
+    }
+    scheduleCues(
+      futureCues(playback, opts, Date.now()).map((c) => ({
+        at: c.at,
+        kind: c.event === 'rest-started' ? 'rest' : 'work',
+      })),
+    )
+  }, [playback, steps.length, settings.timer.workSeconds, settings.timer.restSeconds])
+  useEffect(
+    () => () => {
+      cancelCues()
+      stopSpeech()
+    },
+    [],
+  )
 
   if (!valid) return <Navigate to="/workouts" replace />
   if (schedule === null) return <Navigate to={`/workouts/${key}`} replace />
@@ -184,6 +229,7 @@ export function FocusPage() {
   }
 
   const onPlay = () => {
+    unlockAudio() // from the tap: the cues fire from timers, which can't unlock audio
     setPlayDone(false)
     const now = Date.now()
     setNowTick(now)
@@ -192,13 +238,17 @@ export function FocusPage() {
     setPlayback(startPlayback(idx, settings.timer.workSeconds, now))
   }
   const onPause = () => setPlayback((p) => (p === null ? p : pausePlayback(p, Date.now())))
-  const onResume = () => setPlayback((p) => (p === null ? p : resumePlayback(p, Date.now())))
+  const onResume = () => {
+    unlockAudio()
+    setPlayback((p) => (p === null ? p : resumePlayback(p, Date.now())))
+  }
   const onExtend = () => setPlayback((p) => (p === null ? p : extendPlayback(p, 10_000)))
   const onSkip = () => {
     if (playback === null) return
     applyTick(skipPhase(playback, playbackOpts, Date.now()))
   }
   const onStop = () => {
+    stopSpeech()
     setPlayback(null)
     setPlayDone(false)
   }
@@ -472,7 +522,10 @@ export function FocusPage() {
             <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
               <button
                 type="button"
-                onClick={() => updatePlayerSettings({ voiceCues: !settings.player.voiceCues })}
+                onClick={() => {
+                  if (settings.player.voiceCues) stopSpeech()
+                  updatePlayerSettings({ voiceCues: !settings.player.voiceCues })
+                }}
                 aria-pressed={settings.player.voiceCues}
                 className={`rounded-lg border px-2.5 py-1.5 font-medium ${
                   settings.player.voiceCues

@@ -132,3 +132,31 @@ export function skipPhase(state: PlaybackState, opts: PlaybackOpts, now: number)
   const running = state.pausedMs === null ? state : resumePlayback(state, now)
   return tickPlayback({ ...running, endsAt: now }, opts, now)
 }
+
+export interface PlaybackCue {
+  /** epoch ms the phase boundary falls at */
+  at: number
+  event: PlaybackEvent
+}
+
+/**
+ * Every phase boundary still ahead of a running state, in order, found by
+ * replaying `tickPlayback` at each `endsAt`. Lets the audio layer schedule all
+ * beeps on the audio clock up front, so they keep sounding when the screen is
+ * off and the page's timers are frozen. Empty while paused; stops at an untimed
+ * wait (its end is a tap, not a time).
+ */
+export function futureCues(state: PlaybackState, opts: PlaybackOpts, now: number): PlaybackCue[] {
+  const cues: PlaybackCue[] = []
+  let current: PlaybackState | null = state
+  // each step has at most a work and a rest boundary — the bound is a safety net
+  for (let i = 0; i < opts.stepCount * 2 + 2; i++) {
+    if (current === null || current.pausedMs !== null || current.endsAt === null) break
+    const at = Math.max(current.endsAt, now)
+    const result: TickResult = tickPlayback(current, opts, at)
+    if (result.event === null) break
+    cues.push({ at: current.endsAt, event: result.event })
+    current = result.state
+  }
+  return cues
+}

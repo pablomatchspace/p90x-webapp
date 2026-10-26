@@ -131,6 +131,7 @@ test('E26: voice cues announce start and next exercise; rest beeps differ', asyn
   await expect(
     page.getByRole('heading', { name: /Get ready — up next: Run in Place/ }),
   ).toBeVisible()
+  await page.clock.fastForward(1_000) // the cue follows the rest beep rather than talking over it
   const spoken = await page.evaluate(() => (window as unknown as { __spoken: string[] }).__spoken)
   expect(spoken).toContain('March in Place') // spoken at workout start
   expect(spoken).toContain('Get ready. Up next: Run in Place') // spoken at rest start
@@ -142,6 +143,50 @@ test('E26: voice cues announce start and next exercise; rest beeps differ', asyn
   await page.getByRole('button', { name: 'Start', exact: true }).click()
   const after = await page.evaluate(() => (window as unknown as { __spoken: string[] }).__spoken)
   expect(after.filter((t) => t === 'March in Place')).toHaveLength(1)
+})
+
+test('E38: beeps are scheduled on one shared audio clock from the Start tap', async ({ page }) => {
+  // Spy on Web Audio: contexts created, and oscillators started (scheduled).
+  await page.addInitScript(() => {
+    const w = window as unknown as { __ctxs: number; __tones: number }
+    w.__ctxs = 0
+    w.__tones = 0
+    const Real = window.AudioContext
+    class Spy extends Real {
+      constructor() {
+        super()
+        w.__ctxs++
+      }
+      createOscillator() {
+        const osc = super.createOscillator()
+        const start = osc.start.bind(osc)
+        osc.start = (when?: number) => {
+          w.__tones++
+          start(when)
+        }
+        return osc
+      }
+    }
+    window.AudioContext = Spy
+  })
+  await page.clock.fastForward(500) // flush the debounced persister before reloading
+  await page.reload()
+  await expect(page.getByText('Segment 1 of 76')).toBeVisible()
+  const stats = () =>
+    page.evaluate(() => {
+      const w = window as unknown as { __ctxs: number; __tones: number }
+      return { ctxs: w.__ctxs, tones: w.__tones }
+    })
+
+  await page.getByRole('button', { name: 'Start', exact: true }).click()
+  // every upcoming boundary is queued up front — the schedule that survives a locked screen
+  await expect.poll(async () => (await stats()).tones).toBeGreaterThan(100)
+
+  // crossing a boundary and pausing/resuming never spawns a second context
+  await page.clock.fastForward(30_300)
+  await page.getByRole('button', { name: 'Pause', exact: true }).click()
+  await page.getByRole('button', { name: 'Resume', exact: true }).click()
+  expect((await stats()).ctxs).toBe(1)
 })
 
 test('E27: play mode surfaces the media launch button (E23 parity)', async ({ page }) => {
