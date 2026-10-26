@@ -14,7 +14,7 @@ import {
 } from '@/lib/workouts'
 import { getWorkout, hasWorkoutIn } from '@/lib/shared'
 import { workoutOccurrences, type ProgramDay } from '@/lib/schedule'
-import { getTimeline, timelinesFor } from '@/lib/workouts'
+import { getTimeline, loggedLabel, timelinesFor } from '@/lib/workouts'
 import type { PlaySegment, PlayTimeline } from '@/lib/workouts'
 import {
   setCompletionStatus,
@@ -291,7 +291,7 @@ export function PlayPage() {
                     onChange={() => toggleJump(id)}
                     className="h-4 w-4 rounded border-zinc-300 text-red-600 focus:ring-red-500"
                   />
-                  <span>{id.split('-').slice(0, 4).join(' ')}</span>
+                  <span>{loggedLabel(timeline, id)}</span>
                 </label>
               </li>
             ))}

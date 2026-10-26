@@ -15,6 +15,14 @@ didn't bump the package version — they're numbered B01/B02 here for a
 continuous record; #33's package column is left at the un-suffixed version
 that was actually shipped.
 
+## 1.E36.U173.B01 (package 1.36.173-b1) — 2026-10-26
+
+- **fix(play): summary checklist labels.** The guided-play summary built each
+  row's label by truncating the exercise id to four words, so left/right pairs
+  (Kenpo X, Cardio X, Generation Next bonus Glutes) rendered as identical rows
+  and long ids lost their tail ("squat hand release in"). Rows now use the
+  timeline's own move name (`loggedLabel`), keeping "— Left" / "— Right".
+
 ## 1.E36.U173 (package 1.36.173) — 2026-10-26
 
 - **E36 — Generation Next video-faithful logging (U171–U173).** Strength days now

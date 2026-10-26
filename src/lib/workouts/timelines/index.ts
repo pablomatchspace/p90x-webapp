@@ -60,4 +60,12 @@ export function getTimeline(workoutKey: string, variant?: string): PlayTimeline 
   return matches.find((t) => t.variant === variant) ?? matches[0]
 }
 
+/**
+ * Summary-checklist label for a logged exercise id: the first segment's name
+ * (keeps "— Left" / "— Right" and long ids intact); the id itself as a fallback.
+ */
+export function loggedLabel(timeline: PlayTimeline, id: string): string {
+  return timeline.segments.find((s) => s.exerciseId === id)?.name ?? id.replace(/-/g, ' ')
+}
+
 export type { PlayTimeline, PlaySegment } from './types'
