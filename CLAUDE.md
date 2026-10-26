@@ -163,10 +163,12 @@ properties / namespaces).
     tight (`maxDiffPixelRatio: 0.01`). Both `-win32` and `-linux` sets are committed.
     Regenerate **win32** on this machine:
     `npm run build && npx playwright test e2e/smoke.spec.ts --update-snapshots`.
-    Regenerate **linux** via a temporary CI `--update-snapshots` job that uploads the
-    `e2e/smoke.spec.ts-snapshots/` dir as an artifact (download with `gh run download`, keep the
-    `*-linux.png` files), or via the `mcr.microsoft.com/playwright` Docker image when the daemon
-    is running. macOS has no committed baselines — a contributor would generate `-darwin` locally.
+    Regenerate **linux** with the **Update visual baselines** workflow
+    (`.github/workflows/update-visual-baselines.yml`): Actions → Run workflow on your PR branch.
+    It re-renders `smoke.spec.ts` on the CI runner (`--update-snapshots=changed`), commits the
+    changed `*-linux.png` to that branch and starts CI on the new head — review the images in the
+    PR diff, never run it to silence an unintended visual change. It refuses to run on `main`.
+    macOS has no committed baselines — a contributor would generate `-darwin` locally.
 - **E2E pitfalls (learned the hard way):**
   - A frozen `page.clock` (`clock.install`) **never advances by itself** — elapsed-time UI
     (focus playing/paused, any `now`-driven timer) needs an explicit `page.clock.fastForward(ms)`.

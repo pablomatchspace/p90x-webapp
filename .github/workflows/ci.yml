@@ -4,6 +4,8 @@ on:
   pull_request:
   push:
     branches: [main]
+  # started by the "Update visual baselines" workflow for the commit it pushes
+  workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.ref }}

@@ -1,0 +1,55 @@
+# Regenerates the linux visual baselines (e2e/smoke.spec.ts-snapshots/*-linux.png)
+# on the CI runner and commits them to the branch it is run on. Manual only:
+# Actions → "Update visual baselines" → Run workflow → pick the branch.
+# Review the committed images in the PR diff — an accidental UI change would
+# otherwise be "accepted" here. win32 baselines are still regenerated locally.
+name: Update visual baselines
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: update-baselines-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  update:
+    # main is protected by review; baselines are only ever updated on a PR branch
+    if: github.ref != 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build
+      - run: npx playwright test e2e/smoke.spec.ts --update-snapshots=changed
+        env:
+          CI: 'true'
+      - name: Commit regenerated baselines
+        id: commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add e2e/smoke.spec.ts-snapshots/*-linux.png
+          if git diff --cached --quiet; then
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
+            echo "No snapshot changes."
+            exit 0
+          fi
+          git commit -m "test(e2e): regenerate linux visual baselines"
+          git push
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
+      # a push made with GITHUB_TOKEN does not start workflows, so start CI for the new head
+      - name: Re-run CI on the updated branch
+        if: steps.commit.outputs.pushed == 'true'
+        run: gh workflow run ci.yml --ref "$GITHUB_REF_NAME"
+        env:
+          GH_TOKEN: ${{ github.token }}
