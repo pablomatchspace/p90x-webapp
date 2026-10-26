@@ -2,17 +2,30 @@ import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Card, Page } from '@/components/Page'
 import { formatLong, isISODate, todayISO } from '@/lib/shared'
-import { getTemplate, getWorkout, type ProgramKey } from '@/lib/shared'
+import { getTemplate, getWorkout, type ProgramRef } from '@/lib/shared'
 import { startProgram } from '@/state/actions'
 import { useSettings } from '@/state/selectors'
 
-const VARIANTS: { value: ProgramKey; label: string; hint: string }[] = [
-  { value: 'classic', label: 'Classic', hint: 'The standard rotation — resistance-heavy.' },
-  { value: 'lean', label: 'Lean', hint: 'More cardio, less resistance.' },
+const VARIANTS: { value: ProgramRef; label: string; hint: string }[] = [
+  {
+    value: { suite: 'p90x', variant: 'classic' },
+    label: 'Classic',
+    hint: 'The standard rotation — resistance-heavy.',
+  },
+  {
+    value: { suite: 'p90x', variant: 'lean' },
+    label: 'Lean',
+    hint: 'More cardio, less resistance.',
+  },
+  {
+    value: { suite: 'gennext', variant: 'standard' },
+    label: 'Generation Next',
+    hint: 'BODi 2026 — strength, athletic and recovery pillars, 7 days a week. Dumbbells, bench, foam roller.',
+  },
 ]
 
 /** The workouts scheduled on day 1, so the variant choice is concrete. */
-function day1Of(program: ProgramKey): string {
+function day1Of(program: ProgramRef): string {
   return getTemplate(program)[0]
     .workouts.map((key) => getWorkout(key).name)
     .join(' + ')
@@ -32,7 +45,7 @@ export function StartPage() {
   const settings = useSettings()
   const navigate = useNavigate()
   const [date, setDate] = useState(todayISO())
-  const [program, setProgram] = useState<ProgramKey>(settings.program)
+  const [program, setProgram] = useState<ProgramRef>(settings.program)
 
   // Landing here with a program already running (typed URL, back button): never
   // clobber it. Changing day 1 belongs in Settings, which confirms the shift.
@@ -95,21 +108,21 @@ export function StartPage() {
         </Card>
 
         <Card>
-          <h2 className="text-base font-semibold">Which rotation?</h2>
+          <h2 className="text-base font-semibold">Which program?</h2>
           <div
             role="radiogroup"
-            aria-label="Program variant"
+            aria-label="Program"
             className="mt-3 flex flex-col gap-2 sm:flex-row"
           >
             {VARIANTS.map((variant) => (
               <button
-                key={variant.value}
+                key={variant.value.variant}
                 type="button"
                 role="radio"
-                aria-checked={program === variant.value}
+                aria-checked={program.variant === variant.value.variant}
                 onClick={() => setProgram(variant.value)}
                 className={`flex-1 rounded-lg border p-3 text-left transition-colors ${
-                  program === variant.value
+                  program.variant === variant.value.variant
                     ? 'border-red-600 bg-red-50 dark:bg-red-950/30'
                     : 'border-zinc-300 hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800'
                 }`}
@@ -125,7 +138,8 @@ export function StartPage() {
             ))}
           </div>
           <p className="mt-3 text-xs text-zinc-500 dark:text-zinc-400">
-            You can switch rotation later without losing logged sessions.
+            The program is locked for the round — to change it later, complete or delete the round
+            on Rounds.
           </p>
         </Card>
 

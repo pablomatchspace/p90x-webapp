@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Archive, Flag, Pencil, RotateCcw, Trash2 } from 'lucide-react'
 import { Card, Page } from '@/components/Page'
-import { formatLong } from '@/lib/shared'
+import { formatLong, programLabel } from '@/lib/shared'
 import type { ArchivedRound } from '@/lib/shared'
 import { completeRound, deleteRound, renameRound, restoreRound } from '@/state/actions'
 import { useAdherence, useSettings } from '@/state/selectors'
@@ -61,8 +61,8 @@ function CurrentRoundCard({ onArchived }: { onArchived: (label: string) => void 
         <Flag className="h-4 w-4 text-red-600" aria-hidden /> Current round
       </h2>
       <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-        {settings.program === 'lean' ? 'Lean' : 'Classic'} · started{' '}
-        {formatLong(settings.startDate)} · day {day} of {total}
+        {programLabel(settings.program)} · started {formatLong(settings.startDate)} · day {day} of{' '}
+        {total}
         {finished ? ' — complete!' : ''}
       </p>
       <div className="mt-3 flex flex-wrap gap-2">
@@ -174,8 +174,8 @@ function ArchivedRoundCard({ round, canRestore }: { round: ArchivedRound; canRes
             <h2 className="truncate font-semibold">{round.label}</h2>
           )}
           <p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">
-            {round.program === 'lean' ? 'Lean' : 'Classic'} · started {formatLong(round.startDate)}{' '}
-            · archived {formatLong(round.archivedAt.slice(0, 10))}
+            {programLabel(round.program)} · started {formatLong(round.startDate)} · archived{' '}
+            {formatLong(round.archivedAt.slice(0, 10))}
           </p>
         </div>
         <Link

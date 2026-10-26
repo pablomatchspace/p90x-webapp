@@ -12,7 +12,7 @@ import {
   tickPlayback,
   type PlaybackState,
 } from '@/lib/workouts'
-import { getWorkout, hasWorkout } from '@/lib/shared'
+import { getWorkout, hasWorkoutIn } from '@/lib/shared'
 import { workoutOccurrences } from '@/lib/schedule'
 import { getTimeline, timelinesFor } from '@/lib/workouts'
 import type { PlaySegment, PlayTimeline } from '@/lib/workouts'
@@ -41,7 +41,8 @@ export function PlayPage() {
   const params = useParams<{ key: string; programDayId: string }>()
   const key = params.key ?? ''
   const programDayId = params.programDayId ?? ''
-  const valid = hasWorkout(key)
+  const suite = useSettings().program.suite
+  const valid = hasWorkoutIn(suite, key)
 
   const schedule = useSchedule()
   const sessions = useWorkoutSessions(key)

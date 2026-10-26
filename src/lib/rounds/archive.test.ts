@@ -11,7 +11,7 @@ import { applySnapshot, buildArchivedRound, defaultRoundLabel, latestStartStats 
 function liveDoc() {
   const doc = emptyState()
   doc.settings.startDate = '2026-01-05'
-  doc.settings.program = 'lean'
+  doc.settings.program = { suite: 'p90x', variant: 'lean' }
   doc.settings.age = 40
   doc.settings.height = meters(1.8)
   doc.settings.startWeight = kg(82)
@@ -54,7 +54,7 @@ describe('buildArchivedRound', () => {
     expect(round).toMatchObject({
       id: 'r1',
       label: 'Round 1',
-      program: 'lean',
+      program: { suite: 'p90x', variant: 'lean' },
       startDate: '2026-01-05',
     })
     expect(round.bodyLog).toHaveLength(2)
@@ -82,7 +82,7 @@ describe('applySnapshot', () => {
     const settings = emptyState().settings
     applySnapshot(settings, round)
     expect(settings).toMatchObject({
-      program: 'lean',
+      program: { suite: 'p90x', variant: 'lean' },
       startDate: '2026-01-05',
       age: 40,
       height: 1.8,

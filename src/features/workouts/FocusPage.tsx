@@ -3,7 +3,7 @@ import { Link, Navigate, useParams } from 'react-router-dom'
 import { Card, Page } from '@/components/Page'
 import { formatLong } from '@/lib/shared'
 import { archiveLatestNets, overloadTarget, targetStatus } from '@/lib/workouts'
-import { getWorkout, hasWorkout, type WorkoutDef } from '@/lib/shared'
+import { getWorkout, hasWorkoutIn, type WorkoutDef } from '@/lib/shared'
 import {
   extendPlayback,
   pausePlayback,
@@ -69,7 +69,8 @@ export function FocusPage() {
   const params = useParams<{ key: string; programDayId: string }>()
   const key = params.key ?? ''
   const programDayId = params.programDayId ?? ''
-  const valid = hasWorkout(key)
+  const suite = useSettings().program.suite
+  const valid = hasWorkoutIn(suite, key)
   const def = valid ? getWorkout(key) : null
   const steps = def === null ? [] : focusSteps(def)
 

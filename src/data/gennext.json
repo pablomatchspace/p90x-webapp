@@ -1,0 +1,2017 @@
+{
+  "workouts": [
+    {
+      "key": "gn-push-strength",
+      "name": "Push Strength",
+      "style": "strength",
+      "pillar": "MOT",
+      "exercises": [
+        {
+          "id": "goblet-squat",
+          "name": "Goblet Squat",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Block 1"
+        },
+        {
+          "id": "alternating-step-ups",
+          "name": "Alternating Step Ups",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Block 1"
+        },
+        {
+          "id": "wide-stance-rotational-push",
+          "name": "Wide Stance Rotational Push",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Block 1"
+        },
+        {
+          "id": "sumo-squats",
+          "name": "Sumo Squats",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Block 2"
+        },
+        {
+          "id": "incline-bench-press",
+          "name": "Incline Bench Press",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Block 2"
+        },
+        {
+          "id": "curtsey-lunges",
+          "name": "Curtsey Lunges",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Block 2"
+        },
+        {
+          "id": "push-press",
+          "name": "Push Press",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Block 2"
+        },
+        {
+          "id": "squat-thruster",
+          "name": "Squat Thruster",
+          "rounds": 5,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            },
+            {
+              "main": "R4",
+              "secondary": "W"
+            },
+            {
+              "main": "R5",
+              "secondary": "W"
+            }
+          ],
+          "block": "Finisher"
+        }
+      ]
+    },
+    {
+      "key": "gn-pull-strength",
+      "name": "Pull Strength",
+      "style": "strength",
+      "pillar": "MOT",
+      "exercises": [
+        {
+          "id": "dumbbell-clean",
+          "name": "Dumbbell Clean",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Block 1"
+        },
+        {
+          "id": "hip-thrust-on-bench",
+          "name": "Hip Thrust on Bench",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Block 1"
+        },
+        {
+          "id": "upright-row",
+          "name": "Upright Row",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Block 1"
+        },
+        {
+          "id": "rdl",
+          "name": "RDL",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Block 2"
+        },
+        {
+          "id": "sa-row-right",
+          "name": "SA Row Right",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Block 2"
+        },
+        {
+          "id": "sa-row-left",
+          "name": "SA Row Left",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Block 2"
+        },
+        {
+          "id": "pull-over",
+          "name": "Pull Over",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Block 2"
+        },
+        {
+          "id": "skier-swing",
+          "name": "Skier Swing",
+          "rounds": 5,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            },
+            {
+              "main": "R4",
+              "secondary": "W"
+            },
+            {
+              "main": "R5",
+              "secondary": "W"
+            }
+          ],
+          "block": "Finisher"
+        },
+        {
+          "id": "bent-over-reverse-flys",
+          "name": "Bent Over Reverse Flys",
+          "rounds": 5,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            },
+            {
+              "main": "R4",
+              "secondary": "W"
+            },
+            {
+              "main": "R5",
+              "secondary": "W"
+            }
+          ],
+          "block": "Finisher"
+        }
+      ]
+    },
+    {
+      "key": "gn-upper-body",
+      "name": "Upper Body",
+      "style": "strength",
+      "pillar": "MOT",
+      "exercises": [
+        {
+          "id": "tempo-bench-press",
+          "name": "Tempo Bench Press",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Block 1"
+        },
+        {
+          "id": "strict-arnie-press",
+          "name": "Strict Arnie Press",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Block 1"
+        },
+        {
+          "id": "chest-fly",
+          "name": "Chest Fly",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Block 1"
+        },
+        {
+          "id": "skull-crusher",
+          "name": "Skull Crusher",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Block 1"
+        },
+        {
+          "id": "narrow-supported-row",
+          "name": "Narrow Supported Row",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Block 2"
+        },
+        {
+          "id": "prone-fly",
+          "name": "Prone Fly",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Block 2"
+        },
+        {
+          "id": "supinated-biceps-curl",
+          "name": "Supinated Biceps Curl",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Block 2"
+        },
+        {
+          "id": "hammer-curls",
+          "name": "Hammer Curls",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Finisher"
+        },
+        {
+          "id": "lateral-raises",
+          "name": "Lateral Raises",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Finisher"
+        }
+      ]
+    },
+    {
+      "key": "gn-lower-body",
+      "name": "Lower Body",
+      "style": "strength",
+      "pillar": "MOT",
+      "exercises": [
+        {
+          "id": "dual-front-squat",
+          "name": "Dual Front Squat",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Block 1"
+        },
+        {
+          "id": "bulgarian-split-squat-right-side",
+          "name": "Bulgarian Split Squat (Right Side)",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Block 1"
+        },
+        {
+          "id": "bulgarian-split-squat-left-side",
+          "name": "Bulgarian Split Squat (Left Side)",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Block 1"
+        },
+        {
+          "id": "romanian-deadlift-rdl",
+          "name": "Romanian Deadlift (RDL)",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Block 2"
+        },
+        {
+          "id": "lateral-bench-step-downs-right",
+          "name": "Lateral Bench Step Downs (Right)",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Block 2"
+        },
+        {
+          "id": "lateral-bench-step-downs-left",
+          "name": "Lateral Bench Step Downs (Left)",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Block 2"
+        },
+        {
+          "id": "alt-lateral-lunges",
+          "name": "Alt Lateral Lunges",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Finisher"
+        },
+        {
+          "id": "suitcase-deadlift",
+          "name": "Suitcase Deadlift",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Finisher"
+        }
+      ]
+    },
+    {
+      "key": "gn-full-body-strength",
+      "name": "Full Body Strength",
+      "style": "strength",
+      "pillar": "MOT",
+      "exercises": [
+        {
+          "id": "squat-thruster",
+          "name": "Squat Thruster",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Block 1"
+        },
+        {
+          "id": "chest-press-to-leg-raise",
+          "name": "Chest Press to Leg Raise",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Block 1"
+        },
+        {
+          "id": "2-rdl-to-2-bent-over-row",
+          "name": "2 RDL to 2 Bent Over Row",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Block 1"
+        },
+        {
+          "id": "devils-press",
+          "name": "Devil's Press",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Block 1"
+        },
+        {
+          "id": "heel-elevated-squat",
+          "name": "Heel Elevated Squat",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Block 2"
+        },
+        {
+          "id": "frontal-to-lateral-raise",
+          "name": "Frontal to Lateral Raise",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Block 2"
+        },
+        {
+          "id": "renegade-row",
+          "name": "Renegade Row",
+          "rounds": 5,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            },
+            {
+              "main": "R4",
+              "secondary": "W"
+            },
+            {
+              "main": "R5",
+              "secondary": "W"
+            }
+          ],
+          "block": "Finisher"
+        },
+        {
+          "id": "ground-to-overhead",
+          "name": "Ground to Overhead",
+          "rounds": 5,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            },
+            {
+              "main": "R4",
+              "secondary": "W"
+            },
+            {
+              "main": "R5",
+              "secondary": "W"
+            }
+          ],
+          "block": "Finisher"
+        }
+      ]
+    },
+    {
+      "key": "gn-full-body-power",
+      "name": "Full Body Power",
+      "style": "strength",
+      "pillar": "MOT",
+      "exercises": [
+        {
+          "id": "glute-swings-r",
+          "name": "Glute Swings R",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Block 1"
+        },
+        {
+          "id": "glute-swings-l",
+          "name": "Glute Swings L",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Block 1"
+        },
+        {
+          "id": "clean-to-press-r",
+          "name": "Clean to Press R",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Block 1"
+        },
+        {
+          "id": "clean-to-press-l",
+          "name": "Clean to Press L",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Block 1"
+        },
+        {
+          "id": "sa-devils-press-r",
+          "name": "SA Devil's Press R",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Block 1"
+        },
+        {
+          "id": "sa-devils-press-l",
+          "name": "SA Devil's Press L",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Block 1"
+        },
+        {
+          "id": "single-leg-squat-to-bench",
+          "name": "Single Leg Squat to Bench",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Block 2"
+        },
+        {
+          "id": "heromaker",
+          "name": "Heromaker",
+          "rounds": 5,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            },
+            {
+              "main": "R4",
+              "secondary": "W"
+            },
+            {
+              "main": "R5",
+              "secondary": "W"
+            }
+          ],
+          "block": "Finisher"
+        }
+      ]
+    },
+    {
+      "key": "gn-core-circuit",
+      "name": "Core Circuit",
+      "style": "strength",
+      "pillar": "MOT",
+      "exercises": [
+        {
+          "id": "russian-twist",
+          "name": "Russian Twist",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Block 1"
+        },
+        {
+          "id": "tall-kneeling-alt-halo",
+          "name": "Tall Kneeling Alt Halo",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Block 1"
+        },
+        {
+          "id": "plank-pull-through",
+          "name": "Plank Pull Through",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Block 1"
+        },
+        {
+          "id": "half-kneeling-woodchop-r-l",
+          "name": "Half Kneeling Woodchop R/L",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Block 2"
+        },
+        {
+          "id": "butterfly-sit-up",
+          "name": "Butterfly Sit Up",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Block 2"
+        }
+      ]
+    },
+    {
+      "key": "gn-plyometrix",
+      "name": "Plyometrix",
+      "style": "completion",
+      "pillar": "NPT"
+    },
+    {
+      "key": "gn-speed-and-agility",
+      "name": "Speed and Agility",
+      "style": "completion",
+      "pillar": "NPT"
+    },
+    {
+      "key": "gn-accel-decel",
+      "name": "Accel/Decel",
+      "style": "completion",
+      "pillar": "NPT"
+    },
+    {
+      "key": "gn-cardio-boxing",
+      "name": "Cardio Boxing",
+      "style": "completion",
+      "pillar": "NPT"
+    },
+    {
+      "key": "gn-active-mobility",
+      "name": "Active Mobility",
+      "style": "completion",
+      "pillar": "ART"
+    },
+    {
+      "key": "gn-active-flexibility",
+      "name": "Active Flexibility",
+      "style": "completion",
+      "pillar": "ART"
+    },
+    {
+      "key": "gn-myofascial-release",
+      "name": "Myofascial Release",
+      "style": "completion",
+      "pillar": "ART"
+    },
+    {
+      "key": "gn-bonus-abs",
+      "name": "Bonus: 5-Min Abs",
+      "style": "bonus"
+    },
+    {
+      "key": "gn-bonus-arms",
+      "name": "Bonus: 5-Min Arms",
+      "style": "bonus"
+    },
+    {
+      "key": "gn-bonus-classic-push-pull",
+      "name": "Bonus: 5-Min Classic Push-Pull",
+      "style": "bonus"
+    },
+    {
+      "key": "gn-bonus-glutes",
+      "name": "Bonus: 5-Min Glutes",
+      "style": "bonus"
+    },
+    {
+      "key": "gn-bonus-shoulders",
+      "name": "Bonus: 5-Min Shoulders",
+      "style": "bonus"
+    }
+  ],
+  "template": [
+    {
+      "day": 1,
+      "week": 1,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["gn-push-strength"]
+    },
+    {
+      "day": 2,
+      "week": 1,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["gn-plyometrix"]
+    },
+    {
+      "day": 3,
+      "week": 1,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["gn-upper-body"]
+    },
+    {
+      "day": 4,
+      "week": 1,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["gn-active-mobility"]
+    },
+    {
+      "day": 5,
+      "week": 1,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["gn-lower-body"]
+    },
+    {
+      "day": 6,
+      "week": 1,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["gn-cardio-boxing"]
+    },
+    {
+      "day": 7,
+      "week": 1,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["gn-myofascial-release"]
+    },
+    {
+      "day": 8,
+      "week": 2,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["gn-pull-strength"]
+    },
+    {
+      "day": 9,
+      "week": 2,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["gn-cardio-boxing"]
+    },
+    {
+      "day": 10,
+      "week": 2,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["gn-lower-body"]
+    },
+    {
+      "day": 11,
+      "week": 2,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["gn-active-mobility"]
+    },
+    {
+      "day": 12,
+      "week": 2,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["gn-upper-body"]
+    },
+    {
+      "day": 13,
+      "week": 2,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["gn-plyometrix"]
+    },
+    {
+      "day": 14,
+      "week": 2,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["gn-myofascial-release"]
+    },
+    {
+      "day": 15,
+      "week": 3,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["gn-push-strength"]
+    },
+    {
+      "day": 16,
+      "week": 3,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["gn-plyometrix"]
+    },
+    {
+      "day": 17,
+      "week": 3,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["gn-upper-body"]
+    },
+    {
+      "day": 18,
+      "week": 3,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["gn-active-mobility"]
+    },
+    {
+      "day": 19,
+      "week": 3,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["gn-lower-body"]
+    },
+    {
+      "day": 20,
+      "week": 3,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["gn-cardio-boxing"]
+    },
+    {
+      "day": 21,
+      "week": 3,
+      "phase": 1,
+      "recovery": false,
+      "workouts": ["gn-myofascial-release"]
+    },
+    {
+      "day": 22,
+      "week": 4,
+      "phase": 1,
+      "recovery": true,
+      "workouts": ["gn-speed-and-agility"]
+    },
+    {
+      "day": 23,
+      "week": 4,
+      "phase": 1,
+      "recovery": true,
+      "workouts": ["gn-active-mobility"]
+    },
+    {
+      "day": 24,
+      "week": 4,
+      "phase": 1,
+      "recovery": true,
+      "workouts": ["gn-core-circuit"]
+    },
+    {
+      "day": 25,
+      "week": 4,
+      "phase": 1,
+      "recovery": true,
+      "workouts": ["gn-active-flexibility"]
+    },
+    {
+      "day": 26,
+      "week": 4,
+      "phase": 1,
+      "recovery": true,
+      "workouts": ["gn-cardio-boxing"]
+    },
+    {
+      "day": 27,
+      "week": 4,
+      "phase": 1,
+      "recovery": true,
+      "workouts": ["gn-core-circuit"]
+    },
+    {
+      "day": 28,
+      "week": 4,
+      "phase": 1,
+      "recovery": true,
+      "workouts": ["gn-myofascial-release"]
+    },
+    {
+      "day": 29,
+      "week": 5,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["gn-full-body-strength"]
+    },
+    {
+      "day": 30,
+      "week": 5,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["gn-accel-decel"]
+    },
+    {
+      "day": 31,
+      "week": 5,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["gn-pull-strength"]
+    },
+    {
+      "day": 32,
+      "week": 5,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["gn-active-flexibility"]
+    },
+    {
+      "day": 33,
+      "week": 5,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["gn-full-body-power"]
+    },
+    {
+      "day": 34,
+      "week": 5,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["gn-speed-and-agility"]
+    },
+    {
+      "day": 35,
+      "week": 5,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["gn-myofascial-release"]
+    },
+    {
+      "day": 36,
+      "week": 6,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["gn-full-body-power"]
+    },
+    {
+      "day": 37,
+      "week": 6,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["gn-speed-and-agility"]
+    },
+    {
+      "day": 38,
+      "week": 6,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["gn-push-strength"]
+    },
+    {
+      "day": 39,
+      "week": 6,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["gn-active-flexibility"]
+    },
+    {
+      "day": 40,
+      "week": 6,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["gn-full-body-strength"]
+    },
+    {
+      "day": 41,
+      "week": 6,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["gn-accel-decel"]
+    },
+    {
+      "day": 42,
+      "week": 6,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["gn-myofascial-release"]
+    },
+    {
+      "day": 43,
+      "week": 7,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["gn-full-body-strength"]
+    },
+    {
+      "day": 44,
+      "week": 7,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["gn-accel-decel"]
+    },
+    {
+      "day": 45,
+      "week": 7,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["gn-pull-strength"]
+    },
+    {
+      "day": 46,
+      "week": 7,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["gn-active-flexibility"]
+    },
+    {
+      "day": 47,
+      "week": 7,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["gn-full-body-power"]
+    },
+    {
+      "day": 48,
+      "week": 7,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["gn-speed-and-agility"]
+    },
+    {
+      "day": 49,
+      "week": 7,
+      "phase": 2,
+      "recovery": false,
+      "workouts": ["gn-myofascial-release"]
+    },
+    {
+      "day": 50,
+      "week": 8,
+      "phase": 2,
+      "recovery": true,
+      "workouts": ["gn-active-flexibility"]
+    },
+    {
+      "day": 51,
+      "week": 8,
+      "phase": 2,
+      "recovery": true,
+      "workouts": ["gn-core-circuit"]
+    },
+    {
+      "day": 52,
+      "week": 8,
+      "phase": 2,
+      "recovery": true,
+      "workouts": ["gn-cardio-boxing"]
+    },
+    {
+      "day": 53,
+      "week": 8,
+      "phase": 2,
+      "recovery": true,
+      "workouts": ["gn-active-mobility"]
+    },
+    {
+      "day": 54,
+      "week": 8,
+      "phase": 2,
+      "recovery": true,
+      "workouts": ["gn-core-circuit"]
+    },
+    {
+      "day": 55,
+      "week": 8,
+      "phase": 2,
+      "recovery": true,
+      "workouts": ["gn-speed-and-agility"]
+    },
+    {
+      "day": 56,
+      "week": 8,
+      "phase": 2,
+      "recovery": true,
+      "workouts": ["gn-myofascial-release"]
+    },
+    {
+      "day": 57,
+      "week": 9,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["gn-upper-body"]
+    },
+    {
+      "day": 58,
+      "week": 9,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["gn-plyometrix"]
+    },
+    {
+      "day": 59,
+      "week": 9,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["gn-push-strength"]
+    },
+    {
+      "day": 60,
+      "week": 9,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["gn-active-flexibility"]
+    },
+    {
+      "day": 61,
+      "week": 9,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["gn-lower-body"]
+    },
+    {
+      "day": 62,
+      "week": 9,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["gn-cardio-boxing"]
+    },
+    {
+      "day": 63,
+      "week": 9,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["gn-myofascial-release"]
+    },
+    {
+      "day": 64,
+      "week": 10,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["gn-full-body-strength"]
+    },
+    {
+      "day": 65,
+      "week": 10,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["gn-accel-decel"]
+    },
+    {
+      "day": 66,
+      "week": 10,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["gn-pull-strength"]
+    },
+    {
+      "day": 67,
+      "week": 10,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["gn-active-mobility"]
+    },
+    {
+      "day": 68,
+      "week": 10,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["gn-full-body-power"]
+    },
+    {
+      "day": 69,
+      "week": 10,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["gn-speed-and-agility"]
+    },
+    {
+      "day": 70,
+      "week": 10,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["gn-myofascial-release"]
+    },
+    {
+      "day": 71,
+      "week": 11,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["gn-lower-body"]
+    },
+    {
+      "day": 72,
+      "week": 11,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["gn-cardio-boxing"]
+    },
+    {
+      "day": 73,
+      "week": 11,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["gn-pull-strength"]
+    },
+    {
+      "day": 74,
+      "week": 11,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["gn-active-flexibility"]
+    },
+    {
+      "day": 75,
+      "week": 11,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["gn-upper-body"]
+    },
+    {
+      "day": 76,
+      "week": 11,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["gn-plyometrix"]
+    },
+    {
+      "day": 77,
+      "week": 11,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["gn-myofascial-release"]
+    },
+    {
+      "day": 78,
+      "week": 12,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["gn-full-body-power"]
+    },
+    {
+      "day": 79,
+      "week": 12,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["gn-speed-and-agility"]
+    },
+    {
+      "day": 80,
+      "week": 12,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["gn-push-strength"]
+    },
+    {
+      "day": 81,
+      "week": 12,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["gn-active-mobility"]
+    },
+    {
+      "day": 82,
+      "week": 12,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["gn-full-body-strength"]
+    },
+    {
+      "day": 83,
+      "week": 12,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["gn-accel-decel"]
+    },
+    {
+      "day": 84,
+      "week": 12,
+      "phase": 3,
+      "recovery": false,
+      "workouts": ["gn-myofascial-release"]
+    },
+    {
+      "day": 85,
+      "week": 13,
+      "phase": 3,
+      "recovery": true,
+      "workouts": ["gn-active-flexibility"]
+    },
+    {
+      "day": 86,
+      "week": 13,
+      "phase": 3,
+      "recovery": true,
+      "workouts": ["gn-core-circuit"]
+    },
+    {
+      "day": 87,
+      "week": 13,
+      "phase": 3,
+      "recovery": true,
+      "workouts": ["gn-cardio-boxing"]
+    },
+    {
+      "day": 88,
+      "week": 13,
+      "phase": 3,
+      "recovery": true,
+      "workouts": ["gn-active-mobility"]
+    },
+    {
+      "day": 89,
+      "week": 13,
+      "phase": 3,
+      "recovery": true,
+      "workouts": ["gn-core-circuit"]
+    },
+    {
+      "day": 90,
+      "week": 13,
+      "phase": 3,
+      "recovery": true,
+      "workouts": ["gn-speed-and-agility"]
+    }
+  ]
+}

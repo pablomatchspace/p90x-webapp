@@ -22,7 +22,7 @@ function session(programDayId: string, reps: number, knee = 0): Session {
   return { programDayId, entries: { 'standard-push-ups': entry(reps, knee) } }
 }
 
-const schedule = materialize('classic', '2026-01-05', [])
+const schedule = materialize({ suite: 'p90x', variant: 'classic' }, '2026-01-05', [])
 const occurrences = workoutOccurrences(schedule, 'chest-back') // d001/d008/d015/d057/d071
 
 function archive(id: string, sessions: Session[], chairFactor = 2): ArchivedRound {
@@ -30,7 +30,7 @@ function archive(id: string, sessions: Session[], chairFactor = 2): ArchivedRoun
     id,
     archivedAt: '2026-04-06T00:00:00Z',
     label: id,
-    program: 'classic',
+    program: { suite: 'p90x', variant: 'classic' },
     startDate: '2026-01-05',
     scheduleOps: [],
     workoutLogs: sessions.length > 0 ? { 'chest-back': { sessions } } : {},

@@ -10,7 +10,7 @@ import {
 
 /** Fabricated sample settings used by the public import fixture. */
 const sample: Settings = {
-  program: 'classic',
+  program: { suite: 'p90x', variant: 'classic' },
   startDate: '2026-01-05',
   units: 'metric',
   gender: 'male',

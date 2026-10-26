@@ -4,10 +4,10 @@ import { Card, Page } from '@/components/Page'
 import { LineChart, type ChartSeries } from '@/components/LineChart'
 import { movingAverage } from '@/lib/shared'
 import { formatShort } from '@/lib/shared'
-import { loggableWorkouts } from '@/lib/shared'
+import { loggableWorkoutsFor } from '@/lib/shared'
 import { workoutProgression, workoutTotalTrend } from '@/lib/workouts'
 import { formatScore } from '@/lib/workouts'
-import { useSchedule, useScoringSettings, useWorkoutSessions } from '@/state/selectors'
+import { useSchedule, useScoringSettings, useSettings, useWorkoutSessions } from '@/state/selectors'
 
 /**
  * Strength progression charts (US-063, upgraded in E21): per-exercise net-score
@@ -36,9 +36,9 @@ const PALETTE = [
   '#a855f7',
 ]
 
-const LOGGABLE = loggableWorkouts()
-
 export function StrengthProgressPage() {
+  const suite = useSettings().program.suite
+  const LOGGABLE = useMemo(() => loggableWorkoutsFor(suite), [suite])
   const schedule = useSchedule()
   const scoring = useScoringSettings()
   const [workoutKey, setWorkoutKey] = useState(LOGGABLE[0]?.key ?? '')

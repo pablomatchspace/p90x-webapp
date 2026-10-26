@@ -1,7 +1,7 @@
 import { computeAdherence, type Adherence } from '@/lib/schedule'
 import { deriveBody } from '@/lib/body'
 import { compareISO, type ISODate } from '@/lib/shared'
-import { loggableWorkouts, type ProgramKey, type WorkoutStyle } from '@/lib/shared'
+import { loggableWorkoutsFor, type ProgramRef, type WorkoutStyle } from '@/lib/shared'
 import { workoutProgression, workoutTotalTrend, type TopMover } from '@/lib/workouts'
 import { materialize, type Schedule } from '@/lib/schedule'
 import { indexSessions } from '@/lib/schedule'
@@ -26,7 +26,7 @@ import type {
 
 /** The round-scoped slice both a live round and an archive normalize to. */
 export interface RoundData {
-  program: ProgramKey
+  program: ProgramRef
   startDate: ISODate
   scheduleOps: ScheduleOp[]
   workoutLogs: AppState['workoutLogs']
@@ -177,7 +177,7 @@ export function buildRoundReport(data: RoundData, today?: ISODate): RoundReport 
 
   const workouts: WorkoutOutcome[] = []
   const topMovers: RoundTopMover[] = []
-  for (const workout of loggableWorkouts()) {
+  for (const workout of loggableWorkoutsFor(data.program.suite)) {
     const sessions: ReadonlyMap<string, Session> = new Map(
       (data.workoutLogs[workout.key]?.sessions ?? []).map((s) => [s.programDayId, s]),
     )

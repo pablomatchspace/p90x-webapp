@@ -1,8 +1,8 @@
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { Card, Page } from '@/components/Page'
-import { getWorkout, hasWorkout } from '@/lib/shared'
+import { getWorkout, hasWorkoutIn } from '@/lib/shared'
 import { workoutOccurrences } from '@/lib/schedule'
-import { useSchedule } from '@/state/selectors'
+import { useSchedule, useSettings } from '@/state/selectors'
 import { CompletionLog } from './CompletionLog'
 import { MediaLinks } from './MediaLinks'
 import { StrengthGrid } from './StrengthGrid'
@@ -12,13 +12,15 @@ const STYLE_LABELS = {
   arx: 'Reps per session',
   completion: 'Completion log',
   rest: 'Completion log',
+  bonus: 'Bonus add-on — done / not done',
 } as const
 
 export function WorkoutDetailPage() {
   const params = useParams<{ key: string }>()
   const schedule = useSchedule()
   const key = params.key ?? ''
-  if (!hasWorkout(key)) return <Navigate to="/workouts" replace />
+  const suite = useSettings().program.suite
+  if (!hasWorkoutIn(suite, key)) return <Navigate to="/workouts" replace />
   const def = getWorkout(key)
 
   const backLink = (
@@ -63,7 +65,7 @@ export function WorkoutDetailPage() {
             page.
           </p>
         </Card>
-      ) : def.style === 'completion' || def.style === 'rest' ? (
+      ) : def.style === 'completion' || def.style === 'rest' || def.style === 'bonus' ? (
         <CompletionLog def={def} occurrences={occurrences} />
       ) : (
         <StrengthGrid def={def} occurrences={occurrences} />

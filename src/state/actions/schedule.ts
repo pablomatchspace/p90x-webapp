@@ -1,6 +1,6 @@
 import { clock } from '@/state/ports'
 import { beginProgram } from '@/lib/schedule'
-import { isISODate, type ISODate, type ProgramKey, type ScheduleOp } from '@/lib/shared'
+import { isISODate, type ISODate, type ProgramRef, type ScheduleOp } from '@/lib/shared'
 import { useStore } from '@/state/store'
 
 /** Schedule & program-lifecycle use-cases — invariants in `@/lib/schedule`. */
@@ -25,7 +25,7 @@ export function revertScheduleOp(opId: string): void {
  * Refuses to overwrite an existing program (beginProgram's invariant):
  * re-anchoring day 1 goes through `setStartDate` on the Settings screen.
  */
-export function startProgram(startDate: ISODate, program: ProgramKey): void {
+export function startProgram(startDate: ISODate, program: ProgramRef): void {
   if (!isISODate(startDate)) return
   useStore.getState().mutate((draft) => {
     beginProgram(draft.settings, startDate, program)

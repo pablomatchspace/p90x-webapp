@@ -7,7 +7,7 @@ import { bodyFractionSchema, kgSchema, metersSchema } from './units'
  * (scores, penalties, BMI, adherence…) is recomputed by pure functions, mirroring
  * the Excel design where formulas derive everything from entered cells (PRD §8).
  */
-export const SCHEMA_VERSION = 13
+export const SCHEMA_VERSION = 14
 
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'expected YYYY-MM-DD')
 
@@ -38,8 +38,14 @@ export const workoutLinkSchema = z.object({
   audio: httpUrl.optional(),
 })
 
+/** E33: suite + variant (programData `ProgramRef`). */
+export const programRefSchema = z.union([
+  z.object({ suite: z.literal('p90x'), variant: z.enum(['classic', 'lean']) }),
+  z.object({ suite: z.literal('gennext'), variant: z.literal('standard') }),
+])
+
 export const settingsSchema = z.object({
-  program: z.enum(['classic', 'lean']),
+  program: programRefSchema,
   /** null until the user configures or imports a program */
   startDate: isoDate.nullable(),
   units: z.enum(['metric', 'imperial']),
@@ -112,7 +118,7 @@ const exerciseRoundSchema = z.object({
 
 export const exerciseEntrySchema = z.object({
   /** one entry per catalog round: 1, 2, or 4 (Strip-Set Curls) */
-  rounds: z.array(exerciseRoundSchema).min(1).max(4),
+  rounds: z.array(exerciseRoundSchema).min(1).max(5),
 })
 
 export const sessionSchema = z.object({
@@ -175,7 +181,7 @@ export const archivedRoundSchema = z.object({
   archivedAt: z.string(),
   /** user-editable list label, defaulted to "Round N" at archive time */
   label: z.string().min(1),
-  program: z.enum(['classic', 'lean']),
+  program: programRefSchema,
   startDate: isoDate,
   scheduleOps: z.array(scheduleOpSchema),
   workoutLogs: workoutLogsSchema,
@@ -216,7 +222,7 @@ export function emptyState(): AppState {
   return {
     schemaVersion: SCHEMA_VERSION,
     settings: {
-      program: 'classic',
+      program: { suite: 'p90x', variant: 'classic' },
       startDate: null,
       units: 'metric',
       gender: 'male',

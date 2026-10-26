@@ -42,8 +42,13 @@ describe('op builders', () => {
 describe('previewOp', () => {
   it('accepts a valid skip and pushes the projected finish out a day', () => {
     const ops: ScheduleOp[] = []
-    const before = materialize('classic', START, ops)
-    const preview = previewOp('classic', START, ops, newSkipOp('2026-01-14', T))
+    const before = materialize({ suite: 'p90x', variant: 'classic' }, START, ops)
+    const preview = previewOp(
+      { suite: 'p90x', variant: 'classic' },
+      START,
+      ops,
+      newSkipOp('2026-01-14', T),
+    )
     expect(preview.ok).toBe(true)
     expect(preview.reason).toBeNull()
     expect(preview.after?.projectedCompletion).toBe(addDays(before.projectedCompletion, 1))
@@ -51,27 +56,42 @@ describe('previewOp', () => {
   })
 
   it('refuses an out-of-range skip with the engine reason, state unchanged', () => {
-    const preview = previewOp('classic', START, [], newSkipOp('2025-12-25', T))
+    const preview = previewOp(
+      { suite: 'p90x', variant: 'classic' },
+      START,
+      [],
+      newSkipOp('2025-12-25', T),
+    )
     expect(preview.ok).toBe(false)
     expect(preview.reason).toBeTruthy()
     expect(preview.after).toBeNull()
   })
 
   it('refuses a swap outside the calendar with a reason', () => {
-    const preview = previewOp('classic', START, [], newSwapOp('2026-01-20', '2027-01-01', T))
+    const preview = previewOp(
+      { suite: 'p90x', variant: 'classic' },
+      START,
+      [],
+      newSwapOp('2026-01-20', '2027-01-01', T),
+    )
     expect(preview.ok).toBe(false)
     expect(preview.reason).toBeTruthy()
   })
 
   it('supports pull-forward: swapping a gap with the next program day', () => {
     const ops = [skip('2026-01-14')]
-    const schedule = materialize('classic', START, ops)
+    const schedule = materialize({ suite: 'p90x', variant: 'classic' }, START, ops)
     expect(schedule.byDate.get('2026-01-14')?.kind).toBe('gap')
 
     const next = nextProgramDateAfter(schedule, '2026-01-14')
     expect(next).toBe('2026-01-15')
 
-    const preview = previewOp('classic', START, ops, newSwapOp('2026-01-14', next as string, T))
+    const preview = previewOp(
+      { suite: 'p90x', variant: 'classic' },
+      START,
+      ops,
+      newSwapOp('2026-01-14', next as string, T),
+    )
     expect(preview.ok).toBe(true)
     const pulled = preview.after?.byDate.get('2026-01-14')
     expect(pulled?.kind === 'program' && pulled.programDayId).toBe('d010')
@@ -81,7 +101,7 @@ describe('previewOp', () => {
 
 describe('nextProgramDateAfter', () => {
   it('returns null past the end of the calendar', () => {
-    const schedule = materialize('classic', START, [])
+    const schedule = materialize({ suite: 'p90x', variant: 'classic' }, START, [])
     expect(nextProgramDateAfter(schedule, schedule.lastProgramDate)).toBeNull()
   })
 })
@@ -89,10 +109,12 @@ describe('nextProgramDateAfter', () => {
 describe('apply → revert identity (US-031 AC)', () => {
   it('holds for a deterministic swap over a skip history', () => {
     const ops = [skip('2026-01-14')]
-    const base = materialize('classic', START, ops)
+    const base = materialize({ suite: 'p90x', variant: 'classic' }, START, ops)
     const candidate = swap('2026-01-20', '2026-01-21')
     const reverted = { ...candidate, revertedAt: '2026-01-02T00:00:00.000Z' }
-    expect(materialize('classic', START, [...ops, reverted]).days).toEqual(base.days)
+    expect(
+      materialize({ suite: 'p90x', variant: 'classic' }, START, [...ops, reverted]).days,
+    ).toEqual(base.days)
   })
 
   it('holds for arbitrary candidates over arbitrary op histories', () => {
@@ -109,8 +131,8 @@ describe('apply → revert identity (US-031 AC)', () => {
 
     fc.assert(
       fc.property(fc.array(anyOp, { maxLength: 6 }), anyOp, (ops, candidate) => {
-        const base = materialize('classic', START, ops)
-        const withReverted = materialize('classic', START, [
+        const base = materialize({ suite: 'p90x', variant: 'classic' }, START, ops)
+        const withReverted = materialize({ suite: 'p90x', variant: 'classic' }, START, [
           ...ops,
           { ...candidate, revertedAt: 'x' },
         ])
@@ -125,16 +147,10 @@ describe('apply → revert identity (US-031 AC)', () => {
 
 describe('remapBaseWeek', () => {
   it('returns the 7 template slots of a normal week and 6 for week 13', () => {
-    expect(remapBaseWeek('classic', START, [], 1).map((d) => d.programDayId)).toEqual([
-      'd001',
-      'd002',
-      'd003',
-      'd004',
-      'd005',
-      'd006',
-      'd007',
-    ])
-    expect(remapBaseWeek('classic', START, [], 13)).toHaveLength(6)
+    expect(
+      remapBaseWeek({ suite: 'p90x', variant: 'classic' }, START, [], 1).map((d) => d.programDayId),
+    ).toEqual(['d001', 'd002', 'd003', 'd004', 'd005', 'd006', 'd007'])
+    expect(remapBaseWeek({ suite: 'p90x', variant: 'classic' }, START, [], 13)).toHaveLength(6)
   })
 
   it('reflects earlier remaps so a new one composes on top', () => {
@@ -144,21 +160,17 @@ describe('remapBaseWeek', () => {
       fromWeek: 1,
       order: [1, 0, 2, 3, 4, 5, 6],
     }
-    const base = remapBaseWeek('classic', START, [remap], 1)
+    const base = remapBaseWeek({ suite: 'p90x', variant: 'classic' }, START, [remap], 1)
     expect(base.map((d) => d.programDayId).slice(0, 2)).toEqual(['d002', 'd001'])
   })
 
   it('ignores skips and swaps — they act downstream of slot order', () => {
     const ops = [skip('2026-01-05'), swap('2026-01-07', '2026-01-08')]
-    expect(remapBaseWeek('classic', START, ops, 1).map((d) => d.programDayId)).toEqual([
-      'd001',
-      'd002',
-      'd003',
-      'd004',
-      'd005',
-      'd006',
-      'd007',
-    ])
+    expect(
+      remapBaseWeek({ suite: 'p90x', variant: 'classic' }, START, ops, 1).map(
+        (d) => d.programDayId,
+      ),
+    ).toEqual(['d001', 'd002', 'd003', 'd004', 'd005', 'd006', 'd007'])
   })
 })
 

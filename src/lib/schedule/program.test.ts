@@ -20,16 +20,16 @@ describe('canStartProgram', () => {
 describe('beginProgram', () => {
   it('sets program and day 1 on a fresh document', () => {
     const settings = emptyState().settings
-    expect(beginProgram(settings, '2026-01-05', 'lean')).toBe(true)
+    expect(beginProgram(settings, '2026-01-05', { suite: 'p90x', variant: 'lean' })).toBe(true)
     expect(settings.startDate).toBe('2026-01-05')
-    expect(settings.program).toBe('lean')
+    expect(settings.program).toEqual({ suite: 'p90x', variant: 'lean' })
   })
 
   it('refuses to overwrite an existing program', () => {
     const settings = emptyState().settings
-    beginProgram(settings, '2026-01-05', 'classic')
-    expect(beginProgram(settings, '2026-02-02', 'lean')).toBe(false)
+    beginProgram(settings, '2026-01-05', { suite: 'p90x', variant: 'classic' })
+    expect(beginProgram(settings, '2026-02-02', { suite: 'p90x', variant: 'lean' })).toBe(false)
     expect(settings.startDate).toBe('2026-01-05')
-    expect(settings.program).toBe('classic')
+    expect(settings.program).toEqual({ suite: 'p90x', variant: 'classic' })
   })
 })

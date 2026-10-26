@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import { expect, test, type Page } from '@playwright/test'
 // The full 76-segment skip journey is intentionally exhaustive; the emulated
 // mobile device needs more than the default 30s to render all transitions.
@@ -218,21 +219,22 @@ test('X Stretch day shows Play workout with an untimed flow wait (E18)', async (
 })
 
 /**
- * Cardio X play mode (E18): Cardio X is lean-only, so the test switches the
- * sample from classic to lean first. With start date 2026-01-05 and the 01-14
+ * Cardio X play mode (E18): Cardio X is lean-only, so the test imports a
+ * Lean copy of the sample first. With start date 2026-01-05 and the 01-14
  * skip, lean day 16 (Cardio X) lands on 2026-01-21 — the same date the
  * beforeEach clock is already pinned to. Kenpo rep drills wait for a Done tap.
  */
 test('Cardio X (lean) shows Play workout with untimed rep waits (E18)', async ({ page }) => {
-  // Switch the sample's program from classic to lean via Settings.
-  await page.goto('#/more/settings')
-  await page.getByRole('button', { name: 'Switch to lean', exact: true }).click()
-  // Confirm the variant change in the modal (scoped to the dialog to avoid the
-  // row button of the same name).
-  await page
-    .getByRole('dialog', { name: 'Confirm program variant' })
-    .getByRole('button', { name: 'Switch to lean', exact: true })
-    .click()
+  // E33: the variant is locked once a round runs, so import a Lean copy of the sample.
+  const sample = JSON.parse(readFileSync('public/sample-data.json', 'utf8'))
+  sample.settings.program = 'lean'
+  await page.goto('#/more/data')
+  await page.setInputFiles('input[type=file]', {
+    name: 'lean.json',
+    mimeType: 'application/json',
+    buffer: Buffer.from(JSON.stringify(sample)),
+  })
+  await page.getByRole('button', { name: 'Import & replace' }).click()
 
   // The clock is still 2026-01-21 (beforeEach) = lean day 16 = Cardio X.
   await page.goto('#/today')

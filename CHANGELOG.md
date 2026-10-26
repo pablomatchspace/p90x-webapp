@@ -15,6 +15,83 @@ didn't bump the package version — they're numbered B01/B02 here for a
 continuous record; #33's package column is left at the un-suffixed version
 that was actually shipped.
 
+## 1.E33.U166 (package 1.33.166) — 2026-10-26
+
+- **E33 — P90X Generation Next program, story U166: journey E2E, oracle doc &
+  release.** `e2e/gennext.spec.ts` (desktop + realme 16 Pro+) runs start
+  Generation Next → bonus add-on → log a 5-round Squat Thruster finisher (score
+  R×W/10) → pillar-grouped Workouts → complete the round → start Classic (no
+  cross-suite comparison), plus the Settings lock. New oracle
+  `docs/requirements/gennext-workouts.md`: calendar, Dumbbell Tracker, and every
+  workout's warm-up / blocks / rounds / timing / finisher with video timestamps,
+  the video↔tracker differences and open questions. Visual baselines updated for
+  the 3-option start screen and the locked Settings program row.
+  Review fixes: workout, focus and play routes only accept the active suite's
+  workouts (`hasWorkoutIn`), and bonus fivers are managed from Today only.
+
+## 1.E33.U165 (package 1.33.165) — 2026-10-26
+
+- **E33 — P90X Generation Next program, story U165: 5-minute bonus add-ons.** On
+  any Generation Next day (Today and day detail), "Add a 5-minute bonus" offers
+  the five fivers (Abs, Arms, Classic Push-Pull, Glutes, Shoulders). Adding one
+  logs it done in its own session on that program day; its card then shows the
+  usual completion buttons. Bonuses never change day status or adherence — a
+  test pins that a done bonus on an undone day leaves both unchanged.
+
+## 1.E33.U164 (package 1.33.164) — 2026-10-26
+
+- **E33 — P90X Generation Next program, story U164: program-aware UI.** Workouts
+  lists only the active suite — Generation Next grouped by pillar (Metabolic
+  Overload, Neuro-Performance, Active Recovery) plus the 5-minute bonus fivers —
+  under a "<program> — every workout" subtitle. Workout links in Settings cover
+  the active suite only; the Yoga timeline setting shows only for P90X. Calendar
+  cells get short codes for every `gn-*` workout.
+
+## 1.E33.U163 (package 1.33.163) — 2026-10-26
+
+- **E33 — P90X Generation Next program, story U163: start choice & program lock.**
+  `/start` offers Classic, Lean and Generation Next ("Which program?"). Once a
+  round runs, the program is locked: Settings shows it read-only with a link to
+  Rounds (the Classic↔Lean switch and its confirm dialog are gone — amends D8).
+  Round-over-round comparisons only list rounds of the same program suite.
+  `e2e/lean.spec.ts` now covers choosing Lean at start, the lock, and a Lean v1
+  backup importing as Lean; the Cardio X play test imports a Lean copy of the
+  sample instead of switching variants.
+
+## 1.E33.U162 (package 1.33.162) — 2026-10-26
+
+- **E33 — P90X Generation Next program, story U162: dumbbell logging & D9 scoring.**
+  The strength grid groups Generation Next rows under Block 1 / Block 2 / Finisher
+  headings (Dumbbell Tracker layout); finishers log 5 rounds of reps × weight.
+  Scoring is the unchanged Classic engine (decision D9): R×W/rwDivisor averaged
+  over entered rounds, no 2-round drop penalty. Pinned by tests, as is
+  Myofascial Release counting as a required completion workout.
+
+## 1.E33.U161 (package 1.33.161) — 2026-10-26
+
+- **E33 — P90X Generation Next program, story U161: generated program data.**
+  `tools/gen_gennext.py` transcribes the BODi Workout Calendar (90 cells, week 13
+  six days, recovery weeks 4/8/13) and the Dumbbell Tracker (7 workouts, Block 1 /
+  Block 2 / Finisher, 5-round finishers) into `src/data/gennext.json` and
+  self-verifies before writing. `programData` serves it behind the same
+  `ProgramRef` API: 14 `gn-*` workouts with a `pillar` (MOT / NPT / ART), 5 `bonus`
+  fivers, and `block` on every dumbbell exercise. Golden-master tests pin day 1,
+  the week-6 Wednesday cell (Push Strength), every Myofascial Sunday and the
+  tracker layouts.
+
+## 1.E33.U160 (package 1.33.160) — 2026-10-25
+
+- **E33 — P90X Generation Next program, story U160: program suites & variants
+  (schema v14).** A program is now a suite plus a variant — `ProgramRef`
+  `{ suite: 'p90x', variant: 'classic' | 'lean' }`, with `gennext` reserved for
+  Generation Next — replacing `ProgramKey`. `settings.program` and every
+  `archivedRounds[].program` hold the ref; `MIGRATIONS[13]` maps old Classic/Lean
+  strings (live and archived) and leaves anything else for validation to reject.
+  Exercise entries now allow 5 rounds (Generation Next finishers).
+  `programLabel`, `workoutsFor(suite)` and `loggableWorkoutsFor(suite)` replace
+  hardcoded labels and the global loggable list; a `v14` schema fixture joins
+  the historical set and the unmapped-key check rejects leftover program strings.
+
 ## 1.E32.U159 (package 1.32.159) — 2026-07-17
 
 - **E32 — Schema migration safety, story U159: pre-migration safety backups & snapshot validation.** Adds automated safety backups prior to schema migration, isolates historical test data into static JSON fixtures, and validates that migrated historical formats are free from unmapped outdated fields.

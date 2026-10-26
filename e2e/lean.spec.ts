@@ -1,55 +1,47 @@
+import { readFileSync } from 'node:fs'
 import { expect, test, type Page } from '@playwright/test'
 
 /**
- * Lean variant toggle (US-073). A switch on a program that already has data is
- * confirmed with an impact preview (day 1 becomes Core Synergistics), can be
- * cancelled, and once applied persists across a reload. The re-derivation math
- * itself is covered by the materialize golden test.
+ * Program choice & lock (US-073, amended by E33 U163). The variant is picked when
+ * a program starts — Lean is a choice on /start — and is then locked for the
+ * round: Settings shows it read-only and points to Rounds.
  */
 
 async function openSettings(page: Page) {
-  await page.goto('/')
   await page.getByRole('link', { name: 'More' }).first().click()
   await page.getByRole('link', { name: /Settings\s+Stats/ }).click()
   await expect(page.getByRole('heading', { name: 'Settings' })).toBeVisible()
 }
 
-test.beforeEach(async ({ page }) => {
+test('Lean is chosen at start and then locked for the round', async ({ page }) => {
+  await page.goto('#/start')
+  await page.getByRole('radio', { name: /Lean/ }).click()
+  await expect(page.getByRole('radio', { name: /Lean/ })).toHaveAttribute('aria-checked', 'true')
+  await expect(page.getByText(/Day 1: Core Synergistics/)).toBeVisible()
+  await page.getByRole('button', { name: 'Start program' }).click()
+  await expect(page).toHaveURL(/#\/today/)
+
+  await openSettings(page)
+  await expect(page.getByText('Lean', { exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: /Switch to/ })).toHaveCount(0)
+  await expect(page.getByText(/Locked for this round/)).toBeVisible()
+  await page.getByRole('link', { name: 'Change program on Rounds' }).click()
+  await expect(page).toHaveURL(/#\/rounds/)
+})
+
+test('an imported Lean backup keeps its variant (v1 export → v14 ref)', async ({ page }) => {
+  const sample = JSON.parse(readFileSync('public/sample-data.json', 'utf8'))
+  sample.settings.program = 'lean'
   await page.goto('/')
   await page.getByRole('link', { name: 'More' }).first().click()
   await page.getByRole('link', { name: 'Data Import your Excel conversion' }).click()
-  await page.getByRole('button', { name: 'Try sample data' }).click()
+  await page.setInputFiles('input[type=file]', {
+    name: 'lean.json',
+    mimeType: 'application/json',
+    buffer: Buffer.from(JSON.stringify(sample)),
+  })
+  await expect(page.getByText('Lean', { exact: true }).first()).toBeVisible()
   await page.getByRole('button', { name: 'Import & replace' }).click()
-  await expect(page.getByText(/Imported sample dataset/)).toBeVisible()
-})
-
-test('switching Classic to Lean is confirmed, applied and persisted', async ({ page }) => {
   await openSettings(page)
-  await expect(page.getByText('classic', { exact: true })).toBeVisible()
-
-  // a switch with data present must be confirmed, and previews the impact
-  await page.getByRole('button', { name: /Switch to lean/i }).click()
-  await expect(page.getByRole('heading', { name: /Switch to lean\?/i })).toBeVisible()
-  await expect(page.getByText(/day 1 becomes/i)).toBeVisible()
-  // scope to the confirm dialog — the E23 Workout links card also names the routine
-  await expect(
-    page.getByRole('dialog', { name: 'Confirm program variant' }).getByText(/Core Synergistics/),
-  ).toBeVisible()
-
-  // cancelling leaves Classic in place
-  await page.getByRole('button', { name: 'Cancel' }).click()
-  await expect(page.getByText('classic', { exact: true })).toBeVisible()
-
-  // applying switches the variant
-  await page.getByRole('button', { name: /Switch to lean/i }).click()
-  await page
-    .getByRole('dialog')
-    .getByRole('button', { name: /Switch to lean/i })
-    .click()
-  await expect(page.getByText('lean', { exact: true })).toBeVisible()
-
-  // and it survives a reload (the schedule re-derives from the persisted variant)
-  await page.waitForTimeout(400)
-  await page.reload()
-  await expect(page.getByText('lean', { exact: true })).toBeVisible()
+  await expect(page.getByText('Lean', { exact: true })).toBeVisible()
 })
