@@ -277,12 +277,12 @@ Post-v1.0.0. See the `1.E32.U159` CHANGELOG entry.
 
 ## E33 — P90X Generation Next program
 
-- ⏳ US-160 · Suite/variant program model + schema v14 (M, P0)
-- ⏳ US-161 · Generation Next data generator — `tools/gen_gennext.py` → `src/data/gennext.json` (M, P0)
-- ⏳ US-162 · Dumbbell logging by block + Classic scoring (D9) (M, P0)
-- ⏳ US-163 · Start suite/variant, program lock & same-suite comparisons (M, P0)
-- ⏳ US-164 · Program-agnostic UI copy (S, P1)
-- ⏳ US-165 · Bonus 5-min add-ons (S, P1)
-- ⏳ US-166 · E2E, visual baselines & release (S, P1)
+- ✅ US-160 · Suite/variant program model + schema v14 (M, P0)
+- ✅ US-161 · Generation Next data generator — `tools/gen_gennext.py` → `src/data/gennext.json` (M, P0)
+- ✅ US-162 · Dumbbell logging by block + Classic scoring (D9) (M, P0)
+- ✅ US-163 · Start suite/variant, program lock & same-suite comparisons (M, P0)
+- ✅ US-164 · Program-agnostic UI copy (S, P1)
+- ✅ US-165 · Bonus 5-min add-ons (S, P1)
+- ✅ US-166 · E2E, visual baselines & release (S, P1)
 
 Post-v1.0.0. Full write-up: [`docs/epics/E33-gennext-program.md`](../epics/E33-gennext-program.md).

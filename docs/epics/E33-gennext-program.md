@@ -1,6 +1,6 @@
 # Epic E33 — P90X Generation Next program
 
-> **Status:** in progress · **Stories:** US-160 → US-166
+> **Status:** delivered · **Stories:** US-160 → US-166
 > **Ships as:** package **1.33.160**…**1.33.166**, displayed **`1.E33.U160`**…`U166` · **Schema:** **v13 → v14** (`program` becomes `{ suite, variant }`; exercise entries allow 5 rounds)
 > **One-liner:** Start (or start the next round as) **P90X Generation Next** — BODi's
 > 2026 90-day program with Waz Ashayer — next to Classic and Lean: its own
