@@ -15,6 +15,15 @@ didn't bump the package version — they're numbered B01/B02 here for a
 continuous record; #33's package column is left at the un-suffixed version
 that was actually shipped.
 
+## 1.E33.U164 (package 1.33.164) — 2026-10-26
+
+- **E33 — P90X Generation Next program, story U164: program-aware UI.** Workouts
+  lists only the active suite — Generation Next grouped by pillar (Metabolic
+  Overload, Neuro-Performance, Active Recovery) plus the 5-minute bonus fivers —
+  under a "<program> — every workout" subtitle. Workout links in Settings cover
+  the active suite only; the Yoga timeline setting shows only for P90X. Calendar
+  cells get short codes for every `gn-*` workout.
+
 ## 1.E33.U163 (package 1.33.163) — 2026-10-26
 
 - **E33 — P90X Generation Next program, story U163: start choice & program lock.**

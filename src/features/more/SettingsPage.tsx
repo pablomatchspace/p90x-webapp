@@ -405,20 +405,22 @@ export function SettingsPage() {
               ) : null}
             </div>
           </Row>
-          <Row
-            label="Yoga timeline"
-            hint="Choose the default timeline that plays on Yoga X days — can be overridden per session"
-          >
-            <Segmented
+          {settings.program.suite === 'p90x' ? (
+            <Row
               label="Yoga timeline"
-              value={settings.yoga}
-              options={[
-                { value: 'classic', label: 'Classic (90 min)' },
-                { value: 'x3', label: 'P90X3 (30 min)' },
-              ]}
-              onChange={(value) => updateYogaVariant(value)}
-            />
-          </Row>
+              hint="Choose the default timeline that plays on Yoga X days — can be overridden per session"
+            >
+              <Segmented
+                label="Yoga timeline"
+                value={settings.yoga}
+                options={[
+                  { value: 'classic', label: 'Classic (90 min)' },
+                  { value: 'x3', label: 'P90X3 (30 min)' },
+                ]}
+                onChange={(value) => updateYogaVariant(value)}
+              />
+            </Row>
+          ) : null}
           <Row
             label="Start date"
             hint={

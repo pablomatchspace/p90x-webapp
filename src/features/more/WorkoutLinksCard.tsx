@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Card } from '@/components/Page'
 import { MEDIA_KINDS, parseLinkInput, type MediaKind } from '@/lib/shared'
-import { workouts } from '@/lib/shared'
+import { workoutsFor } from '@/lib/shared'
 import { updateWorkoutLink } from '@/state/actions'
 import { useSettings } from '@/state/selectors'
 
@@ -77,7 +77,7 @@ function LinkField({
 }
 
 export function WorkoutLinksCard() {
-  const links = useSettings().workoutLinks
+  const { workoutLinks: links, program } = useSettings()
   return (
     <Card>
       <h2 className="text-base font-semibold">Workout links</h2>
@@ -87,7 +87,7 @@ export function WorkoutLinksCard() {
         streaming site, your media server…). Blank a field to remove its button.
       </p>
       <div className="mt-2 divide-y divide-zinc-100 dark:divide-zinc-800">
-        {workouts
+        {workoutsFor(program.suite)
           .filter((w) => w.style !== 'rest')
           .map((w) => (
             <div key={w.key} className="py-2">
