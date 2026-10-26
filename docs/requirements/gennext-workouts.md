@@ -16,8 +16,9 @@ the videos show no exercise-name overlays).
 renamed on disk to match their content: *Active Mobility* ↔ *Myofascial Release*
 were swapped; *Pull Strength* / *Full Body Strength* / *Full Body Power* were
 rotated; *Sample Workout (Preview)* is the pull-up-bar setup clip. *Sample Workout
-(Full Workout)* is a free taster, not a program workout — so **Core Circuit has no
-video** and is defined by the tracker alone.
+(Full Workout)* is a free taster, not a program workout. Core Circuit's video
+(38.0 min, BODi lists 38 min) was added on 2026-10-26 (E36); before that it was
+defined by the tracker alone.
 
 ## Pillars
 
@@ -322,12 +323,25 @@ Puppy pose forearm roll 21:15 · Arm R (wrist→shoulder) 22:03 · Arm L 22:54 (
 
 ## 14. Core Circuit
 
-> Core Circuit — strength (dumbbell); **tracker-PDF only** (no video). Pillar: MOT.
-> No Play timeline (E34) unless a video turns up.
+> Core Circuit (38.0 min) — strength (core); one medium–heavy dumbbell, mat. Pillar: MOT.
+> Logged in focus mode like the other strength days (no Play timeline).
 
-- Block 1 (3 rounds): Russian Twist; Tall Kneeling Alt Halo; Plank Pull Through.
-- Block 2 (3 rounds): Half Kneeling Woodchop R/L; Butterfly Sit Up.
-- No finisher on the tracker; work/rest timing unknown.
+- Warm-up 00:00–03:30 (30 s each): bird dog, bird-dog crunch R/L, quadruped hip circles, beast to high plank / down dog.
+- Format (stated 03:31): 2 blocks × 4 moves × 3 rounds, 30 s work, 15 s transition; each block's first move runs 30 s left + 30 s right.
+- Block 1 (anti-rotation, rotation, stability; demo 04:00–05:15):
+  1. Single-Arm Plank, L then R hand behind back — r1 05:16, r2 08:51, r3 12:23  [NOT in tracker — bodyweight hold]
+  2. Russian Twist (DB; mod heels down / no DB) — r1 06:28, r2 09:52, r3 13:35  [tracker ✓]
+  3. Alternating Halo (DB up and over the head, crunch to the oblique) — r1 07:20, r2 10:42, r3 14:15  [tracker ✓ "Tall Kneeling Alt Halo"]
+  4. Plank Pull-Through (medium DB, dragged outside the body) — r1 08:00, r2 11:27, r3 14:55 (ends ~15:40)  [tracker ✓]
+- Block 2 (weighted / bodyweight alternating; explained 15:45):
+  1. Half-Kneeling Woodchop, 30 s each side (heavy DB) — r1 17:28, r2 20:58, r3 24:35  [tracker ✓ "Half Kneeling Woodchop R/L"]
+  2. Military Plank, high plank to low plank and back — r1 18:30, r2 22:03, r3 25:35  [NOT in tracker — bodyweight]
+  3. Butterfly Sit-Up (DB overhead, soles together; mod no DB, touch toes) — r1 19:15, r2 22:50, r3 26:20  [tracker ✓]
+  4. Alternating Side Plank (low plank, rotate to side plank) — r1 20:14, r2 23:37, r3 27:16 (ends ~27:50)  [NOT in tracker — bodyweight]
+- Finisher: 6-min AMRAP "merry-go-round" (stated 27:51; 29:31–35:30): 5 side-lying oblique crunches each side,
+  10 shoulder taps, 15 hollow rocks (mod 15 s hollow hold), 20 twisted mountain climbers; count rounds.
+  [NOT in tracker — app logs rounds completed]
+- Cool-down ~35:30–38:00: cobra / abdominal stretch, side-body and hip-flexor stretch R/L.
 
 ## 15. Bonus 5-minute workouts ("fivers")
 
@@ -356,17 +370,25 @@ if back down before time, hold plank of choice. Mods: chin-ups, pull-up assist.
 - **Pull Strength**: B1: video starts with Pull-Up (not in tracker); other 3 match in order. B2 4/4 match, same order. Finisher: tracker 5 rounds vs video open-ended ladder (2, 4, 6, 8, 10 … in 6 min; demo reached 5 rungs); Chin-Ups not in tracker; reverse fly done chest-supported vs tracker "Bent Over Reverse Flys".
 - **Full Body Strength**: B1 4/4 match, same order. B2: video has Negative Pull-Up + Tempo Push-Up as moves 1–2 (not in tracker); Heel Elevated Squat + Frontal to Lateral Raise match as moves 3–4. Finisher: **tracker 5 rounds vs video 3 rounds** of Renegade Row / Ground to Overhead; video adds X Sit-Up plus a bodyweight buy-in/cash-out AMRAP (squat, hand-release push-up, frogger), none in tracker.
 - **Full Body Power**: B1 = 3 clusters; tracker's 6 R/L moves match in order; cluster core moves (Hollow Hold, Low Plank Reach, Unilateral V-Sit) not in tracker. B2 is a 10-min +1-rep accumulator (5 to ~10 reps), not fixed rounds; Chin-Ups + Decline Push-Up not in tracker. Finisher: **tracker 5 rounds vs video 3 EMOM rounds** of Heromaker; Box Jumps not in tracker.
+- **Core Circuit**: all 5 tracker moves match, in order; video adds Single-Arm Plank (B1 move 1), Military Plank and Alternating Side Plank (B2 moves 2 and 4) and a 6-min AMRAP finisher (tracker: no finisher).
 - **Cardio Boxing / Accel-Decel**: no tracker; nothing to compare.
 
-**App rule (E33):** the catalog logs exactly the tracker's exercises and round
-counts; bodyweight moves and finisher formats (ladders, EMOMs, accumulators) are
-performed with the video and logged only as part of the workout. The open
-questions below are listed in the E33 PR for the owner to confirm.
+**App rule (E36, decision D10, superseding E33's tracker-only rule):** the catalog
+logs every block and finisher move **in video order**. Tracker moves keep their
+tracker names (their ids are in logged data) and log reps × weight; bodyweight moves
+log reps + modified reps (knees, assist band, step instead of jump); Hollow Hold
+logs seconds. Round counts follow the video: EMOM finishers run 3 rounds (Full Body
+Strength, Full Body Power, Upper Body, Lower Body); the Push / Pull ladders keep 5
+rungs (rung N = round N); Full Body Power's accumulator logs each lap as a round
+(capped at 5); Full Body Strength's buy-in / cash-out is one "AMRAP (rounds)" row
+with two rounds. Focus mode plays each block round by round (every move once, then
+again), except Full Body Power's Block 1, which finishes each R / L / core cluster
+before the next; the buy-in opens the Full Body Strength finisher and the cash-out
+closes it. Warm-ups and cool-downs are not logged.
 
 ## Open questions
 
-1. Full Body Strength and Full Body Power finishers: tracker shows 5 rounds, the
-   videos run 3. The app keeps 5 (unused rounds simply stay empty).
-2. Lower Body step-downs: does tracker "(Right)" mean the working or the floating leg?
+1. Lower Body step-downs: does tracker "(Right)" mean the working or the floating leg?
    The app keeps the tracker's order.
-3. Should the tracker-absent bodyweight moves (pull-ups, push-ups…) get rep logging?
+
+Resolved (E36): finisher rounds follow the video; bodyweight moves get rep logging.

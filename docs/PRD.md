@@ -48,17 +48,18 @@ Single persona: **the athlete-owner** — metric units, digital-scale user, mid-
 
 ## 5. Locked product decisions (from PRD Q&A, 2026-07-06)
 
-| #   | Decision                | Choice                                                                                                                                 |
-| --- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| D1  | Stack                   | **Vite + React + TypeScript**, client-side only, GitHub Pages                                                                          |
-| D2  | Rescheduling scope      | **All four modes**: skip/shift-remaining, move/swap single days, pull-forward, weekly template editor                                  |
-| D3  | Personal data           | **Local import file only** — converter output is gitignored; public repo ships a fabricated sample dataset for demos/tests only        |
-| D4  | Dashboard               | All KPI groups: body metrics vs targets **plus body progress charts**, adherence & pace, strength progression, phase/next-workout card |
-| D5  | Quotes                  | Built-in offline pack + **editable** in Settings (stored in user data); deterministic quote-of-the-day                                 |
-| D6  | Entry UX                | **All**: last-time ghost prefill, steppers/numeric keypad, focus mode, rest/interval timer                                             |
-| D7  | Platform                | **Mobile-first + installable offline PWA**                                                                                             |
-| D8  | Extras                  | **All in**: free-form notes page, Lean-variant toggle, body-fat calculators (Navy/3-site/7-site)                                       |
-| D9  | Generation Next scoring | **Reuse the Classic engine** (E33): dumbbell rows are R×W/rwDivisor averaged over 3–5 rounds; the 2-round drop penalty never applies   |
+| #   | Decision                | Choice                                                                                                                                                          |
+| --- | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| D1  | Stack                   | **Vite + React + TypeScript**, client-side only, GitHub Pages                                                                                                   |
+| D2  | Rescheduling scope      | **All four modes**: skip/shift-remaining, move/swap single days, pull-forward, weekly template editor                                                           |
+| D3  | Personal data           | **Local import file only** — converter output is gitignored; public repo ships a fabricated sample dataset for demos/tests only                                 |
+| D4  | Dashboard               | All KPI groups: body metrics vs targets **plus body progress charts**, adherence & pace, strength progression, phase/next-workout card                          |
+| D5  | Quotes                  | Built-in offline pack + **editable** in Settings (stored in user data); deterministic quote-of-the-day                                                          |
+| D6  | Entry UX                | **All**: last-time ghost prefill, steppers/numeric keypad, focus mode, rest/interval timer                                                                      |
+| D7  | Platform                | **Mobile-first + installable offline PWA**                                                                                                                      |
+| D8  | Extras                  | **All in**: free-form notes page, Lean-variant toggle, body-fat calculators (Navy/3-site/7-site)                                                                |
+| D9  | Generation Next scoring | **Reuse the Classic engine** (E33): dumbbell rows are R×W/rwDivisor averaged over 3–5 rounds; the 2-round drop penalty never applies                            |
+| D10 | Generation Next logging | **Follow the videos** (E36): bodyweight moves log reps + modified reps (scored like knee/chair rows), holds log seconds; focus mode plays rounds in video order |
 
 Supporting defaults: Tailwind CSS for styling; Zustand for state; hand-rolled SVG for charts (no chart library); Zod for import validation; `vite-plugin-pwa` for the service worker; dates handled as local-calendar ISO strings (`YYYY-MM-DD`, no UTC conversion); light/dark theme via system preference.
 
@@ -378,6 +379,8 @@ The table below is a snapshot; the **living record** is the story index
 | E32 — Schema migration safety ([CHANGELOG](../CHANGELOG.md))                          | US-159          | ✅ delivered |
 | [E33 — P90X Generation Next program](epics/E33-gennext-program.md)                    | US-160 → US-166 | ✅ delivered |
 | [E34 — Generation Next Focus Play](epics/E34-gennext-play.md)                         | US-167 → US-170 | ✅ delivered |
+| E35 — Portion Fix nutrition                                                           | —               | ⏸ blocked    |
+| [E36 — Generation Next video-faithful logging](epics/E36-gennext-video-logging.md)    | US-171 → US-173 | ✅ delivered |
 
 E22/E24 carve an exception out of the §3 "Nutrition" non-goal: the excluded
 workbook nutrition _sheets_ stay excluded, but the app now derives calorie and
@@ -425,12 +428,12 @@ All ACs demonstrably met · unit tests for new logic (lib code: required) · E2E
 
 ## 12. Release plan
 
-| Phase           | Contents                                                                                              | Gate                                                             | Status                         |
-| --------------- | ----------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- | ------------------------------ |
-| **V1 core**     | E0 → E1 → E2 → E3 (US-030/031/032/034) → E4 (minus US-046) → E5 → E6 → US-070, US-080, US-082, US-083 | Owner demo: import real file locally, use for a real workout day | ✅ shipped · ⏳ demo gate open |
-| **V1.1 extras** | US-033, US-046, US-071, US-072, US-073, US-074, US-081                                                | CI green + owner spot-check                                      | ✅ shipped                     |
-| **Post-v1.0.0** | E9 onwards — each later epic spec'd under `docs/epics/` and indexed in `docs/stories/README.md`       | CI green + per-epic merge                                        | ✅ E9 → E34 shipped            |
-| Ongoing         | Hardening, quote-pack curation, feedback fixes                                                        | —                                                                | —                              |
+| Phase           | Contents                                                                                              | Gate                                                             | Status                            |
+| --------------- | ----------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- | --------------------------------- |
+| **V1 core**     | E0 → E1 → E2 → E3 (US-030/031/032/034) → E4 (minus US-046) → E5 → E6 → US-070, US-080, US-082, US-083 | Owner demo: import real file locally, use for a real workout day | ✅ shipped · ⏳ demo gate open    |
+| **V1.1 extras** | US-033, US-046, US-071, US-072, US-073, US-074, US-081                                                | CI green + owner spot-check                                      | ✅ shipped                        |
+| **Post-v1.0.0** | E9 onwards — each later epic spec'd under `docs/epics/` and indexed in `docs/stories/README.md`       | CI green + per-epic merge                                        | ✅ E9 → E36 shipped (E35 blocked) |
+| Ongoing         | Hardening, quote-pack curation, feedback fixes                                                        | —                                                                | —                                 |
 
 E0–E8 shipped as **v1.0.0**; E9 followed on `main`. The one V1 gate still open is
 the **owner demo** — importing the real workbook locally and using the app for a

@@ -29,6 +29,28 @@
           "block": "Block 1"
         },
         {
+          "id": "narrow-to-wide-push-up",
+          "name": "Narrow to Wide Push-Up",
+          "rounds": 3,
+          "secondary": "mod",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "M"
+            },
+            {
+              "main": "R2",
+              "secondary": "M"
+            },
+            {
+              "main": "R3",
+              "secondary": "M"
+            }
+          ],
+          "block": "Block 1"
+        },
+        {
           "id": "alternating-step-ups",
           "name": "Alternating Step Ups",
           "rounds": 3,
@@ -189,7 +211,108 @@
             }
           ],
           "block": "Finisher"
+        },
+        {
+          "id": "diamond-push-up",
+          "name": "Diamond Push-Up",
+          "rounds": 5,
+          "secondary": "mod",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "M"
+            },
+            {
+              "main": "R2",
+              "secondary": "M"
+            },
+            {
+              "main": "R3",
+              "secondary": "M"
+            },
+            {
+              "main": "R4",
+              "secondary": "M"
+            },
+            {
+              "main": "R5",
+              "secondary": "M"
+            }
+          ],
+          "block": "Finisher"
+        },
+        {
+          "id": "bench-dip",
+          "name": "Bench Dip",
+          "rounds": 5,
+          "secondary": "mod",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "M"
+            },
+            {
+              "main": "R2",
+              "secondary": "M"
+            },
+            {
+              "main": "R3",
+              "secondary": "M"
+            },
+            {
+              "main": "R4",
+              "secondary": "M"
+            },
+            {
+              "main": "R5",
+              "secondary": "M"
+            }
+          ],
+          "block": "Finisher"
         }
+      ],
+      "focusOrder": [
+        ["goblet-squat", 0],
+        ["narrow-to-wide-push-up", 0],
+        ["alternating-step-ups", 0],
+        ["wide-stance-rotational-push", 0],
+        ["goblet-squat", 1],
+        ["narrow-to-wide-push-up", 1],
+        ["alternating-step-ups", 1],
+        ["wide-stance-rotational-push", 1],
+        ["goblet-squat", 2],
+        ["narrow-to-wide-push-up", 2],
+        ["alternating-step-ups", 2],
+        ["wide-stance-rotational-push", 2],
+        ["sumo-squats", 0],
+        ["incline-bench-press", 0],
+        ["curtsey-lunges", 0],
+        ["push-press", 0],
+        ["sumo-squats", 1],
+        ["incline-bench-press", 1],
+        ["curtsey-lunges", 1],
+        ["push-press", 1],
+        ["sumo-squats", 2],
+        ["incline-bench-press", 2],
+        ["curtsey-lunges", 2],
+        ["push-press", 2],
+        ["squat-thruster", 0],
+        ["diamond-push-up", 0],
+        ["bench-dip", 0],
+        ["squat-thruster", 1],
+        ["diamond-push-up", 1],
+        ["bench-dip", 1],
+        ["squat-thruster", 2],
+        ["diamond-push-up", 2],
+        ["bench-dip", 2],
+        ["squat-thruster", 3],
+        ["diamond-push-up", 3],
+        ["bench-dip", 3],
+        ["squat-thruster", 4],
+        ["diamond-push-up", 4],
+        ["bench-dip", 4]
       ]
     },
     {
@@ -198,6 +321,28 @@
       "style": "strength",
       "pillar": "MOT",
       "exercises": [
+        {
+          "id": "pull-up",
+          "name": "Pull-Up",
+          "rounds": 3,
+          "secondary": "mod",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "M"
+            },
+            {
+              "main": "R2",
+              "secondary": "M"
+            },
+            {
+              "main": "R3",
+              "secondary": "M"
+            }
+          ],
+          "block": "Block 1"
+        },
         {
           "id": "dumbbell-clean",
           "name": "Dumbbell Clean",
@@ -353,6 +498,36 @@
           "block": "Block 2"
         },
         {
+          "id": "chin-up",
+          "name": "Chin-Up",
+          "rounds": 5,
+          "secondary": "mod",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "M"
+            },
+            {
+              "main": "R2",
+              "secondary": "M"
+            },
+            {
+              "main": "R3",
+              "secondary": "M"
+            },
+            {
+              "main": "R4",
+              "secondary": "M"
+            },
+            {
+              "main": "R5",
+              "secondary": "M"
+            }
+          ],
+          "block": "Finisher"
+        },
+        {
           "id": "skier-swing",
           "name": "Skier Swing",
           "rounds": 5,
@@ -412,6 +587,47 @@
           ],
           "block": "Finisher"
         }
+      ],
+      "focusOrder": [
+        ["pull-up", 0],
+        ["dumbbell-clean", 0],
+        ["hip-thrust-on-bench", 0],
+        ["upright-row", 0],
+        ["pull-up", 1],
+        ["dumbbell-clean", 1],
+        ["hip-thrust-on-bench", 1],
+        ["upright-row", 1],
+        ["pull-up", 2],
+        ["dumbbell-clean", 2],
+        ["hip-thrust-on-bench", 2],
+        ["upright-row", 2],
+        ["rdl", 0],
+        ["sa-row-right", 0],
+        ["sa-row-left", 0],
+        ["pull-over", 0],
+        ["rdl", 1],
+        ["sa-row-right", 1],
+        ["sa-row-left", 1],
+        ["pull-over", 1],
+        ["rdl", 2],
+        ["sa-row-right", 2],
+        ["sa-row-left", 2],
+        ["pull-over", 2],
+        ["chin-up", 0],
+        ["skier-swing", 0],
+        ["bent-over-reverse-flys", 0],
+        ["chin-up", 1],
+        ["skier-swing", 1],
+        ["bent-over-reverse-flys", 1],
+        ["chin-up", 2],
+        ["skier-swing", 2],
+        ["bent-over-reverse-flys", 2],
+        ["chin-up", 3],
+        ["skier-swing", 3],
+        ["bent-over-reverse-flys", 3],
+        ["chin-up", 4],
+        ["skier-swing", 4],
+        ["bent-over-reverse-flys", 4]
       ]
     },
     {
@@ -509,6 +725,28 @@
           "block": "Block 1"
         },
         {
+          "id": "wide-grip-pull-up",
+          "name": "Wide Grip Pull-Up",
+          "rounds": 3,
+          "secondary": "mod",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "M"
+            },
+            {
+              "main": "R2",
+              "secondary": "M"
+            },
+            {
+              "main": "R3",
+              "secondary": "M"
+            }
+          ],
+          "block": "Block 2"
+        },
+        {
           "id": "narrow-supported-row",
           "name": "Narrow Supported Row",
           "rounds": 3,
@@ -575,6 +813,28 @@
           "block": "Block 2"
         },
         {
+          "id": "push-ups",
+          "name": "Push-Ups",
+          "rounds": 3,
+          "secondary": "mod",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "M"
+            },
+            {
+              "main": "R2",
+              "secondary": "M"
+            },
+            {
+              "main": "R3",
+              "secondary": "M"
+            }
+          ],
+          "block": "Finisher"
+        },
+        {
           "id": "hammer-curls",
           "name": "Hammer Curls",
           "rounds": 3,
@@ -592,6 +852,28 @@
             {
               "main": "R3",
               "secondary": "W"
+            }
+          ],
+          "block": "Finisher"
+        },
+        {
+          "id": "bench-dips",
+          "name": "Bench Dips",
+          "rounds": 3,
+          "secondary": "mod",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "M"
+            },
+            {
+              "main": "R2",
+              "secondary": "M"
+            },
+            {
+              "main": "R3",
+              "secondary": "M"
             }
           ],
           "block": "Finisher"
@@ -617,7 +899,70 @@
             }
           ],
           "block": "Finisher"
+        },
+        {
+          "id": "burpee-pull-ups",
+          "name": "Burpee Pull-Ups",
+          "rounds": 3,
+          "secondary": "mod",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "M"
+            },
+            {
+              "main": "R2",
+              "secondary": "M"
+            },
+            {
+              "main": "R3",
+              "secondary": "M"
+            }
+          ],
+          "block": "Finisher"
         }
+      ],
+      "focusOrder": [
+        ["tempo-bench-press", 0],
+        ["strict-arnie-press", 0],
+        ["chest-fly", 0],
+        ["skull-crusher", 0],
+        ["tempo-bench-press", 1],
+        ["strict-arnie-press", 1],
+        ["chest-fly", 1],
+        ["skull-crusher", 1],
+        ["tempo-bench-press", 2],
+        ["strict-arnie-press", 2],
+        ["chest-fly", 2],
+        ["skull-crusher", 2],
+        ["wide-grip-pull-up", 0],
+        ["narrow-supported-row", 0],
+        ["prone-fly", 0],
+        ["supinated-biceps-curl", 0],
+        ["wide-grip-pull-up", 1],
+        ["narrow-supported-row", 1],
+        ["prone-fly", 1],
+        ["supinated-biceps-curl", 1],
+        ["wide-grip-pull-up", 2],
+        ["narrow-supported-row", 2],
+        ["prone-fly", 2],
+        ["supinated-biceps-curl", 2],
+        ["push-ups", 0],
+        ["hammer-curls", 0],
+        ["bench-dips", 0],
+        ["lateral-raises", 0],
+        ["burpee-pull-ups", 0],
+        ["push-ups", 1],
+        ["hammer-curls", 1],
+        ["bench-dips", 1],
+        ["lateral-raises", 1],
+        ["burpee-pull-ups", 1],
+        ["push-ups", 2],
+        ["hammer-curls", 2],
+        ["bench-dips", 2],
+        ["lateral-raises", 2],
+        ["burpee-pull-ups", 2]
       ]
     },
     {
@@ -693,6 +1038,28 @@
           "block": "Block 1"
         },
         {
+          "id": "jump-squat",
+          "name": "Jump Squat",
+          "rounds": 3,
+          "secondary": "mod",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "M"
+            },
+            {
+              "main": "R2",
+              "secondary": "M"
+            },
+            {
+              "main": "R3",
+              "secondary": "M"
+            }
+          ],
+          "block": "Block 1"
+        },
+        {
           "id": "romanian-deadlift-rdl",
           "name": "Romanian Deadlift (RDL)",
           "rounds": 3,
@@ -759,6 +1126,28 @@
           "block": "Block 2"
         },
         {
+          "id": "skater-to-broad-jump",
+          "name": "Skater to Broad Jump",
+          "rounds": 3,
+          "secondary": "mod",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "M"
+            },
+            {
+              "main": "R2",
+              "secondary": "M"
+            },
+            {
+              "main": "R3",
+              "secondary": "M"
+            }
+          ],
+          "block": "Block 2"
+        },
+        {
           "id": "alt-lateral-lunges",
           "name": "Alt Lateral Lunges",
           "rounds": 3,
@@ -801,7 +1190,64 @@
             }
           ],
           "block": "Finisher"
+        },
+        {
+          "id": "gorilla-burpees",
+          "name": "Gorilla Burpees",
+          "rounds": 3,
+          "secondary": "mod",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "M"
+            },
+            {
+              "main": "R2",
+              "secondary": "M"
+            },
+            {
+              "main": "R3",
+              "secondary": "M"
+            }
+          ],
+          "block": "Finisher"
         }
+      ],
+      "focusOrder": [
+        ["dual-front-squat", 0],
+        ["bulgarian-split-squat-right-side", 0],
+        ["bulgarian-split-squat-left-side", 0],
+        ["jump-squat", 0],
+        ["dual-front-squat", 1],
+        ["bulgarian-split-squat-right-side", 1],
+        ["bulgarian-split-squat-left-side", 1],
+        ["jump-squat", 1],
+        ["dual-front-squat", 2],
+        ["bulgarian-split-squat-right-side", 2],
+        ["bulgarian-split-squat-left-side", 2],
+        ["jump-squat", 2],
+        ["romanian-deadlift-rdl", 0],
+        ["lateral-bench-step-downs-right", 0],
+        ["lateral-bench-step-downs-left", 0],
+        ["skater-to-broad-jump", 0],
+        ["romanian-deadlift-rdl", 1],
+        ["lateral-bench-step-downs-right", 1],
+        ["lateral-bench-step-downs-left", 1],
+        ["skater-to-broad-jump", 1],
+        ["romanian-deadlift-rdl", 2],
+        ["lateral-bench-step-downs-right", 2],
+        ["lateral-bench-step-downs-left", 2],
+        ["skater-to-broad-jump", 2],
+        ["alt-lateral-lunges", 0],
+        ["suitcase-deadlift", 0],
+        ["gorilla-burpees", 0],
+        ["alt-lateral-lunges", 1],
+        ["suitcase-deadlift", 1],
+        ["gorilla-burpees", 1],
+        ["alt-lateral-lunges", 2],
+        ["suitcase-deadlift", 2],
+        ["gorilla-burpees", 2]
       ]
     },
     {
@@ -899,6 +1345,50 @@
           "block": "Block 1"
         },
         {
+          "id": "negative-pull-up",
+          "name": "Negative Pull-Up",
+          "rounds": 3,
+          "secondary": "mod",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "M"
+            },
+            {
+              "main": "R2",
+              "secondary": "M"
+            },
+            {
+              "main": "R3",
+              "secondary": "M"
+            }
+          ],
+          "block": "Block 2"
+        },
+        {
+          "id": "tempo-push-up",
+          "name": "Tempo Push-Up",
+          "rounds": 3,
+          "secondary": "mod",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "M"
+            },
+            {
+              "main": "R2",
+              "secondary": "M"
+            },
+            {
+              "main": "R3",
+              "secondary": "M"
+            }
+          ],
+          "block": "Block 2"
+        },
+        {
           "id": "heel-elevated-squat",
           "name": "Heel Elevated Squat",
           "rounds": 3,
@@ -943,9 +1433,24 @@
           "block": "Block 2"
         },
         {
+          "id": "buy-in-cash-out-amrap-rounds",
+          "name": "Buy-In / Cash-Out AMRAP (rounds)",
+          "rounds": 2,
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "Buy-in"
+            },
+            {
+              "main": "Cash-out"
+            }
+          ],
+          "block": "Finisher"
+        },
+        {
           "id": "renegade-row",
           "name": "Renegade Row",
-          "rounds": 5,
+          "rounds": 3,
           "secondary": "weight",
           "agg": "avg",
           "labels": [
@@ -959,14 +1464,6 @@
             },
             {
               "main": "R3",
-              "secondary": "W"
-            },
-            {
-              "main": "R4",
-              "secondary": "W"
-            },
-            {
-              "main": "R5",
               "secondary": "W"
             }
           ],
@@ -975,7 +1472,7 @@
         {
           "id": "ground-to-overhead",
           "name": "Ground to Overhead",
-          "rounds": 5,
+          "rounds": 3,
           "secondary": "weight",
           "agg": "avg",
           "labels": [
@@ -990,18 +1487,69 @@
             {
               "main": "R3",
               "secondary": "W"
+            }
+          ],
+          "block": "Finisher"
+        },
+        {
+          "id": "x-sit-up",
+          "name": "X Sit-Up",
+          "rounds": 3,
+          "secondary": "mod",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "M"
             },
             {
-              "main": "R4",
-              "secondary": "W"
+              "main": "R2",
+              "secondary": "M"
             },
             {
-              "main": "R5",
-              "secondary": "W"
+              "main": "R3",
+              "secondary": "M"
             }
           ],
           "block": "Finisher"
         }
+      ],
+      "focusOrder": [
+        ["squat-thruster", 0],
+        ["chest-press-to-leg-raise", 0],
+        ["2-rdl-to-2-bent-over-row", 0],
+        ["devils-press", 0],
+        ["squat-thruster", 1],
+        ["chest-press-to-leg-raise", 1],
+        ["2-rdl-to-2-bent-over-row", 1],
+        ["devils-press", 1],
+        ["squat-thruster", 2],
+        ["chest-press-to-leg-raise", 2],
+        ["2-rdl-to-2-bent-over-row", 2],
+        ["devils-press", 2],
+        ["negative-pull-up", 0],
+        ["tempo-push-up", 0],
+        ["heel-elevated-squat", 0],
+        ["frontal-to-lateral-raise", 0],
+        ["negative-pull-up", 1],
+        ["tempo-push-up", 1],
+        ["heel-elevated-squat", 1],
+        ["frontal-to-lateral-raise", 1],
+        ["negative-pull-up", 2],
+        ["tempo-push-up", 2],
+        ["heel-elevated-squat", 2],
+        ["frontal-to-lateral-raise", 2],
+        ["buy-in-cash-out-amrap-rounds", 0],
+        ["renegade-row", 0],
+        ["ground-to-overhead", 0],
+        ["x-sit-up", 0],
+        ["renegade-row", 1],
+        ["ground-to-overhead", 1],
+        ["x-sit-up", 1],
+        ["renegade-row", 2],
+        ["ground-to-overhead", 2],
+        ["x-sit-up", 2],
+        ["buy-in-cash-out-amrap-rounds", 1]
       ]
     },
     {
@@ -1055,6 +1603,24 @@
           "block": "Block 1"
         },
         {
+          "id": "hollow-hold-sec",
+          "name": "Hollow Hold (sec)",
+          "rounds": 3,
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1"
+            },
+            {
+              "main": "R2"
+            },
+            {
+              "main": "R3"
+            }
+          ],
+          "block": "Block 1"
+        },
+        {
           "id": "clean-to-press-r",
           "name": "Clean to Press R",
           "rounds": 3,
@@ -1094,6 +1660,28 @@
             {
               "main": "R3",
               "secondary": "W"
+            }
+          ],
+          "block": "Block 1"
+        },
+        {
+          "id": "low-plank-reach",
+          "name": "Low Plank Reach",
+          "rounds": 3,
+          "secondary": "mod",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "M"
+            },
+            {
+              "main": "R2",
+              "secondary": "M"
+            },
+            {
+              "main": "R3",
+              "secondary": "M"
             }
           ],
           "block": "Block 1"
@@ -1143,30 +1731,90 @@
           "block": "Block 1"
         },
         {
-          "id": "single-leg-squat-to-bench",
-          "name": "Single Leg Squat to Bench",
+          "id": "unilateral-v-sit",
+          "name": "Unilateral V-Sit",
           "rounds": 3,
-          "secondary": "weight",
+          "secondary": "mod",
           "agg": "avg",
           "labels": [
             {
               "main": "R1",
-              "secondary": "W"
+              "secondary": "M"
             },
             {
               "main": "R2",
-              "secondary": "W"
+              "secondary": "M"
             },
             {
               "main": "R3",
-              "secondary": "W"
+              "secondary": "M"
+            }
+          ],
+          "block": "Block 1"
+        },
+        {
+          "id": "chin-up",
+          "name": "Chin-Up",
+          "rounds": 5,
+          "secondary": "mod",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "M"
+            },
+            {
+              "main": "R2",
+              "secondary": "M"
+            },
+            {
+              "main": "R3",
+              "secondary": "M"
+            },
+            {
+              "main": "R4",
+              "secondary": "M"
+            },
+            {
+              "main": "R5",
+              "secondary": "M"
             }
           ],
           "block": "Block 2"
         },
         {
-          "id": "heromaker",
-          "name": "Heromaker",
+          "id": "decline-push-up",
+          "name": "Decline Push-Up",
+          "rounds": 5,
+          "secondary": "mod",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "M"
+            },
+            {
+              "main": "R2",
+              "secondary": "M"
+            },
+            {
+              "main": "R3",
+              "secondary": "M"
+            },
+            {
+              "main": "R4",
+              "secondary": "M"
+            },
+            {
+              "main": "R5",
+              "secondary": "M"
+            }
+          ],
+          "block": "Block 2"
+        },
+        {
+          "id": "single-leg-squat-to-bench",
+          "name": "Single Leg Squat to Bench",
           "rounds": 5,
           "secondary": "weight",
           "agg": "avg",
@@ -1192,8 +1840,102 @@
               "secondary": "W"
             }
           ],
+          "block": "Block 2"
+        },
+        {
+          "id": "heromaker",
+          "name": "Heromaker",
+          "rounds": 3,
+          "secondary": "weight",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "W"
+            },
+            {
+              "main": "R2",
+              "secondary": "W"
+            },
+            {
+              "main": "R3",
+              "secondary": "W"
+            }
+          ],
+          "block": "Finisher"
+        },
+        {
+          "id": "box-jumps",
+          "name": "Box Jumps",
+          "rounds": 3,
+          "secondary": "mod",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "M"
+            },
+            {
+              "main": "R2",
+              "secondary": "M"
+            },
+            {
+              "main": "R3",
+              "secondary": "M"
+            }
+          ],
           "block": "Finisher"
         }
+      ],
+      "focusOrder": [
+        ["glute-swings-r", 0],
+        ["glute-swings-l", 0],
+        ["hollow-hold-sec", 0],
+        ["glute-swings-r", 1],
+        ["glute-swings-l", 1],
+        ["hollow-hold-sec", 1],
+        ["glute-swings-r", 2],
+        ["glute-swings-l", 2],
+        ["hollow-hold-sec", 2],
+        ["clean-to-press-r", 0],
+        ["clean-to-press-l", 0],
+        ["low-plank-reach", 0],
+        ["clean-to-press-r", 1],
+        ["clean-to-press-l", 1],
+        ["low-plank-reach", 1],
+        ["clean-to-press-r", 2],
+        ["clean-to-press-l", 2],
+        ["low-plank-reach", 2],
+        ["sa-devils-press-r", 0],
+        ["sa-devils-press-l", 0],
+        ["unilateral-v-sit", 0],
+        ["sa-devils-press-r", 1],
+        ["sa-devils-press-l", 1],
+        ["unilateral-v-sit", 1],
+        ["sa-devils-press-r", 2],
+        ["sa-devils-press-l", 2],
+        ["unilateral-v-sit", 2],
+        ["chin-up", 0],
+        ["decline-push-up", 0],
+        ["single-leg-squat-to-bench", 0],
+        ["chin-up", 1],
+        ["decline-push-up", 1],
+        ["single-leg-squat-to-bench", 1],
+        ["chin-up", 2],
+        ["decline-push-up", 2],
+        ["single-leg-squat-to-bench", 2],
+        ["chin-up", 3],
+        ["decline-push-up", 3],
+        ["single-leg-squat-to-bench", 3],
+        ["chin-up", 4],
+        ["decline-push-up", 4],
+        ["single-leg-squat-to-bench", 4],
+        ["heromaker", 0],
+        ["box-jumps", 0],
+        ["heromaker", 1],
+        ["box-jumps", 1],
+        ["heromaker", 2],
+        ["box-jumps", 2]
       ]
     },
     {
@@ -1202,6 +1944,24 @@
       "style": "strength",
       "pillar": "MOT",
       "exercises": [
+        {
+          "id": "single-arm-plank-sec",
+          "name": "Single Arm Plank (sec)",
+          "rounds": 3,
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1"
+            },
+            {
+              "main": "R2"
+            },
+            {
+              "main": "R3"
+            }
+          ],
+          "block": "Block 1"
+        },
         {
           "id": "russian-twist",
           "name": "Russian Twist",
@@ -1291,6 +2051,28 @@
           "block": "Block 2"
         },
         {
+          "id": "military-plank",
+          "name": "Military Plank",
+          "rounds": 3,
+          "secondary": "mod",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "M"
+            },
+            {
+              "main": "R2",
+              "secondary": "M"
+            },
+            {
+              "main": "R3",
+              "secondary": "M"
+            }
+          ],
+          "block": "Block 2"
+        },
+        {
           "id": "butterfly-sit-up",
           "name": "Butterfly Sit Up",
           "rounds": 3,
@@ -1311,7 +2093,68 @@
             }
           ],
           "block": "Block 2"
+        },
+        {
+          "id": "alternating-side-plank",
+          "name": "Alternating Side Plank",
+          "rounds": 3,
+          "secondary": "mod",
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1",
+              "secondary": "M"
+            },
+            {
+              "main": "R2",
+              "secondary": "M"
+            },
+            {
+              "main": "R3",
+              "secondary": "M"
+            }
+          ],
+          "block": "Block 2"
+        },
+        {
+          "id": "core-amrap-rounds",
+          "name": "Core AMRAP (rounds)",
+          "rounds": 1,
+          "agg": "avg",
+          "labels": [
+            {
+              "main": "R1"
+            }
+          ],
+          "block": "Finisher"
         }
+      ],
+      "focusOrder": [
+        ["single-arm-plank-sec", 0],
+        ["russian-twist", 0],
+        ["tall-kneeling-alt-halo", 0],
+        ["plank-pull-through", 0],
+        ["single-arm-plank-sec", 1],
+        ["russian-twist", 1],
+        ["tall-kneeling-alt-halo", 1],
+        ["plank-pull-through", 1],
+        ["single-arm-plank-sec", 2],
+        ["russian-twist", 2],
+        ["tall-kneeling-alt-halo", 2],
+        ["plank-pull-through", 2],
+        ["half-kneeling-woodchop-r-l", 0],
+        ["military-plank", 0],
+        ["butterfly-sit-up", 0],
+        ["alternating-side-plank", 0],
+        ["half-kneeling-woodchop-r-l", 1],
+        ["military-plank", 1],
+        ["butterfly-sit-up", 1],
+        ["alternating-side-plank", 1],
+        ["half-kneeling-woodchop-r-l", 2],
+        ["military-plank", 2],
+        ["butterfly-sit-up", 2],
+        ["alternating-side-plank", 2],
+        ["core-amrap-rounds", 0]
       ]
     },
     {

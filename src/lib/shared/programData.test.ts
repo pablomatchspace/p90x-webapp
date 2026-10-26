@@ -140,41 +140,81 @@ describe('Generation Next program data (E33 U161, golden master vs BODi calendar
     expect(dayOf(9, 1).phase).toBe(3)
   })
 
-  it('logs the seven dumbbell workouts exactly like the Dumbbell Tracker', () => {
+  it('logs every move in video order: tracker dumbbell moves plus bodyweight moves (E36)', () => {
     const shape = (key: string) =>
-      getWorkout(key).exercises!.map((e) => `${e.block}|${e.name}|${e.rounds}`)
+      getWorkout(key).exercises!.map((e) => `${e.block}|${e.name}|${e.rounds}|${e.secondary ?? ''}`)
     expect(shape('gn-push-strength')).toEqual([
-      'Block 1|Goblet Squat|3',
-      'Block 1|Alternating Step Ups|3',
-      'Block 1|Wide Stance Rotational Push|3',
-      'Block 2|Sumo Squats|3',
-      'Block 2|Incline Bench Press|3',
-      'Block 2|Curtsey Lunges|3',
-      'Block 2|Push Press|3',
-      'Finisher|Squat Thruster|5',
+      'Block 1|Goblet Squat|3|weight',
+      'Block 1|Narrow to Wide Push-Up|3|mod',
+      'Block 1|Alternating Step Ups|3|weight',
+      'Block 1|Wide Stance Rotational Push|3|weight',
+      'Block 2|Sumo Squats|3|weight',
+      'Block 2|Incline Bench Press|3|weight',
+      'Block 2|Curtsey Lunges|3|weight',
+      'Block 2|Push Press|3|weight',
+      'Finisher|Squat Thruster|5|weight',
+      'Finisher|Diamond Push-Up|5|mod',
+      'Finisher|Bench Dip|5|mod',
     ])
     const counts = Object.fromEntries(
       loggableWorkoutsFor('gennext').map((w) => [w.key, w.exercises!.length]),
     )
     expect(counts).toEqual({
-      'gn-upper-body': 9,
-      'gn-lower-body': 8,
-      'gn-push-strength': 8,
-      'gn-pull-strength': 9,
-      'gn-core-circuit': 5,
-      'gn-full-body-strength': 8,
-      'gn-full-body-power': 8,
+      'gn-upper-body': 13,
+      'gn-lower-body': 11,
+      'gn-push-strength': 11,
+      'gn-pull-strength': 11,
+      'gn-core-circuit': 9,
+      'gn-full-body-strength': 12,
+      'gn-full-body-power': 14,
     })
     for (const w of loggableWorkoutsFor('gennext')) {
       expect(w.pillar).toBe('MOT')
       for (const e of w.exercises!) {
-        expect(e).toMatchObject({ secondary: 'weight', agg: 'avg' })
+        expect(e.agg).toBe('avg')
         expect(e.labels).toHaveLength(e.rounds)
-        expect(e.rounds).toBe(
-          e.block === 'Finisher' && w.key !== 'gn-upper-body' && w.key !== 'gn-lower-body' ? 5 : 3,
-        )
       }
     }
+  })
+
+  it('follows the video where it differs from the tracker (E36)', () => {
+    const rounds = (key: string, block: string) =>
+      getWorkout(key)
+        .exercises!.filter((e) => e.block === block)
+        .map((e) => e.rounds)
+    // EMOM finishers run 3 rounds on video (the tracker printed 5)
+    expect(rounds('gn-full-body-strength', 'Finisher')).toEqual([2, 3, 3, 3])
+    expect(rounds('gn-full-body-power', 'Finisher')).toEqual([3, 3])
+    // ladder finishers keep 5 rungs; the accumulator logs its laps as rounds (cap 5)
+    expect(rounds('gn-pull-strength', 'Finisher')).toEqual([5, 5, 5])
+    expect(rounds('gn-full-body-power', 'Block 2')).toEqual([5, 5, 5])
+  })
+
+  it('builds Core Circuit from its video: two 4-move blocks and an AMRAP finisher (E36)', () => {
+    const shape = getWorkout('gn-core-circuit').exercises!.map(
+      (e) => `${e.block}|${e.name}|${e.rounds}|${e.secondary ?? ''}`,
+    )
+    expect(shape).toEqual([
+      'Block 1|Single Arm Plank (sec)|3|',
+      'Block 1|Russian Twist|3|weight',
+      'Block 1|Tall Kneeling Alt Halo|3|weight',
+      'Block 1|Plank Pull Through|3|weight',
+      'Block 2|Half Kneeling Woodchop R/L|3|weight',
+      'Block 2|Military Plank|3|mod',
+      'Block 2|Butterfly Sit Up|3|weight',
+      'Block 2|Alternating Side Plank|3|mod',
+      'Finisher|Core AMRAP (rounds)|1|',
+    ])
+  })
+
+  it('logs holds in seconds and the AMRAP as rounds, without a modified count', () => {
+    const fbp = getWorkout('gn-full-body-power').exercises!
+    expect(fbp.find((e) => e.id === 'hollow-hold-sec')!.secondary).toBeUndefined()
+    const amrap = getWorkout('gn-full-body-strength').exercises!.find(
+      (e) => e.id === 'buy-in-cash-out-amrap-rounds',
+    )!
+    expect(amrap.secondary).toBeUndefined()
+    expect(amrap.labels.map((l) => l.main)).toEqual(['Buy-in', 'Cash-out'])
   })
 
   it('carries pillars, completion-style cardio/recovery and five bonus workouts', () => {

@@ -207,4 +207,17 @@ describe('D9 — Generation Next reuses the Classic engine (E33 U162)', () => {
     ]
     expect(scoreExercise({ rounds }, goblet, scoring).score).toBe(48)
   })
+
+  it('scores bodyweight moves like Classic knee/chair rows: reps + modified reps / chairFactor (E36)', () => {
+    const pushUp = getWorkout('gn-push-strength').exercises!.find(
+      (e) => e.id === 'narrow-to-wide-push-up',
+    )!
+    const rounds = [
+      { reps: 10, assist: 4 },
+      { reps: 8, assist: null },
+      { reps: null, assist: 12 },
+    ]
+    // chairFactor 2: (10 + 2) + 8 + 6 = 26 / 3
+    expect(scoreExercise({ rounds }, pushUp, scoring).score).toBeCloseTo(26 / 3)
+  })
 })

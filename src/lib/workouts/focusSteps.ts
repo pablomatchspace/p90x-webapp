@@ -8,6 +8,8 @@ import type { Session } from '@/lib/shared'
  * play like the video: all round 1s in sheet order, then all round 2s in the
  * listed order. This is UX data, not workbook data — the sheets only store
  * R1/R2 columns — so it lives here by hand; catalog.json stays generated.
+ * Generation Next (E36) instead carries `focusOrder`, one card per round,
+ * generated from the videos by tools/gen_gennext.py.
  */
 export interface FocusStep {
   exercise: CatalogExercise
@@ -40,6 +42,14 @@ const allRounds = (exercise: CatalogExercise): FocusStep => ({
 
 export function focusSteps(def: WorkoutDef): FocusStep[] {
   const exercises = def.exercises ?? []
+  // E36: Generation Next ships its video order with the generated catalog.
+  if (def.focusOrder !== undefined) {
+    const byId = new Map(exercises.map((e) => [e.id, e]))
+    return def.focusOrder.flatMap(([id, round]): FocusStep[] => {
+      const exercise = byId.get(id)
+      return exercise === undefined ? [] : [{ exercise, rounds: [round] }]
+    })
+  }
   const round2Ids = ROUND_2_ORDER[def.key]
   if (round2Ids !== undefined) {
     const byId = new Map(exercises.map((e) => [e.id, e]))
