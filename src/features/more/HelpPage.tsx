@@ -54,7 +54,9 @@ export function HelpPage() {
           <span className="font-medium">Hearing the workout:</span> during play and focus playback,
           rest starts with a lower two-tone beep so it sounds different from work, and with{' '}
           <span className="font-medium">Voice cues</span> on (the toggle on the play and focus
-          screens) each exercise is announced as it comes up.
+          screens) each exercise is announced right after the beep. Beeps are scheduled ahead, so
+          they keep sounding if the screen turns off; spoken cues need the screen on. On iPhone, the
+          silent switch mutes the beeps.
         </p>
         <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
           <span className="font-medium">Speaking your reps:</span> in focus mode, tap{' '}
@@ -70,12 +72,12 @@ export function HelpPage() {
         </dl>
         <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-300">
           Turn on <span className="font-medium">Hands-free</span> next to the mic and it re-arms
-          after every phrase until you switch it off or leave the screen — starting always takes a
-          tap, so nothing listens on page load. The mic asks for browser permission the first time,
-          and the button only appears in browsers with speech recognition (Chrome, Edge, Safari).
-          Your browser&rsquo;s own speech engine turns audio into text — it may use an online
-          service for that — but the app itself never records anything and stores only the numbers
-          you log.
+          after every phrase (and after each spoken cue) until you switch it off or leave the screen
+          — starting always takes a tap, so nothing listens on page load. The mic asks for browser
+          permission the first time, and the button only appears in browsers with speech recognition
+          (Chrome, Edge, Safari). Your browser&rsquo;s own speech engine turns audio into text — it
+          may use an online service for that — but the app itself never records anything and stores
+          only the numbers you log.
         </p>
       </Card>
 

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   extendPlayback,
+  futureCues,
   pausePlayback,
   remainingMs,
   resumePlayback,
@@ -255,5 +256,41 @@ describe('untimed waits (E17)', () => {
     const opts = { stepCount: 2, workSeconds: 60, restSeconds: 30, stepSeconds: [60, null] }
     const lastWait = { phase: 'work' as const, stepIndex: 1, endsAt: null, pausedMs: null }
     expect(skipPhase(lastWait, opts, T0)).toEqual({ state: null, event: 'sequence-finished' })
+  })
+})
+
+describe('futureCues', () => {
+  it('lists every upcoming cue with its wall-clock time through the finish', () => {
+    const s = startPlayback(0, 60, T0)
+    expect(futureCues(s, OPTS, T0)).toEqual([
+      { at: T0 + 60_000, event: 'rest-started' },
+      { at: T0 + 90_000, event: 'step-advanced' },
+      { at: T0 + 150_000, event: 'rest-started' },
+      { at: T0 + 180_000, event: 'step-advanced' },
+      { at: T0 + 240_000, event: 'sequence-finished' },
+    ])
+  })
+
+  it('honours per-step durations and skipped rests', () => {
+    const opts = {
+      ...OPTS,
+      stepSeconds: [10, 20, 30],
+      restAfter: [0, 5],
+    }
+    expect(futureCues(startPlayback(0, 10, T0), opts, T0)).toEqual([
+      { at: T0 + 10_000, event: 'step-advanced' },
+      { at: T0 + 30_000, event: 'rest-started' },
+      { at: T0 + 35_000, event: 'step-advanced' },
+      { at: T0 + 65_000, event: 'sequence-finished' },
+    ])
+  })
+
+  it('is empty while paused and stops at an untimed wait', () => {
+    const s = startPlayback(0, 60, T0)
+    expect(futureCues(pausePlayback(s, T0 + 5_000), OPTS, T0 + 5_000)).toEqual([])
+    const opts = { ...OPTS, stepSeconds: [10, null, 10], restAfter: [0, 0] }
+    expect(futureCues(startPlayback(0, 10, T0), opts, T0)).toEqual([
+      { at: T0 + 10_000, event: 'step-advanced' },
+    ])
   })
 })

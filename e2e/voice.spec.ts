@@ -48,6 +48,7 @@ async function speak(page: Page, transcript: string) {
     const rec = (window as unknown as StubWindow).__rec
     if (rec === null || rec === undefined) throw new Error('no active recognition')
     rec.onresult?.({ results: [[{ transcript: text }]] })
+    ;(window as unknown as StubWindow).__rec = null // this session is over; a re-arm sets a new one
     rec.onend?.()
   }, transcript)
 }
@@ -106,8 +107,9 @@ test('hands-free re-arms between utterances', async ({ page }) => {
   await expect(page.getByRole('textbox', { name: 'Standard Push-Ups round 1 reps' })).toHaveValue(
     '22',
   )
-  // still listening — the second utterance needs no tap
+  // still listening — the second utterance needs no tap (re-armed after a short pause)
   await expect(page.getByRole('button', { name: 'Listening…' })).toBeVisible()
+  await page.waitForFunction(() => (window as unknown as StubWindow).__rec != null)
   await speak(page, '8')
   await expect(
     page.getByRole('textbox', { name: 'Standard Push-Ups round 1 knee reps' }),

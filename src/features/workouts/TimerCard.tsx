@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { Card } from '@/components/Page'
 import { updateTimerSettings } from '@/state/actions'
 import { useSettings } from '@/state/selectors'
-import { beep, mmss } from './timerUtils'
+import { beep, unlockAudio } from './audio'
+import { mmss } from './timerUtils'
 
 const PRESETS = [30, 60, 90, 120]
 
@@ -52,6 +53,7 @@ export function TimerCard() {
   }, [running])
 
   const start = () => {
+    unlockAudio() // the end-of-rest beep fires from a timer, which can't unlock audio
     const seconds = remaining !== null && remaining > 0 && !done ? remaining : duration
     endRef.current = Date.now() + seconds * 1000
     setRemaining(seconds)

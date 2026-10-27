@@ -310,3 +310,9 @@ E35 (Portion Fix nutrition) is reserved and blocked on BODi's container-plan PDF
 - ✅ US-174 · Gear per workout on Today, workout pages, play/focus and a 7-day roll-up (M, P1)
 
 Post-v1.0.0. Full write-up: [`docs/epics/E37-workout-gear.md`](../epics/E37-workout-gear.md).
+
+## E38 — Audio & voice reliability
+
+- ✅ US-175 · Tap-unlocked shared audio, scheduled beeps, ordered/cancellable speech, robust hands-free mic (M, P0)
+
+Post-v1.0.0. Full write-up: [`docs/epics/E38-audio-reliability.md`](../epics/E38-audio-reliability.md).

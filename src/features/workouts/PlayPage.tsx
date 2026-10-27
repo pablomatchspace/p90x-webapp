@@ -4,6 +4,7 @@ import { Card, Page } from '@/components/Page'
 import { formatLong } from '@/lib/shared'
 import {
   extendPlayback,
+  futureCues,
   pausePlayback,
   remainingMs,
   resumePlayback,
@@ -25,7 +26,17 @@ import {
 import { useSchedule, useSettings, useWorkoutLinks, useWorkoutSessions } from '@/state/selectors'
 import { GearList } from './GearList'
 import { MediaLinks } from './MediaLinks'
-import { beep, mmss, speak } from './timerUtils'
+import {
+  beep,
+  BEEP_MS,
+  cancelCues,
+  cueScheduledAt,
+  scheduleCues,
+  speak,
+  stopSpeech,
+  unlockAudio,
+} from './audio'
+import { mmss } from './timerUtils'
 import { useWakeLock } from './playerHooks'
 
 const ghostBtn =
@@ -130,21 +141,26 @@ export function PlayPage() {
 
   // E26: a rest gets its own lower falling beep, and (when voice cues are on)
   // the next/starting exercise is spoken so eyes can stay off the screen.
+  // E38: while playing, the beeps sit on the audio clock (see the effect below)
+  // so a tick-driven event only beeps if no scheduled cue already covers it;
+  // speech follows the beep instead of talking over it.
   const commitResult = useCallback(
-    (result: { state: PlaybackState | null; event: string | null }) => {
+    (result: { state: PlaybackState | null; event: string | null }, fromTick = false) => {
       if (result.event !== null) {
-        beep(result.event === 'rest-started' ? 'rest' : 'work')
+        const kind = result.event === 'rest-started' ? 'rest' : 'work'
+        if (!(fromTick && cueScheduledAt(Date.now()))) beep(kind)
         if ('vibrate' in navigator) navigator.vibrate([200, 100, 200])
         if (settings.player.voiceCues) {
+          const after = BEEP_MS[kind]
           if (result.event === 'rest-started' && result.state !== null) {
             const next = segments[result.state.stepIndex + 1]
             // Match the on-screen "Get ready — up next: X" heading (Q13b rest gap).
-            if (next !== undefined) speak(`Get ready. Up next: ${next.name}`)
+            if (next !== undefined) speak(`Get ready. Up next: ${next.name}`, after)
           } else if (result.event === 'step-advanced' && result.state !== null) {
             const seg = segments[result.state.stepIndex]
-            if (seg !== undefined) speak(seg.name)
+            if (seg !== undefined) speak(seg.name, after)
           } else if (result.event === 'sequence-finished') {
-            speak('Workout complete')
+            speak('Workout complete', after)
           }
         }
       }
@@ -170,13 +186,37 @@ export function PlayPage() {
         ) {
           markInstance(playback.stepIndex, true)
         }
-        commitResult(result)
+        commitResult(result, true)
       }
     }, 200)
     return () => clearInterval(id)
   }, [playback, opts, segments.length, isLastOfInstance, markInstance, commitResult])
 
   useWakeLock(playback !== null)
+
+  // E38: put every upcoming beep on the audio clock. Browsers freeze page timers
+  // with the screen off, but already-scheduled Web Audio keeps sounding. Runs on
+  // each state change (start, pause, extend, skip, boundary), replacing the
+  // schedule; cleared when playback stops or the screen unmounts.
+  useEffect(() => {
+    if (playback === null) {
+      cancelCues()
+      return
+    }
+    scheduleCues(
+      futureCues(playback, opts, Date.now()).map((c) => ({
+        at: c.at,
+        kind: c.event === 'rest-started' ? 'rest' : 'work',
+      })),
+    )
+  }, [playback, opts])
+  useEffect(
+    () => () => {
+      cancelCues()
+      stopSpeech()
+    },
+    [],
+  )
 
   // Persist the per-jump done/skipped log when the summary appears and on every
   // checklist correction (Q21c). Raw user input — allowed under "never store derived".
@@ -225,6 +265,7 @@ export function PlayPage() {
   const def = getWorkout(key)
 
   const onPlay = () => {
+    unlockAudio() // from the tap: the cues fire from timers, which can't unlock audio
     setFinished(false)
     setDoneMap(new Map())
     const now = Date.now()
@@ -235,7 +276,10 @@ export function PlayPage() {
     setPlayback(startPlayback(idx, segments[idx].seconds, now))
   }
   const onPause = () => setPlayback((p) => (p === null ? p : pausePlayback(p, Date.now())))
-  const onResume = () => setPlayback((p) => (p === null ? p : resumePlayback(p, Date.now())))
+  const onResume = () => {
+    unlockAudio()
+    setPlayback((p) => (p === null ? p : resumePlayback(p, Date.now())))
+  }
   const onExtend = () => setPlayback((p) => (p === null ? p : extendPlayback(p, 10_000)))
   const onSkip = () => {
     if (playback === null) return
@@ -252,12 +296,16 @@ export function PlayPage() {
     commitResult(skipPhase(playback, opts, Date.now()))
   }
   const onStop = () => {
+    stopSpeech()
     setPlayback(null)
     setFinished(false)
   }
 
   const toggleAutoMark = () => updatePlayerSettings({ autoMarkDone: !settings.player.autoMarkDone })
-  const toggleVoiceCues = () => updatePlayerSettings({ voiceCues: !settings.player.voiceCues })
+  const toggleVoiceCues = () => {
+    if (settings.player.voiceCues) stopSpeech()
+    updatePlayerSettings({ voiceCues: !settings.player.voiceCues })
+  }
 
   const toggleJump = (id: string) =>
     setDoneMap((m) => {

@@ -15,6 +15,17 @@ didn't bump the package version — they're numbered B01/B02 here for a
 continuous record; #33's package column is left at the un-suffixed version
 that was actually shipped.
 
+## 1.E38.U175 (package 1.38.175) — 2026-10-26
+
+- **E38 — Audio & voice reliability (U175).** Play/focus beeps were silent on many
+  devices (a fresh, suspended AudioContext per cue); they now share one context
+  unlocked by the Start tap, are louder, and are pre-scheduled on the audio clock so
+  they keep sounding with the screen off. Spoken cues follow the beep instead of
+  talking over it, always use an English voice, no longer get dropped after a cancel,
+  and stop when you stop or leave. Hands-free voice entry no longer loops on
+  network/mic errors, ignores stale recognizer events, and mutes the mic while the
+  app speaks. No schema change (v14). Spoken cues still need the screen on.
+
 ## 1.E37.U174 (package 1.37.174) — 2026-10-26
 
 - **E37 — Workout gear (U174).** Every workout now says what gear it needs:
