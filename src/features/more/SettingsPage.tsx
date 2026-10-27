@@ -2,6 +2,7 @@ import { type ReactNode, useState } from 'react'
 import { AlertTriangle } from 'lucide-react'
 import { Card, Page } from '@/components/Page'
 import { Chip } from '@/features/schedule/Chip'
+import { FfmiScale } from '@/features/body/FfmiCard'
 import { NumberField } from '@/features/workouts/NumberField'
 import {
   deriveBody,
@@ -24,7 +25,7 @@ import {
   recompFlag,
   suggestedTarget,
 } from '@/lib/body'
-import { normalizedFfmi, planFromFfmi } from '@/lib/body'
+import { ffmiSummary, normalizedFfmi, planFromFfmi } from '@/lib/body'
 import {
   currentWeightKg,
   energyAmount,
@@ -612,8 +613,8 @@ export function SettingsPage() {
           <h3 className="text-sm font-semibold">Estimate from FFMI</h3>
           <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
             Pick a normalized-FFMI goal and a plan body-fat; applying writes the target inputs above
-            and stores the FFMI target for the dashboard. Uses the workbook&rsquo;s 6.1
-            normalization at 1.8 m.
+            and stores the FFMI target for the dashboard. Uses Kouri&rsquo;s 6.1 normalization at
+            1.8 m; the scale shows where your start, current and target FFMI fall.
           </p>
           <div className="mt-2 divide-y divide-zinc-100 dark:divide-zinc-800">
             <Row
@@ -621,7 +622,7 @@ export function SettingsPage() {
               hint={
                 ffmiDraft !== null
                   ? `Category: ${ffmiCategory(ffmiDraft)}`
-                  : 'e.g. 20–22 = Above Average'
+                  : 'e.g. 19–21 = Above average'
               }
             >
               <NumberField
@@ -631,6 +632,12 @@ export function SettingsPage() {
                 onChange={setFfmiDraft}
               />
             </Row>
+            <div className="py-3">
+              <FfmiScale
+                summary={{ ...ffmiSummary(settings, bodyLog), target: ffmiDraft }}
+                gender={settings.gender}
+              />
+            </div>
             <Row label="FFMI plan body-fat (%)">
               <NumberField
                 label="FFMI plan body-fat (%)"
@@ -947,17 +954,30 @@ export function SettingsPage() {
               <>
                 <dl className="mt-3 grid grid-cols-3 gap-3">
                   <Derived
-                    label={`BMR (${targetNut.bmrMethod === 'katch' ? 'Katch–McArdle' : 'Mifflin'})`}
+                    label={`BMR (${targetNut.bmrMethod === 'average' ? 'lean-mass avg' : 'Mifflin'})`}
                     value={showKcal(targetNut.bmr)}
                     unit="kcal"
                   />
-                  <Derived label="TDEE (×1.55)" value={showKcal(targetNut.tdee)} unit="kcal" />
+                  <Derived label="TDEE (daily avg)" value={showKcal(targetNut.tdee)} unit="kcal" />
                   <Derived
                     label="Goal calories"
                     value={showKcal(targetNut.calories)}
                     unit={targetNut.caloriesFloored ? 'kcal · at BMR' : 'kcal'}
                   />
                 </dl>
+                <p className="mt-2 text-xs text-zinc-600 dark:text-zinc-300">
+                  TDEE = BMR {showKcal(targetNut.bmr)} × {targetNut.dailyLifeFactor} daily life ={' '}
+                  {showKcal(targetNut.bmr * targetNut.dailyLifeFactor)}, plus{' '}
+                  {showKcal(targetNut.exerciseKcal)} kcal/day of scheduled workouts averaged over
+                  the program = {showKcal(targetNut.tdee)} (likely {showKcal(targetNut.tdeeLow)}–
+                  {showKcal(targetNut.tdeeHigh)}).{' '}
+                  {targetNut.bmrMethod === 'average'
+                    ? `BMR is the mean of Katch–McArdle ${showKcal(targetNut.bmrKatch ?? 0)} and Cunningham ${showKcal(targetNut.bmrCunningham ?? 0)}`
+                    : 'BMR is Mifflin–St Jeor (add start body-fat for the lean-mass equations)'}
+                  {targetNut.bmrMethod === 'average' && targetNut.bmrMifflin !== null
+                    ? `; Mifflin–St Jeor cross-check ${showKcal(targetNut.bmrMifflin)}.`
+                    : '.'}
+                </p>
                 <p className="mt-2 text-xs text-zinc-600 dark:text-zinc-300">
                   {targetNut.goal === 'maintenance'
                     ? 'Already at your body target — maintenance calories.'
@@ -1005,9 +1025,11 @@ export function SettingsPage() {
                   </li>
                 </ul>
                 <p className="mt-2 text-[11px] text-zinc-500 dark:text-zinc-400">
-                  Protein 1.6–2.2 g/kg (Morton meta-analysis; ISSN) · fat ≥0.5 g/kg for hormonal
-                  health · fat tissue ~7700, lean ~1800 kcal/kg (Hall) · low-carb caps carbs at the
-                  &lt;130 g/day consensus threshold.
+                  TDEE: BMR × 1.4 (FAO/WHO/UNU sedentary-band floor) plus workout energy from 2024
+                  Compendium METs — a ±10% estimate, so adjust from your weight trend · Protein
+                  1.6–2.2 g/kg (Morton meta-analysis; ISSN) · fat ≥0.5 g/kg for hormonal health ·
+                  fat tissue ~7700, lean ~1800 kcal/kg (Hall) · low-carb caps carbs at the &lt;130
+                  g/day consensus threshold.
                 </p>
               </>
             )}

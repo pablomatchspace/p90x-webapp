@@ -5,7 +5,7 @@ import { expect, test, type Page } from '@playwright/test'
  * (start 2026-01-05, 14 daily weigh-ins 2026-01-06..19). Clock pinned to
  * Jan 20 so "today" has no entry yet. Sample settings: 1.8 m, start 82 kg /
  * 22% BF, target 77.554 kg, limits 90 kg / 28 BMI. Latest weigh-in
- * (2026-01-19, 80.8 kg / 21.2%) derives BMI 24.94, FFMI 19.65 "Average".
+ * (2026-01-19, 80.8 kg / 21.2%) derives BMI 24.94, FFMI 19.65 "Above average" (E40 bands).
  */
 
 async function importSample(page: Page) {
@@ -30,7 +30,7 @@ test('body log lists imported entries with derivations and gap markers', async (
   await page.getByRole('button', { name: 'Edit 2026-01-19', exact: true }).click()
   await expect(page.getByRole('textbox', { name: 'Weight (kg)' })).toHaveValue('80.8')
   await expect(page.getByText(/BMI 24\.94/).first()).toBeVisible()
-  await expect(page.getByText(/FFMI 19\.65 \(Average\)/).first()).toBeVisible()
+  await expect(page.getByText(/FFMI 19\.65 \(Above average\)/).first()).toBeVisible()
 
   // deleting a mid-series day exposes a visible gap in the history
   await page.getByRole('button', { name: 'Edit 2026-01-12', exact: true }).click()

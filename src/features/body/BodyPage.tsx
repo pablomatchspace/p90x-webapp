@@ -17,6 +17,7 @@ import {
 import { compareISO, diffDays, formatLong, isISODate, todayISO, type ISODate } from '@/lib/shared'
 import type { BodyEntry, BodyFraction, Settings } from '@/lib/shared'
 import { Chip, type ChipTone } from '@/features/schedule/Chip'
+import { FfmiCard } from './FfmiCard'
 import { NumberField } from '@/features/workouts/NumberField'
 import { deleteBodyEntry, upsertBodyEntry } from '@/state/actions'
 import { useBodyLog, useSettings } from '@/state/selectors'
@@ -214,6 +215,7 @@ export function BodyPage() {
         ) : undefined
       }
     >
+      <FfmiCard />
       <Card>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="font-semibold">{selected === today ? 'Today' : formatLong(selected)}</h2>

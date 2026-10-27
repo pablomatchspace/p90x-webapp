@@ -117,8 +117,9 @@ export function NutritionCard({ schedulePhase }: { schedulePhase: NutritionPhase
               <Macro label="Fat" grams={target.fat} detail={`${target.fatPerKg} g/kg`} />
             </dl>
             <p className="mt-2 text-[11px] text-zinc-500 dark:text-zinc-400">
-              Evidence-based · {target.bmrMethod === 'katch' ? 'Katch–McArdle' : 'Mifflin–St Jeor'}{' '}
-              TDEE ≈ {kcal(target.tdee)} kcal
+              Evidence-based · TDEE ≈ {kcal(target.tdee)} kcal (likely {kcal(target.tdeeLow)}–
+              {kcal(target.tdeeHigh)}) = BMR × {target.dailyLifeFactor} + ~
+              {kcal(target.exerciseKcal)} kcal/day of workouts
               {target.goal === 'maintenance'
                 ? ' · already at your body target'
                 : target.goal === 'recomp'
