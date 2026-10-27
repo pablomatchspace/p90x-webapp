@@ -80,7 +80,7 @@ src/state/      store.ts (Zustand+Immer + lifecycle events), actions/* per-conte
                 (barrel actions.ts; all mutations funnel through useStore.getState().mutate,
                 invariants live in src/lib), selectors.ts, ports.ts (clock + wiring contracts), persist.ts
 src/features/   screens by area: start, today, schedule, workouts, body, dashboard, more
-src/components/ Layout, Page, NoProgramCard, ErrorBoundary, SystemBanners, LineChart, UpdateToast
+src/components/ Layout, Page, NoProgramCard, ErrorBoundary, SystemBanners, LineChart, UpdateToast (+ swBridge)
 src/data/       templates.json + catalog.json — generated from the workbook by tools/, never hand-edited
 e2e/            Playwright specs (per-feature + journeys.spec.ts)
 tools/          convert_xlsm.py (workbook→JSON) and program/catalog generators

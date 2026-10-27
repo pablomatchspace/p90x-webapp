@@ -1,4 +1,7 @@
+import { useState } from 'react'
+import { RefreshCw } from 'lucide-react'
 import { Card, Page } from '@/components/Page'
+import { applyUpdate, checkForUpdate, type UpdateCheck } from '@/components/swBridge'
 import { formatAppVersion } from '@/lib/shared'
 
 /**
@@ -10,6 +13,50 @@ import { formatAppVersion } from '@/lib/shared'
  */
 
 const REPO = 'https://github.com/pablomatchspace/p90x-webapp'
+
+const UPDATE_MESSAGES: Record<UpdateCheck | 'checking' | 'installing', string> = {
+  checking: 'Checking for a newer version…',
+  installing: 'New version found — installing and reloading…',
+  'update-ready': 'New version found — installing and reloading…',
+  'up-to-date': 'You’re on the latest version.',
+  offline: 'You’re offline — connect to the internet to check.',
+  unavailable: 'Updates are only available in the installed or deployed app.',
+  error: 'Couldn’t check for updates — try again in a moment.',
+}
+
+/** E39: ask for the newest build and, if there is one, install it and reload. */
+function CheckForUpdates() {
+  const [status, setStatus] = useState<UpdateCheck | 'checking' | 'installing' | null>(null)
+  const busy = status === 'checking' || status === 'installing'
+
+  const run = async () => {
+    setStatus('checking')
+    const result = await checkForUpdate()
+    if (result !== 'update-ready') {
+      setStatus(result)
+      return
+    }
+    setStatus('installing')
+    applyUpdate() // reloads into the new version
+  }
+
+  return (
+    <div className="mt-3 flex flex-wrap items-center gap-3">
+      <button
+        type="button"
+        onClick={() => void run()}
+        disabled={busy}
+        className="flex items-center gap-2 rounded-lg bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+      >
+        <RefreshCw className={`h-4 w-4 ${busy ? 'animate-spin' : ''}`} aria-hidden />
+        Check for updates
+      </button>
+      <span role="status" className="text-sm text-zinc-600 dark:text-zinc-300">
+        {status === null ? '' : UPDATE_MESSAGES[status]}
+      </span>
+    </div>
+  )
+}
 
 /** Verbatim from INSTRUCTIONS!A9–A14. */
 const ABBREVIATIONS: [string, string][] = [
@@ -121,6 +168,7 @@ export function HelpPage() {
             </dd>
           </div>
         </dl>
+        <CheckForUpdates />
         <p className="mt-3 text-xs text-zinc-500 dark:text-zinc-400">
           Scores, schedule and body-fat calculators reproduce the P90Xcel workbook (v2.05). P90X® is
           a Beachbody® program; this is an independent personal tracker.

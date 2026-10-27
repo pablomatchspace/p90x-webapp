@@ -15,6 +15,13 @@ didn't bump the package version — they're numbered B01/B02 here for a
 continuous record; #33's package column is left at the un-suffixed version
 that was actually shipped.
 
+## 1.E39.U176 (package 1.39.176) — 2026-10-27
+
+- **E39 — Check for updates (U176).** Help → About has a **Check for updates**
+  button: it asks the server for the newest build and, if there is one, installs
+  it and reloads; otherwise it says you're on the latest version (or that you're
+  offline). No more waiting for the browser's own update check. No schema change (v14).
+
 ## 1.E38.U175 (package 1.38.175) — 2026-10-26
 
 - **E38 — Audio & voice reliability (U175).** Play/focus beeps were silent on many

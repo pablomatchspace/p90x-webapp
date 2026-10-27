@@ -316,3 +316,9 @@ Post-v1.0.0. Full write-up: [`docs/epics/E37-workout-gear.md`](../epics/E37-work
 - ✅ US-175 · Tap-unlocked shared audio, scheduled beeps, ordered/cancellable speech, robust hands-free mic (M, P0)
 
 Post-v1.0.0. Full write-up: [`docs/epics/E38-audio-reliability.md`](../epics/E38-audio-reliability.md).
+
+## E39 — Check for updates in Help
+
+- ✅ US-176 · "Check for updates" button in Help → About: fetch, install, reload (S, P1)
+
+Post-v1.0.0. Full write-up: [`docs/epics/E39-help-update-button.md`](../epics/E39-help-update-button.md).
