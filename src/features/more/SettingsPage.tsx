@@ -2,6 +2,7 @@ import { type ReactNode, useState } from 'react'
 import { AlertTriangle } from 'lucide-react'
 import { Card, Page } from '@/components/Page'
 import { Chip } from '@/features/schedule/Chip'
+import { FfmiScale } from '@/features/body/FfmiCard'
 import { NumberField } from '@/features/workouts/NumberField'
 import {
   deriveBody,
@@ -24,7 +25,7 @@ import {
   recompFlag,
   suggestedTarget,
 } from '@/lib/body'
-import { normalizedFfmi, planFromFfmi } from '@/lib/body'
+import { ffmiSummary, normalizedFfmi, planFromFfmi } from '@/lib/body'
 import {
   currentWeightKg,
   energyAmount,
@@ -612,8 +613,8 @@ export function SettingsPage() {
           <h3 className="text-sm font-semibold">Estimate from FFMI</h3>
           <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
             Pick a normalized-FFMI goal and a plan body-fat; applying writes the target inputs above
-            and stores the FFMI target for the dashboard. Uses the workbook&rsquo;s 6.1
-            normalization at 1.8 m.
+            and stores the FFMI target for the dashboard. Uses Kouri&rsquo;s 6.1 normalization at
+            1.8 m; the scale shows where your start, current and target FFMI fall.
           </p>
           <div className="mt-2 divide-y divide-zinc-100 dark:divide-zinc-800">
             <Row
@@ -631,6 +632,12 @@ export function SettingsPage() {
                 onChange={setFfmiDraft}
               />
             </Row>
+            <div className="py-3">
+              <FfmiScale
+                summary={{ ...ffmiSummary(settings, bodyLog), target: ffmiDraft }}
+                gender={settings.gender}
+              />
+            </div>
             <Row label="FFMI plan body-fat (%)">
               <NumberField
                 label="FFMI plan body-fat (%)"

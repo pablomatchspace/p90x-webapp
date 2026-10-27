@@ -45,6 +45,10 @@ test('estimates from an FFMI goal, applies targets, dashboard tracks progress', 
   await bfInput.blur()
 
   await expect(page.getByText('Category: Athletic')).toBeVisible()
+  // E40: the picker shows where start, current and the typed target fall on the scale
+  await expect(
+    panel.getByRole('img', { name: /FFMI scale: Current FFMI 19\.65.*start 19\.74, target 21/ }),
+  ).toBeVisible()
   const tile = (label: string) => panel.getByText(label, { exact: true }).locator('..')
   await expect(tile('Lean mass (plan)')).toContainText('68')
   await expect(tile('Lean gain')).toContainText('+4.1')

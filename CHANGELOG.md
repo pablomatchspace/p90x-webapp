@@ -15,6 +15,12 @@ didn't bump the package version — they're numbered B01/B02 here for a
 continuous record; #33's package column is left at the un-suffixed version
 that was actually shipped.
 
+## 1.E40.U178.B01 (package 1.40.178-b1) — 2026-10-27
+
+- **Fix — FFMI scale in Settings.** The Settings → "Estimate from FFMI" target picker now shows the
+  FFMI reference scale with your start, current and (typed) target FFMI, so you can see which band a
+  goal lands in. It was left off the E40 release. No schema change (v14).
+
 ## 1.E40.U178 (package 1.40.178) — 2026-10-27
 
 - **E40 — FFMI statistic and scale (U177).** Body page and dashboard get an **FFMI** card: start →

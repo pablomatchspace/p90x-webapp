@@ -29,7 +29,7 @@ current / target markers (and the 23.9 ceiling tick for women). `ffmiCategory` n
 label everywhere.
 
 **AC:** [x] bands pinned at 17 / 19 / 21 / 25 · [x] summary tests · [x] Body page card + legend + sources ·
-[x] dashboard compact card · [x] female ceiling marker · [x] FFMI value still equals the workbook golden row.
+[x] dashboard compact card · [x] Settings target picker shows the scale with the draft target (B01) · [x] female ceiling marker · [x] FFMI value still equals the workbook golden row.
 
 ### US-178 — Factorial TDEE (M, P1)
 
