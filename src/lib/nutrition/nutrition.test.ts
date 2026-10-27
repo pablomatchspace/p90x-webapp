@@ -1,26 +1,26 @@
 import { describe, expect, it } from 'vitest'
 import { KG_PER_LB } from '@/lib/body'
 import {
-  ACTIVITY_FACTOR,
   currentLeanKg,
   currentWeightKg,
   energyAmount,
-  katchMcArdle,
   KCAL_PER_KG,
   LEAN_KCAL_PER_KG,
   LEVEL_CALORIES,
   LOW_CARB_CAP_G,
   macroGrams,
-  mifflinStJeor,
   nutritionLevel,
   nutritionTargets,
   PHASE_SPLITS,
   remainingProgramDays,
   targetComposition,
   targetNutrition,
+  targetNutritionFromState,
   applyNutritionPatch,
 } from './nutrition'
-import { emptyState, type BodyEntry, type Settings } from '@/lib/shared'
+import { DAILY_LIFE_FACTOR, katchMcArdle, mifflinStJeor } from './energy'
+import { emptyState, getTemplate, type BodyEntry, type Settings } from '@/lib/shared'
+import { averageExerciseKcal } from './energy'
 import { bodyFraction, kg, meters } from '@/lib/shared'
 
 /** Guide arithmetic goldens use round-number pound weights; storage is kg. */
@@ -268,16 +268,25 @@ describe('targetNutrition', () => {
     leanDeltaKg: 0,
     horizonWeeks: 12,
     dietStyle: 'balanced' as const,
+    exerciseKcalPerDay: 300,
   }
-  const katchTdee = (370 + 21.6 * 62.4) * ACTIVITY_FACTOR
+  // E40: BMR is the Katch–McArdle / Cunningham mean; TDEE = BMR × 1.4 + scheduled exercise
+  const bmrAvg = (370 + 21.6 * 62.4 + (500 + 22 * 62.4)) / 2
+  const katchTdee = bmrAvg * DAILY_LIFE_FACTOR.mid + 300
 
-  it('derives a deficit plan from Katch–McArdle TDEE and the fat-loss pace', () => {
+  it('derives a deficit plan from the factorial TDEE and the fat-loss pace', () => {
     const t = targetNutrition(base)
     expect(t).not.toBeNull()
     if (t === null) return
-    expect(t.bmrMethod).toBe('katch')
-    expect(t.bmr).toBeCloseTo(370 + 21.6 * 62.4, 4) // 1717.84
+    expect(t.bmrMethod).toBe('average')
+    expect(t.bmr).toBeCloseTo(bmrAvg, 4)
+    expect(t.bmrKatch).toBeCloseTo(370 + 21.6 * 62.4, 4) // 1717.84
+    expect(t.bmrCunningham).toBeCloseTo(500 + 22 * 62.4, 4) // 1873.2
+    expect(t.dailyLifeFactor).toBe(1.4)
+    expect(t.exerciseKcal).toBe(300)
     expect(t.tdee).toBeCloseTo(katchTdee, 4)
+    expect(t.tdeeLow).toBeLessThan(t.tdee)
+    expect(t.tdeeHigh).toBeGreaterThan(t.tdee)
     expect(t.goal).toBe('deficit')
     expect(t.rateClamped).toBe(false)
     expect(t.targetWeightKg).toBeCloseTo(76, 9)
@@ -319,6 +328,15 @@ describe('targetNutrition', () => {
     const t = targetNutrition({ ...base, leanKg: null })
     expect(t?.bmrMethod).toBe('mifflin')
     expect(t?.bmr).toBeCloseTo(1730, 6)
+    expect(t?.bmrKatch).toBeNull()
+    expect(t?.bmrMifflin).toBeCloseTo(1730, 6)
+  })
+
+  it('more scheduled exercise raises the TDEE one-for-one, and the calories with it', () => {
+    const lo = targetNutrition({ ...base, exerciseKcalPerDay: 100 })
+    const hi = targetNutrition({ ...base, exerciseKcalPerDay: 400 })
+    expect((hi?.tdee ?? 0) - (lo?.tdee ?? 0)).toBeCloseTo(300, 6)
+    expect((hi?.calories ?? 0) - (lo?.calories ?? 0)).toBeCloseTo(300, 0)
   })
 
   it('treats a lean-gain-only target as a surplus and holds protein at 1.8 g/kg', () => {
@@ -345,8 +363,13 @@ describe('targetNutrition', () => {
   })
 
   it('low-carb leaves an already-low fill uncapped', () => {
-    // max-pace deficit → calories low enough that the fill lands under 130 g
-    const t = targetNutrition({ ...base, fatDeltaKg: -20, dietStyle: 'lowCarb' })
+    // max-pace deficit, no scheduled exercise → calories floor at BMR and the fill lands under 130 g
+    const t = targetNutrition({
+      ...base,
+      fatDeltaKg: -20,
+      dietStyle: 'lowCarb',
+      exerciseKcalPerDay: 0,
+    })
     expect(t).not.toBeNull()
     if (t === null) return
     expect(t.carbs).toBeLessThan(LOW_CARB_CAP_G)
@@ -359,6 +382,30 @@ describe('targetNutrition', () => {
     expect(targetNutrition({ ...base, fatDeltaKg: null })).toBeNull()
     expect(targetNutrition({ ...base, leanDeltaKg: null })).toBeNull()
     expect(targetNutrition({ ...base, leanKg: null, heightM: null, age: null })).toBeNull()
+  })
+})
+
+describe('targetNutritionFromState', () => {
+  const settings = settingsWith({
+    startWeight: kg(70),
+    startBodyFat: bodyFraction(0.17),
+    height: meters(1.65),
+    age: 35,
+    targets: { leanMassIncrease: kg(1), bodyFat: null, ffmi: null },
+  })
+
+  it('derives the exercise energy from the active program schedule at the current weight', () => {
+    const classic = targetNutritionFromState(settings, [], '2026-01-10')
+    const gennext = targetNutritionFromState(
+      { ...settings, program: { suite: 'gennext', variant: 'standard' } },
+      [],
+      '2026-01-10',
+    )
+    expect(classic?.exerciseKcal).toBeCloseTo(
+      averageExerciseKcal(getTemplate({ suite: 'p90x', variant: 'classic' }), 70),
+      9,
+    )
+    expect(gennext?.exerciseKcal).toBeLessThan(classic?.exerciseKcal ?? 0)
   })
 })
 

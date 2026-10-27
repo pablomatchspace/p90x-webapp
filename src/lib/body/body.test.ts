@@ -34,7 +34,7 @@ describe('deriveBody', () => {
     const d = deriveBody(entry(69, 0.17), { height: meters(1.65), startWeight: kg(67.9) })
     expect(formatFixed(d.leanMass, 1)).toBe('57.3')
     expect(formatFixed(d.ffmi, 2)).toBe('21.95')
-    expect(d.ffmiCategory).toBe('Above Average')
+    expect(d.ffmiCategory).toBe('Athletic') // E40: sourced bands replace the workbook names
     expect(formatFixed(d.bmi, 2)).toBe('25.34')
     expect(d.weightLoss).toBeCloseTo(-1.1, 10)
     expect(d.bodyFatKg).toBeCloseTo(11.73, 10)
@@ -47,7 +47,7 @@ describe('deriveBody', () => {
     expect(formatFixed(d.bmi, 2)).toBe('24.94')
     expect(formatFixed(d.leanMass, 1)).toBe('63.7')
     expect(formatFixed(d.ffmi, 2)).toBe('19.65')
-    expect(d.ffmiCategory).toBe('Average')
+    expect(d.ffmiCategory).toBe('Above average')
   })
 
   it('derives nothing without a weight (B2: empty days stay empty)', () => {
@@ -83,14 +83,15 @@ describe('deriveBody', () => {
 })
 
 describe('ffmiCategory', () => {
-  it('matches the workbook bands at their boundaries', () => {
-    expect(ffmiCategory(17.99)).toBe('Below Average')
-    expect(ffmiCategory(18)).toBe('Average')
-    expect(ffmiCategory(20)).toBe('Above Average')
-    expect(ffmiCategory(21.95)).toBe('Above Average')
-    expect(ffmiCategory(22)).toBe('Excellent')
-    expect(ffmiCategory(23)).toBe('Advanced/Near Limit')
-    expect(ffmiCategory(25)).toBe('Possibly Enhanced')
+  // E40: deliberate deviation from the workbook's SCHEDULE!K names — the value
+  // (FFMI itself) is still the workbook's; only the category wording/bands changed.
+  it('uses the sourced bands at their boundaries', () => {
+    expect(ffmiCategory(16.99)).toBe('Low')
+    expect(ffmiCategory(17)).toBe('Below average')
+    expect(ffmiCategory(19)).toBe('Above average')
+    expect(ffmiCategory(21)).toBe('Athletic')
+    expect(ffmiCategory(24.99)).toBe('Athletic')
+    expect(ffmiCategory(25)).toBe('Above the usual natural range')
   })
 })
 

@@ -1,6 +1,7 @@
 import type { BodyEntry, BodyFraction, Kg, Meters, Settings } from '@/lib/shared'
 import { bodyFraction, kg, meters } from '@/lib/shared'
 import { normalizedFfmi } from './ffmi'
+import { ffmiBand } from './ffmiScale'
 
 /**
  * Body-log derivations (US-050/051, PRD §6.3) — pure functions mirroring the
@@ -48,14 +49,13 @@ export function deriveBody(entry: BodyEntry, settings: BodySettings): BodyDerive
   }
 }
 
-/** SCHEDULE!K category bands, verbatim from the workbook's nested IF. */
+/**
+ * FFMI category name. E40 replaced the workbook's SCHEDULE!K nested IF (<18 /
+ * 20 / 22 / 23 / 25) with literature-anchored bands (ffmiScale.ts) — the FFMI
+ * value itself is unchanged and still pinned to the workbook.
+ */
 export function ffmiCategory(ffmi: number): string {
-  if (ffmi < 18) return 'Below Average'
-  if (ffmi < 20) return 'Average'
-  if (ffmi < 22) return 'Above Average'
-  if (ffmi < 23) return 'Excellent'
-  if (ffmi < 25) return 'Advanced/Near Limit'
-  return 'Possibly Enhanced'
+  return ffmiBand(ffmi).label
 }
 
 type TargetSettings = Pick<Settings, 'startWeight' | 'startBodyFat' | 'targets'>

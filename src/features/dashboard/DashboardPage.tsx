@@ -5,6 +5,7 @@ import { todayISO } from '@/lib/shared'
 import { getWorkout } from '@/lib/shared'
 import { BodyQuickAdd } from '@/features/body/BodyQuickAdd'
 import { AdherenceCard } from '@/features/dashboard/AdherenceCard'
+import { FfmiCard } from '@/features/body/FfmiCard'
 import { KpiCards } from '@/features/dashboard/KpiCards'
 import { QuoteCard } from '@/features/dashboard/QuoteCard'
 import { ProgramStatusBar } from '@/features/schedule/ProgramStatusBar'
@@ -94,6 +95,7 @@ export function DashboardPage() {
       <ProgramStatusBar />
       <NextUp />
       <KpiCards />
+      <FfmiCard compact />
       <AdherenceCard />
       <BodyQuickAdd />
     </Page>

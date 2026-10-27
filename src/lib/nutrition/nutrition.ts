@@ -1,5 +1,6 @@
 import { KG_PER_LB, leanMassForFfmi, type Sex } from '@/lib/body'
-import { diffDays, type BodyEntry, type ISODate, type Settings } from '@/lib/shared'
+import { diffDays, getTemplate, type BodyEntry, type ISODate, type Settings } from '@/lib/shared'
+import { averageExerciseKcal, estimateBmr, estimateTdee, type BmrMethod } from './energy'
 
 /**
  * P90X Nutrition Plan targets (E22). The workbook's nutrition tabs were excluded
@@ -150,10 +151,10 @@ export function nutritionTargets(
  * lean deltas separately instead of netting them into one scale-weight number
  * (all sourced in docs/requirements/nutrition-targets.md):
  *
- *   TDEE     = BMR × activity factor. BMR from Katch–McArdle (uses lean mass,
- *              the better choice when body-fat is known) when lean mass is
- *              available, else Mifflin–St Jeor (the best-validated equation
- *              from weight/height/age/sex).
+ *   TDEE     = BMR × 1.4 (daily life) + the program's average exercise energy
+ *              (E40 factorial model, energy.ts — replaced E22's flat ×1.55).
+ *              BMR is the mean of Katch–McArdle and Cunningham (both key off
+ *              lean mass) when lean mass is available, else Mifflin–St Jeor.
  *   calories = TDEE + (fatΔ × 7700 + leanΔ × 1800) over the remaining days —
  *              fat and lean tissue have very different energy densities, so a
  *              recomp (lose fat, gain lean, scale barely moves) still gets a
@@ -170,8 +171,6 @@ export function nutritionTargets(
  * number is recomputed from raw inputs.
  * ──────────────────────────────────────────────────────────────────────────── */
 
-/** Moderately active — P90X is ~1 h of demanding work ~6 days/week. */
-export const ACTIVITY_FACTOR = 1.55
 /** Energy density of adipose tissue (~3500 kcal/lb). */
 export const KCAL_PER_KG = 7700
 /** Energy density of lean (fat-free) tissue — mostly water, ~1800 kcal/kg (Hall). */
@@ -197,23 +196,6 @@ export type DietStyle = 'balanced' | 'lowCarb'
 
 /** Composition deltas below this are treated as "no change intended". */
 const DELTA_EPSILON_KG = 0.05
-
-/** Mifflin–St Jeor BMR (kcal/day); null if any input is missing. */
-export function mifflinStJeor(
-  weightKg: number | null,
-  heightM: number | null,
-  age: number | null,
-  gender: Sex,
-): number | null {
-  if (weightKg == null || heightM == null || age == null) return null
-  return 10 * weightKg + 6.25 * (heightM * 100) - 5 * age + (gender === 'male' ? 5 : -161)
-}
-
-/** Katch–McArdle BMR (kcal/day) from lean mass; null if lean mass is missing. */
-export function katchMcArdle(leanKg: number | null): number | null {
-  if (leanKg == null) return null
-  return 370 + 21.6 * leanKg
-}
 
 /** Latest weigh-in lean mass wins; the day-1 start stats are the honest fallback. */
 export function currentLeanKg(settings: Settings, bodyLog: BodyEntry[]): number | null {
@@ -286,8 +268,19 @@ export function targetComposition(
 
 export interface TargetNutrition {
   bmr: number
-  bmrMethod: 'katch' | 'mifflin'
+  bmrMethod: BmrMethod
+  /** the individual equations behind `bmr`, for the cross-check display */
+  bmrKatch: number | null
+  bmrCunningham: number | null
+  bmrMifflin: number | null
+  /** non-exercise daily-life multiplier applied to the BMR */
+  dailyLifeFactor: number
+  /** average scheduled-exercise energy per day */
+  exerciseKcal: number
   tdee: number
+  /** ≈ ±1 SD band around the TDEE */
+  tdeeLow: number
+  tdeeHigh: number
   currentWeightKg: number
   targetWeightKg: number
   horizonWeeks: number
@@ -332,16 +325,21 @@ export function targetNutrition(opts: {
   leanDeltaKg: number | null
   horizonWeeks: number
   dietStyle: DietStyle
+  /** average scheduled-exercise energy per day (energy.ts averageExerciseKcal) */
+  exerciseKcalPerDay: number
 }): TargetNutrition | null {
   const { currentWeightKg: weight, leanKg, heightM, age, gender, fatDeltaKg, leanDeltaKg } = opts
   if (weight == null || weight <= 0 || fatDeltaKg == null || leanDeltaKg == null) return null
 
-  const katch = katchMcArdle(leanKg)
-  const mifflin = mifflinStJeor(weight, heightM, age, gender)
-  const bmr = katch ?? mifflin
-  if (bmr == null) return null
-  const bmrMethod: 'katch' | 'mifflin' = katch != null ? 'katch' : 'mifflin'
-  const tdee = bmr * ACTIVITY_FACTOR
+  const estimate = estimateBmr({ leanKg, weightKg: weight, heightM, age, gender })
+  if (estimate === null) return null
+  const bmr = estimate.value
+  const {
+    tdee,
+    low: tdeeLow,
+    high: tdeeHigh,
+    factor,
+  } = estimateTdee(estimate, opts.exerciseKcalPerDay)
 
   const weeks = opts.horizonWeeks > 0 ? opts.horizonWeeks : 1
   // Each tissue gets its own muscle-sparing pace ceiling (only the directions
@@ -381,8 +379,15 @@ export function targetNutrition(opts: {
 
   return {
     bmr,
-    bmrMethod,
+    bmrMethod: estimate.method,
+    bmrKatch: estimate.katch,
+    bmrCunningham: estimate.cunningham,
+    bmrMifflin: estimate.mifflin,
+    dailyLifeFactor: factor,
+    exerciseKcal: opts.exerciseKcalPerDay,
     tdee,
+    tdeeLow,
+    tdeeHigh,
     currentWeightKg: weight,
     targetWeightKg: weight + fatDeltaKg + leanDeltaKg,
     horizonWeeks: weeks,
@@ -426,6 +431,8 @@ export function targetNutritionFromState(
     leanDeltaKg: comp !== null && lean !== null ? comp.targetLeanKg - lean : null,
     horizonWeeks: remainingProgramDays(settings.startDate, today) / 7,
     dietStyle: settings.nutrition.dietStyle,
+    exerciseKcalPerDay:
+      weight !== null ? averageExerciseKcal(getTemplate(settings.program), weight) : 0,
   })
 }
 

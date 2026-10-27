@@ -322,3 +322,10 @@ Post-v1.0.0. Full write-up: [`docs/epics/E38-audio-reliability.md`](../epics/E38
 - ✅ US-176 · "Check for updates" button in Help → About: fetch, install, reload (S, P1)
 
 Post-v1.0.0. Full write-up: [`docs/epics/E39-help-update-button.md`](../epics/E39-help-update-button.md).
+
+## E40 — FFMI statistic, scale and validated TDEE
+
+- ✅ US-177 · FFMI start → current → change → target card with a sourced visual scale, Body page + dashboard (M, P1)
+- ✅ US-178 · Factorial, schedule-aware TDEE: mean of Katch–McArdle & Cunningham × 1.4 + workout energy, with range (M, P1)
+
+Post-v1.0.0. Full write-up: [`docs/epics/E40-ffmi-tdee-science.md`](../epics/E40-ffmi-tdee-science.md).
