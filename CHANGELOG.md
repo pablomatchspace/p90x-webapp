@@ -15,6 +15,17 @@ didn't bump the package version — they're numbered B01/B02 here for a
 continuous record; #33's package column is left at the un-suffixed version
 that was actually shipped.
 
+## 1.E40.U178 (package 1.40.178) — 2026-10-27
+
+- **E40 — FFMI statistic and scale (U177).** Body page and dashboard get an **FFMI** card: start →
+  current → change → target with a visual reference scale (Low / Below average / Above average /
+  Athletic / Above the usual natural range). The bands are anchored to published values (ESPEN 17,
+  population median ≈ 19, top decile ≈ 21, Kouri 25) instead of the workbook's category names — an
+  intentional deviation, FFMI itself is unchanged. Normalization stays at Kouri's 1.80 m.
+- **E40 — Validated TDEE (U178).** TDEE is now BMR × 1.4 plus the workout energy of your actual program
+  schedule (net Compendium METs), with a likely range; BMR is the mean of Katch–McArdle and Cunningham.
+  Replaces the flat × 1.55 (sample persona: 2 705 → 2 906 kcal — higher, not lower). No schema change (v14).
+
 ## 1.E39.U176 (package 1.39.176) — 2026-10-27
 
 - **E39 — Check for updates (U176).** Help → About has a **Check for updates**

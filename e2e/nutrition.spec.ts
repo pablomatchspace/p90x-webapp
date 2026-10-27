@@ -46,9 +46,10 @@ test('today shows the evidence-based target recommendation next to the P90X plan
   // composition-aware engine budgets a real deficit even though the scale
   // barely moves (fatΔ ≈ −5.1 kg at 7700, leanΔ ≈ +4.3 kg at 1800 kcal/kg).
   await expect(target.getByText('Recomp', { exact: true })).toBeVisible()
-  await expect(target.getByText('2,281')).toBeVisible()
-  // Body-fat is logged, so lean mass is known → Katch–McArdle drives the TDEE.
-  await expect(target.getByText(/Katch–McArdle TDEE/)).toBeVisible()
+  await expect(target.getByText('2,482')).toBeVisible()
+  // E40: factorial TDEE (BMR × 1.4 + the schedule's average workout energy), with its range.
+  await expect(target.getByText(/TDEE ≈ 2,906 kcal \(likely 2,619–3,194\)/)).toBeVisible()
+  await expect(target.getByText(/BMR × 1\.4 \+ ~354 kcal\/day of workouts/)).toBeVisible()
   // The footnote shows both weekly paces, not the misleading net-scale rate.
   await expect(target.getByText(/−0\.48 kg\/wk fat · \+0\.40 kg\/wk lean/)).toBeVisible()
 
@@ -71,11 +72,11 @@ test('the low-carb diet style caps carbs and shifts the calories into fat', asyn
   const target = page.locator('section[aria-label="Your target"]')
   await expect(target.getByText('low-carb', { exact: true })).toBeVisible()
   const macro = (label: string) => target.locator('dt', { hasText: label }).locator('..')
-  // Calories are unchanged (2,281): carbs stop at 130 g, fat absorbs the rest.
-  await expect(target.getByText('2,281')).toBeVisible()
+  // Calories are unchanged (2,482): carbs stop at 130 g, fat absorbs the rest.
+  await expect(target.getByText('2,482')).toBeVisible()
   await expect(macro('Carbs')).toContainText('130')
   await expect(macro('Carbs')).toContainText('capped')
-  await expect(macro('Fat')).toContainText('1.4 g/kg')
+  await expect(macro('Fat')).toContainText('1.7 g/kg')
 })
 
 test('settings read-outs and overrides drive the P90X target', async ({ page }) => {
@@ -156,9 +157,9 @@ test('settings shows the target-based recommendation section', async ({ page }) 
   await expect(section).toBeVisible()
   await expect(section.getByText('Recomp', { exact: true })).toBeVisible()
 
-  // Katch–McArdle BMR (lean mass known) feeds a ×1.55 TDEE and a deficit daily target.
+  // E40: lean-mass BMR (Katch–McArdle/Cunningham mean) feeds the factorial TDEE and a deficit daily target.
   const derived = (label: string) => section.locator('dt', { hasText: label }).locator('..')
-  await expect(derived('BMR')).toContainText('1,745')
-  await expect(derived('TDEE')).toContainText('2,705')
+  await expect(derived('BMR')).toContainText('1,823')
+  await expect(derived('TDEE')).toContainText('2,906')
   await expect(section.locator('li').filter({ hasText: 'Protein' })).toContainText('2.2 g/kg')
 })
