@@ -15,7 +15,7 @@ import type { FocusStep } from './focusSteps'
  *   hundred and five"), with "point five" / "and a half" fractions
  * - field words route a value to a column — before or right after the number
  *   ("reps 22, knee 8" ≡ "22 reps, 8 knee"); main: rep(s)/second(s);
- *   secondary: knee(s)/chair(s)/weight(s)/pound(s)/kilo(s)/kg/side
+ *   secondary: knee(s)/chair(s)/modified/mod/weight(s)/pound(s)/kilo(s)/kg/side
  * - "round N" scopes following values to that round on multi-round cards
  */
 
@@ -75,6 +75,8 @@ const SECONDARY_WORDS = new Set([
   'knees',
   'chair',
   'chairs',
+  'modified',
+  'mod',
   'weight',
   'weights',
   'pound',
@@ -289,4 +291,14 @@ export function assignVoiceValues(
     out.push({ slot: pick.slot, value: v.value })
   }
   return out
+}
+
+/**
+ * 1-based round the athlete named that this card doesn't show (E36 cards carry
+ * a single round), else null. Lets the UI say why a value was not logged.
+ */
+export function mismatchedRound(values: VoiceValue[], slots: VoiceSlot[]): number | null {
+  const shown = new Set(slots.map((s) => s.round))
+  const miss = values.find((v) => v.round !== undefined && !shown.has(v.round))
+  return miss?.round === undefined ? null : miss.round + 1
 }

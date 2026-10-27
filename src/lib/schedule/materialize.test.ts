@@ -28,7 +28,7 @@ function programDays(schedule: ReturnType<typeof materialize>): ProgramDay[] {
 
 describe('materialize — Lean variant (US-073)', () => {
   it('puts Core Synergistics on day 1 (the workbook Lean selector)', () => {
-    const s = materialize('lean', START, [])
+    const s = materialize({ suite: 'p90x', variant: 'lean' }, START, [])
     expect(programDays(s)).toHaveLength(90)
     const [d1] = programDays(s)
     expect(d1.programDayId).toBe('d001')
@@ -36,8 +36,8 @@ describe('materialize — Lean variant (US-073)', () => {
   })
 
   it('shares its calendar skeleton with Classic, so reschedule ops replay unchanged', () => {
-    const classic = materialize('classic', START, [])
-    const lean = materialize('lean', START, [])
+    const classic = materialize({ suite: 'p90x', variant: 'classic' }, START, [])
+    const lean = materialize({ suite: 'p90x', variant: 'lean' }, START, [])
     // Identical dates and day/week/phase/recovery per position — only the
     // workouts differ, which is exactly why every date/week-indexed op stays
     // valid across a variant switch (no invalidation needed).
@@ -52,7 +52,7 @@ describe('materialize — Lean variant (US-073)', () => {
 })
 
 describe('materialize — no ops', () => {
-  const s = materialize('classic', START, [])
+  const s = materialize({ suite: 'p90x', variant: 'classic' }, START, [])
 
   it('lays 90 contiguous days from the start date', () => {
     expect(s.days).toHaveLength(90)
@@ -89,7 +89,7 @@ describe('materialize — skips (golden: workbook post-skip schedule)', () => {
     op('skip', { date: '2026-05-28' }),
     op('skip', { date: '2026-06-04' }),
   ]
-  const s = materialize('classic', START, ops)
+  const s = materialize({ suite: 'p90x', variant: 'classic' }, START, ops)
 
   it('reproduces the workbook schedule: 3 gaps shift the program to Aug 25', () => {
     expect(s.days).toHaveLength(93)
@@ -115,7 +115,9 @@ describe('materialize — skips (golden: workbook post-skip schedule)', () => {
   })
 
   it('sample persona: start Jan 5 + one skip ends Apr 5, projected Apr 6', () => {
-    const sample = materialize('classic', '2026-01-05', [op('skip', { date: '2026-01-14' })])
+    const sample = materialize({ suite: 'p90x', variant: 'classic' }, '2026-01-05', [
+      op('skip', { date: '2026-01-14' }),
+    ])
     expect(sample.byDate.get('2026-01-13')).toMatchObject({ programDayId: 'd009' })
     expect(sample.byDate.get('2026-01-14')).toMatchObject({ kind: 'gap' })
     expect(sample.byDate.get('2026-01-15')).toMatchObject({ programDayId: 'd010' })
@@ -124,7 +126,7 @@ describe('materialize — skips (golden: workbook post-skip schedule)', () => {
   })
 
   it('two skips on the same date insert consecutive gaps', () => {
-    const twice = materialize('classic', START, [
+    const twice = materialize({ suite: 'p90x', variant: 'classic' }, START, [
       op('skip', { date: '2026-06-01' }),
       op('skip', { date: '2026-06-01' }),
     ])
@@ -138,7 +140,7 @@ describe('materialize — skips (golden: workbook post-skip schedule)', () => {
   it('ignores skips outside the program with a reason; schedule unchanged', () => {
     const early = op('skip', { date: '2026-05-01' })
     const late = op('skip', { date: '2026-12-31' })
-    const out = materialize('classic', START, [early, late])
+    const out = materialize({ suite: 'p90x', variant: 'classic' }, START, [early, late])
     expect(out.days).toHaveLength(90)
     expect(out.ignoredOps).toEqual([
       { opId: early.id, reason: expect.stringContaining('before the program start') },
@@ -147,7 +149,9 @@ describe('materialize — skips (golden: workbook post-skip schedule)', () => {
   })
 
   it('reverted ops are ignored entirely (and are not reported as ignored)', () => {
-    const out = materialize('classic', START, [op('skip', { date: '2026-05-27' }, true)])
+    const out = materialize({ suite: 'p90x', variant: 'classic' }, START, [
+      op('skip', { date: '2026-05-27' }, true),
+    ])
     expect(out.days).toHaveLength(90)
     expect(out.ignoredOps).toEqual([])
   })
@@ -155,7 +159,7 @@ describe('materialize — skips (golden: workbook post-skip schedule)', () => {
 
 describe('materialize — swaps', () => {
   it('exchanges content between two dates; position numbering stays put', () => {
-    const s = materialize('classic', START, [
+    const s = materialize({ suite: 'p90x', variant: 'classic' }, START, [
       op('swap', { dateA: '2026-05-25', dateB: '2026-05-26' }),
     ])
     const a = s.byDate.get('2026-05-25')
@@ -167,7 +171,7 @@ describe('materialize — swaps', () => {
 
   it('swapping a program day into a gap pulls the workout forward', () => {
     const skip = op('skip', { date: '2026-05-27' })
-    const s = materialize('classic', START, [
+    const s = materialize({ suite: 'p90x', variant: 'classic' }, START, [
       skip,
       op('swap', { dateA: '2026-05-27', dateB: '2026-05-28' }),
     ])
@@ -179,7 +183,7 @@ describe('materialize — swaps', () => {
   it('rejects swaps referencing dates off the schedule or identical dates', () => {
     const offDate = op('swap', { dateA: '2026-05-25', dateB: '2027-01-01' })
     const same = op('swap', { dateA: '2026-05-25', dateB: '2026-05-25' })
-    const s = materialize('classic', START, [offDate, same])
+    const s = materialize({ suite: 'p90x', variant: 'classic' }, START, [offDate, same])
     expect(s.ignoredOps).toEqual([
       { opId: offDate.id, reason: expect.stringContaining('2027-01-01') },
       { opId: same.id, reason: expect.stringContaining('same day') },
@@ -191,7 +195,7 @@ describe('materialize — swaps', () => {
 describe('materialize — remaps', () => {
   it('reorders each week from fromWeek on; earlier weeks untouched', () => {
     // move the rest day (slot 6) to the front of every week from week 2
-    const s = materialize('classic', START, [
+    const s = materialize({ suite: 'p90x', variant: 'classic' }, START, [
       op('remap', { fromWeek: 2, order: [6, 0, 1, 2, 3, 4, 5] }),
     ])
     const days = programDays(s)
@@ -203,7 +207,7 @@ describe('materialize — remaps', () => {
   })
 
   it('week 13 has 6 slots — out-of-range order indices drop', () => {
-    const s = materialize('classic', START, [
+    const s = materialize({ suite: 'p90x', variant: 'classic' }, START, [
       op('remap', { fromWeek: 13, order: [6, 5, 4, 3, 2, 1, 0] }),
     ])
     const days = programDays(s)
@@ -214,7 +218,7 @@ describe('materialize — remaps', () => {
 
   it('rejects a non-permutation order', () => {
     const bad = op('remap', { fromWeek: 1, order: [0, 0, 1, 2, 3, 4, 5] })
-    const s = materialize('classic', START, [bad])
+    const s = materialize({ suite: 'p90x', variant: 'classic' }, START, [bad])
     expect(s.ignoredOps).toEqual([{ opId: bad.id, reason: expect.stringContaining('permutation') }])
     expect(programDays(s)[0].programDayId).toBe('d001')
   })
@@ -251,7 +255,7 @@ describe('materialize — invariants under arbitrary op soups (US-034 groundwork
     () => {
       fc.assert(
         fc.property(opsArb, (ops) => {
-          const s = materialize('classic', START, ops as ScheduleOp[])
+          const s = materialize({ suite: 'p90x', variant: 'classic' }, START, ops as ScheduleOp[])
           const program = programDays(s)
           expect(program).toHaveLength(90)
           const ids = new Set(program.map((d) => d.programDayId))
@@ -278,18 +282,20 @@ describe('materialize — invariants under arbitrary op soups (US-034 groundwork
       op('swap', { dateA: '2026-05-25', dateB: '2026-06-01' }),
     ]
     const snapshot = JSON.parse(JSON.stringify(ops))
-    const a = materialize('classic', START, ops)
-    const b = materialize('classic', START, ops)
+    const a = materialize({ suite: 'p90x', variant: 'classic' }, START, ops)
+    const b = materialize({ suite: 'p90x', variant: 'classic' }, START, ops)
     expect(a.days).toEqual(b.days)
     expect(ops).toEqual(snapshot)
     // template module data not mutated by the remap
-    expect(materialize('classic', START, []).days[0]).toMatchObject({ programDayId: 'd001' })
+    expect(materialize({ suite: 'p90x', variant: 'classic' }, START, []).days[0]).toMatchObject({
+      programDayId: 'd001',
+    })
   })
 })
 
 describe('groupByWeek', () => {
   it('always yields 13 chronological sections; gaps attach to the paused week', () => {
-    const s = materialize('classic', START, [
+    const s = materialize({ suite: 'p90x', variant: 'classic' }, START, [
       op('skip', { date: '2026-05-27' }),
       op('skip', { date: '2026-05-28' }),
       op('skip', { date: '2026-06-04' }),
@@ -304,7 +310,7 @@ describe('groupByWeek', () => {
   })
 
   it('a gap swapped to the very start joins week 1', () => {
-    const s = materialize('classic', START, [
+    const s = materialize({ suite: 'p90x', variant: 'classic' }, START, [
       op('skip', { date: '2026-05-27' }),
       op('swap', { dateA: '2026-05-25', dateB: '2026-05-27' }),
     ])

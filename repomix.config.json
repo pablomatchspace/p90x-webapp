@@ -23,7 +23,8 @@
       "e2e/**/*-snapshots/**",
       "public/icons/**",
       "docs/audits/**",
-      "**/*.md"
+      "**/*.md",
+      "graphify-out/**"
     ]
   },
   "security": {

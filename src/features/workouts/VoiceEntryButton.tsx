@@ -4,11 +4,13 @@ import type { FocusStep } from '@/lib/workouts'
 import type { ExerciseEntry } from '@/lib/shared'
 import {
   assignVoiceValues,
+  mismatchedRound,
   parseVoiceTranscript,
   voiceSlots,
   type VoiceCommand,
   type VoiceSlot,
 } from '@/lib/workouts'
+import { isSpeaking, onSpeaking } from './audio'
 import { mainLabel, SECONDARY_LABELS } from './entryLabels'
 
 /**
@@ -46,6 +48,11 @@ function speechRecognitionCtor(): SpeechRecognitionCtor | null {
   return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null
 }
 
+/** Errors where re-arming can only fail again — stop instead of looping the mic. */
+const FATAL_ERRORS = new Set(['network', 'audio-capture', 'language-not-supported', 'bad-grammar'])
+/** Pause before a hands-free re-arm: no tight restart loop, and the OS mic chime breathes. */
+const REARM_MS = 300
+
 const pill = (active: boolean, activeClasses: string) =>
   `flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 font-medium ${
     active
@@ -73,15 +80,37 @@ export function VoiceEntryButton({
   const [feedback, setFeedback] = useState<string | null>(null)
   const recRef = useRef<SpeechRecognitionLike | null>(null)
   const armedRef = useRef(false)
+  const rearmRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // the mic sits out while the app speaks (E38) — it would hear its own cue
+  const pausedForSpeechRef = useRef(false)
   // recognition callbacks outlive renders — read the freshest props through a ref
   const latest = useRef({ step, entry, handsFree, onValue, onCommand })
   latest.current = { step, entry, handsFree, onValue, onCommand }
+  const startRef = useRef<() => void>(() => {})
 
   useEffect(
     () => () => {
       armedRef.current = false
+      if (rearmRef.current !== null) clearTimeout(rearmRef.current)
       recRef.current?.abort()
     },
+    [],
+  )
+
+  // E38: mute the mic for the duration of a spoken cue, then re-arm.
+  useEffect(
+    () =>
+      onSpeaking((speaking) => {
+        if (speaking) {
+          if (recRef.current !== null && armedRef.current) {
+            pausedForSpeechRef.current = true
+            recRef.current.abort() // its onend waits for the cue to finish
+          }
+        } else if (pausedForSpeechRef.current) {
+          pausedForSpeechRef.current = false
+          if (armedRef.current && recRef.current === null) startRef.current()
+        }
+      }),
     [],
   )
 
@@ -110,7 +139,15 @@ export function VoiceEntryButton({
       (slot) => (currentEntry?.rounds[slot.round]?.[slot.field] ?? null) !== null,
     )
     const assignments = assignVoiceValues(parsed.values, slots, filled)
+    const wrong = mismatchedRound(parsed.values, slots)
     if (assignments.length === 0) {
+      if (wrong !== null) {
+        const shown = current.rounds.map((r) => r + 1).join(', ')
+        setFeedback(
+          `Heard “${heard}” — round ${wrong} isn’t on this card (round ${shown}); nothing logged.`,
+        )
+        return
+      }
       setFeedback(`Heard “${heard}” — no matching field on this card.`)
       return
     }
@@ -123,7 +160,8 @@ export function VoiceEntryButton({
           : SECONDARY_LABELS[secondary]
       return `${current.rounds.length > 1 ? `R${slot.round + 1} ` : ''}${name} ${value}`
     })
-    setFeedback(`Logged ${applied.join(' · ')}.`)
+    const skipped = wrong === null ? '' : ` Round ${wrong} isn’t on this card — skipped.`
+    setFeedback(`Logged ${applied.join(' · ')}.${skipped}`)
   }
 
   const start = () => {
@@ -131,25 +169,49 @@ export function VoiceEntryButton({
     rec.lang = 'en-US'
     rec.continuous = false
     rec.interimResults = false
+    // a superseded instance (toggled off, or replaced) must not touch shared state
+    const stale = () => recRef.current !== rec
     rec.onresult = (event) => {
+      if (stale()) return
       const result = event.results[event.results.length - 1]?.[0]
       if (result !== undefined) handleTranscript(result.transcript)
     }
     rec.onerror = (event) => {
+      if (stale()) return
       if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
         armedRef.current = false
         setListening(false)
         setDenied(true)
         setFeedback('Microphone unavailable — check the browser permission.')
+      } else if (FATAL_ERRORS.has(event.error)) {
+        armedRef.current = false
+        setListening(false)
+        setFeedback(
+          event.error === 'network'
+            ? 'Speech service unreachable — check your connection and tap the mic again.'
+            : 'Couldn’t use the microphone — tap the mic to try again.',
+        )
       } else if (event.error === 'no-speech') {
         setFeedback('Didn’t hear anything — try again.')
       }
     }
     rec.onend = () => {
+      if (stale()) return
       recRef.current = null
+      if (!armedRef.current) {
+        setListening(false)
+        return
+      }
+      if (pausedForSpeechRef.current) return // re-armed when the cue ends
       // hands-free: one utterance per session, re-armed until switched off
-      if (armedRef.current && latest.current.handsFree) {
-        start()
+      if (latest.current.handsFree) {
+        rearmRef.current = setTimeout(() => {
+          rearmRef.current = null
+          if (!armedRef.current || recRef.current !== null) return
+          if (isSpeaking())
+            pausedForSpeechRef.current = true // re-armed when the cue ends
+          else start()
+        }, REARM_MS)
       } else {
         armedRef.current = false
         setListening(false)
@@ -162,10 +224,13 @@ export function VoiceEntryButton({
       // an instance can refuse a second start(); the next tap re-creates it
     }
   }
+  startRef.current = start
 
   const toggle = () => {
     if (listening) {
       armedRef.current = false
+      if (rearmRef.current !== null) clearTimeout(rearmRef.current)
+      rearmRef.current = null
       setListening(false)
       recRef.current?.abort()
       recRef.current = null

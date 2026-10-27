@@ -16,6 +16,21 @@ export const SHORT_CODES: Record<string, string> = {
   'cardio-x': 'CARD',
   'x-stretch': 'STR',
   rest: 'REST',
+  // E33 Generation Next
+  'gn-push-strength': 'PUSH',
+  'gn-pull-strength': 'PULL',
+  'gn-upper-body': 'UPPR',
+  'gn-lower-body': 'LOWR',
+  'gn-full-body-strength': 'FBS',
+  'gn-full-body-power': 'FBP',
+  'gn-core-circuit': 'CORE',
+  'gn-plyometrix': 'PLYO',
+  'gn-speed-and-agility': 'S&A',
+  'gn-accel-decel': 'ACDC',
+  'gn-cardio-boxing': 'BOX',
+  'gn-active-mobility': 'MOB',
+  'gn-active-flexibility': 'FLEX',
+  'gn-myofascial-release': 'MFR',
 }
 
 export function shortCode(workoutKey: string): string {

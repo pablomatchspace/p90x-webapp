@@ -3,12 +3,13 @@ import { Link, useParams } from 'react-router-dom'
 import { NoProgramCard } from '@/components/NoProgramCard'
 import { Card, Page } from '@/components/Page'
 import { addDays, compareISO, formatLong, isISODate, todayISO, type ISODate } from '@/lib/shared'
-import { getWorkout } from '@/lib/shared'
-import { hasTimeline } from '@/lib/workouts'
+import { getWorkout, workoutsFor } from '@/lib/shared'
+import { gearForWorkouts, hasTimeline } from '@/lib/workouts'
 import type { ProgramDay } from '@/lib/schedule'
 import { dayStatus, workoutState } from '@/lib/schedule'
 import { BodyQuickAdd } from '@/features/body/BodyQuickAdd'
 import { NutritionCard } from '@/features/today/NutritionCard'
+import { GearList } from '@/features/workouts/GearList'
 import { Chip } from '@/features/schedule/Chip'
 import { ProgramStatusBar } from '@/features/schedule/ProgramStatusBar'
 import { RescheduleSection } from '@/features/schedule/RescheduleSection'
@@ -20,8 +21,84 @@ import {
   WORKOUT_STATE_LABELS,
   WORKOUT_STATE_TONES,
 } from '@/features/schedule/scheduleUi'
-import { setWorkoutCompleted } from '@/state/actions'
+import { setCompletionStatus, setWorkoutCompleted } from '@/state/actions'
 import { useSchedule, useSessionIndex } from '@/state/selectors'
+
+/**
+ * E33 U165: Generation Next's optional 5-minute fivers. Adding one logs it done
+ * on this program day (its own session, never part of the day's status or
+ * adherence); its card then offers the usual completion buttons to undo.
+ */
+function BonusAddOns({ day }: { day: ProgramDay }) {
+  const index = useSessionIndex()
+  const sessions = index.get(day.programDayId)
+  const bonuses = workoutsFor('gennext').filter((w) => w.style === 'bonus')
+  const added = bonuses.filter((w) => sessions?.get(w.key) !== undefined)
+  const available = bonuses.filter((w) => sessions?.get(w.key) === undefined)
+  return (
+    <>
+      {added.map((w) => (
+        <WorkoutCard
+          key={w.key}
+          day={day}
+          workoutKey={w.key}
+          intro="Optional bonus — never counts toward adherence."
+        />
+      ))}
+      {available.length > 0 ? (
+        <Card>
+          <h2 className="text-sm font-semibold">Add a 5-minute bonus</h2>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {available.map((w) => (
+              <button
+                key={w.key}
+                type="button"
+                onClick={() => setCompletionStatus(w.key, day.programDayId, 'yes')}
+                className="min-h-11 rounded-lg border border-zinc-300 px-3 py-1.5 text-sm font-medium hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800"
+              >
+                + {w.name.replace('Bonus: ', '')}
+              </button>
+            ))}
+          </div>
+        </Card>
+      ) : null}
+    </>
+  )
+}
+
+/**
+ * E37: gear to have ready for the next seven days of the schedule (today
+ * included), so the week can be prepped ahead. Bonus fivers are optional
+ * add-ons and are left out.
+ */
+const GEAR_HORIZON_DAYS = 7
+
+function WeekGear({ from }: { from: ISODate }) {
+  const schedule = useSchedule()
+  const index = useSessionIndex()
+  if (schedule === null) return null
+  const keys: string[] = []
+  for (let i = 0; i < GEAR_HORIZON_DAYS; i++) {
+    const day = schedule.byDate.get(addDays(from, i))
+    if (day?.kind !== 'program') continue
+    // a workout already finished today is no longer something to prep for
+    for (const key of day.workouts) {
+      if (i > 0 || workoutState(key, index.get(day.programDayId)?.get(key)) !== 'done') {
+        keys.push(key)
+      }
+    }
+  }
+  const gear = gearForWorkouts(keys)
+  if (gear.length === 0) return null
+  return (
+    <Card>
+      <h2 className="text-sm font-semibold">Gear for the next 7 days</h2>
+      <div className="mt-2">
+        <GearList gear={gear} lead="Have ready" />
+      </div>
+    </Card>
+  )
+}
 
 function WorkoutCard({
   day,
@@ -51,8 +128,13 @@ function WorkoutCard({
         <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">{session.annotation}</p>
       ) : null}
       {intro ? <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{intro}</p> : null}
+      {def.style === 'rest' ? null : (
+        <div className="mt-1">
+          <GearList workoutKey={workoutKey} inline />
+        </div>
+      )}
 
-      {def.style === 'completion' ? (
+      {def.style === 'completion' || def.style === 'bonus' ? (
         <div className="mt-3">
           <CompletionButtons
             workoutKey={workoutKey}
@@ -215,6 +297,7 @@ export function TodayPage() {
           {day.workouts.map((key) => (
             <WorkoutCard key={key} day={day} workoutKey={key} />
           ))}
+          {schedule.program.suite === 'gennext' ? <BonusAddOns day={day} /> : null}
         </>
       )}
 
@@ -225,6 +308,8 @@ export function TodayPage() {
       {isToday && day !== undefined && day.kind === 'program' ? (
         <NutritionCard schedulePhase={day.phase} />
       ) : null}
+
+      {isToday && day?.kind === 'program' ? <WeekGear from={date} /> : null}
 
       {isToday ? <BodyQuickAdd /> : null}
 

@@ -6,10 +6,12 @@ export const SECONDARY_LABELS: Record<SecondaryKind, string> = {
   chair: 'chair reps',
   weight: 'weight',
   extra: 'other side',
+  mod: 'modified reps',
 }
 
 export function mainLabel(exercise: CatalogExercise): string {
-  return exercise.name.includes('(sec)') ? 'seconds' : 'reps'
+  if (exercise.name.includes('(sec)')) return 'seconds'
+  return exercise.name.includes('(rounds)') ? 'rounds' : 'reps'
 }
 
 export function fieldAria(

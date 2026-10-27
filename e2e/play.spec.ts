@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import { expect, test, type Page } from '@playwright/test'
 // The full 76-segment skip journey is intentionally exhaustive; the emulated
 // mobile device needs more than the default 30s to render all transitions.
@@ -76,7 +77,7 @@ test('persists per-jump corrections and explicit completion', async ({ page }) =
   await skipToSummary(page)
 
   // Skipping all segments leaves every logged jump unchecked; correct one on the summary.
-  const jumpSquats = page.getByLabel('jump squats', { exact: true })
+  const jumpSquats = page.getByLabel('Jump Squats', { exact: true })
   await expect(jumpSquats).not.toBeChecked()
   await jumpSquats.check()
   await expect(page.getByText('Jumps done 1 of 23')).toBeVisible()
@@ -130,6 +131,7 @@ test('E26: voice cues announce start and next exercise; rest beeps differ', asyn
   await expect(
     page.getByRole('heading', { name: /Get ready — up next: Run in Place/ }),
   ).toBeVisible()
+  await page.clock.fastForward(1_000) // the cue follows the rest beep rather than talking over it
   const spoken = await page.evaluate(() => (window as unknown as { __spoken: string[] }).__spoken)
   expect(spoken).toContain('March in Place') // spoken at workout start
   expect(spoken).toContain('Get ready. Up next: Run in Place') // spoken at rest start
@@ -141,6 +143,50 @@ test('E26: voice cues announce start and next exercise; rest beeps differ', asyn
   await page.getByRole('button', { name: 'Start', exact: true }).click()
   const after = await page.evaluate(() => (window as unknown as { __spoken: string[] }).__spoken)
   expect(after.filter((t) => t === 'March in Place')).toHaveLength(1)
+})
+
+test('E38: beeps are scheduled on one shared audio clock from the Start tap', async ({ page }) => {
+  // Spy on Web Audio: contexts created, and oscillators started (scheduled).
+  await page.addInitScript(() => {
+    const w = window as unknown as { __ctxs: number; __tones: number }
+    w.__ctxs = 0
+    w.__tones = 0
+    const Real = window.AudioContext
+    class Spy extends Real {
+      constructor() {
+        super()
+        w.__ctxs++
+      }
+      createOscillator() {
+        const osc = super.createOscillator()
+        const start = osc.start.bind(osc)
+        osc.start = (when?: number) => {
+          w.__tones++
+          start(when)
+        }
+        return osc
+      }
+    }
+    window.AudioContext = Spy
+  })
+  await page.clock.fastForward(500) // flush the debounced persister before reloading
+  await page.reload()
+  await expect(page.getByText('Segment 1 of 76')).toBeVisible()
+  const stats = () =>
+    page.evaluate(() => {
+      const w = window as unknown as { __ctxs: number; __tones: number }
+      return { ctxs: w.__ctxs, tones: w.__tones }
+    })
+
+  await page.getByRole('button', { name: 'Start', exact: true }).click()
+  // every upcoming boundary is queued up front — the schedule that survives a locked screen
+  await expect.poll(async () => (await stats()).tones).toBeGreaterThan(100)
+
+  // crossing a boundary and pausing/resuming never spawns a second context
+  await page.clock.fastForward(30_300)
+  await page.getByRole('button', { name: 'Pause', exact: true }).click()
+  await page.getByRole('button', { name: 'Resume', exact: true }).click()
+  expect((await stats()).ctxs).toBe(1)
 })
 
 test('E27: play mode surfaces the media launch button (E23 parity)', async ({ page }) => {
@@ -218,21 +264,22 @@ test('X Stretch day shows Play workout with an untimed flow wait (E18)', async (
 })
 
 /**
- * Cardio X play mode (E18): Cardio X is lean-only, so the test switches the
- * sample from classic to lean first. With start date 2026-01-05 and the 01-14
+ * Cardio X play mode (E18): Cardio X is lean-only, so the test imports a
+ * Lean copy of the sample first. With start date 2026-01-05 and the 01-14
  * skip, lean day 16 (Cardio X) lands on 2026-01-21 — the same date the
  * beforeEach clock is already pinned to. Kenpo rep drills wait for a Done tap.
  */
 test('Cardio X (lean) shows Play workout with untimed rep waits (E18)', async ({ page }) => {
-  // Switch the sample's program from classic to lean via Settings.
-  await page.goto('#/more/settings')
-  await page.getByRole('button', { name: 'Switch to lean', exact: true }).click()
-  // Confirm the variant change in the modal (scoped to the dialog to avoid the
-  // row button of the same name).
-  await page
-    .getByRole('dialog', { name: 'Confirm program variant' })
-    .getByRole('button', { name: 'Switch to lean', exact: true })
-    .click()
+  // E33: the variant is locked once a round runs, so import a Lean copy of the sample.
+  const sample = JSON.parse(readFileSync('public/sample-data.json', 'utf8'))
+  sample.settings.program = 'lean'
+  await page.goto('#/more/data')
+  await page.setInputFiles('input[type=file]', {
+    name: 'lean.json',
+    mimeType: 'application/json',
+    buffer: Buffer.from(JSON.stringify(sample)),
+  })
+  await page.getByRole('button', { name: 'Import & replace' }).click()
 
   // The clock is still 2026-01-21 (beforeEach) = lean day 16 = Cardio X.
   await page.goto('#/today')

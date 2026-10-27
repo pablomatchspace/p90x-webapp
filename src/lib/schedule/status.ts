@@ -36,7 +36,7 @@ export type WorkoutState = 'done' | 'partial' | 'no' | 'pending'
 
 export function workoutState(workoutKey: string, session: Session | undefined): WorkoutState {
   const def = getWorkout(workoutKey)
-  if (def.style === 'completion' || def.style === 'rest') {
+  if (def.style === 'completion' || def.style === 'rest' || def.style === 'bonus') {
     if (session?.completion === 'yes') return 'done'
     if (session?.completion === 'no') return 'no'
     return 'pending'

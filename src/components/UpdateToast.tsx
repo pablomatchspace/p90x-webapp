@@ -1,5 +1,6 @@
 import { RefreshCw } from 'lucide-react'
 import { useRegisterSW } from 'virtual:pwa-register/react'
+import { setRegistration } from './swBridge'
 
 /** New-version prompt (registerType 'prompt') + first-install offline notice. */
 export function UpdateToast() {
@@ -7,7 +8,10 @@ export function UpdateToast() {
     needRefresh: [needRefresh, setNeedRefresh],
     offlineReady: [offlineReady, setOfflineReady],
     updateServiceWorker,
-  } = useRegisterSW()
+  } = useRegisterSW({
+    // shared with Help → "Check for updates" (E39)
+    onRegisteredSW: (_url, reg) => setRegistration(reg),
+  })
 
   if (!needRefresh && !offlineReady) return null
 

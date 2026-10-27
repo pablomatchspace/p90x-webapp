@@ -4,7 +4,7 @@ import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { migrateToCurrent } from '@/lib/shared'
 import { materialize } from '@/lib/schedule/materialize'
-import { indexSessions } from '@/lib/schedule/status'
+import { dayStatus, indexSessions } from '@/lib/schedule/status'
 import { adherenceTrend, computeAdherence } from './adherence'
 
 /**
@@ -96,5 +96,34 @@ describe('adherenceTrend (sample dataset @ 2026-01-20)', () => {
 
   it('is empty before the program starts', () => {
     expect(adherenceTrend(schedule, index, '2026-01-01')).toEqual([])
+  })
+})
+
+describe('Generation Next bonus add-ons never count (E33 U165)', () => {
+  const GN = { suite: 'gennext', variant: 'standard' } as const
+  const START = '2026-02-02'
+
+  it('a done bonus on an undone day leaves the day missed and adherence unchanged', () => {
+    const schedule = materialize(GN, START, [])
+    const bare = computeAdherence(schedule, indexSessions({}), [], '2026-02-05')
+    const withBonus = computeAdherence(
+      schedule,
+      indexSessions({
+        'gn-bonus-abs': { sessions: [{ programDayId: 'd001', completion: 'yes' }] },
+      }),
+      [],
+      '2026-02-05',
+    )
+    expect(withBonus).toEqual(bare)
+    const day1 = schedule.byProgramDayId.get('d001')!
+    expect(
+      dayStatus(
+        day1,
+        indexSessions({
+          'gn-bonus-abs': { sessions: [{ programDayId: 'd001', completion: 'yes' }] },
+        }),
+        '2026-02-05',
+      ),
+    ).toBe('missed')
   })
 })

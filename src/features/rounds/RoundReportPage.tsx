@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { Card, Page } from '@/components/Page'
 import { NoProgramCard } from '@/components/NoProgramCard'
 import { formatFixed, fractionToPercent, kgToUnit } from '@/lib/body'
-import { formatLong, todayISO } from '@/lib/shared'
+import { formatLong, programLabel, todayISO } from '@/lib/shared'
 import {
   archivedRoundData,
   buildRoundReport,
@@ -345,7 +345,10 @@ export function RoundReportPage() {
   const range = `${formatLong(data.startDate)} → ${formatLong(report.schedule.lastProgramDate)}`
   const subtitle = live
     ? `So far — day ${report.adherence.dayReached} of ${report.adherence.programDays} · ${range}`
-    : `${data.program === 'lean' ? 'Lean' : 'Classic'} · ${range}`
+    : `${programLabel(data.program)} · ${range}`
+
+  // E33: only rounds of the same program suite are comparable
+  const sameSuite = compareCandidates.filter((c) => c.data.program.suite === data.program.suite)
 
   return (
     <Page
@@ -372,12 +375,12 @@ export function RoundReportPage() {
       <AdherenceOutcomeCard report={report} />
       <BodyOutcomeCard report={report} metrics={metrics} units={settings.units} />
       <StrengthOutcomeCard report={report} />
-      {compareCandidates.length > 0 ? (
+      {sameSuite.length > 0 ? (
         <RoundCompareSection
           currentLabel={live ? 'Current round' : (archived?.label ?? 'This round')}
           current={data}
           currentAdherence={report.adherence}
-          others={compareCandidates}
+          others={sameSuite}
           units={settings.units}
         />
       ) : null}

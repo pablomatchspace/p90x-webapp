@@ -135,10 +135,18 @@ export function StrengthGrid({ def, occurrences }: { def: WorkoutDef; occurrence
 
       <Card>
         <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
-          {exercises.map((exercise) => {
+          {exercises.map((exercise, i) => {
             const result = scoreExercise(session?.entries?.[exercise.id], exercise, scoring)
+            // E33: Generation Next rows are grouped like the Dumbbell Tracker
+            const blockStart =
+              exercise.block !== undefined && exercises[i - 1]?.block !== exercise.block
             return (
               <div key={exercise.id} className="py-3 first:pt-0 last:pb-0">
+                {blockStart ? (
+                  <h3 className="mb-2 text-xs font-semibold tracking-wide text-red-600 uppercase">
+                    {exercise.block}
+                  </h3>
+                ) : null}
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
                   <h3 className="text-sm font-medium">{exercise.name}</h3>
                   <ScoreLine name={exercise.name} result={result} showPenalty={!isArx} />

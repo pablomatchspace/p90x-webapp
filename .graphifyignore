@@ -1,0 +1,7 @@
+# graphify also honors .gitignore (personal data p90x-data*.json is excluded there).
+# Binary images carry no code knowledge and would each cost a vision extraction.
+e2e/**/*-snapshots/
+public/icons/
+public/favicon.svg
+# Docs (PRD, epics, requirements, changelog) stay out of the graph: code + CI config only.
+*.md

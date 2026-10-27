@@ -50,7 +50,7 @@ describe('loadState', () => {
     const oldState = {
       schemaVersion: 12,
       settings: {
-        program: 'classic',
+        program: { suite: 'p90x', variant: 'classic' },
         startDate: null,
         units: 'metric',
         gender: 'male',

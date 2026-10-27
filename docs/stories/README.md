@@ -257,3 +257,68 @@ Post-v1.0.0. Full write-up: [`docs/epics/E29-overload-targets.md`](../epics/E29-
 - ✅ US-152 · E2E, visual baselines & release (S, P1)
 
 Post-v1.0.0. Full write-up: [`docs/epics/E30-voice-entry.md`](../epics/E30-voice-entry.md).
+
+## E31 — Domain-driven design alignment
+
+- ✅ US-153 · Ubiquitous language — `docs/GLOSSARY.md`
+- ✅ US-154 · Physical bounded contexts in `src/lib/*` + barrels + `architecture.test.ts`
+- ✅ US-155 · Branded unit value objects — `units.ts`
+- ✅ US-156 · Persisted-field renames, schema v13
+- ✅ US-157 · Application layer — `src/state/actions/*`
+- ✅ US-158 · Ports & typed store
+
+Post-v1.0.0. No standalone epic doc — see the `1.E31.*` CHANGELOG entries and [`docs/CONTEXT-MAP.md`](../CONTEXT-MAP.md).
+
+## E32 — Schema migration safety
+
+- ✅ US-159 · Pre-migration safety backups & schema snapshot fixtures
+
+Post-v1.0.0. See the `1.E32.U159` CHANGELOG entry.
+
+## E33 — P90X Generation Next program
+
+- ✅ US-160 · Suite/variant program model + schema v14 (M, P0)
+- ✅ US-161 · Generation Next data generator — `tools/gen_gennext.py` → `src/data/gennext.json` (M, P0)
+- ✅ US-162 · Dumbbell logging by block + Classic scoring (D9) (M, P0)
+- ✅ US-163 · Start suite/variant, program lock & same-suite comparisons (M, P0)
+- ✅ US-164 · Program-agnostic UI copy (S, P1)
+- ✅ US-165 · Bonus 5-min add-ons (S, P1)
+- ✅ US-166 · E2E, visual baselines & release (S, P1)
+
+Post-v1.0.0. Full write-up: [`docs/epics/E33-gennext-program.md`](../epics/E33-gennext-program.md).
+
+## E34 — P90X Generation Next Focus Play
+
+- ✅ US-167 · NPT play timelines — Plyometrix, Speed and Agility, Accel/Decel, Cardio Boxing (M, P0)
+- ✅ US-168 · ART play timelines — Active Mobility, Active Flexibility, Myofascial Release (S, P0)
+- ✅ US-169 · Bonus fiver timelines (S, P1)
+- ✅ US-170 · E2E & release (S, P1)
+
+Post-v1.0.0. Full write-up: [`docs/epics/E34-gennext-play.md`](../epics/E34-gennext-play.md).
+
+## E36 — Generation Next video-faithful logging
+
+- ✅ US-171 · Bodyweight moves + video round counts in the catalog (M, P0)
+- ✅ US-172 · Focus mode plays rounds in video order (S, P0)
+- ✅ US-173 · Core Circuit from its video, E2E & release (S, P1)
+
+Post-v1.0.0. Full write-up: [`docs/epics/E36-gennext-video-logging.md`](../epics/E36-gennext-video-logging.md).
+E35 (Portion Fix nutrition) is reserved and blocked on BODi's container-plan PDFs.
+
+## E37 — Workout gear
+
+- ✅ US-174 · Gear per workout on Today, workout pages, play/focus and a 7-day roll-up (M, P1)
+
+Post-v1.0.0. Full write-up: [`docs/epics/E37-workout-gear.md`](../epics/E37-workout-gear.md).
+
+## E38 — Audio & voice reliability
+
+- ✅ US-175 · Tap-unlocked shared audio, scheduled beeps, ordered/cancellable speech, robust hands-free mic (M, P0)
+
+Post-v1.0.0. Full write-up: [`docs/epics/E38-audio-reliability.md`](../epics/E38-audio-reliability.md).
+
+## E39 — Check for updates in Help
+
+- ✅ US-176 · "Check for updates" button in Help → About: fetch, install, reload (S, P1)
+
+Post-v1.0.0. Full write-up: [`docs/epics/E39-help-update-button.md`](../epics/E39-help-update-button.md).

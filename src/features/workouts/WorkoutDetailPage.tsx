@@ -1,10 +1,11 @@
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { Card, Page } from '@/components/Page'
-import { getWorkout, hasWorkout } from '@/lib/shared'
+import { getWorkout, hasWorkoutIn } from '@/lib/shared'
 import { workoutOccurrences } from '@/lib/schedule'
-import { useSchedule } from '@/state/selectors'
+import { useSchedule, useSettings } from '@/state/selectors'
 import { CompletionLog } from './CompletionLog'
 import { MediaLinks } from './MediaLinks'
+import { GearList } from './GearList'
 import { StrengthGrid } from './StrengthGrid'
 
 const STYLE_LABELS = {
@@ -12,13 +13,15 @@ const STYLE_LABELS = {
   arx: 'Reps per session',
   completion: 'Completion log',
   rest: 'Completion log',
+  bonus: 'Bonus add-on — done / not done',
 } as const
 
 export function WorkoutDetailPage() {
   const params = useParams<{ key: string }>()
   const schedule = useSchedule()
   const key = params.key ?? ''
-  if (!hasWorkout(key)) return <Navigate to="/workouts" replace />
+  const suite = useSettings().program.suite
+  if (!hasWorkoutIn(suite, key)) return <Navigate to="/workouts" replace />
   const def = getWorkout(key)
 
   const backLink = (
@@ -56,14 +59,24 @@ export function WorkoutDetailPage() {
 
   return (
     <Page title={def.name} subtitle={STYLE_LABELS[def.style]} actions={backLink}>
+      {def.style === 'rest' ? null : <GearList workoutKey={key} />}
       {occurrences.length === 0 ? (
         <Card>
           <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            This routine isn't on the program calendar — it's logged from rest days on the Today
-            page.
+            {def.style === 'bonus' ? (
+              <>
+                Bonus fivers aren't scheduled — add one from any program day on{' '}
+                <Link to="/today" className="underline">
+                  Today
+                </Link>
+                .
+              </>
+            ) : (
+              "This routine isn't on the program calendar — it's logged from rest days on the Today page."
+            )}
           </p>
         </Card>
-      ) : def.style === 'completion' || def.style === 'rest' ? (
+      ) : def.style === 'completion' || def.style === 'rest' || def.style === 'bonus' ? (
         <CompletionLog def={def} occurrences={occurrences} />
       ) : (
         <StrengthGrid def={def} occurrences={occurrences} />

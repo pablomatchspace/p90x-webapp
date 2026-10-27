@@ -58,6 +58,10 @@ dependencies and no side effects.
 
 ## Notes on placement
 
+- E33 adds a second program suite: `programData` registers Classic/Lean
+  (`templates.json` + `catalog.json`) and Generation Next (`gennext.json`)
+  behind one `ProgramRef`-keyed API; contexts never branch on the suite
+  except through `programData` helpers.
 - `programData` sits in `shared`, not `schedule` or `workouts`: the
   workbook-generated templates + catalog are reference data every context
   reads — a published language, not scheduling logic.
