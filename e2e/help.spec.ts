@@ -37,3 +37,28 @@ test('help page shows abbreviations, audio guide, privacy note and version', asy
   await expect(page.getByText('Version', { exact: true })).toBeVisible()
   await expect(page.getByRole('link', { name: 'GitHub repository' })).toBeVisible()
 })
+
+/**
+ * E39: Help → About has a "Check for updates" button. Against the built app the
+ * service worker is registered, so a check with nothing newer deployed says so;
+ * offline it explains instead of failing silently.
+ */
+test('help page checks for updates', async ({ page, context }) => {
+  await page.goto('#/more/help')
+  await expect(page.getByRole('heading', { name: /Help/ })).toBeVisible()
+  await page.evaluate(() => navigator.serviceWorker.ready) // registration handed to the bridge
+  await page
+    .getByRole('button', { name: 'OK' })
+    .click({ timeout: 3000 })
+    .catch(() => {})
+
+  const check = page.getByRole('button', { name: 'Check for updates' })
+  await check.scrollIntoViewIfNeeded()
+  await check.click()
+  await expect(page.getByText('You’re on the latest version.')).toBeVisible()
+
+  await context.setOffline(true)
+  await check.click()
+  await expect(page.getByText(/You’re offline/)).toBeVisible()
+  await context.setOffline(false)
+})
