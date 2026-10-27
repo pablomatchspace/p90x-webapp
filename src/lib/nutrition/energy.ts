@@ -3,8 +3,8 @@ import type { Sex } from '@/lib/body'
 /**
  * Factorial energy expenditure (E40) — replaces the flat BMR × 1.55 of E22.
  *
- *   BMR   = mean(Katch–McArdle, Cunningham) when lean mass is known, else
- *           Mifflin–St Jeor
+ *   BMR   = Katch–McArdle when lean mass is known (Cunningham and Mifflin are
+ *           kept as cross-checks), else Mifflin–St Jeor
  *   TDEE  = BMR × daily-life factor (1.4)          non-exercise living + digestion
  *         + average exercise energy                the program's own schedule
  *
@@ -29,7 +29,7 @@ export function cunningham(leanKg: number | null): number | null {
   return 500 + 22 * leanKg
 }
 
-export type BmrMethod = 'average' | 'mifflin'
+export type BmrMethod = 'katch' | 'mifflin'
 
 export interface BmrEstimate {
   /** kcal/day used in the TDEE */
@@ -69,7 +69,7 @@ export function estimateBmr(opts: {
   const cun = cunningham(opts.leanKg)
   const mifflin = mifflinStJeor(opts.weightKg, opts.heightM, opts.age, opts.gender)
   if (katch !== null && cun !== null) {
-    return { value: (katch + cun) / 2, method: 'average', katch, cunningham: cun, mifflin }
+    return { value: katch, method: 'katch', katch, cunningham: cun, mifflin }
   }
   if (mifflin !== null) {
     return { value: mifflin, method: 'mifflin', katch: null, cunningham: null, mifflin }

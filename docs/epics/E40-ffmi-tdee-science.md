@@ -13,7 +13,7 @@
 | Where | **Body page + dashboard** |
 | Scale | **Normalized scale with sourced anchors**, not the workbook names; **same bar for everyone + female ceiling marker** |
 | TDEE | **Factorial, schedule-aware average** (not separate training/rest days, no new setting) |
-| BMR | **Mean of Katch–McArdle and Cunningham**; Mifflin–St Jeor fallback and cross-check |
+| BMR | **Katch–McArdle** (B02; originally the mean with Cunningham); Cunningham and Mifflin–St Jeor shown as cross-checks, Mifflin as the fallback |
 | Daily-life factor | **× 1.4** (range 1.3–1.5) |
 
 Sources, MET table and caveats: [`docs/requirements/ffmi-tdee-science.md`](../requirements/ffmi-tdee-science.md).
@@ -33,17 +33,17 @@ label everywhere.
 
 ### US-178 — Factorial TDEE (M, P1)
 
-`lib/nutrition/energy.ts`: `estimateBmr` (mean of the two lean-mass equations, Mifflin fallback),
+`lib/nutrition/energy.ts`: `estimateBmr` (Katch–McArdle, Cunningham/Mifflin cross-checks, Mifflin fallback),
 `WORKOUT_ENERGY` (minutes × MET per workout), `averageExerciseKcal` over the program template,
 `estimateTdee` with an RSS range. `targetNutrition` consumes it; Today and Settings show
 `TDEE = BMR × 1.4 + workouts` with the range and the equation cross-check.
 
 **AC:** [x] every scheduled workout has an energy entry (guard test) · [x] net-MET maths · [x] TDEE =
 BMR × 1.4 + exercise · [x] range · [x] target calories follow exercise one-for-one · [x] Today/Settings copy ·
-[x] sample persona: 2 906 kcal (was 2 705).
+[x] sample persona: 2 797 kcal (was 2 705).
 
 ## 3. Result worth knowing
 
 The owner doubted that 2 516 kcal is credible. The rigorous model does **not** lower it: the arithmetic
-was right (1 623 × 1.55), and for a six-day schedule the factorial estimate is higher (≈ +7 % on the
+was right (1 623 × 1.55), and for a six-day schedule the factorial estimate is higher (≈ +3 % on the
 sample persona), landing near the P90X booklet's own formula. The honest message is the range.

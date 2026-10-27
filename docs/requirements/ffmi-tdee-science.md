@@ -40,18 +40,19 @@ they can be reached.
 ## 2. TDEE — factorial model (owner decision, E40 Q4)
 
 ```
-BMR   = mean(Katch–McArdle, Cunningham)        lean mass known   (Q: "average of the two")
+BMR   = Katch–McArdle                           lean mass known   (owner decision, E40 B02)
       = Mifflin–St Jeor                         otherwise
 TDEE  = BMR × 1.4  +  average exercise energy
 ```
 
-* **Katch–McArdle** `370 + 21.6 × lean` and **Cunningham** `500 + 22 × lean` (Cunningham 1980) both key
-  off lean mass. In athletes, Cunningham had the smallest bias in a 50-athlete comparison
-  (−165 kcal vs 22 mean for others) and its (1980) form was among the five equations whose mean did
-  not differ from measured RMR in the 2023 meta-analysis (29 studies, 1 430 participants) — Tier A−.
-  Individual error is still ±200–300 kcal (limits of agreement), hence the range in §2.3. Katch–McArdle
-  runs lower; the mean was the owner's choice. Mifflin–St Jeor stays as the no-body-fat fallback and the
-  displayed cross-check.
+* **Katch–McArdle** `370 + 21.6 × lean` — keyed off lean mass, which the app already tracks (owner
+  decision at B02; the original E40 release used the mean of Katch–McArdle and Cunningham). It is the
+  lower of the two lean-mass equations. **Cunningham** `500 + 22 × lean` (Cunningham 1980) is shown as a
+  cross-check: in athletes it had the smallest bias in a 50-athlete comparison (−165 kcal vs −22 mean for others) and was among the equations whose mean did not
+  differ from measured RMR in the 2023 meta-analysis (29 studies, 1 430 participants), so for a trained
+  user it reads about 150 kcal higher and Katch–McArdle may under-state BMR slightly. Individual error is
+  ±200–300 kcal (limits of agreement) either way, hence the range in §2.3. Mifflin–St Jeor is the
+  no-body-fat fallback and the second cross-check.
 * **Daily-life factor 1.4** (range 1.3–1.5): the lower edge of the FAO/WHO/UNU 2004 "sedentary or light
   activity lifestyle" band (PAL 1.40–1.69), which already contains digestion. Exercise is added
   separately, so the old 1.55 "moderately active" multiplier — which bundled lifestyle *and* a typical
@@ -80,11 +81,11 @@ for these branded programs. Session lengths: Generation Next from the video runt
 
 ### 2.2 Result on the sample persona (80.8 kg, 21.2 % BF, Classic)
 
-BMR (1 745 K–M, 1 901 Cunningham) → 1 823; × 1.4 = 2 552; + 354 kcal/day of workouts (≈ 2 478/week) =
-**2 906 kcal**, likely 2 619–3 194. The old flat × 1.55 on Katch–McArdle gave 2 705. Cross-check: the
-P90X booklet formula (RMR 10 kcal/lb × 1.2 + 600) gives ≈ 2 737 for the same body. The factorial
-model therefore sits slightly *above* the old figure, not below it: a flat ×1.55 of a lean-mass
-BMR is not an over-estimate for six scheduled sessions a week.
+BMR 1 745 (Katch–McArdle; Cunningham 1 901 as cross-check); × 1.4 = 2 443; + 354 kcal/day of workouts
+(≈ 2 478/week) = **2 797 kcal**, likely 2 521–3 074. The old flat × 1.55 on Katch–McArdle gave 2 705.
+Cross-check: the P90X booklet formula (RMR 10 kcal/lb × 1.2 + 600) gives ≈ 2 737 for the same body — the
+factorial model lands about 2 % above it. A flat × 1.55 of a lean-mass BMR was therefore not an
+over-estimate for six scheduled sessions a week.
 
 ### 2.3 Uncertainty band
 

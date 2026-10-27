@@ -20,12 +20,12 @@ describe('cunningham', () => {
 })
 
 describe('estimateBmr', () => {
-  it('averages Katch–McArdle and Cunningham when lean mass is known', () => {
+  it('uses Katch–McArdle when lean mass is known, keeping Cunningham and Mifflin as cross-checks', () => {
     const e = estimateBmr({ leanKg: 58, weightKg: 70, heightM: 1.65, age: 35, gender: 'male' })
     expect(e?.katch).toBeCloseTo(370 + 21.6 * 58, 9) // 1622.8
     expect(e?.cunningham).toBe(1776)
-    expect(e?.value).toBeCloseTo((370 + 21.6 * 58 + 1776) / 2, 9)
-    expect(e?.method).toBe('average')
+    expect(e?.value).toBeCloseTo(370 + 21.6 * 58, 9)
+    expect(e?.method).toBe('katch')
     expect(e?.mifflin).toBeCloseTo(10 * 70 + 6.25 * 165 - 5 * 35 + 5, 9) // cross-check kept
   })
 
@@ -45,7 +45,7 @@ describe('estimateBmr', () => {
 
   it('keeps a lean-based estimate even when height and age are missing (no cross-check)', () => {
     const e = estimateBmr({ leanKg: 58, weightKg: 70, heightM: null, age: null, gender: 'male' })
-    expect(e?.method).toBe('average')
+    expect(e?.method).toBe('katch')
     expect(e?.mifflin).toBeNull()
   })
 })

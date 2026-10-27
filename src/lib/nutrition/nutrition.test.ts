@@ -270,16 +270,16 @@ describe('targetNutrition', () => {
     dietStyle: 'balanced' as const,
     exerciseKcalPerDay: 300,
   }
-  // E40: BMR is the Katch–McArdle / Cunningham mean; TDEE = BMR × 1.4 + scheduled exercise
-  const bmrAvg = (370 + 21.6 * 62.4 + (500 + 22 * 62.4)) / 2
-  const katchTdee = bmrAvg * DAILY_LIFE_FACTOR.mid + 300
+  // E40: BMR is Katch–McArdle; TDEE = BMR × 1.4 + scheduled exercise
+  const bmrKatch = 370 + 21.6 * 62.4
+  const katchTdee = bmrKatch * DAILY_LIFE_FACTOR.mid + 300
 
   it('derives a deficit plan from the factorial TDEE and the fat-loss pace', () => {
     const t = targetNutrition(base)
     expect(t).not.toBeNull()
     if (t === null) return
-    expect(t.bmrMethod).toBe('average')
-    expect(t.bmr).toBeCloseTo(bmrAvg, 4)
+    expect(t.bmrMethod).toBe('katch')
+    expect(t.bmr).toBeCloseTo(bmrKatch, 4)
     expect(t.bmrKatch).toBeCloseTo(370 + 21.6 * 62.4, 4) // 1717.84
     expect(t.bmrCunningham).toBeCloseTo(500 + 22 * 62.4, 4) // 1873.2
     expect(t.dailyLifeFactor).toBe(1.4)
