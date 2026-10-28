@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { FEATURE_KEYS } from './features'
 import { isHttpUrl } from './links'
 import { bodyFractionSchema, kgSchema, metersSchema } from './units'
 
@@ -7,7 +8,7 @@ import { bodyFractionSchema, kgSchema, metersSchema } from './units'
  * (scores, penalties, BMI, adherence…) is recomputed by pure functions, mirroring
  * the Excel design where formulas derive everything from entered cells (PRD §8).
  */
-export const SCHEMA_VERSION = 14
+export const SCHEMA_VERSION = 15
 
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'expected YYYY-MM-DD')
 
@@ -88,6 +89,8 @@ export const settingsSchema = z.object({
   }),
   /** E23: video/audio deeplinks per workout, opened in a new tab from the day card */
   workoutLinks: z.record(z.string(), workoutLinkSchema),
+  /** E41: features the user switched off — empty means everything is on */
+  disabledFeatures: z.array(z.enum(FEATURE_KEYS)),
 })
 
 const opBase = {
@@ -239,6 +242,7 @@ export function emptyState(): AppState {
       training: 'intermediate',
       nutrition: { phaseOverride: null, calorieOverride: null, dietStyle: 'balanced' },
       workoutLinks: {},
+      disabledFeatures: [],
     },
     scheduleOps: [],
     workoutLogs: {},

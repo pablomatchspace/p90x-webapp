@@ -45,7 +45,7 @@ export function BodyQuickAdd() {
         {derived !== null && derived.bmi !== null ? (
           <p className="text-xs text-zinc-500 dark:text-zinc-400">
             BMI {formatFixed(derived.bmi, 2)}
-            {derived.ffmiCategory !== null
+            {derived.ffmiCategory !== null && !settings.disabledFeatures.includes('ffmi')
               ? ` · FFMI ${formatFixed(derived.ffmi, 2)} (${derived.ffmiCategory})`
               : ''}
           </p>

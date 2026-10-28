@@ -4,7 +4,7 @@ import { Card } from '@/components/Page'
 import { LineChart } from '@/components/LineChart'
 import { adherenceTrend } from '@/lib/schedule'
 import { todayISO } from '@/lib/shared'
-import { useAdherence, useSchedule, useSessionIndex } from '@/state/selectors'
+import { useAdherence, useFeature, useSchedule, useSessionIndex } from '@/state/selectors'
 
 /**
  * Adherence & pace card (US-060/062, upgraded in E21): discipline at a glance —
@@ -27,11 +27,13 @@ export function AdherenceCard() {
   const a = useAdherence()
   const schedule = useSchedule()
   const index = useSessionIndex()
+  const enabled = useFeature('adherence')
+  const showTrends = useFeature('trends')
   const trend = useMemo(
     () => (schedule === null ? [] : adherenceTrend(schedule, index, todayISO())),
     [schedule, index],
   )
-  if (a === null) return null
+  if (!enabled || a === null) return null
   const rate = a.adherenceRate === null ? '—' : `${Math.round(a.adherenceRate * 100)}%`
   const trendTicks = [1, 29, 57, 85]
     .filter((day) => day <= a.dayReached)
@@ -41,12 +43,14 @@ export function AdherenceCard() {
     <Card>
       <div className="flex items-center justify-between">
         <h2 className="font-semibold">Adherence &amp; pace</h2>
-        <Link
-          to="/progress"
-          className="text-sm font-medium text-red-600 hover:underline dark:text-red-400"
-        >
-          Strength →
-        </Link>
+        {showTrends ? (
+          <Link
+            to="/progress"
+            className="text-sm font-medium text-red-600 hover:underline dark:text-red-400"
+          >
+            Strength →
+          </Link>
+        ) : null}
       </div>
 
       <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">

@@ -13,7 +13,7 @@ import {
 import { fillForward, movingAverage, type Pt } from '@/lib/shared'
 import { addDays, compareISO, diffDays, formatShort, todayISO, type ISODate } from '@/lib/shared'
 import type { Schedule } from '@/lib/schedule'
-import { useBodyLog, useSchedule, useSettings } from '@/state/selectors'
+import { useBodyLog, useFeature, useSchedule, useSettings } from '@/state/selectors'
 import { Chip } from '@/features/schedule/Chip'
 import { buildBodyMetrics, progressToTarget, TONE_CHIP, type MetricKey } from './bodyMetrics'
 
@@ -77,7 +77,11 @@ export function BodyTrendsPage() {
   // null = auto-pick whichever mode has data, until the athlete explicitly toggles
   const [compMode, setCompMode] = useState<'abs' | 'pct' | null>(null)
 
-  const metrics = useMemo(() => buildBodyMetrics(settings), [settings])
+  const ffmiOn = useFeature('ffmi')
+  const metrics = useMemo(
+    () => buildBodyMetrics(settings).filter((m) => ffmiOn || m.key !== 'ffmi'),
+    [settings, ffmiOn],
+  )
   const metric = metrics.find((m) => m.key === metricKey) ?? metrics[0]
 
   const phaseWindow = useMemo(

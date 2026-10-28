@@ -330,3 +330,13 @@ Post-v1.0.0. Full write-up: [`docs/epics/E39-help-update-button.md`](../epics/E3
 - ✅ US-179 · Settings: explanatory text behind tappable ⓘ "more info" help (S, P2)
 
 Post-v1.0.0. Full write-up: [`docs/epics/E40-ffmi-tdee-science.md`](../epics/E40-ffmi-tdee-science.md).
+
+## E41 — Feature switches (More → Features)
+
+- ✅ US-180 · Feature catalog, schema v15 `disabledFeatures`, action and selector (S, P1)
+- ✅ US-181 · More → Features page with grouped switches (S, P1)
+- ✅ US-182 · Sections switchable: rest timer, quotes, notes, calculators, trends & progress (M, P1)
+- ✅ US-183 · Cards and aids switchable: FFMI, nutrition, gear, workout links, adherence, overload (M, P1)
+- ✅ US-184 · Workout player switchable: voice entry, beeps & spoken cues (S, P1)
+
+Post-v1.0.0. Full write-up: [`docs/epics/E41-feature-switches.md`](../epics/E41-feature-switches.md).

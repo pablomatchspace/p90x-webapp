@@ -3,7 +3,7 @@ import { Card } from '@/components/Page'
 import { deriveBody, formatFixed, threshold } from '@/lib/body'
 import { Chip } from '@/features/schedule/Chip'
 import { todayISO } from '@/lib/shared'
-import { useBodyLog, useSettings } from '@/state/selectors'
+import { useBodyLog, useFeature, useSettings } from '@/state/selectors'
 import { buildBodyMetrics, expectedProgressPct, progressToTarget, TONE_CHIP } from './bodyMetrics'
 
 /**
@@ -15,7 +15,9 @@ export function KpiCards() {
   const settings = useSettings()
   const bodyLog = useBodyLog()
   const latest = bodyLog.length > 0 ? bodyLog[bodyLog.length - 1] : null
-  const metrics = buildBodyMetrics(settings)
+  const ffmiOn = useFeature('ffmi')
+  const trendsOn = useFeature('trends')
+  const metrics = buildBodyMetrics(settings).filter((m) => ffmiOn || m.key !== 'ffmi')
   const derived = latest ? deriveBody(latest, settings) : null
   const expected = expectedProgressPct(settings.startDate, todayISO())
 
@@ -23,12 +25,14 @@ export function KpiCards() {
     <Card>
       <div className="flex items-center justify-between">
         <h2 className="font-semibold">Body vs targets</h2>
-        <Link
-          to="/trends"
-          className="text-sm font-medium text-red-600 hover:underline dark:text-red-400"
-        >
-          Trends →
-        </Link>
+        {trendsOn ? (
+          <Link
+            to="/trends"
+            className="text-sm font-medium text-red-600 hover:underline dark:text-red-400"
+          >
+            Trends →
+          </Link>
+        ) : null}
       </div>
       {latest === null || derived === null ? (
         <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">

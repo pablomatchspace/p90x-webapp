@@ -3,6 +3,7 @@ import {
   Calculator,
   Cloud,
   Database,
+  SlidersHorizontal,
   HelpCircle,
   NotebookPen,
   Quote,
@@ -11,8 +12,19 @@ import {
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Card, Page } from '@/components/Page'
+import type { FeatureKey } from '@/lib/shared'
+import { useSettings } from '@/state/selectors'
 
-const items = [
+interface MoreItem {
+  to: string
+  icon: typeof Database
+  title: string
+  desc: string
+  /** E41: hidden while this feature is switched off */
+  feature?: FeatureKey
+}
+
+const items: MoreItem[] = [
   {
     to: '/more/data',
     icon: Database,
@@ -36,12 +48,14 @@ const items = [
     icon: Timer,
     title: 'Rest timer',
     desc: 'Interval beeper for strength rests',
+    feature: 'restTimer',
   },
   {
     to: '/more/quotes',
     icon: Quote,
     title: 'Motivation',
     desc: 'Daily quotes — curate your own pack',
+    feature: 'quotes',
   },
   {
     to: '/more/settings',
@@ -54,12 +68,20 @@ const items = [
     icon: NotebookPen,
     title: 'Notes',
     desc: 'Free-form training notes',
+    feature: 'notes',
   },
   {
     to: '/more/calculators',
     icon: Calculator,
     title: 'Body-fat calculators',
     desc: 'Navy, 3-site, 7-site',
+    feature: 'calculators',
+  },
+  {
+    to: '/more/features',
+    icon: SlidersHorizontal,
+    title: 'Features',
+    desc: 'Turn optional parts of the app on or off',
   },
   {
     to: '/more/help',
@@ -70,10 +92,14 @@ const items = [
 ]
 
 export function MorePage() {
+  const { disabledFeatures } = useSettings()
+  const visible = items.filter(
+    (item) => item.feature === undefined || !disabledFeatures.includes(item.feature),
+  )
   return (
     <Page title="More" subtitle="Settings, data and tools">
       <div className="grid gap-3 sm:grid-cols-2">
-        {items.map(({ to, icon: Icon, title, desc }) => (
+        {visible.map(({ to, icon: Icon, title, desc }) => (
           <Link key={to} to={to} className="group">
             <Card className="h-full transition-colors group-hover:border-red-300 dark:group-hover:border-red-800">
               <div className="flex items-start gap-3">

@@ -4,6 +4,7 @@ import { updateTimerSettings } from '@/state/actions'
 import { useSettings } from '@/state/selectors'
 import { beep, unlockAudio } from './audio'
 import { mmss } from './timerUtils'
+import { useAudioFeature } from './useAudioFeature'
 
 const PRESETS = [30, 60, 90, 120]
 
@@ -13,6 +14,7 @@ const PRESETS = [30, 60, 90, 120]
  * More → Rest timer and embedded in focus mode.
  */
 export function TimerCard() {
+  useAudioFeature()
   const restDefault = useSettings().timer.restSeconds
   const [duration, setDuration] = useState(restDefault)
   const [remaining, setRemaining] = useState<number | null>(null) // null = idle at `duration`

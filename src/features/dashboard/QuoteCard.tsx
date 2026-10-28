@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Card } from '@/components/Page'
 import { quoteOfDay } from '@/lib/shared'
+import { useFeature } from '@/state/selectors'
 import { useStore } from '@/state/store'
 
 /**
@@ -11,8 +12,9 @@ import { useStore } from '@/state/store'
  */
 export function QuoteCard({ seed, label = 'Daily motivation' }: { seed: number; label?: string }) {
   const quotes = useStore((s) => s.data.quotes)
+  const enabled = useFeature('quotes')
   const quote = quoteOfDay(seed, quotes)
-  if (quote === null) return null
+  if (!enabled || quote === null) return null
   return (
     <Card>
       <div className="flex items-center justify-between gap-2">

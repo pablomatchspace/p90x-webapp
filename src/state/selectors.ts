@@ -4,7 +4,14 @@ import { todayISO } from '@/lib/shared'
 import { materialize, type Schedule } from '@/lib/schedule'
 import { previewOp, type OpPreview } from '@/lib/schedule'
 import { indexSessions, type SessionIndex } from '@/lib/schedule'
-import type { AppState, ScheduleOp, ScoringSettings, Session, Settings } from '@/lib/shared'
+import type {
+  AppState,
+  FeatureKey,
+  ScheduleOp,
+  ScoringSettings,
+  Session,
+  Settings,
+} from '@/lib/shared'
 import { useStore } from '@/state/store'
 
 /** Materialized schedule, or null until a start date exists. Recomputes only
@@ -35,6 +42,11 @@ export function useScoringSettings(): ScoringSettings {
 
 export function useSettings(): Settings {
   return useStore((s) => s.data.settings)
+}
+
+/** E41: whether an optional feature is switched on (everything is on by default). */
+export function useFeature(key: FeatureKey): boolean {
+  return useStore((s) => !s.data.settings.disabledFeatures.includes(key))
 }
 
 /** E23: one workout's media deeplinks, or undefined when none are configured. */

@@ -84,6 +84,7 @@ function EntryRow({
   const units = settings.units
   const unit = weightUnit(units)
   const d = deriveBody(entry, settings)
+  const ffmiOn = !settings.disabledFeatures.includes('ffmi')
   const w = entry.weight ?? null
   const bf = entry.bodyFat ?? null
   const fmtW = (v: number | null) =>
@@ -127,9 +128,8 @@ function EntryRow({
           </ToneText>
           {' · Lean '}
           {fmtW(d.leanMass)}
-          {' · FFMI '}
-          {formatFixed(d.ffmi, 2)}
-          {d.ffmiCategory !== null ? ` (${d.ffmiCategory})` : ''}
+          {ffmiOn ? ` · FFMI ${formatFixed(d.ffmi, 2)}` : ''}
+          {ffmiOn && d.ffmiCategory !== null ? ` (${d.ffmiCategory})` : ''}
           {entry.zoneMinutes != null ? ` · Zone ${entry.zoneMinutes} min` : ''}
         </p>
       </button>
@@ -168,6 +168,7 @@ export function BodyPage() {
   const units = settings.units
   const unit = weightUnit(units)
   const bounds = boundsFrom(settings)
+  const ffmiOn = !settings.disabledFeatures.includes('ffmi')
   const entry = bodyLog.find((e) => e.date === selected) ?? null
   const prev = [...bodyLog].reverse().find((e) => compareISO(e.date, selected) < 0) ?? null
   const derived = entry === null ? null : deriveBody(entry, settings)
@@ -295,9 +296,8 @@ export function BodyPage() {
             </ToneText>
             {' · Lean '}
             {fmtW(derived.leanMass)}
-            {' · FFMI '}
-            {formatFixed(derived.ffmi, 2)}
-            {derived.ffmiCategory !== null ? ` (${derived.ffmiCategory})` : ''}
+            {ffmiOn ? ` · FFMI ${formatFixed(derived.ffmi, 2)}` : ''}
+            {ffmiOn && derived.ffmiCategory !== null ? ` (${derived.ffmiCategory})` : ''}
           </p>
         ) : (
           <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-400">
@@ -307,7 +307,8 @@ export function BodyPage() {
 
         {settings.height == null || settings.startWeight == null ? (
           <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
-            Import your data (or set height and start weight) to unlock BMI, FFMI and weight loss.
+            Import your data (or set height and start weight) to unlock BMI{ffmiOn ? ', FFMI' : ''}{' '}
+            and weight loss.
           </p>
         ) : null}
 

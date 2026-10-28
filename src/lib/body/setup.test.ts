@@ -22,6 +22,7 @@ const sample: Settings = {
   training: 'intermediate',
   nutrition: { phaseOverride: null, calorieOverride: null, dietStyle: 'balanced' },
   workoutLinks: {},
+  disabledFeatures: [],
 }
 
 describe('setupDerived (golden vs sample SETUP)', () => {

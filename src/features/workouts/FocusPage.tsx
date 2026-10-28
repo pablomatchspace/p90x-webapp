@@ -23,7 +23,13 @@ import {
   updatePlayerSettings,
   updateTimerSettings,
 } from '@/state/actions'
-import { useSchedule, useScoringSettings, useSettings, useWorkoutSessions } from '@/state/selectors'
+import {
+  useFeature,
+  useSchedule,
+  useScoringSettings,
+  useSettings,
+  useWorkoutSessions,
+} from '@/state/selectors'
 import { useStore } from '@/state/store'
 import { QuoteCard } from '@/features/dashboard/QuoteCard'
 import { MediaLinks } from './MediaLinks'
@@ -44,6 +50,7 @@ import {
 } from './audio'
 import { mmss } from './timerUtils'
 import { useWakeLock } from './playerHooks'
+import { useAudioFeature } from './useAudioFeature'
 import { VoiceEntryButton } from './VoiceEntryButton'
 
 function Sparkline({ points }: { points: number[] }) {
@@ -93,6 +100,10 @@ export function FocusPage() {
   const [idx, setIdx] = useState(() => resumeIndex(steps, session))
   const [finished, setFinished] = useState(false)
   const settings = useSettings()
+  const overloadOn = useFeature('overload')
+  const voiceEntryOn = useFeature('voiceEntry')
+  const audioOn = useAudioFeature()
+  const restTimerOn = useFeature('restTimer')
   const [playback, setPlayback] = useState<PlaybackState | null>(null)
   const [playDone, setPlayDone] = useState(false)
   const [nowTick, setNowTick] = useState(() => Date.now())
@@ -201,7 +212,9 @@ export function FocusPage() {
   const isArx = def?.style === 'arx'
 
   // E29: the forward-looking coach number, tinted live as entries land.
-  const target = overloadTarget(occurrences, sessions, occIndex, exercise, scoring, archiveNets)
+  const target = overloadOn
+    ? overloadTarget(occurrences, sessions, occIndex, exercise, scoring, archiveNets)
+    : null
   const status = target === null ? null : targetStatus(result.net, target)
   const TARGET_TONE = {
     pending: 'text-zinc-500 dark:text-zinc-400',
@@ -274,7 +287,9 @@ export function FocusPage() {
     const targeted = exercises
       .map((e) => ({
         exercise: e,
-        goal: overloadTarget(occurrences, sessions, occIndex, e, scoring, archiveNets),
+        goal: overloadOn
+          ? overloadTarget(occurrences, sessions, occIndex, e, scoring, archiveNets)
+          : null,
       }))
       .filter(
         (t): t is { exercise: typeof t.exercise; goal: NonNullable<typeof t.goal> } =>
@@ -425,32 +440,36 @@ export function FocusPage() {
           />
         </div>
 
-        {/* E30: speak the numbers — available while idle and during playback */}
-        <VoiceEntryButton
-          step={step}
-          entry={session?.entries?.[exercise.id]}
-          handsFree={settings.player.voiceHandsFree}
-          onToggleHandsFree={() =>
-            updatePlayerSettings({ voiceHandsFree: !settings.player.voiceHandsFree })
-          }
-          onValue={(slot, value) =>
-            setRoundValue(key, programDayId, exercise.id, slot.round, slot.field, value)
-          }
-          onCommand={(command) => {
-            // While the timer runs, the sequence position lives in playback
-            // state — "next" must go through the same skip path as the Skip
-            // button or the card and the timer drift apart.
-            if (command === 'next') {
-              if (playback !== null) onSkip()
-              else if (idx < steps.length - 1) setIdx(idx + 1)
-            } else if (command === 'previous') {
-              if (playback === null && idx > 0) setIdx(idx - 1)
-            } else if (command === 'finish') {
-              onStop()
-              finish()
-            }
-          }}
-        />
+        {voiceEntryOn ? (
+          <>
+            {/* E30: speak the numbers — available while idle and during playback */}
+            <VoiceEntryButton
+              step={step}
+              entry={session?.entries?.[exercise.id]}
+              handsFree={settings.player.voiceHandsFree}
+              onToggleHandsFree={() =>
+                updatePlayerSettings({ voiceHandsFree: !settings.player.voiceHandsFree })
+              }
+              onValue={(slot, value) =>
+                setRoundValue(key, programDayId, exercise.id, slot.round, slot.field, value)
+              }
+              onCommand={(command) => {
+                // While the timer runs, the sequence position lives in playback
+                // state — "next" must go through the same skip path as the Skip
+                // button or the card and the timer drift apart.
+                if (command === 'next') {
+                  if (playback !== null) onSkip()
+                  else if (idx < steps.length - 1) setIdx(idx + 1)
+                } else if (command === 'previous') {
+                  if (playback === null && idx > 0) setIdx(idx - 1)
+                } else if (command === 'finish') {
+                  onStop()
+                  finish()
+                }
+              }}
+            />
+          </>
+        ) : null}
 
         {playback === null ? (
           <>
@@ -517,26 +536,30 @@ export function FocusPage() {
                 below.
               </span>
             </div>
-            {/* E26: spoken exercise announcements — reachable from focus-only
+            {audioOn ? (
+              <>
+                {/* E26: spoken exercise announcements — reachable from focus-only
                 workouts (e.g. Chest & Back) that have no play-mode screen. */}
-            <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
-              <button
-                type="button"
-                onClick={() => {
-                  if (settings.player.voiceCues) stopSpeech()
-                  updatePlayerSettings({ voiceCues: !settings.player.voiceCues })
-                }}
-                aria-pressed={settings.player.voiceCues}
-                className={`rounded-lg border px-2.5 py-1.5 font-medium ${
-                  settings.player.voiceCues
-                    ? 'border-emerald-600 bg-emerald-600 text-white'
-                    : 'border-zinc-300 text-zinc-600 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800'
-                }`}
-              >
-                Voice cues
-              </button>
-              <span>· When on, Play speaks each exercise aloud.</span>
-            </div>
+                <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (settings.player.voiceCues) stopSpeech()
+                      updatePlayerSettings({ voiceCues: !settings.player.voiceCues })
+                    }}
+                    aria-pressed={settings.player.voiceCues}
+                    className={`rounded-lg border px-2.5 py-1.5 font-medium ${
+                      settings.player.voiceCues
+                        ? 'border-emerald-600 bg-emerald-600 text-white'
+                        : 'border-zinc-300 text-zinc-600 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800'
+                    }`}
+                  >
+                    Voice cues
+                  </button>
+                  <span>· When on, Play speaks each exercise aloud.</span>
+                </div>
+              </>
+            ) : null}
           </>
         ) : (
           <div className="mt-5 flex flex-wrap items-center gap-3">
@@ -586,7 +609,7 @@ export function FocusPage() {
         )}
       </Card>
 
-      <TimerCard />
+      {restTimerOn ? <TimerCard /> : null}
     </Page>
   )
 }
