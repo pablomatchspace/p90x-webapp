@@ -8,9 +8,10 @@ import type { FocusStep } from './focusSteps'
  * `setRoundValue` pipeline so ghosts, drop verdicts and overload targets react
  * exactly as if typed.
  *
- * Grammar (English — recognition is pinned to en-US):
- * - whole-utterance commands: "next" · "previous"/"back" · "finish"/"finish
- *   workout"/"done"
+ * Grammar (English — recognition is pinned to en-US). It is strict: an
+ * utterance containing any word outside it is ignored, so gym talk ("one
+ * more!", "done", "go back") can never log a rep or move the session.
+ * - whole-utterance commands: "next" · "previous" · "finish workout"
  * - values: numbers as digits ("22", "22.5") or words ("twenty-two", "a
  *   hundred and five"), with "point five" / "and a half" fractions
  * - field words route a value to a column — before or right after the number
@@ -92,17 +93,29 @@ const SECONDARY_WORDS = new Set([
 const COMMANDS: Record<string, VoiceCommand> = {
   next: 'next',
   previous: 'previous',
-  back: 'previous',
-  finish: 'finish',
   'finish workout': 'finish',
-  done: 'finish',
 }
+
+/** Words that may appear in a values utterance besides numbers and field words. */
+const GRAMMAR_WORDS = new Set(['round', 'and', 'a', 'half', 'point', 'hundred'])
 
 const DIGIT_TOKEN = /^\d+(?:[.,]\d+)?$/
 
 /** Own-property lookup — `in`/indexing would also match `constructor` & co. */
 function lookup(table: Record<string, number>, key: string): number | undefined {
   return Object.hasOwn(table, key) ? table[key] : undefined
+}
+
+function inGrammar(token: string): boolean {
+  return (
+    DIGIT_TOKEN.test(token) ||
+    GRAMMAR_WORDS.has(token) ||
+    MAIN_WORDS.has(token) ||
+    SECONDARY_WORDS.has(token) ||
+    lookup(UNITS, token) !== undefined ||
+    lookup(TEENS, token) !== undefined ||
+    lookup(TENS, token) !== undefined
+  )
 }
 
 /** A spoken number below one hundred starting at `i`, or null. */
@@ -177,20 +190,22 @@ function numberAt(tokens: string[], i: number): { value: number; next: number } 
  * One utterance → command or values. Field words attach to the nearest
  * number — pending until one follows ("knee 8"), or retroactively when they
  * trail one directly ("8 knee"); "knee reps" style compounds keep the
- * secondary tag. Filler words separate values. Null when the utterance
- * contains neither a command nor a number.
+ * secondary tag. Null unless the utterance is a command or is made only of
+ * grammar words and holds at least one number.
  */
 export function parseVoiceTranscript(transcript: string): VoiceParse | null {
   const tokens = transcript
     .toLowerCase()
     .replace(/-/g, ' ')
     .replace(/[^a-z0-9., ]+/g, ' ')
+    .replace(/(?<!\d)[.,]|[.,](?!\d)/g, ' ') // punctuation only joins digits ("22.5"), never "22,knee"
     .split(/\s+/)
     .map((t) => t.replace(/^[.,]+|[.,]+$/g, ''))
     .filter((t) => t.length > 0)
 
   const phrase = tokens.join(' ')
   if (Object.hasOwn(COMMANDS, phrase)) return { kind: 'command', command: COMMANDS[phrase] }
+  if (!tokens.every(inGrammar)) return null
 
   const values: VoiceValue[] = []
   let pendingField: 'reps' | 'assist' | null = null

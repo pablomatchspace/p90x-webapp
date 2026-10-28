@@ -56,16 +56,18 @@ while chalked up.
 
 - `parseVoiceTranscript(transcript)` →
   `{ kind: 'command', command: 'next' | 'previous' | 'finish' }` when the
-  whole utterance is a command ("next", "previous"/"back", "finish"/"finish
-  workout"/"done"), `{ kind: 'values', values: VoiceValue[] }` when it
-  contains numbers, else `null`. A `VoiceValue` is a number plus optional
+  whole utterance is a command ("next", "previous", "finish"/"finish
+  workout"; B01: the "done"/"back"/bare "finish" aliases were removed — too easy
+  to say by accident), `{ kind: 'values', values: VoiceValue[] }` when it holds
+  numbers, else `null`. The grammar is strict (B01): an utterance with any word
+  outside it ("one more", "come on") is ignored. A `VoiceValue` is a number plus optional
   `field` (from spoken words — main: rep/reps/second(s); secondary:
   knee(s)/chair(s)/weight(s)/pound(s)/kilo(s)/kg/lb(s)/side) and optional
   0-based `round` (from "round N", persisting until re-spoken). Field words
   bind to the nearest number — prefix or immediately trailing — and "knee
   reps"-style compounds stay secondary. Numbers parse as digits ("22",
   "22.5") or words zero–999 ("twenty-two", "a hundred and five"), with
-  "point five" / "and a half" fractions; filler words separate values.
+  "point five" / "and a half" fractions; "and" separates values (other words reject the utterance, B01).
 - `voiceSlots(step)` → the card's `{ round, field }` pairs in display order
   (per shown round: main, then secondary when the exercise has one).
 - `assignVoiceValues(values, slots, filled)` → `{ slot, value }[]`: each
@@ -98,10 +100,10 @@ again", "Microphone unavailable").
 ### US-150 — Pure voice-transcript engine (M, P0)
 
 **AC:** [x] digits, decimals and number words 0–999 parse, incl. "and a
-half"/"point five" · [x] whole-utterance "next"/"previous"/"back"/
-"finish"/"finish workout"/"done" parse as commands · [x] field words tag the
+half"/"point five" · [x] whole-utterance "next"/"previous"/
+"finish workout" parse as commands · [x] field words tag the
 nearest number, prefix or trailing, incl. "knee reps" compounds · [x]
-"round N" scopes following values · [x] non-numeric filler separates values ·
+"round N" scopes following values · [x] non-grammar words reject the utterance (B01) ·
 [x] slot order matches the card's visible field order · [x] assignment
 prefers empty matching slots, never doubles up a slot per utterance, drops
 unplaceable values · [x] null/empty/garbage transcripts parse to null

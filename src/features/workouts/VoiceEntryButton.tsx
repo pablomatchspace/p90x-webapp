@@ -72,17 +72,19 @@ export function VoiceEntryButton({
   entry: ExerciseEntry | undefined
   handsFree: boolean
   onValue: (slot: VoiceSlot, value: number) => void
-  onCommand: (command: VoiceCommand) => void
+  /** Returns why a command did nothing (shown to the athlete), or nothing when it ran. */
+  onCommand: (command: VoiceCommand) => string | void
   onToggleHandsFree: () => void
 }) {
   const [listening, setListening] = useState(false)
-  const [denied, setDenied] = useState(false)
   const [feedback, setFeedback] = useState<string | null>(null)
   const recRef = useRef<SpeechRecognitionLike | null>(null)
   const armedRef = useRef(false)
   const rearmRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   // the mic sits out while the app speaks (E38) — it would hear its own cue
   const pausedForSpeechRef = useRef(false)
+  // hands-free pauses while the page is hidden (phone locked, app switched) and resumes on return
+  const pausedForHiddenRef = useRef(false)
   // recognition callbacks outlive renders — read the freshest props through a ref
   const latest = useRef({ step, entry, handsFree, onValue, onCommand })
   latest.current = { step, entry, handsFree, onValue, onCommand }
@@ -114,6 +116,34 @@ export function VoiceEntryButton({
     [],
   )
 
+  useEffect(() => {
+    const onVisibility = () => {
+      if (document.visibilityState === 'hidden') {
+        if (!armedRef.current) return
+        if (rearmRef.current !== null) clearTimeout(rearmRef.current)
+        rearmRef.current = null
+        if (latest.current.handsFree) {
+          pausedForHiddenRef.current = true
+          recRef.current?.abort()
+        } else {
+          // push-to-talk: a backgrounded page simply stops listening
+          armedRef.current = false
+          setListening(false)
+          const rec = recRef.current
+          recRef.current = null
+          rec?.abort()
+        }
+      } else if (pausedForHiddenRef.current) {
+        pausedForHiddenRef.current = false
+        if (!armedRef.current || recRef.current !== null) return
+        if (isSpeaking()) pausedForSpeechRef.current = true
+        else startRef.current()
+      }
+    }
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => document.removeEventListener('visibilitychange', onVisibility)
+  }, [])
+
   const ctor = speechRecognitionCtor()
   if (ctor === null) return null
 
@@ -124,13 +154,13 @@ export function VoiceEntryButton({
       setFeedback(
         heard === ''
           ? 'Didn’t hear anything — try again.'
-          : `Heard “${heard}” — no numbers or command.`,
+          : `Heard “${heard}” — not a logging phrase (say numbers like “reps 22”, “next” or “finish workout”).`,
       )
       return
     }
     if (parsed.kind === 'command') {
-      setFeedback(`Heard “${heard}”.`)
-      latest.current.onCommand(parsed.command)
+      const note = latest.current.onCommand(parsed.command)
+      setFeedback(note ? `Heard “${heard}”. ${note}` : `Heard “${heard}”.`)
       return
     }
     const { step: current, entry: currentEntry } = latest.current
@@ -181,7 +211,6 @@ export function VoiceEntryButton({
       if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
         armedRef.current = false
         setListening(false)
-        setDenied(true)
         setFeedback('Microphone unavailable — check the browser permission.')
       } else if (FATAL_ERRORS.has(event.error)) {
         armedRef.current = false
@@ -192,7 +221,8 @@ export function VoiceEntryButton({
             : 'Couldn’t use the microphone — tap the mic to try again.',
         )
       } else if (event.error === 'no-speech') {
-        setFeedback('Didn’t hear anything — try again.')
+        // hands-free re-arms by itself — a quiet gap shouldn't wipe the last result
+        if (!latest.current.handsFree) setFeedback('Didn’t hear anything — try again.')
       }
     }
     rec.onend = () => {
@@ -203,6 +233,7 @@ export function VoiceEntryButton({
         return
       }
       if (pausedForSpeechRef.current) return // re-armed when the cue ends
+      if (pausedForHiddenRef.current) return // re-armed when the page is visible again
       // hands-free: one utterance per session, re-armed until switched off
       if (latest.current.handsFree) {
         rearmRef.current = setTimeout(() => {
@@ -221,7 +252,11 @@ export function VoiceEntryButton({
     try {
       rec.start()
     } catch {
-      // an instance can refuse a second start(); the next tap re-creates it
+      // the browser refused — don't leave a dead "Listening…" button behind
+      recRef.current = null
+      armedRef.current = false
+      setListening(false)
+      setFeedback('Couldn’t start the microphone — tap the mic to try again.')
     }
   }
   startRef.current = start
@@ -231,6 +266,8 @@ export function VoiceEntryButton({
       armedRef.current = false
       if (rearmRef.current !== null) clearTimeout(rearmRef.current)
       rearmRef.current = null
+      pausedForSpeechRef.current = false
+      pausedForHiddenRef.current = false
       setListening(false)
       recRef.current?.abort()
       recRef.current = null
@@ -239,7 +276,9 @@ export function VoiceEntryButton({
     setFeedback(null)
     armedRef.current = true
     setListening(true)
-    start()
+    if (isSpeaking())
+      pausedForSpeechRef.current = true // the cue ends, then the mic opens
+    else start()
   }
 
   return (
@@ -247,9 +286,8 @@ export function VoiceEntryButton({
       <button
         type="button"
         onClick={toggle}
-        disabled={denied}
         aria-pressed={listening}
-        className={`${pill(listening, 'animate-pulse border-red-600 bg-red-600 text-white')} disabled:opacity-30`}
+        className={pill(listening, 'animate-pulse border-red-600 bg-red-600 text-white')}
       >
         <Mic className="h-4 w-4" aria-hidden />
         {listening ? 'Listening…' : 'Voice entry'}
@@ -265,7 +303,7 @@ export function VoiceEntryButton({
       <span aria-live="polite">
         {feedback ??
           (handsFree
-            ? 'Mic re-arms after each phrase — say “reps 22, knee 8”, “next” or “finish workout”.'
+            ? 'Tap the mic to start; it then re-arms after each phrase — say “reps 22, knee 8”, “next” or “finish workout”.'
             : 'Tap, then say “reps 22, knee 8” — or “next”.')}
       </span>
     </div>
