@@ -954,7 +954,7 @@ export function SettingsPage() {
               <>
                 <dl className="mt-3 grid grid-cols-3 gap-3">
                   <Derived
-                    label={`BMR (${targetNut.bmrMethod === 'average' ? 'lean-mass avg' : 'Mifflin'})`}
+                    label={`BMR (${targetNut.bmrMethod === 'katch' ? 'Katch–McArdle' : 'Mifflin'})`}
                     value={showKcal(targetNut.bmr)}
                     unit="kcal"
                   />
@@ -971,12 +971,17 @@ export function SettingsPage() {
                   {showKcal(targetNut.exerciseKcal)} kcal/day of scheduled workouts averaged over
                   the program = {showKcal(targetNut.tdee)} (likely {showKcal(targetNut.tdeeLow)}–
                   {showKcal(targetNut.tdeeHigh)}).{' '}
-                  {targetNut.bmrMethod === 'average'
-                    ? `BMR is the mean of Katch–McArdle ${showKcal(targetNut.bmrKatch ?? 0)} and Cunningham ${showKcal(targetNut.bmrCunningham ?? 0)}`
-                    : 'BMR is Mifflin–St Jeor (add start body-fat for the lean-mass equations)'}
-                  {targetNut.bmrMethod === 'average' && targetNut.bmrMifflin !== null
-                    ? `; Mifflin–St Jeor cross-check ${showKcal(targetNut.bmrMifflin)}.`
-                    : '.'}
+                  {targetNut.bmrMethod === 'katch'
+                    ? `BMR is Katch–McArdle (lean mass)${
+                        targetNut.bmrCunningham !== null
+                          ? `; cross-checks: Cunningham ${showKcal(targetNut.bmrCunningham)}`
+                          : ''
+                      }${
+                        targetNut.bmrMifflin !== null
+                          ? `, Mifflin–St Jeor ${showKcal(targetNut.bmrMifflin)}`
+                          : ''
+                      }.`
+                    : 'BMR is Mifflin–St Jeor (add start body-fat for the lean-mass equation).'}
                 </p>
                 <p className="mt-2 text-xs text-zinc-600 dark:text-zinc-300">
                   {targetNut.goal === 'maintenance'

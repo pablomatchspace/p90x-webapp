@@ -15,6 +15,12 @@ didn't bump the package version — they're numbered B01/B02 here for a
 continuous record; #33's package column is left at the un-suffixed version
 that was actually shipped.
 
+## 1.E40.U178.B02 (package 1.40.178-b2) — 2026-10-27
+
+- **Change — BMR is Katch–McArdle.** The nutrition target's BMR uses Katch–McArdle alone instead of
+  the mean with Cunningham; Cunningham and Mifflin–St Jeor stay as cross-check figures in Settings.
+  Sample persona: BMR 1 745, TDEE 2 797 kcal (likely 2 521–3 074), daily target 2 373. No schema change (v14).
+
 ## 1.E40.U178.B01 (package 1.40.178-b1) — 2026-10-27
 
 - **Fix — FFMI scale in Settings.** The Settings → "Estimate from FFMI" target picker now shows the
