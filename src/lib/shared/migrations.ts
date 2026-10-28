@@ -161,6 +161,13 @@ const MIGRATIONS: Record<number, (doc: Record<string, unknown>) => void> = {
     toRef(doc.settings)
     for (const round of Array.isArray(doc.archivedRounds) ? doc.archivedRounds : []) toRef(round)
   },
+  // v14 → v15 (E41): feature switches — everything stays on for an existing document.
+  14: (doc) => {
+    const settings = doc.settings as { disabledFeatures?: unknown } | undefined
+    if (settings !== undefined && settings !== null && typeof settings === 'object') {
+      if (settings.disabledFeatures === undefined) settings.disabledFeatures = []
+    }
+  },
 }
 
 export function migrateToCurrent(raw: unknown): MigrationResult {

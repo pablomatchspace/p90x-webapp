@@ -38,6 +38,7 @@ import {
 } from './audio'
 import { mmss } from './timerUtils'
 import { useWakeLock } from './playerHooks'
+import { useAudioFeature } from './useAudioFeature'
 
 const ghostBtn =
   'rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-50 disabled:opacity-30 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800'
@@ -50,6 +51,7 @@ const ghostBtn =
  * rests (Q15A). FocusPage stays strength-only (Q16).
  */
 export function PlayPage() {
+  useAudioFeature()
   const params = useParams<{ key: string; programDayId: string }>()
   const key = params.key ?? ''
   const programDayId = params.programDayId ?? ''

@@ -52,7 +52,7 @@ import {
   updateTraining,
   updateYogaVariant,
 } from '@/state/actions'
-import { useBodyLog, useSchedule, useSettings } from '@/state/selectors'
+import { useBodyLog, useFeature, useSchedule, useSettings } from '@/state/selectors'
 import { useStore } from '@/state/store'
 import { Link } from 'react-router-dom'
 import { WorkoutLinksCard } from './WorkoutLinksCard'
@@ -248,6 +248,8 @@ export function SettingsPage() {
   const settings = useSettings()
   const bodyLog = useBodyLog()
   const schedule = useSchedule()
+  const ffmiOn = useFeature('ffmi')
+  const nutritionOn = useFeature('nutrition')
   const hasData = useStore(
     (s) =>
       s.data.bodyLog.length > 0 ||
@@ -653,216 +655,232 @@ export function SettingsPage() {
           />
           <Derived label="Target BMI" value={formatFixed(derived.targetBmi, 1)} />
         </dl>
-        <div className="mt-4 border-t border-zinc-100 pt-3 dark:border-zinc-800">
-          <Heading
-            level={3}
-            title="Estimate from FFMI"
-            help={
-              <>
-                Pick a normalized-FFMI goal and a plan body-fat; applying writes the target inputs
-                above and stores the FFMI target for the dashboard. Uses Kouri&rsquo;s 6.1
-                normalization at 1.8 m; the scale shows where your start, current and target FFMI
-                fall.
-              </>
-            }
-          />
-          <div className="mt-2 divide-y divide-zinc-100 dark:divide-zinc-800">
-            <Row
-              label="Target FFMI (normalized)"
-              hint={
-                ffmiDraft !== null
-                  ? `Category: ${ffmiCategory(ffmiDraft)}`
-                  : 'e.g. 19–21 = Above average'
-              }
-            >
-              <NumberField
-                label="Target FFMI (normalized)"
-                value={ffmiDraft}
-                step={0.1}
-                onChange={setFfmiDraft}
+        {ffmiOn ? (
+          <>
+            <div className="mt-4 border-t border-zinc-100 pt-3 dark:border-zinc-800">
+              <Heading
+                level={3}
+                title="Estimate from FFMI"
+                help={
+                  <>
+                    Pick a normalized-FFMI goal and a plan body-fat; applying writes the target
+                    inputs above and stores the FFMI target for the dashboard. Uses Kouri&rsquo;s
+                    6.1 normalization at 1.8 m; the scale shows where your start, current and target
+                    FFMI fall.
+                  </>
+                }
               />
-            </Row>
-            <div className="py-3">
-              <FfmiScale
-                summary={{ ...ffmiSummary(settings, bodyLog), target: ffmiDraft }}
-                gender={settings.gender}
-              />
-            </div>
-            <Row label="FFMI plan body-fat (%)">
-              <NumberField
-                label="FFMI plan body-fat (%)"
-                value={bfDraft}
-                step={0.5}
-                onChange={setBfDraft}
-              />
-            </Row>
-          </div>
-          {ffmiPlan !== null ? (
-            <dl className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
-              <Derived label="Lean mass (plan)" value={showWeight(ffmiPlan.lean)} unit={wUnit} />
-              <Derived
-                label="Lean gain"
-                value={`${ffmiPlan.increase >= 0 ? '+' : ''}${formatFixed(
-                  kgToUnit(ffmiPlan.increase, units),
-                  1,
-                )}`}
-                unit={wUnit}
-              />
-              <Derived label="Implied weight" value={showWeight(ffmiPlan.weight)} unit={wUnit} />
-              <Derived
-                label="Sheet target (plan)"
-                value={showWeight(ffmiPlan.sheetTargetWeight)}
-                unit={wUnit}
-              />
-            </dl>
-          ) : (
-            <p className="mt-3 text-xs text-zinc-500 dark:text-zinc-400">
-              Set height, start weight and start body-fat (plus both fields above) to see the plan.
-            </p>
-          )}
-          <button
-            type="button"
-            disabled={ffmiPlan === null}
-            onClick={() => setPendingFfmi(true)}
-            className="mt-3 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-40"
-          >
-            Apply as targets
-          </button>
-        </div>
-        {feasibility !== null && baseline !== null ? (
-          <section
-            aria-label="Reality check"
-            className="mt-4 rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-900/60"
-          >
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <h3 className="text-sm font-semibold">Reality check</h3>
-              <Chip tone={freshBlock ? 'amber' : 'zinc'}>
-                {freshBlock ? 'Program complete — fresh 90-day block' : `${horizonDays} days left`}
-              </Chip>
-            </div>
-            <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-              {baseline.source === 'latest'
-                ? `Latest weigh-in · ${formatLong(baseline.date)}`
-                : baseline.date !== null
-                  ? `From your start stats · ${formatLong(baseline.date)}`
-                  : 'From your start stats'}
-            </p>
-
-            {/* Product policy ranks fat-loss feasibility before lean-gain feasibility. */}
-            <div className="mt-4 rounded-lg border border-zinc-200 bg-white p-3 dark:border-zinc-700 dark:bg-zinc-950">
-              <InfoTip
-                label="Fat-loss pace"
-                help="Muscle-sparing reference band: 0.5–1% bodyweight/week (Helms)."
-              >
-                {(toggle) => (
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h4 className="text-sm font-semibold">Fat-loss pace</h4>
-                    {toggle}
-                    <Chip tone={VERDICT_TONE[feasibility.fat.verdict]}>
-                      {feasibility.fat.verdict}
-                    </Chip>
-                    <Chip tone="zinc">Tier A</Chip>
-                  </div>
-                )}
-              </InfoTip>
-              <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-300">
-                {feasibility.fat.fatLossKg <= 0
-                  ? 'No fat-mass loss required by this plan.'
-                  : feasibility.fat.weeklyPctBw > 0
-                    ? `${showKg(feasibility.fat.fatLossKg)} ${wUnit} fat loss · ${formatFixed(
-                        feasibility.fat.weeklyPctBw * 100,
-                        2,
-                      )}% bodyweight/week required`
-                    : `${showKg(feasibility.fat.fatLossKg)} ${wUnit} fat loss while body weight holds or rises (recomp) — Helms' weekly pace limit doesn't apply.`}
-              </p>
-            </div>
-
-            {/* Both Tier-B models stay visible together; no selector hides either result. */}
-            <div className="mt-3 rounded-lg border border-zinc-200 bg-white p-3 dark:border-zinc-700 dark:bg-zinc-950">
-              <InfoTip
-                label="Muscle-gain pace"
-                help="Blue = published model range for this window · red marker = required gain."
-              >
-                {(toggle) => (
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h4 className="text-sm font-semibold">Muscle-gain pace</h4>
-                    {toggle}
-                    <Chip tone={VERDICT_TONE[feasibility.lean.verdict]}>
-                      {feasibility.lean.verdict}
-                    </Chip>
-                    <Chip tone="zinc">Tier B</Chip>
-                  </div>
-                )}
-              </InfoTip>
-              <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-300">
-                {showKg(feasibility.lean.requiredGainKg)} {wUnit} required ·{' '}
-                {showKg(feasibility.lean.requiredPaceKgPerMonth)} {wUnit}/month
-              </p>
-              <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                <GainModelBar
-                  label="Aragon %BW model"
-                  low={kgToUnit(feasibility.lean.models.aragon.maxGain.low, units)}
-                  high={kgToUnit(feasibility.lean.models.aragon.maxGain.high, units)}
-                  required={kgToUnit(Math.max(0, feasibility.lean.requiredGainKg), units)}
-                  unit={wUnit}
-                />
-                <GainModelBar
-                  label="Lyle absolute model"
-                  low={kgToUnit(feasibility.lean.models.lyle.maxGain.low, units)}
-                  high={kgToUnit(feasibility.lean.models.lyle.maxGain.high, units)}
-                  required={kgToUnit(Math.max(0, feasibility.lean.requiredGainKg), units)}
-                  unit={wUnit}
-                />
+              <div className="mt-2 divide-y divide-zinc-100 dark:divide-zinc-800">
+                <Row
+                  label="Target FFMI (normalized)"
+                  hint={
+                    ffmiDraft !== null
+                      ? `Category: ${ffmiCategory(ffmiDraft)}`
+                      : 'e.g. 19–21 = Above average'
+                  }
+                >
+                  <NumberField
+                    label="Target FFMI (normalized)"
+                    value={ffmiDraft}
+                    step={0.1}
+                    onChange={setFfmiDraft}
+                  />
+                </Row>
+                <div className="py-3">
+                  <FfmiScale
+                    summary={{ ...ffmiSummary(settings, bodyLog), target: ffmiDraft }}
+                    gender={settings.gender}
+                  />
+                </div>
+                <Row label="FFMI plan body-fat (%)">
+                  <NumberField
+                    label="FFMI plan body-fat (%)"
+                    value={bfDraft}
+                    step={0.5}
+                    onChange={setBfDraft}
+                  />
+                </Row>
               </div>
+              {ffmiPlan !== null ? (
+                <dl className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  <Derived
+                    label="Lean mass (plan)"
+                    value={showWeight(ffmiPlan.lean)}
+                    unit={wUnit}
+                  />
+                  <Derived
+                    label="Lean gain"
+                    value={`${ffmiPlan.increase >= 0 ? '+' : ''}${formatFixed(
+                      kgToUnit(ffmiPlan.increase, units),
+                      1,
+                    )}`}
+                    unit={wUnit}
+                  />
+                  <Derived
+                    label="Implied weight"
+                    value={showWeight(ffmiPlan.weight)}
+                    unit={wUnit}
+                  />
+                  <Derived
+                    label="Sheet target (plan)"
+                    value={showWeight(ffmiPlan.sheetTargetWeight)}
+                    unit={wUnit}
+                  />
+                </dl>
+              ) : (
+                <p className="mt-3 text-xs text-zinc-500 dark:text-zinc-400">
+                  Set height, start weight and start body-fat (plus both fields above) to see the
+                  plan.
+                </p>
+              )}
+              <button
+                type="button"
+                disabled={ffmiPlan === null}
+                onClick={() => setPendingFfmi(true)}
+                className="mt-3 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-40"
+              >
+                Apply as targets
+              </button>
             </div>
+            {feasibility !== null && baseline !== null ? (
+              <section
+                aria-label="Reality check"
+                className="mt-4 rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-900/60"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h3 className="text-sm font-semibold">Reality check</h3>
+                  <Chip tone={freshBlock ? 'amber' : 'zinc'}>
+                    {freshBlock
+                      ? 'Program complete — fresh 90-day block'
+                      : `${horizonDays} days left`}
+                  </Chip>
+                </div>
+                <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+                  {baseline.source === 'latest'
+                    ? `Latest weigh-in · ${formatLong(baseline.date)}`
+                    : baseline.date !== null
+                      ? `From your start stats · ${formatLong(baseline.date)}`
+                      : 'From your start stats'}
+                </p>
 
-            {/* Recomp and ceiling flags qualify the pace verdicts without blocking the target. */}
-            <div className="mt-3 flex flex-wrap gap-2">
-              {feasibility.recomp !== 'not-applicable' ? (
-                <Chip tone={RECOMP_TONE[feasibility.recomp]}>Recomp: {feasibility.recomp}</Chip>
-              ) : null}
-              <Chip tone={feasibility.ceiling.withinLimit ? 'green' : 'rose'}>
-                Ceiling: {feasibility.ceiling.withinLimit ? 'within' : 'over limit'}
-              </Chip>
-              <span className="text-xs text-zinc-500 dark:text-zinc-400">
-                Approx. {formatFixed(feasibility.ceiling.ceiling, 1)} normalized FFMI{' '}
-                <Chip tone="zinc">Tier A/A−</Chip>
-              </span>
-            </div>
-            {feasibility.recomp !== 'not-applicable' ? (
-              <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
-                Simultaneous fat loss and lean gain is harder, not impossible (Barakat).
-              </p>
-            ) : null}
-
-            {/* The conservative model overlap can replace only the local estimator draft. */}
-            {feasibility.suggestion !== null ? (
-              <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg bg-sky-50 p-3 dark:bg-sky-950/30">
-                <div>
-                  <div className="flex items-center gap-2 text-sm font-semibold">
-                    Suggested target: {formatFixed(feasibility.suggestion.ffmi, 1)}
-                    <Chip tone="zinc">Tier B</Chip>
-                  </div>
-                  <p className="text-xs text-zinc-600 dark:text-zinc-300">
-                    Conservative gain: {showKg(feasibility.suggestion.gainKg)} {wUnit}
+                {/* Product policy ranks fat-loss feasibility before lean-gain feasibility. */}
+                <div className="mt-4 rounded-lg border border-zinc-200 bg-white p-3 dark:border-zinc-700 dark:bg-zinc-950">
+                  <InfoTip
+                    label="Fat-loss pace"
+                    help="Muscle-sparing reference band: 0.5–1% bodyweight/week (Helms)."
+                  >
+                    {(toggle) => (
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h4 className="text-sm font-semibold">Fat-loss pace</h4>
+                        {toggle}
+                        <Chip tone={VERDICT_TONE[feasibility.fat.verdict]}>
+                          {feasibility.fat.verdict}
+                        </Chip>
+                        <Chip tone="zinc">Tier A</Chip>
+                      </div>
+                    )}
+                  </InfoTip>
+                  <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-300">
+                    {feasibility.fat.fatLossKg <= 0
+                      ? 'No fat-mass loss required by this plan.'
+                      : feasibility.fat.weeklyPctBw > 0
+                        ? `${showKg(feasibility.fat.fatLossKg)} ${wUnit} fat loss · ${formatFixed(
+                            feasibility.fat.weeklyPctBw * 100,
+                            2,
+                          )}% bodyweight/week required`
+                        : `${showKg(feasibility.fat.fatLossKg)} ${wUnit} fat loss while body weight holds or rises (recomp) — Helms' weekly pace limit doesn't apply.`}
                   </p>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setFfmiDraft(feasibility.suggestion?.ffmi ?? null)}
-                  className="rounded-lg bg-sky-700 px-3 py-2 text-sm font-medium text-white hover:bg-sky-800"
-                >
-                  Use realistic target
-                </button>
-              </div>
-            ) : null}
 
-            {/* Disclose concurrent-training uncertainty without inventing a discount multiplier. */}
-            <p className="mt-3 text-[11px] text-zinc-500 dark:text-zinc-400">
-              Concurrent endurance and resistance work can blunt strength and hypertrophy responses
-              (Wilson); no discount multiplier is applied. Not medical or coaching advice.
-            </p>
-          </section>
+                {/* Both Tier-B models stay visible together; no selector hides either result. */}
+                <div className="mt-3 rounded-lg border border-zinc-200 bg-white p-3 dark:border-zinc-700 dark:bg-zinc-950">
+                  <InfoTip
+                    label="Muscle-gain pace"
+                    help="Blue = published model range for this window · red marker = required gain."
+                  >
+                    {(toggle) => (
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h4 className="text-sm font-semibold">Muscle-gain pace</h4>
+                        {toggle}
+                        <Chip tone={VERDICT_TONE[feasibility.lean.verdict]}>
+                          {feasibility.lean.verdict}
+                        </Chip>
+                        <Chip tone="zinc">Tier B</Chip>
+                      </div>
+                    )}
+                  </InfoTip>
+                  <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-300">
+                    {showKg(feasibility.lean.requiredGainKg)} {wUnit} required ·{' '}
+                    {showKg(feasibility.lean.requiredPaceKgPerMonth)} {wUnit}/month
+                  </p>
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                    <GainModelBar
+                      label="Aragon %BW model"
+                      low={kgToUnit(feasibility.lean.models.aragon.maxGain.low, units)}
+                      high={kgToUnit(feasibility.lean.models.aragon.maxGain.high, units)}
+                      required={kgToUnit(Math.max(0, feasibility.lean.requiredGainKg), units)}
+                      unit={wUnit}
+                    />
+                    <GainModelBar
+                      label="Lyle absolute model"
+                      low={kgToUnit(feasibility.lean.models.lyle.maxGain.low, units)}
+                      high={kgToUnit(feasibility.lean.models.lyle.maxGain.high, units)}
+                      required={kgToUnit(Math.max(0, feasibility.lean.requiredGainKg), units)}
+                      unit={wUnit}
+                    />
+                  </div>
+                </div>
+
+                {/* Recomp and ceiling flags qualify the pace verdicts without blocking the target. */}
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {feasibility.recomp !== 'not-applicable' ? (
+                    <Chip tone={RECOMP_TONE[feasibility.recomp]}>Recomp: {feasibility.recomp}</Chip>
+                  ) : null}
+                  <Chip tone={feasibility.ceiling.withinLimit ? 'green' : 'rose'}>
+                    Ceiling: {feasibility.ceiling.withinLimit ? 'within' : 'over limit'}
+                  </Chip>
+                  <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                    Approx. {formatFixed(feasibility.ceiling.ceiling, 1)} normalized FFMI{' '}
+                    <Chip tone="zinc">Tier A/A−</Chip>
+                  </span>
+                </div>
+                {feasibility.recomp !== 'not-applicable' ? (
+                  <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
+                    Simultaneous fat loss and lean gain is harder, not impossible (Barakat).
+                  </p>
+                ) : null}
+
+                {/* The conservative model overlap can replace only the local estimator draft. */}
+                {feasibility.suggestion !== null ? (
+                  <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg bg-sky-50 p-3 dark:bg-sky-950/30">
+                    <div>
+                      <div className="flex items-center gap-2 text-sm font-semibold">
+                        Suggested target: {formatFixed(feasibility.suggestion.ffmi, 1)}
+                        <Chip tone="zinc">Tier B</Chip>
+                      </div>
+                      <p className="text-xs text-zinc-600 dark:text-zinc-300">
+                        Conservative gain: {showKg(feasibility.suggestion.gainKg)} {wUnit}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setFfmiDraft(feasibility.suggestion?.ffmi ?? null)}
+                      className="rounded-lg bg-sky-700 px-3 py-2 text-sm font-medium text-white hover:bg-sky-800"
+                    >
+                      Use realistic target
+                    </button>
+                  </div>
+                ) : null}
+
+                {/* Disclose concurrent-training uncertainty without inventing a discount multiplier. */}
+                <p className="mt-3 text-[11px] text-zinc-500 dark:text-zinc-400">
+                  Concurrent endurance and resistance work can blunt strength and hypertrophy
+                  responses (Wilson); no discount multiplier is applied. Not medical or coaching
+                  advice.
+                </p>
+              </section>
+            ) : null}
+          </>
         ) : null}
         {warnings.length > 0 && (
           <ul
@@ -879,250 +897,259 @@ export function SettingsPage() {
         )}
       </Card>
 
-      {/* E22: P90X nutrition plan — level, daily calories, per-phase macro split */}
-      <Card>
-        <Heading
-          title="Nutrition"
-          help={
-            <>
-              The P90X nutrition plan&rsquo;s daily calorie target, from your latest weigh-in (start
-              weight until you log one): weight (lb) × 10 resting burn, plus 20% daily activity,
-              plus 600 kcal for the workout — then the level chart picks the plan. Today&rsquo;s
-              card shows the phase&rsquo;s macro grams.
-            </>
-          }
-        />
-        <div className="mt-2 divide-y divide-zinc-100 dark:divide-zinc-800">
-          <Row
-            label="Nutrition phase"
-            help="Auto follows the training blocks (weeks 1–4 / 5–8 / 9–13); pin a phase to stay in it longer, as the guide allows"
-          >
-            <Segmented
-              label="Nutrition phase"
-              value={
-                settings.nutrition.phaseOverride === null
-                  ? 'auto'
-                  : String(settings.nutrition.phaseOverride)
-              }
-              options={[
-                { value: 'auto', label: 'Auto' },
-                { value: '1', label: '1' },
-                { value: '2', label: '2' },
-                { value: '3', label: '3' },
-              ]}
-              onChange={(value) =>
-                updateNutrition({
-                  phaseOverride: value === 'auto' ? null : (Number(value) as NutritionPhase),
-                })
-              }
-            />
-          </Row>
-          <Row
-            label="Custom daily calories (kcal)"
-            help="Replaces the level plan — leave empty to follow the level chart"
-          >
-            <NumberField
-              label="Custom daily calories (kcal)"
-              value={settings.nutrition.calorieOverride ?? null}
-              step={50}
-              onChange={(value) => updateNutrition({ calorieOverride: value })}
-            />
-          </Row>
-          <Row
-            label="Diet style"
-            help="Target-based macros only: low-carb caps carbs at 130 g/day and moves the spare calories into fat"
-          >
-            <Segmented
-              label="Diet style"
-              value={settings.nutrition.dietStyle}
-              options={[
-                { value: 'balanced', label: 'Balanced' },
-                { value: 'lowCarb', label: 'Low-carb' },
-              ]}
-              onChange={(value) => updateNutrition({ dietStyle: value as DietStyle })}
-            />
-          </Row>
-        </div>
-        <dl className="mt-3 grid grid-cols-3 gap-3 border-t border-zinc-100 pt-3 dark:border-zinc-800">
-          <Derived label="Energy amount" value={showKcal(energy)} unit="kcal" />
-          <Derived label="Level" value={level ?? '—'} />
-          <Derived
-            label="Daily target"
-            value={showKcal(dailyCalories)}
-            unit={settings.nutrition.calorieOverride !== null ? 'kcal · custom' : 'kcal'}
-          />
-        </dl>
-        <details className="mt-3 border-t border-zinc-100 pt-3 dark:border-zinc-800">
-          <summary className="cursor-pointer text-sm font-medium text-zinc-600 dark:text-zinc-300">
-            Macro breakdown & target-based plan
-          </summary>
-          {dailyCalories !== null ? (
-            <ul className="mt-3 space-y-2">
-              {NUTRITION_PHASES.map((phase) => {
-                const split = PHASE_SPLITS[phase]
-                const grams = macroGrams(dailyCalories, phase)
-                return (
-                  <li
-                    key={phase}
-                    className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-sm"
-                  >
-                    <span className="flex items-center gap-2">
-                      <span className="font-medium">
-                        Phase {phase} · {PHASE_NAMES[phase]}
-                      </span>
-                      {activePhase === phase ? <Chip tone="green">current</Chip> : null}
-                    </span>
-                    <span className="tabular-nums text-xs text-zinc-500 dark:text-zinc-400">
-                      {Math.round(split.protein * 100)}/{Math.round(split.carbs * 100)}/
-                      {Math.round(split.fat * 100)} · {Math.round(grams.protein)} g protein ·{' '}
-                      {Math.round(grams.carbs)} g carbs · {Math.round(grams.fat)} g fat
-                    </span>
-                  </li>
-                )
-              })}
-            </ul>
-          ) : (
-            <p className="mt-3 text-xs text-zinc-500 dark:text-zinc-400">
-              Set your start weight (or log a weigh-in) to derive the calorie level, or enter custom
-              daily calories.
-            </p>
-          )}
-
-          {/* E22 evidence-based layer: calories & macros tuned to the stored target */}
-          <section
-            aria-label="Target-based nutrition"
-            className="mt-4 rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-900/60"
-          >
-            <InfoTip
-              label="Target-based recommendation"
+      {nutritionOn ? (
+        <>
+          {/* E22: P90X nutrition plan — level, daily calories, per-phase macro split */}
+          <Card>
+            <Heading
+              title="Nutrition"
               help={
                 <>
-                  <p>
-                    What current sports-nutrition consensus suggests you eat to reach your
-                    body-composition targets over the remaining program window — distinct from the
-                    boxed P90X plan above. Fat and lean changes are budgeted separately (a recomp
-                    still gets a real deficit even when the scale barely moves); protein and fat by
-                    body weight, carbs as the remainder unless the low-carb style caps them.
-                  </p>
-                  <p className="mt-2">
-                    TDEE: BMR × 1.4 (FAO/WHO/UNU sedentary-band floor) plus workout energy from 2024
-                    Compendium METs — a ±10% estimate, so adjust from your weight trend · Protein
-                    1.6–2.2 g/kg (Morton meta-analysis; ISSN) · fat ≥0.5 g/kg for hormonal health ·
-                    fat tissue ~7700, lean ~1800 kcal/kg (Hall) · low-carb caps carbs at the &lt;130
-                    g/day consensus threshold.
-                  </p>
+                  The P90X nutrition plan&rsquo;s daily calorie target, from your latest weigh-in
+                  (start weight until you log one): weight (lb) × 10 resting burn, plus 20% daily
+                  activity, plus 600 kcal for the workout — then the level chart picks the plan.
+                  Today&rsquo;s card shows the phase&rsquo;s macro grams.
                 </>
               }
-            >
-              {(toggle) => (
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="flex items-center gap-1">
-                    <h3 className="text-sm font-semibold">Target-based recommendation</h3>
-                    {toggle}
-                  </div>
-                  {targetNut !== null ? (
-                    <span className="flex flex-wrap items-center gap-1.5">
-                      <Chip tone={NUTRITION_GOAL_TONE[targetNut.goal]}>
-                        {NUTRITION_GOAL_LABEL[targetNut.goal]}
-                      </Chip>
-                      {targetNut.rateClamped ? <Chip tone="amber">pace capped</Chip> : null}
-                    </span>
-                  ) : null}
-                </div>
-              )}
-            </InfoTip>
-            <p className="mt-1 text-[11px] text-zinc-500 dark:text-zinc-400">
-              Not medical or dietetic advice.
-            </p>
-            {targetNut === null ? (
-              <p className="mt-3 text-xs text-zinc-500 dark:text-zinc-400">
-                Needs a body-fat reading (start stats or a weigh-in) for the metabolic estimate,
-                plus at least one body target above — lean-mass increase, body-fat % or FFMI.
-              </p>
-            ) : (
-              <>
-                <dl className="mt-3 grid grid-cols-3 gap-3">
-                  <Derived
-                    label={`BMR (${targetNut.bmrMethod === 'katch' ? 'Katch–McArdle' : 'Mifflin'})`}
-                    value={showKcal(targetNut.bmr)}
-                    unit="kcal"
-                  />
-                  <Derived label="TDEE (daily avg)" value={showKcal(targetNut.tdee)} unit="kcal" />
-                  <Derived
-                    label="Goal calories"
-                    value={showKcal(targetNut.calories)}
-                    unit={targetNut.caloriesFloored ? 'kcal · at BMR' : 'kcal'}
-                  />
-                </dl>
-                <p className="mt-2 text-xs text-zinc-600 dark:text-zinc-300">
-                  TDEE = BMR {showKcal(targetNut.bmr)} × {targetNut.dailyLifeFactor} daily life ={' '}
-                  {showKcal(targetNut.bmr * targetNut.dailyLifeFactor)}, plus{' '}
-                  {showKcal(targetNut.exerciseKcal)} kcal/day of scheduled workouts averaged over
-                  the program = {showKcal(targetNut.tdee)} (likely {showKcal(targetNut.tdeeLow)}–
-                  {showKcal(targetNut.tdeeHigh)}).{' '}
-                  {targetNut.bmrMethod === 'katch'
-                    ? `BMR is Katch–McArdle (lean mass)${
-                        targetNut.bmrCunningham !== null
-                          ? `; cross-checks: Cunningham ${showKcal(targetNut.bmrCunningham)}`
-                          : ''
-                      }${
-                        targetNut.bmrMifflin !== null
-                          ? `, Mifflin–St Jeor ${showKcal(targetNut.bmrMifflin)}`
-                          : ''
-                      }.`
-                    : 'BMR is Mifflin–St Jeor (add start body-fat for the lean-mass equation).'}
-                </p>
-                <p className="mt-2 text-xs text-zinc-600 dark:text-zinc-300">
-                  {targetNut.goal === 'maintenance'
-                    ? 'Already at your body target — maintenance calories.'
-                    : targetNut.goal === 'recomp'
-                      ? `Lose ${formatFixed(Math.abs(kgToUnit(targetNut.weeklyFatKg, units)), 2)} ${wUnit} fat and gain ${formatFixed(
-                          Math.abs(kgToUnit(targetNut.weeklyLeanKg, units)),
-                          2,
-                        )} ${wUnit} lean per week over ${formatFixed(targetNut.horizonWeeks, 0)} weeks`
-                      : `${targetNut.weeklyRateKg < 0 ? 'Lose' : 'Gain'} ${formatFixed(
-                          Math.abs(kgToUnit(targetNut.weeklyRateKg, units)),
-                          2,
-                        )} ${wUnit}/week to reach your body target over ${formatFixed(
-                          targetNut.horizonWeeks,
-                          0,
-                        )} weeks`}
-                  {targetNut.rateClamped
-                    ? ' — capped to a muscle-sparing pace (Helms ≤1%/wk loss, ~0.5%/wk usable gain).'
-                    : '.'}
-                </p>
-                <ul className="mt-3 space-y-2 border-t border-zinc-200 pt-3 dark:border-zinc-700">
-                  <li className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-sm">
-                    <span className="font-medium">
-                      Protein <Chip tone="zinc">Tier A</Chip>
-                    </span>
-                    <span className="tabular-nums text-xs text-zinc-500 dark:text-zinc-400">
-                      {Math.round(targetNut.protein)} g · {targetNut.proteinPerKg} g/kg
-                      {targetNut.goal === 'deficit' || targetNut.goal === 'recomp'
-                        ? ' (raised for the fat loss)'
-                        : ''}
-                    </span>
-                  </li>
-                  <li className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-sm">
-                    <span className="font-medium">Fat</span>
-                    <span className="tabular-nums text-xs text-zinc-500 dark:text-zinc-400">
-                      {Math.round(targetNut.fat)} g · {targetNut.fatPerKg} g/kg
-                      {targetNut.carbsCapped ? ' (raised by the carb cap)' : ''}
-                    </span>
-                  </li>
-                  <li className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-sm">
-                    <span className="font-medium">Carbs</span>
-                    <span className="tabular-nums text-xs text-zinc-500 dark:text-zinc-400">
-                      {Math.round(targetNut.carbs)} g ·{' '}
-                      {targetNut.carbsCapped ? 'low-carb cap' : 'remainder'}
-                    </span>
-                  </li>
+            />
+            <div className="mt-2 divide-y divide-zinc-100 dark:divide-zinc-800">
+              <Row
+                label="Nutrition phase"
+                help="Auto follows the training blocks (weeks 1–4 / 5–8 / 9–13); pin a phase to stay in it longer, as the guide allows"
+              >
+                <Segmented
+                  label="Nutrition phase"
+                  value={
+                    settings.nutrition.phaseOverride === null
+                      ? 'auto'
+                      : String(settings.nutrition.phaseOverride)
+                  }
+                  options={[
+                    { value: 'auto', label: 'Auto' },
+                    { value: '1', label: '1' },
+                    { value: '2', label: '2' },
+                    { value: '3', label: '3' },
+                  ]}
+                  onChange={(value) =>
+                    updateNutrition({
+                      phaseOverride: value === 'auto' ? null : (Number(value) as NutritionPhase),
+                    })
+                  }
+                />
+              </Row>
+              <Row
+                label="Custom daily calories (kcal)"
+                help="Replaces the level plan — leave empty to follow the level chart"
+              >
+                <NumberField
+                  label="Custom daily calories (kcal)"
+                  value={settings.nutrition.calorieOverride ?? null}
+                  step={50}
+                  onChange={(value) => updateNutrition({ calorieOverride: value })}
+                />
+              </Row>
+              <Row
+                label="Diet style"
+                help="Target-based macros only: low-carb caps carbs at 130 g/day and moves the spare calories into fat"
+              >
+                <Segmented
+                  label="Diet style"
+                  value={settings.nutrition.dietStyle}
+                  options={[
+                    { value: 'balanced', label: 'Balanced' },
+                    { value: 'lowCarb', label: 'Low-carb' },
+                  ]}
+                  onChange={(value) => updateNutrition({ dietStyle: value as DietStyle })}
+                />
+              </Row>
+            </div>
+            <dl className="mt-3 grid grid-cols-3 gap-3 border-t border-zinc-100 pt-3 dark:border-zinc-800">
+              <Derived label="Energy amount" value={showKcal(energy)} unit="kcal" />
+              <Derived label="Level" value={level ?? '—'} />
+              <Derived
+                label="Daily target"
+                value={showKcal(dailyCalories)}
+                unit={settings.nutrition.calorieOverride !== null ? 'kcal · custom' : 'kcal'}
+              />
+            </dl>
+            <details className="mt-3 border-t border-zinc-100 pt-3 dark:border-zinc-800">
+              <summary className="cursor-pointer text-sm font-medium text-zinc-600 dark:text-zinc-300">
+                Macro breakdown & target-based plan
+              </summary>
+              {dailyCalories !== null ? (
+                <ul className="mt-3 space-y-2">
+                  {NUTRITION_PHASES.map((phase) => {
+                    const split = PHASE_SPLITS[phase]
+                    const grams = macroGrams(dailyCalories, phase)
+                    return (
+                      <li
+                        key={phase}
+                        className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-sm"
+                      >
+                        <span className="flex items-center gap-2">
+                          <span className="font-medium">
+                            Phase {phase} · {PHASE_NAMES[phase]}
+                          </span>
+                          {activePhase === phase ? <Chip tone="green">current</Chip> : null}
+                        </span>
+                        <span className="tabular-nums text-xs text-zinc-500 dark:text-zinc-400">
+                          {Math.round(split.protein * 100)}/{Math.round(split.carbs * 100)}/
+                          {Math.round(split.fat * 100)} · {Math.round(grams.protein)} g protein ·{' '}
+                          {Math.round(grams.carbs)} g carbs · {Math.round(grams.fat)} g fat
+                        </span>
+                      </li>
+                    )
+                  })}
                 </ul>
-              </>
-            )}
-          </section>
-        </details>
-      </Card>
+              ) : (
+                <p className="mt-3 text-xs text-zinc-500 dark:text-zinc-400">
+                  Set your start weight (or log a weigh-in) to derive the calorie level, or enter
+                  custom daily calories.
+                </p>
+              )}
+
+              {/* E22 evidence-based layer: calories & macros tuned to the stored target */}
+              <section
+                aria-label="Target-based nutrition"
+                className="mt-4 rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-900/60"
+              >
+                <InfoTip
+                  label="Target-based recommendation"
+                  help={
+                    <>
+                      <p>
+                        What current sports-nutrition consensus suggests you eat to reach your
+                        body-composition targets over the remaining program window — distinct from
+                        the boxed P90X plan above. Fat and lean changes are budgeted separately (a
+                        recomp still gets a real deficit even when the scale barely moves); protein
+                        and fat by body weight, carbs as the remainder unless the low-carb style
+                        caps them.
+                      </p>
+                      <p className="mt-2">
+                        TDEE: BMR × 1.4 (FAO/WHO/UNU sedentary-band floor) plus workout energy from
+                        2024 Compendium METs — a ±10% estimate, so adjust from your weight trend ·
+                        Protein 1.6–2.2 g/kg (Morton meta-analysis; ISSN) · fat ≥0.5 g/kg for
+                        hormonal health · fat tissue ~7700, lean ~1800 kcal/kg (Hall) · low-carb
+                        caps carbs at the &lt;130 g/day consensus threshold.
+                      </p>
+                    </>
+                  }
+                >
+                  {(toggle) => (
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div className="flex items-center gap-1">
+                        <h3 className="text-sm font-semibold">Target-based recommendation</h3>
+                        {toggle}
+                      </div>
+                      {targetNut !== null ? (
+                        <span className="flex flex-wrap items-center gap-1.5">
+                          <Chip tone={NUTRITION_GOAL_TONE[targetNut.goal]}>
+                            {NUTRITION_GOAL_LABEL[targetNut.goal]}
+                          </Chip>
+                          {targetNut.rateClamped ? <Chip tone="amber">pace capped</Chip> : null}
+                        </span>
+                      ) : null}
+                    </div>
+                  )}
+                </InfoTip>
+                <p className="mt-1 text-[11px] text-zinc-500 dark:text-zinc-400">
+                  Not medical or dietetic advice.
+                </p>
+                {targetNut === null ? (
+                  <p className="mt-3 text-xs text-zinc-500 dark:text-zinc-400">
+                    Needs a body-fat reading (start stats or a weigh-in) for the metabolic estimate,
+                    plus at least one body target above — lean-mass increase, body-fat % or FFMI.
+                  </p>
+                ) : (
+                  <>
+                    <dl className="mt-3 grid grid-cols-3 gap-3">
+                      <Derived
+                        label={`BMR (${targetNut.bmrMethod === 'katch' ? 'Katch–McArdle' : 'Mifflin'})`}
+                        value={showKcal(targetNut.bmr)}
+                        unit="kcal"
+                      />
+                      <Derived
+                        label="TDEE (daily avg)"
+                        value={showKcal(targetNut.tdee)}
+                        unit="kcal"
+                      />
+                      <Derived
+                        label="Goal calories"
+                        value={showKcal(targetNut.calories)}
+                        unit={targetNut.caloriesFloored ? 'kcal · at BMR' : 'kcal'}
+                      />
+                    </dl>
+                    <p className="mt-2 text-xs text-zinc-600 dark:text-zinc-300">
+                      TDEE = BMR {showKcal(targetNut.bmr)} × {targetNut.dailyLifeFactor} daily life
+                      = {showKcal(targetNut.bmr * targetNut.dailyLifeFactor)}, plus{' '}
+                      {showKcal(targetNut.exerciseKcal)} kcal/day of scheduled workouts averaged
+                      over the program = {showKcal(targetNut.tdee)} (likely{' '}
+                      {showKcal(targetNut.tdeeLow)}–{showKcal(targetNut.tdeeHigh)}).{' '}
+                      {targetNut.bmrMethod === 'katch'
+                        ? `BMR is Katch–McArdle (lean mass)${
+                            targetNut.bmrCunningham !== null
+                              ? `; cross-checks: Cunningham ${showKcal(targetNut.bmrCunningham)}`
+                              : ''
+                          }${
+                            targetNut.bmrMifflin !== null
+                              ? `, Mifflin–St Jeor ${showKcal(targetNut.bmrMifflin)}`
+                              : ''
+                          }.`
+                        : 'BMR is Mifflin–St Jeor (add start body-fat for the lean-mass equation).'}
+                    </p>
+                    <p className="mt-2 text-xs text-zinc-600 dark:text-zinc-300">
+                      {targetNut.goal === 'maintenance'
+                        ? 'Already at your body target — maintenance calories.'
+                        : targetNut.goal === 'recomp'
+                          ? `Lose ${formatFixed(Math.abs(kgToUnit(targetNut.weeklyFatKg, units)), 2)} ${wUnit} fat and gain ${formatFixed(
+                              Math.abs(kgToUnit(targetNut.weeklyLeanKg, units)),
+                              2,
+                            )} ${wUnit} lean per week over ${formatFixed(targetNut.horizonWeeks, 0)} weeks`
+                          : `${targetNut.weeklyRateKg < 0 ? 'Lose' : 'Gain'} ${formatFixed(
+                              Math.abs(kgToUnit(targetNut.weeklyRateKg, units)),
+                              2,
+                            )} ${wUnit}/week to reach your body target over ${formatFixed(
+                              targetNut.horizonWeeks,
+                              0,
+                            )} weeks`}
+                      {targetNut.rateClamped
+                        ? ' — capped to a muscle-sparing pace (Helms ≤1%/wk loss, ~0.5%/wk usable gain).'
+                        : '.'}
+                    </p>
+                    <ul className="mt-3 space-y-2 border-t border-zinc-200 pt-3 dark:border-zinc-700">
+                      <li className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-sm">
+                        <span className="font-medium">
+                          Protein <Chip tone="zinc">Tier A</Chip>
+                        </span>
+                        <span className="tabular-nums text-xs text-zinc-500 dark:text-zinc-400">
+                          {Math.round(targetNut.protein)} g · {targetNut.proteinPerKg} g/kg
+                          {targetNut.goal === 'deficit' || targetNut.goal === 'recomp'
+                            ? ' (raised for the fat loss)'
+                            : ''}
+                        </span>
+                      </li>
+                      <li className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-sm">
+                        <span className="font-medium">Fat</span>
+                        <span className="tabular-nums text-xs text-zinc-500 dark:text-zinc-400">
+                          {Math.round(targetNut.fat)} g · {targetNut.fatPerKg} g/kg
+                          {targetNut.carbsCapped ? ' (raised by the carb cap)' : ''}
+                        </span>
+                      </li>
+                      <li className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-sm">
+                        <span className="font-medium">Carbs</span>
+                        <span className="tabular-nums text-xs text-zinc-500 dark:text-zinc-400">
+                          {Math.round(targetNut.carbs)} g ·{' '}
+                          {targetNut.carbsCapped ? 'low-carb cap' : 'remainder'}
+                        </span>
+                      </li>
+                    </ul>
+                  </>
+                )}
+              </section>
+            </details>
+          </Card>
+        </>
+      ) : null}
 
       {/* Scoring engine */}
       <Card>

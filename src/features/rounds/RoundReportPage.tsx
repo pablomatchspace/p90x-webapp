@@ -20,7 +20,7 @@ import {
   type BodyMetric,
 } from '@/features/dashboard/bodyMetrics'
 import { RoundCompareSection, type CompareCandidate } from '@/features/rounds/RoundCompareSection'
-import { useSettings } from '@/state/selectors'
+import { useFeature, useSettings } from '@/state/selectors'
 import { useStore } from '@/state/store'
 
 /**
@@ -54,18 +54,21 @@ function BodyOutcomeCard({
   metrics: BodyMetric[]
   units: Settings['units']
 }) {
+  const trendsOn = useFeature('trends')
   const byKey = new Map(metrics.map((m) => [m.key, m]))
   const rows = report.body.filter((o) => o.latest !== null)
   return (
     <Card>
       <div className="flex items-center justify-between">
         <h2 className="font-semibold">Body outcome</h2>
-        <Link
-          to="/trends"
-          className="text-sm font-medium text-red-600 hover:underline dark:text-red-400"
-        >
-          Trends →
-        </Link>
+        {trendsOn ? (
+          <Link
+            to="/trends"
+            className="text-sm font-medium text-red-600 hover:underline dark:text-red-400"
+          >
+            Trends →
+          </Link>
+        ) : null}
       </div>
       {rows.length === 0 ? (
         <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
@@ -160,6 +163,7 @@ function AdherenceOutcomeCard({ report }: { report: RoundReport }) {
 }
 
 function StrengthOutcomeCard({ report }: { report: RoundReport }) {
+  const trendsOn = useFeature('trends')
   const logged = report.workouts.filter((w) => w.logged > 0)
   const gains = report.topMovers.filter((m) => (m.delta ?? 0) > 0).slice(0, 5)
   const drops = report.topMovers
@@ -170,12 +174,14 @@ function StrengthOutcomeCard({ report }: { report: RoundReport }) {
     <Card>
       <div className="flex items-center justify-between">
         <h2 className="font-semibold">Strength outcome</h2>
-        <Link
-          to="/progress"
-          className="text-sm font-medium text-red-600 hover:underline dark:text-red-400"
-        >
-          Charts →
-        </Link>
+        {trendsOn ? (
+          <Link
+            to="/progress"
+            className="text-sm font-medium text-red-600 hover:underline dark:text-red-400"
+          >
+            Charts →
+          </Link>
+        ) : null}
       </div>
       {logged.length === 0 ? (
         <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">

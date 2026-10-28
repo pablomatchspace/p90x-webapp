@@ -27,6 +27,7 @@ const sample: Settings = {
   training: 'intermediate',
   nutrition: { phaseOverride: null, calorieOverride: null, dietStyle: 'balanced' },
   workoutLinks: {},
+  disabledFeatures: [],
 }
 
 function metric(overrides: Partial<BodyMetric>): BodyMetric {

@@ -253,3 +253,35 @@ describe('speak', () => {
     expect(() => audio.stopSpeech()).not.toThrow()
   })
 })
+
+describe('setAudioEnabled (E41 audio feature switch)', () => {
+  it('silences beeps, scheduled cues, unlock and speech while off', async () => {
+    const audio = await load()
+    audio.setAudioEnabled(false)
+    audio.beep('work')
+    audio.unlockAudio()
+    expect(audio.scheduleCues([{ at: Date.now() + 1000, kind: 'work' }])).toBe(false)
+    audio.speak('Push-ups')
+    expect(created).toBe(0)
+    expect(oscillators).toHaveLength(0)
+    expect(spoken).toHaveLength(0)
+  })
+
+  it('cuts speech that is already queued or running when it is switched off', async () => {
+    const audio = await load()
+    audio.speak('Push-ups', 500)
+    audio.setAudioEnabled(false)
+    vi.advanceTimersByTime(1000)
+    expect(spoken).toHaveLength(0)
+  })
+
+  it('plays again once switched back on', async () => {
+    const audio = await load()
+    audio.setAudioEnabled(false)
+    audio.setAudioEnabled(true)
+    audio.beep('work')
+    audio.speak('Push-ups')
+    expect(oscillators).toHaveLength(2)
+    expect(spoken).toHaveLength(1)
+  })
+})

@@ -10,7 +10,7 @@ import {
   type FfmiSummary,
 } from '@/lib/body'
 import type { Sex } from '@/lib/body'
-import { useBodyLog, useSettings } from '@/state/selectors'
+import { useBodyLog, useFeature, useSettings } from '@/state/selectors'
 
 /**
  * E40: the FFMI statistic (start → current → change → target) with its visual
@@ -165,6 +165,8 @@ export function FfmiCard({ compact = false }: { compact?: boolean }) {
   const bodyLog = useBodyLog()
   const summary = ffmiSummary(settings, bodyLog)
   const hasAny = summary.start !== null || summary.current !== null
+  const enabled = useFeature('ffmi')
+  if (!enabled) return null
 
   return (
     <Card>

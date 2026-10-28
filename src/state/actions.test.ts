@@ -13,6 +13,7 @@ import {
   setNotes,
   setRoundValue,
   setExerciseDone,
+  setFeatureEnabled,
   setSessionAnnotation,
   setSessionNotes,
   setStartDate,
@@ -397,5 +398,21 @@ describe('round lifecycle (E28 US-143)', () => {
     expect(useStore.getState().data.archivedRounds).toHaveLength(1)
     deleteRound(id)
     expect(useStore.getState().data.archivedRounds).toEqual([])
+  })
+})
+
+describe('setFeatureEnabled (E41)', () => {
+  it('switches a feature off and back on, keeping the list canonical', () => {
+    setFeatureEnabled('notes', false)
+    setFeatureEnabled('restTimer', false)
+    expect(useStore.getState().data.settings.disabledFeatures).toEqual(['restTimer', 'notes'])
+    setFeatureEnabled('notes', true)
+    expect(useStore.getState().data.settings.disabledFeatures).toEqual(['restTimer'])
+  })
+
+  it('never touches the data the feature owns', () => {
+    setNotes('keep me')
+    setFeatureEnabled('notes', false)
+    expect(useStore.getState().data.notes).toBe('keep me')
   })
 })

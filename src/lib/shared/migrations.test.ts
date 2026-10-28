@@ -290,6 +290,41 @@ describe('v13 → v14 (E33 U160): program becomes a suite/variant ref', () => {
   })
 })
 
+describe('v14 → v15 (E41): feature switches', () => {
+  function fixture(): Record<string, unknown> {
+    const filePath = path.resolve(__dirname, '../../test/fixtures/schema/v14.json')
+    return JSON.parse(readFileSync(filePath, 'utf8'))
+  }
+
+  it('turns every feature on (nothing disabled) for an existing document', () => {
+    const result = migrateToCurrent(fixture())
+    expect(result.ok).toBe(true)
+    if (result.ok) {
+      expect(result.migrated).toBe(true)
+      expect(result.state.settings.disabledFeatures).toEqual([])
+    }
+  })
+
+  it('rejects an unknown feature key instead of silently dropping it', () => {
+    const doc = fixture()
+    ;(doc.settings as Record<string, unknown>).disabledFeatures = ['teleport']
+    doc.schemaVersion = 15
+    expect(migrateToCurrent(doc).ok).toBe(false)
+  })
+
+  it('keeps a valid v15 choice untouched', () => {
+    const doc = fixture()
+    ;(doc.settings as Record<string, unknown>).disabledFeatures = ['notes']
+    doc.schemaVersion = 15
+    const result = migrateToCurrent(doc)
+    expect(result.ok).toBe(true)
+    if (result.ok) {
+      expect(result.migrated).toBe(false)
+      expect(result.state.settings.disabledFeatures).toEqual(['notes'])
+    }
+  })
+})
+
 describe('migration never throws on malformed-but-valid-JSON input', () => {
   /**
    * A hand-edited or partially-corrupted localStorage/import blob is valid

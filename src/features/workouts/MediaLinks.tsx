@@ -1,6 +1,6 @@
 import { ExternalLink, Headphones, MonitorPlay } from 'lucide-react'
 import { MEDIA_KIND_LABELS, MEDIA_KINDS } from '@/lib/shared'
-import { useWorkoutLinks } from '@/state/selectors'
+import { useFeature, useWorkoutLinks } from '@/state/selectors'
 
 const KIND_ICONS = { video: MonitorPlay, audio: Headphones } as const
 
@@ -19,7 +19,8 @@ export function MediaLinks({
   workoutName: string
 }) {
   const links = useWorkoutLinks(workoutKey)
-  if (links === undefined) return null
+  const enabled = useFeature('workoutLinks')
+  if (!enabled || links === undefined) return null
   return (
     <>
       {MEDIA_KINDS.filter((kind) => links[kind] !== undefined).map((kind) => {

@@ -1,4 +1,5 @@
 import { findGear, gearLabel, type GearId } from '@/lib/workouts'
+import { useFeature } from '@/state/selectors'
 
 /**
  * E37: the gear a workout uses (props the video makes optional are listed too). `inline` is a one-line summary for cards;
@@ -15,8 +16,9 @@ export function GearList({
   inline?: boolean
   lead?: string
 }) {
+  const enabled = useFeature('gear')
   const ids = gear ?? (workoutKey === undefined ? null : findGear(workoutKey))
-  if (ids === null) return null
+  if (!enabled || ids === null) return null
   const text = ids.length === 0 ? 'No equipment needed' : ids.map(gearLabel).join(' · ')
   if (inline) {
     return (

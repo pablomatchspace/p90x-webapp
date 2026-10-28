@@ -15,6 +15,16 @@ didn't bump the package version — they're numbered B01/B02 here for a
 continuous record; #33's package column is left at the un-suffixed version
 that was actually shipped.
 
+## 1.E41.U184.B00 (package 1.41.184) — 2026-10-28
+
+- **New: More → Features.** Switch 13 optional parts of the app on or off — rest timer, motivation
+  quotes, notes, body-fat calculators, trends & strength progress, FFMI, nutrition, gear lists, workout
+  links, the adherence card, overload targets, voice entry, and beeps & spoken cues. A switch only
+  hides the feature; its data (notes, links, targets, logs) is kept and pages stay reachable by URL.
+  Everything is on by default. Cloud sync and Rounds are not switchable.
+- Schema **v15**: `settings.disabledFeatures` (only the keys switched off are stored); existing
+  documents migrate with everything on, and the choice travels with export, backup and cloud sync.
+
 ## 1.E40.U179.B00 (package 1.40.179) — 2026-10-28
 
 - **Settings: explanations behind ⓘ.** Static how-it-works text on the Settings page (section intros,

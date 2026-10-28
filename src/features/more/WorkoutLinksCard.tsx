@@ -4,7 +4,7 @@ import { Card } from '@/components/Page'
 import { MEDIA_KINDS, parseLinkInput, type MediaKind } from '@/lib/shared'
 import { workoutsFor } from '@/lib/shared'
 import { updateWorkoutLink } from '@/state/actions'
-import { useSettings } from '@/state/selectors'
+import { useFeature, useSettings } from '@/state/selectors'
 
 /**
  * E23: one URL field per workout × media kind. Values commit on blur (or
@@ -79,6 +79,8 @@ function LinkField({
 
 export function WorkoutLinksCard() {
   const { workoutLinks: links, program } = useSettings()
+  const enabled = useFeature('workoutLinks')
+  if (!enabled) return null
   return (
     <Card>
       <InfoTip

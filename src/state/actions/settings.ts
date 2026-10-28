@@ -1,5 +1,12 @@
 import { applyNutritionPatch } from '@/lib/nutrition'
-import { applyWorkoutLink, type MediaKind, type ScoringSettings, type Settings } from '@/lib/shared'
+import {
+  applyFeatureToggle,
+  applyWorkoutLink,
+  type FeatureKey,
+  type MediaKind,
+  type ScoringSettings,
+  type Settings,
+} from '@/lib/shared'
 import { applyPlayerPatch, applyScoringPatch, applyTimerPatch } from '@/lib/workouts'
 import { useStore } from '@/state/store'
 
@@ -87,5 +94,16 @@ export function updateWorkoutLink(workoutKey: string, kind: MediaKind, url: stri
 export function setNotes(notes: string): void {
   useStore.getState().mutate((draft) => {
     draft.notes = notes
+  })
+}
+
+/** E41: switch an optional feature on or off. Only hides it — its data is untouched. */
+export function setFeatureEnabled(key: FeatureKey, enabled: boolean): void {
+  useStore.getState().mutate((draft) => {
+    draft.settings.disabledFeatures = applyFeatureToggle(
+      draft.settings.disabledFeatures,
+      key,
+      enabled,
+    )
   })
 }

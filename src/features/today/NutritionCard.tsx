@@ -7,7 +7,7 @@ import {
   type NutritionGoal,
   type NutritionPhase,
 } from '@/lib/nutrition'
-import { useBodyLog, useSettings } from '@/state/selectors'
+import { useBodyLog, useFeature, useSettings } from '@/state/selectors'
 import { Chip, type ChipTone } from '@/features/schedule/Chip'
 
 const kcal = (value: number) => Math.round(value).toLocaleString('en-US')
@@ -59,6 +59,8 @@ export function NutritionCard({ schedulePhase }: { schedulePhase: NutritionPhase
   const plan = nutritionTargets(settings, bodyLog, schedulePhase)
   const target = targetNutritionFromState(settings, bodyLog, todayISO())
   const usedLatestWeigh = bodyLog.some((e) => e.weight != null)
+  const enabled = useFeature('nutrition')
+  if (!enabled) return null
 
   return (
     <Card>

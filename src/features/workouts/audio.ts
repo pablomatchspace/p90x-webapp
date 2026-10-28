@@ -21,6 +21,17 @@ export const BEEP_MS: Record<BeepKind, number> = { work: 650, rest: 900 }
 
 let ctx: AudioContext | null = null
 
+/** E41: the Features → "Beeps and spoken cues" switch — off silences every cue below. */
+let audioEnabled = true
+
+export function setAudioEnabled(enabled: boolean): void {
+  audioEnabled = enabled
+  if (!enabled) {
+    cancelCues()
+    stopSpeech()
+  }
+}
+
 function audioContext(): AudioContext | null {
   try {
     ctx ??= new AudioContext()
@@ -37,6 +48,7 @@ function audioContext(): AudioContext | null {
  * Chrome after a reload).
  */
 export function unlockAudio(): void {
+  if (!audioEnabled) return
   const c = audioContext()
   if (c === null) return
   try {
@@ -79,6 +91,7 @@ function tones(c: AudioContext, kind: BeepKind, start: number): Tone[] {
 
 /** Play a cue now (foreground ticks, skips, the rest timer). */
 export function beep(kind: BeepKind = 'work'): void {
+  if (!audioEnabled) return
   const c = audioContext()
   if (c === null) return
   try {
@@ -130,6 +143,7 @@ export function cancelCues(): void {
  */
 export function scheduleCues(cues: { at: number; kind: BeepKind }[], nowMs = Date.now()): boolean {
   cancelCues()
+  if (!audioEnabled) return false
   const c = audioContext()
   if (c === null) return false
   const gen = generation
@@ -227,6 +241,7 @@ function say(text: string): void {
  * speechSynthesis — the beep and visual cue still fire.
  */
 export function speak(text: string, afterMs = 0): void {
+  if (!audioEnabled) return
   try {
     if (!('speechSynthesis' in window)) return
     if (pendingSpeech !== null) clearTimeout(pendingSpeech)
