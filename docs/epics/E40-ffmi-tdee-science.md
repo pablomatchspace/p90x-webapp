@@ -42,6 +42,16 @@ label everywhere.
 BMR × 1.4 + exercise · [x] range · [x] target calories follow exercise one-for-one · [x] Today/Settings copy ·
 [x] sample persona: 2 797 kcal (was 2 705).
 
+### US-179 — Settings: minimal text, tappable "more info" (S, P2)
+
+Shared `InfoTip` (`InfoToggle` ⓘ button + `InfoPanel`, `useInfoTip` state; button `aria-expanded` /
+`aria-controls`, Escape closes, 24 px target). Settings `Row` takes `help` (collapsed) besides `hint`
+(always visible). Decisions: tap-to-expand inline (no floating bubble); only warnings, live values,
+empty-state prompts, the lock notice and disclaimers stay visible; wording moved verbatim.
+
+**AC:** [x] static copy collapsed by default · [x] ⓘ toggles, keyboard + Escape · [x] live values, lock
+notice, disclaimers still visible · [x] desktop and mobile e2e · [x] Linux Settings baselines regenerated.
+
 ## 3. Result worth knowing
 
 The owner doubted that 2 516 kcal is credible. The rigorous model does **not** lower it: the arithmetic

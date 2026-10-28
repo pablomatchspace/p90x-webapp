@@ -327,5 +327,6 @@ Post-v1.0.0. Full write-up: [`docs/epics/E39-help-update-button.md`](../epics/E3
 
 - ✅ US-177 · FFMI start → current → change → target card with a sourced visual scale, Body page + dashboard (M, P1)
 - ✅ US-178 · Factorial, schedule-aware TDEE: mean of Katch–McArdle & Cunningham × 1.4 + workout energy, with range (M, P1)
+- ✅ US-179 · Settings: explanatory text behind tappable ⓘ "more info" help (S, P2)
 
 Post-v1.0.0. Full write-up: [`docs/epics/E40-ffmi-tdee-science.md`](../epics/E40-ffmi-tdee-science.md).

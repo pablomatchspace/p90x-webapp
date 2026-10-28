@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { InfoTip } from '@/components/InfoTip'
 import { Card } from '@/components/Page'
 import { MEDIA_KINDS, parseLinkInput, type MediaKind } from '@/lib/shared'
 import { workoutsFor } from '@/lib/shared'
@@ -80,12 +81,17 @@ export function WorkoutLinksCard() {
   const { workoutLinks: links, program } = useSettings()
   return (
     <Card>
-      <h2 className="text-base font-semibold">Workout links</h2>
-      <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-        Paste a video and/or audio link for each routine — a launch button then appears on that
-        workout&rsquo;s cards and opens the session in a new tab. Links must be full http(s) URLs (a
-        streaming site, your media server…). Blank a field to remove its button.
-      </p>
+      <InfoTip
+        label="Workout links"
+        help="Paste a video and/or audio link for each routine — a launch button then appears on that workout’s cards and opens the session in a new tab. Links must be full http(s) URLs (a streaming site, your media server…). Blank a field to remove its button."
+      >
+        {(toggle) => (
+          <div className="flex items-center gap-1">
+            <h2 className="text-base font-semibold">Workout links</h2>
+            {toggle}
+          </div>
+        )}
+      </InfoTip>
       <div className="mt-2 divide-y divide-zinc-100 dark:divide-zinc-800">
         {workoutsFor(program.suite)
           .filter((w) => w.style !== 'rest')

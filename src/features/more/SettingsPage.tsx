@@ -1,5 +1,6 @@
 import { type ReactNode, useState } from 'react'
 import { AlertTriangle } from 'lucide-react'
+import { InfoTip } from '@/components/InfoTip'
 import { Card, Page } from '@/components/Page'
 import { Chip } from '@/features/schedule/Chip'
 import { FfmiScale } from '@/features/body/FfmiCard'
@@ -62,17 +63,60 @@ import { WorkoutLinksCard } from './WorkoutLinksCard'
  * stacking avoids squeezing the label into an unreadable sliver next to a wide
  * control (E20 mobile legibility fix).
  */
-function Row({ label, hint, children }: { label: string; hint?: ReactNode; children: ReactNode }) {
-  return (
-    <div className="flex flex-col gap-2 py-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+function Row({
+  label,
+  hint,
+  help,
+  children,
+}: {
+  label: string
+  /** short always-visible note: a live value, a lock notice or an empty-state prompt */
+  hint?: ReactNode
+  /** static explanation, collapsed behind an ⓘ (US-179) */
+  help?: ReactNode
+  children: ReactNode
+}) {
+  const row = (toggle: ReactNode) => (
+    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
       <div className="min-w-0 sm:flex-1">
-        <div className="text-sm font-medium">{label}</div>
+        <div className="flex items-center gap-1 text-sm font-medium">
+          {label}
+          {toggle}
+        </div>
         {hint ? (
           <div className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">{hint}</div>
         ) : null}
       </div>
       <div className="shrink-0">{children}</div>
     </div>
+  )
+  return (
+    <div className="py-1.5">
+      {help ? (
+        <InfoTip label={label} help={help}>
+          {row}
+        </InfoTip>
+      ) : (
+        row(null)
+      )}
+    </div>
+  )
+}
+
+/** A card/sub-section title whose static explanation hides behind an ⓘ. */
+function Heading({ level = 2, title, help }: { level?: 2 | 3; title: string; help?: ReactNode }) {
+  const Tag = level === 2 ? 'h2' : 'h3'
+  const className = level === 2 ? 'text-base font-semibold' : 'text-sm font-semibold'
+  if (!help) return <Tag className={className}>{title}</Tag>
+  return (
+    <InfoTip label={title} help={help}>
+      {(toggle) => (
+        <div className="flex items-center gap-1">
+          <Tag className={className}>{title}</Tag>
+          {toggle}
+        </div>
+      )}
+    </InfoTip>
   )
 }
 
@@ -409,7 +453,7 @@ export function SettingsPage() {
           {settings.program.suite === 'p90x' ? (
             <Row
               label="Yoga timeline"
-              hint="Choose the default timeline that plays on Yoga X days — can be overridden per session"
+              help="Choose the default timeline that plays on Yoga X days — can be overridden per session"
             >
               <Segmented
                 label="Yoga timeline"
@@ -447,7 +491,7 @@ export function SettingsPage() {
         <div className="mt-2 divide-y divide-zinc-100 dark:divide-zinc-800">
           <Row
             label="Measurement units"
-            hint="Weights and heights re-display instantly; stored values never change"
+            help="Weights and heights re-display instantly; stored values never change"
           >
             <Segmented
               label="Units"
@@ -459,7 +503,7 @@ export function SettingsPage() {
               onChange={(value) => updateSettings({ units: value })}
             />
           </Row>
-          <Row label="Gender" hint="Used by the body-fat calculators">
+          <Row label="Gender" help="Used by the body-fat calculators">
             <Segmented
               label="Gender"
               value={settings.gender}
@@ -472,7 +516,7 @@ export function SettingsPage() {
           </Row>
           <Row
             label="Training experience"
-            hint="Years spent regularly lifting weights or doing resistance workouts before this program — Novice under 1 year, Intermediate 1–3 years, Advanced 3+ years. Sets the realistic muscle-gain rates in the FFMI feasibility check."
+            help="Years spent regularly lifting weights or doing resistance workouts before this program — Novice under 1 year, Intermediate 1–3 years, Advanced 3+ years. Sets the realistic muscle-gain rates in the FFMI feasibility check."
           >
             <Segmented
               label="Training experience"
@@ -490,10 +534,10 @@ export function SettingsPage() {
 
       {/* Start stats + derived */}
       <Card>
-        <h2 className="text-base font-semibold">Your stats</h2>
-        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-          Your day-1 baseline. Everything below the line is derived and updates live.
-        </p>
+        <Heading
+          title="Your stats"
+          help="Your day-1 baseline. Everything below the line is derived and updates live."
+        />
         <div className="mt-2 divide-y divide-zinc-100 dark:divide-zinc-800">
           <Row label="Age">
             <NumberField
@@ -545,7 +589,7 @@ export function SettingsPage() {
         <div className="mt-2 divide-y divide-zinc-100 dark:divide-zinc-800">
           <Row
             label={`Lean-mass increase (${wUnit})`}
-            hint="Muscle you aim to add over the 90 days"
+            help="Muscle you aim to add over the 90 days"
           >
             <NumberField
               label={`Lean-mass increase (${wUnit})`}
@@ -610,12 +654,18 @@ export function SettingsPage() {
           <Derived label="Target BMI" value={formatFixed(derived.targetBmi, 1)} />
         </dl>
         <div className="mt-4 border-t border-zinc-100 pt-3 dark:border-zinc-800">
-          <h3 className="text-sm font-semibold">Estimate from FFMI</h3>
-          <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-            Pick a normalized-FFMI goal and a plan body-fat; applying writes the target inputs above
-            and stores the FFMI target for the dashboard. Uses Kouri&rsquo;s 6.1 normalization at
-            1.8 m; the scale shows where your start, current and target FFMI fall.
-          </p>
+          <Heading
+            level={3}
+            title="Estimate from FFMI"
+            help={
+              <>
+                Pick a normalized-FFMI goal and a plan body-fat; applying writes the target inputs
+                above and stores the FFMI target for the dashboard. Uses Kouri&rsquo;s 6.1
+                normalization at 1.8 m; the scale shows where your start, current and target FFMI
+                fall.
+              </>
+            }
+          />
           <div className="mt-2 divide-y divide-zinc-100 dark:divide-zinc-800">
             <Row
               label="Target FFMI (normalized)"
@@ -700,11 +750,21 @@ export function SettingsPage() {
 
             {/* Product policy ranks fat-loss feasibility before lean-gain feasibility. */}
             <div className="mt-4 rounded-lg border border-zinc-200 bg-white p-3 dark:border-zinc-700 dark:bg-zinc-950">
-              <div className="flex flex-wrap items-center gap-2">
-                <h4 className="text-sm font-semibold">Fat-loss pace</h4>
-                <Chip tone={VERDICT_TONE[feasibility.fat.verdict]}>{feasibility.fat.verdict}</Chip>
-                <Chip tone="zinc">Tier A</Chip>
-              </div>
+              <InfoTip
+                label="Fat-loss pace"
+                help="Muscle-sparing reference band: 0.5–1% bodyweight/week (Helms)."
+              >
+                {(toggle) => (
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h4 className="text-sm font-semibold">Fat-loss pace</h4>
+                    {toggle}
+                    <Chip tone={VERDICT_TONE[feasibility.fat.verdict]}>
+                      {feasibility.fat.verdict}
+                    </Chip>
+                    <Chip tone="zinc">Tier A</Chip>
+                  </div>
+                )}
+              </InfoTip>
               <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-300">
                 {feasibility.fat.fatLossKg <= 0
                   ? 'No fat-mass loss required by this plan.'
@@ -715,20 +775,25 @@ export function SettingsPage() {
                       )}% bodyweight/week required`
                     : `${showKg(feasibility.fat.fatLossKg)} ${wUnit} fat loss while body weight holds or rises (recomp) — Helms' weekly pace limit doesn't apply.`}
               </p>
-              <p className="mt-1 text-[11px] text-zinc-500 dark:text-zinc-400">
-                Muscle-sparing reference band: 0.5–1% bodyweight/week (Helms).
-              </p>
             </div>
 
             {/* Both Tier-B models stay visible together; no selector hides either result. */}
             <div className="mt-3 rounded-lg border border-zinc-200 bg-white p-3 dark:border-zinc-700 dark:bg-zinc-950">
-              <div className="flex flex-wrap items-center gap-2">
-                <h4 className="text-sm font-semibold">Muscle-gain pace</h4>
-                <Chip tone={VERDICT_TONE[feasibility.lean.verdict]}>
-                  {feasibility.lean.verdict}
-                </Chip>
-                <Chip tone="zinc">Tier B</Chip>
-              </div>
+              <InfoTip
+                label="Muscle-gain pace"
+                help="Blue = published model range for this window · red marker = required gain."
+              >
+                {(toggle) => (
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h4 className="text-sm font-semibold">Muscle-gain pace</h4>
+                    {toggle}
+                    <Chip tone={VERDICT_TONE[feasibility.lean.verdict]}>
+                      {feasibility.lean.verdict}
+                    </Chip>
+                    <Chip tone="zinc">Tier B</Chip>
+                  </div>
+                )}
+              </InfoTip>
               <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-300">
                 {showKg(feasibility.lean.requiredGainKg)} {wUnit} required ·{' '}
                 {showKg(feasibility.lean.requiredPaceKgPerMonth)} {wUnit}/month
@@ -749,9 +814,6 @@ export function SettingsPage() {
                   unit={wUnit}
                 />
               </div>
-              <p className="mt-2 text-[11px] text-zinc-500 dark:text-zinc-400">
-                Blue = published model range for this window · red marker = required gain.
-              </p>
             </div>
 
             {/* Recomp and ceiling flags qualify the pace verdicts without blocking the target. */}
@@ -819,17 +881,21 @@ export function SettingsPage() {
 
       {/* E22: P90X nutrition plan — level, daily calories, per-phase macro split */}
       <Card>
-        <h2 className="text-base font-semibold">Nutrition</h2>
-        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-          The P90X nutrition plan&rsquo;s daily calorie target, from your latest weigh-in (start
-          weight until you log one): weight (lb) × 10 resting burn, plus 20% daily activity, plus
-          600 kcal for the workout — then the level chart picks the plan. Today&rsquo;s card shows
-          the phase&rsquo;s macro grams.
-        </p>
+        <Heading
+          title="Nutrition"
+          help={
+            <>
+              The P90X nutrition plan&rsquo;s daily calorie target, from your latest weigh-in (start
+              weight until you log one): weight (lb) × 10 resting burn, plus 20% daily activity,
+              plus 600 kcal for the workout — then the level chart picks the plan. Today&rsquo;s
+              card shows the phase&rsquo;s macro grams.
+            </>
+          }
+        />
         <div className="mt-2 divide-y divide-zinc-100 dark:divide-zinc-800">
           <Row
             label="Nutrition phase"
-            hint="Auto follows the training blocks (weeks 1–4 / 5–8 / 9–13); pin a phase to stay in it longer, as the guide allows"
+            help="Auto follows the training blocks (weeks 1–4 / 5–8 / 9–13); pin a phase to stay in it longer, as the guide allows"
           >
             <Segmented
               label="Nutrition phase"
@@ -853,7 +919,7 @@ export function SettingsPage() {
           </Row>
           <Row
             label="Custom daily calories (kcal)"
-            hint="Replaces the level plan — leave empty to follow the level chart"
+            help="Replaces the level plan — leave empty to follow the level chart"
           >
             <NumberField
               label="Custom daily calories (kcal)"
@@ -864,7 +930,7 @@ export function SettingsPage() {
           </Row>
           <Row
             label="Diet style"
-            hint="Target-based macros only: low-carb caps carbs at 130 g/day and moves the spare calories into fat"
+            help="Target-based macros only: low-carb caps carbs at 130 g/day and moves the spare calories into fat"
           >
             <Segmented
               label="Diet style"
@@ -927,23 +993,46 @@ export function SettingsPage() {
             aria-label="Target-based nutrition"
             className="mt-4 rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-900/60"
           >
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <h3 className="text-sm font-semibold">Target-based recommendation</h3>
-              {targetNut !== null ? (
-                <span className="flex flex-wrap items-center gap-1.5">
-                  <Chip tone={NUTRITION_GOAL_TONE[targetNut.goal]}>
-                    {NUTRITION_GOAL_LABEL[targetNut.goal]}
-                  </Chip>
-                  {targetNut.rateClamped ? <Chip tone="amber">pace capped</Chip> : null}
-                </span>
-              ) : null}
-            </div>
-            <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-              What current sports-nutrition consensus suggests you eat to reach your
-              body-composition targets over the remaining program window — distinct from the boxed
-              P90X plan above. Fat and lean changes are budgeted separately (a recomp still gets a
-              real deficit even when the scale barely moves); protein and fat by body weight, carbs
-              as the remainder unless the low-carb style caps them. Not medical or dietetic advice.
+            <InfoTip
+              label="Target-based recommendation"
+              help={
+                <>
+                  <p>
+                    What current sports-nutrition consensus suggests you eat to reach your
+                    body-composition targets over the remaining program window — distinct from the
+                    boxed P90X plan above. Fat and lean changes are budgeted separately (a recomp
+                    still gets a real deficit even when the scale barely moves); protein and fat by
+                    body weight, carbs as the remainder unless the low-carb style caps them.
+                  </p>
+                  <p className="mt-2">
+                    TDEE: BMR × 1.4 (FAO/WHO/UNU sedentary-band floor) plus workout energy from 2024
+                    Compendium METs — a ±10% estimate, so adjust from your weight trend · Protein
+                    1.6–2.2 g/kg (Morton meta-analysis; ISSN) · fat ≥0.5 g/kg for hormonal health ·
+                    fat tissue ~7700, lean ~1800 kcal/kg (Hall) · low-carb caps carbs at the &lt;130
+                    g/day consensus threshold.
+                  </p>
+                </>
+              }
+            >
+              {(toggle) => (
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-1">
+                    <h3 className="text-sm font-semibold">Target-based recommendation</h3>
+                    {toggle}
+                  </div>
+                  {targetNut !== null ? (
+                    <span className="flex flex-wrap items-center gap-1.5">
+                      <Chip tone={NUTRITION_GOAL_TONE[targetNut.goal]}>
+                        {NUTRITION_GOAL_LABEL[targetNut.goal]}
+                      </Chip>
+                      {targetNut.rateClamped ? <Chip tone="amber">pace capped</Chip> : null}
+                    </span>
+                  ) : null}
+                </div>
+              )}
+            </InfoTip>
+            <p className="mt-1 text-[11px] text-zinc-500 dark:text-zinc-400">
+              Not medical or dietetic advice.
             </p>
             {targetNut === null ? (
               <p className="mt-3 text-xs text-zinc-500 dark:text-zinc-400">
@@ -1029,13 +1118,6 @@ export function SettingsPage() {
                     </span>
                   </li>
                 </ul>
-                <p className="mt-2 text-[11px] text-zinc-500 dark:text-zinc-400">
-                  TDEE: BMR × 1.4 (FAO/WHO/UNU sedentary-band floor) plus workout energy from 2024
-                  Compendium METs — a ±10% estimate, so adjust from your weight trend · Protein
-                  1.6–2.2 g/kg (Morton meta-analysis; ISSN) · fat ≥0.5 g/kg for hormonal health ·
-                  fat tissue ~7700, lean ~1800 kcal/kg (Hall) · low-carb caps carbs at the &lt;130
-                  g/day consensus threshold.
-                </p>
               </>
             )}
           </section>
@@ -1044,12 +1126,12 @@ export function SettingsPage() {
 
       {/* Scoring engine */}
       <Card>
-        <h2 className="text-base font-semibold">Scoring</h2>
-        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-          The workbook&rsquo;s SETUP scoring cells. Divisors must stay above zero.
-        </p>
+        <Heading
+          title="Scoring"
+          help={<>The workbook&rsquo;s SETUP scoring cells. Divisors must stay above zero.</>}
+        />
         <div className="mt-2 divide-y divide-zinc-100 dark:divide-zinc-800">
-          <Row label="Round-drop penalty" hint="Penalise a drop from round 1 to round 2">
+          <Row label="Round-drop penalty" help="Penalise a drop from round 1 to round 2">
             <Segmented
               label="Penalty"
               value={settings.scoring.penaltyOn ? 'on' : 'off'}
@@ -1060,7 +1142,7 @@ export function SettingsPage() {
               onChange={(value) => updateScoring({ penaltyOn: value === 'on' })}
             />
           </Row>
-          <Row label="Penalty divisor" hint="Divide the round 1→2 drop by this">
+          <Row label="Penalty divisor" help="Divide the round 1→2 drop by this">
             <NumberField
               label="Penalty divisor"
               value={settings.scoring.penaltyDivisor}
@@ -1068,7 +1150,7 @@ export function SettingsPage() {
               onChange={(value) => value !== null && updateScoring({ penaltyDivisor: value })}
             />
           </Row>
-          <Row label="Chair-assist factor" hint="Knee / chair reps count as 1 ÷ this">
+          <Row label="Chair-assist factor" help="Knee / chair reps count as 1 ÷ this">
             <NumberField
               label="Chair-assist factor"
               value={settings.scoring.chairFactor}
@@ -1076,7 +1158,7 @@ export function SettingsPage() {
               onChange={(value) => value !== null && updateScoring({ chairFactor: value })}
             />
           </Row>
-          <Row label="Reps×weight divisor" hint="Cosmetic divisor for R×W chart values">
+          <Row label="Reps×weight divisor" help="Cosmetic divisor for R×W chart values">
             <NumberField
               label="Reps×weight divisor"
               value={settings.scoring.rwDivisor}
