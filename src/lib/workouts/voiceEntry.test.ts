@@ -49,15 +49,36 @@ describe('parseVoiceTranscript — numbers (US-150)', () => {
     })
   })
 
-  it('separates multiple values on filler words and "and"', () => {
+  it('separates multiple values on "and"', () => {
     expect(parseVoiceTranscript('twenty two and eight')).toEqual({
       kind: 'values',
       values: [{ value: 22 }, { value: 8 }],
     })
-    expect(parseVoiceTranscript('22 then 8 please')).toEqual({
+  })
+
+  it('treats a comma or period glued to the next word as a separator', () => {
+    expect(parseVoiceTranscript('reps 22,knee 8')).toEqual({
       kind: 'values',
-      values: [{ value: 22 }, { value: 8 }],
+      values: [
+        { value: 22, field: 'reps' },
+        { value: 8, field: 'assist' },
+      ],
     })
+    expect(parseVoiceTranscript('22 reps.8 knee')).toEqual({
+      kind: 'values',
+      values: [
+        { value: 22, field: 'reps' },
+        { value: 8, field: 'assist' },
+      ],
+    })
+  })
+
+  it('ignores ambient talk: any word outside the grammar rejects the utterance', () => {
+    expect(parseVoiceTranscript('one more')).toBeNull()
+    expect(parseVoiceTranscript('next one')).toBeNull()
+    expect(parseVoiceTranscript('come on two more reps')).toBeNull()
+    expect(parseVoiceTranscript('22 then 8 please')).toBeNull()
+    expect(parseVoiceTranscript('next 22')).toBeNull()
   })
 
   it('returns null for empty or numberless garbage', () => {
@@ -139,13 +160,13 @@ describe('parseVoiceTranscript — commands (US-150)', () => {
     expect(parseVoiceTranscript('next')).toEqual({ kind: 'command', command: 'next' })
     expect(parseVoiceTranscript('Next.')).toEqual({ kind: 'command', command: 'next' })
     expect(parseVoiceTranscript('previous')).toEqual({ kind: 'command', command: 'previous' })
-    expect(parseVoiceTranscript('back')).toEqual({ kind: 'command', command: 'previous' })
     expect(parseVoiceTranscript('finish workout')).toEqual({ kind: 'command', command: 'finish' })
-    expect(parseVoiceTranscript('done')).toEqual({ kind: 'command', command: 'finish' })
   })
 
-  it('treats command words inside longer utterances as filler', () => {
-    expect(parseVoiceTranscript('next 22')).toEqual({ kind: 'values', values: [{ value: 22 }] })
+  it('has no accidental-prone aliases: "done", "back" and bare "finish" do nothing', () => {
+    for (const phrase of ['done', 'back', 'finish', 'go back', 'finished']) {
+      expect(parseVoiceTranscript(phrase)).toBeNull()
+    }
   })
 })
 

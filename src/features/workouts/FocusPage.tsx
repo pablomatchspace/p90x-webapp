@@ -460,8 +460,11 @@ export function FocusPage() {
                 if (command === 'next') {
                   if (playback !== null) onSkip()
                   else if (idx < steps.length - 1) setIdx(idx + 1)
+                  else return 'Last exercise — say “finish workout” when you are done.'
                 } else if (command === 'previous') {
-                  if (playback === null && idx > 0) setIdx(idx - 1)
+                  if (playback !== null) return 'Previous is off while the timer runs.'
+                  if (idx === 0) return 'Already on the first exercise.'
+                  setIdx(idx - 1)
                 } else if (command === 'finish') {
                   onStop()
                   finish()

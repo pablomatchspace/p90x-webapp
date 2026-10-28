@@ -206,6 +206,11 @@ function say(text: string): void {
   const synth = window.speechSynthesis
   let delay = 0
   if (synth.speaking || synth.pending) {
+    // The cancelled cue's late end/error must not report "not speaking" in the
+    // middle of a hand-off to the new one (the mic would re-arm, then mute again).
+    if (activeUtterance !== null) {
+      activeUtterance.onstart = activeUtterance.onend = activeUtterance.onerror = null
+    }
     // Chrome drops a speak() issued in the same tick as cancel()
     synth.cancel()
     delay = 60

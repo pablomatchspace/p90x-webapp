@@ -233,6 +233,22 @@ describe('speak', () => {
     expect(seen).toEqual([true, false, true, false])
   })
 
+  it('stays "speaking" across a hand-off when a newer cue replaces a running one', async () => {
+    const audio = await load()
+    const seen: boolean[] = []
+    audio.onSpeaking((s) => seen.push(s))
+    audio.speak('Rest. Up next: Wide Front Pull-Ups')
+    spoken[0].onstart?.()
+    synth.speaking = true
+    audio.speak('Diamond Push-Ups')
+    spoken[0].onerror?.() // the engine reports the cancelled cue as interrupted
+    vi.advanceTimersByTime(60)
+    spoken[1].onstart?.()
+    expect(audio.isSpeaking()).toBe(true)
+    spoken[1].onend?.()
+    expect(seen).toEqual([true, false]) // the mic is never released between the two cues
+  })
+
   it('stopSpeech silences the running and the queued cue', async () => {
     const audio = await load()
     audio.speak('Now')

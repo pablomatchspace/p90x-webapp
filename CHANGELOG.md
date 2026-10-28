@@ -15,6 +15,22 @@ didn't bump the package version — they're numbered B01/B02 here for a
 continuous record; #33's package column is left at the un-suffixed version
 that was actually shipped.
 
+## 1.E41.U184.B01 (package 1.41.184-b1) — 2026-10-28
+
+Voice entry, voice cues and hands-free review (E30/E38):
+
+- **Hands-free no longer logs gym talk.** Recognition is strict: an utterance with any word outside
+  the grammar ("one more!", "next one", "come on") is ignored with a note. The accident-prone aliases
+  "done", "back" and bare "finish" are gone — use "finish workout" and "previous".
+- **The mic no longer listens to the app.** Tapping the mic while a cue is speaking now waits for the
+  cue to end; one cue replacing another no longer releases and re-grabs the mic between them.
+- **Phone lock / app switch.** Hands-free pauses while the page is hidden and resumes on return;
+  push-to-talk simply stops. A denied mic can be retried, and a failed start no longer leaves a dead
+  "Listening…" button.
+- **Clearer feedback.** Quiet gaps no longer replace the last result with "try again" in hands-free;
+  ignored commands say why ("Previous is off while the timer runs", "Last exercise — say finish
+  workout"); the hands-free hint says a tap starts it; "22,knee 8" parses. No schema change (v15).
+
 ## 1.E41.U184.B00 (package 1.41.184) — 2026-10-28
 
 - **New: More → Features.** Switch 13 optional parts of the app on or off — rest timer, motivation

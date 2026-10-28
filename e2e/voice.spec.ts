@@ -116,6 +116,31 @@ test('hands-free re-arms between utterances', async ({ page }) => {
   ).toHaveValue('8')
 })
 
+test('ambient talk and accident-prone words are ignored, and ignored commands say why', async ({
+  page,
+}) => {
+  await stubRecognition(page)
+  await importSample(page)
+
+  await page.goto('#/workouts/chest-back/focus/d015')
+  await page.getByRole('button', { name: 'Hands-free' }).click()
+  await page.getByRole('button', { name: 'Voice entry' }).click()
+
+  const reps = page.getByRole('textbox', { name: 'Standard Push-Ups round 1 reps' })
+  await speak(page, 'one more')
+  await expect(page.getByText(/Heard “one more” — not a logging phrase/)).toBeVisible()
+  await expect(reps).toHaveValue('')
+
+  await page.waitForFunction(() => (window as unknown as StubWindow).__rec != null)
+  await speak(page, 'done')
+  await expect(page.getByText(/Heard “done” — not a logging phrase/)).toBeVisible()
+  await expect(page.getByText('Workout complete 🎉')).not.toBeVisible()
+
+  await page.waitForFunction(() => (window as unknown as StubWindow).__rec != null)
+  await speak(page, 'previous')
+  await expect(page.getByText(/Already on the first exercise\./)).toBeVisible()
+})
+
 test('voice "next" during playback routes through the skip path', async ({ page }) => {
   await page.clock.install({ time: new Date('2026-01-20T09:00:00') })
   await stubRecognition(page)
