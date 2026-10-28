@@ -15,6 +15,14 @@ didn't bump the package version — they're numbered B01/B02 here for a
 continuous record; #33's package column is left at the un-suffixed version
 that was actually shipped.
 
+## 1.E40.U179.B00 (package 1.40.179) — 2026-10-28
+
+- **Settings: explanations behind ⓘ.** Static how-it-works text on the Settings page (section intros,
+  row hints, the Reality-check legends, the nutrition sources footnote) now sits behind a small tappable
+  ⓘ next to its label; press to expand inline, press again or Escape to close. Warnings, the lock notice,
+  live values, empty-state prompts and the "not medical advice" disclaimers stay visible. Wording is
+  unchanged. New shared `InfoTip` component (`src/components/`). No schema change (v14).
+
 ## 1.E40.U178.B02 (package 1.40.178-b2) — 2026-10-27
 
 - **Change — BMR is Katch–McArdle.** The nutrition target's BMR uses Katch–McArdle alone instead of
